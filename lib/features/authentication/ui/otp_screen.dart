@@ -84,11 +84,11 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                   ),
                   Text(
                     LocaleKeys.otpEnterTitle.tr(),
-                    style: AppTheme.title20,
+                    style: AppTheme.h5,
                   ),
                   Text(
                     LocaleKeys.otpEnterDescription.tr(),
-                    style: AppTheme.body16,
+                    style: AppTheme.body,
                   ),
                   const SizedBox(height: 16),
                   Center(
@@ -98,7 +98,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                       defaultPinTheme: PinTheme(
                         width: 48,
                         height: 48,
-                        textStyle: AppTheme.body16,
+                        textStyle: AppTheme.body,
                         decoration: BoxDecoration(
                           border: Border.all(color: context.secondaryTextColor),
                           borderRadius: BorderRadius.circular(16),
@@ -129,7 +129,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                             : null,
                         child: Text(
                           LocaleKeys.resendOtp.tr(),
-                          style: AppTheme.title12,
+                          style: AppTheme.caption.copyWith(fontWeight: FontWeight.w600),
                         ),
                       ),
                     ],

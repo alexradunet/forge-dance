@@ -68,7 +68,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   ),
                   Text(
                     LocaleKeys.signIn.tr(),
-                    style: AppTheme.title32,
+                    style: AppTheme.h1,
                   ),
                   const SizedBox(height: 24),
                   CommonTextFormField(

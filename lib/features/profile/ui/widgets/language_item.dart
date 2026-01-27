@@ -48,7 +48,7 @@ class LanguageItem extends ConsumerWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     language.name,
-                    style: AppTheme.body16,
+                    style: AppTheme.body,
                   ),
                 ),
               ),

@@ -26,12 +26,12 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final txtColor = textColor ?? AppColors.mono0;
-    final bgColor = backgroundColor ?? AppColors.blueberry100;
+    final txtColor = textColor ?? AppColors.crystalWhite;
+    final bgColor = backgroundColor ?? AppColors.forgeFire;
     return Container(
       height: 48,
       decoration: BoxDecoration(
-        color: isEnable ? bgColor : AppColors.mono40,
+        color: isEnable ? bgColor : AppColors.gray400,
         borderRadius: BorderRadius.circular(24),
       ),
       child: MaterialInkWell(
@@ -49,16 +49,18 @@ class PrimaryButton extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       text,
-                      style: AppTheme.title14.copyWith(
-                        color: isEnable ? txtColor : AppColors.mono60,
+                      style: AppTheme.bodySmall.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: isEnable ? txtColor : AppColors.gray600,
                       ),
                     ),
                   ],
                 )
               : Text(
                   text,
-                  style: AppTheme.title14.copyWith(
-                    color: isEnable ? txtColor : AppColors.mono60,
+                  style: AppTheme.bodySmall.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isEnable ? txtColor : AppColors.gray600,
                   ),
                 ),
         ),

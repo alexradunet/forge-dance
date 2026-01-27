@@ -18,7 +18,7 @@ class SignInAgreement extends StatelessWidget {
         child: RichText(
           textAlign: TextAlign.center,
           text: TextSpan(
-            style: AppTheme.body12.copyWith(
+            style: AppTheme.caption.copyWith(
               color: context.secondaryTextColor,
             ),
             children: [

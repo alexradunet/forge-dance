@@ -54,7 +54,7 @@ class ProfileItem extends StatelessWidget {
               Expanded(
                 child: Text(
                   text,
-                  style: AppTheme.body16.copyWith(color: textColor),
+                  style: AppTheme.body.copyWith(color: textColor),
                 ),
               ),
               if (isShowArrow)

@@ -60,7 +60,7 @@ class HeroItem extends StatelessWidget {
               right: 8,
               child: Text(
                 name,
-                style: AppTheme.title18.copyWith(color: AppColors.mono0),
+                style: AppTheme.h6.copyWith(color: AppColors.crystalWhite),
                 textAlign: TextAlign.center,
               ),
             ),

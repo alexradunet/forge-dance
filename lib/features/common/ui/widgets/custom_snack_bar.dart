@@ -14,18 +14,18 @@ class CustomSnackBar extends SnackBar {
               const Icon(
                 Icons.check,
                 size: 24,
-                color: AppColors.mono0,
+                color: AppColors.crystalWhite,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   text,
-                  style: AppTheme.body14.copyWith(color: AppColors.mono0),
+                  style: AppTheme.bodySmall.copyWith(color: AppColors.crystalWhite),
                 ),
               ),
             ],
           ),
-          backgroundColor: AppColors.watermelon100,
+          backgroundColor: AppColors.growthGreen,
           margin: const EdgeInsets.only(left: 20, right: 20, bottom: 32),
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           shape: RoundedRectangleBorder(
@@ -44,18 +44,18 @@ class CustomSnackBar extends SnackBar {
               const Icon(
                 Icons.info_outline,
                 size: 24,
-                color: AppColors.mono0,
+                color: AppColors.crystalWhite,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   text,
-                  style: AppTheme.body14.copyWith(color: AppColors.mono0),
+                  style: AppTheme.bodySmall.copyWith(color: AppColors.crystalWhite),
                 ),
               ),
             ],
           ),
-          backgroundColor: AppColors.blueberry100,
+          backgroundColor: AppColors.electricBlue,
           margin: const EdgeInsets.only(left: 20, right: 20, bottom: 32),
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           shape: RoundedRectangleBorder(
@@ -74,18 +74,18 @@ class CustomSnackBar extends SnackBar {
               const Icon(
                 Icons.warning_amber,
                 size: 24,
-                color: AppColors.mono100,
+                color: AppColors.gray950,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   text,
-                  style: AppTheme.body14.copyWith(color: AppColors.mono100),
+                  style: AppTheme.bodySmall.copyWith(color: AppColors.gray950),
                 ),
               ),
             ],
           ),
-          backgroundColor: AppColors.cempedak100,
+          backgroundColor: AppColors.warningAmber,
           margin: const EdgeInsets.only(left: 20, right: 20, bottom: 32),
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           shape: RoundedRectangleBorder(
@@ -104,18 +104,18 @@ class CustomSnackBar extends SnackBar {
               const Icon(
                 Icons.close,
                 size: 24,
-                color: AppColors.mono0,
+                color: AppColors.crystalWhite,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   text,
-                  style: AppTheme.body14.copyWith(color: AppColors.mono0),
+                  style: AppTheme.bodySmall.copyWith(color: AppColors.crystalWhite),
                 ),
               ),
             ],
           ),
-          backgroundColor: AppColors.rambutan100,
+          backgroundColor: AppColors.passionRed,
           margin: const EdgeInsets.only(left: 20, right: 20, bottom: 32),
           padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           shape: RoundedRectangleBorder(

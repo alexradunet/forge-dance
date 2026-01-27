@@ -33,10 +33,10 @@ class SecondaryButton extends ConsumerWidget {
     return Container(
       height: 48,
       decoration: BoxDecoration(
-        color: isEnable ? bgColor : AppColors.mono20,
+        color: isEnable ? bgColor : AppColors.gray200,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: isEnable ? txtColor : AppColors.mono20,
+          color: isEnable ? txtColor : AppColors.gray200,
           width: 2,
         ),
       ),
@@ -55,16 +55,18 @@ class SecondaryButton extends ConsumerWidget {
                     const SizedBox(width: 8),
                     Text(
                       text,
-                      style: AppTheme.title14.copyWith(
-                        color: isEnable ? txtColor : AppColors.mono40,
+                      style: AppTheme.bodySmall.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: isEnable ? txtColor : AppColors.gray400,
                       ),
                     ),
                   ],
                 )
               : Text(
                   text,
-                  style: AppTheme.title14.copyWith(
-                    color: isEnable ? txtColor : AppColors.mono40,
+                  style: AppTheme.bodySmall.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: isEnable ? txtColor : AppColors.gray400,
                   ),
                 ),
         ),

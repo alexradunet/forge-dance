@@ -28,7 +28,7 @@ class CommonError extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             LocaleKeys.unexpectedErrorOccurred.tr(),
-            style: AppTheme.body14.copyWith(
+            style: AppTheme.bodySmall.copyWith(
               color: context.secondaryTextColor,
             ),
           ),

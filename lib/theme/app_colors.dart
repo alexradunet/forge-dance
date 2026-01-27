@@ -1,68 +1,95 @@
 import 'package:flutter/material.dart';
 
+/// Forge.dance Design System Colors
+/// Based on the Forge Design System specification
 class AppColors {
   AppColors._();
 
-  static const blueberry10 = Color(0xFFE5F4FF);
-  static const blueberry20 = Color(0xFFCCE9FF);
-  static const blueberry30 = Color(0xFFB3DFFF);
-  static const blueberry40 = Color(0xFF99D4FF);
-  static const blueberry50 = Color(0xFF80C9FF);
-  static const blueberry60 = Color(0xFF66BEFF);
-  static const blueberry70 = Color(0xFF4CB3FF);
-  static const blueberry80 = Color(0xFF33A9FF);
-  static const blueberry90 = Color(0xFF1A9EFF);
-  static const blueberry100 = Color(0xFF0093FF);
+  // ═══════════════════════════════════════════════════════════
+  // PRIMARY PALETTE - Forge Brand Colors
+  // ═══════════════════════════════════════════════════════════
 
-  static const watermelon10 = Color(0xFFE6F3F0);
-  static const watermelon20 = Color(0xFFCDE7E0);
-  static const watermelon30 = Color(0xFFB4DBD1);
-  static const watermelon40 = Color(0xFF9BCFC1);
-  static const watermelon50 = Color(0xFF81C2B2);
-  static const watermelon60 = Color(0xFF68B6A3);
-  static const watermelon70 = Color(0xFF4FAA93);
-  static const watermelon80 = Color(0xFF369E84);
-  static const watermelon90 = Color(0xFF1D9274);
-  static const watermelon100 = Color(0xFF048665);
+  /// 🔥 FORGE FIRE - Primary brand color, CTAs, highlights
+  /// #FF4500 - rgb(255, 69, 0)
+  static const forgeFire = Color(0xFFFF4500);
+  static const forgeFireDark = Color(0xFFDC3A00);
+  static const forgeFireLight = Color(0xFFFF6B33);
 
-  static const cempedak10 = Color(0xFFFFF8E8);
-  static const cempedak20 = Color(0xFFFFF2D0);
-  static const cempedak30 = Color(0xFFFFECB9);
-  static const cempedak40 = Color(0xFFFFE5A1);
-  static const cempedak50 = Color(0xFFFFDF8A);
-  static const cempedak60 = Color(0xFFFFD873);
-  static const cempedak70 = Color(0xFFFFD15B);
-  static const cempedak80 = Color(0xFFFFCB44);
-  static const cempedak90 = Color(0xFFFFC42C);
-  static const cempedak100 = Color(0xFFFFBE15);
+  /// ⚡ ELECTRIC BLUE - Secondary actions, progress, energy
+  /// #00BFFF - rgb(0, 191, 255)
+  static const electricBlue = Color(0xFF00BFFF);
+  static const electricBlueDark = Color(0xFF0099CC);
+  static const electricBlueLight = Color(0xFF33CCFF);
 
-  static const rambutan10 = Color(0xFFFDE7EC);
-  static const rambutan20 = Color(0xFFFACFD9);
-  static const rambutan30 = Color(0xFFF8B7C6);
-  static const rambutan40 = Color(0xFFF59FB3);
-  static const rambutan50 = Color(0xFFF387A0);
-  static const rambutan60 = Color(0xFFF06F8D);
-  static const rambutan70 = Color(0xFFED577A);
-  static const rambutan80 = Color(0xFFEB3F67);
-  static const rambutan90 = Color(0xFFE82754);
-  static const rambutan100 = Color(0xFFE60F41);
+  /// 💎 CRYSTAL WHITE - Text on dark backgrounds, highlights
+  /// #F0F8FF - rgb(240, 248, 255)
+  static const crystalWhite = Color(0xFFF0F8FF);
 
-  static const whiteBg = Color(0xFFFFF5EE);
-  static const mono0 = Color(0xFFFFFFFF);
-  static const mono20 = Color(0xFFEFEFEF);
-  static const mono40 = Color(0xFFBEBEBE);
-  static const mono60 = Color(0xFF8F8F8F);
-  static const mono80 = Color(0xFF606060);
-  static const mono90 = Color(0xFF404040);
-  static const mono100 = Color(0xFF222222);
+  /// 🌑 STEEL GRAY - Primary background, surfaces
+  /// #2C2C2C - rgb(44, 44, 44)
+  static const steelGray = Color(0xFF2C2C2C);
+  static const steelGrayLight = Color(0xFF3A3A3A);
 
-  static const gradient0 = Color(0x00000000);
-  static const gradient10 = Color(0x1A000000);
-  static const gradient20 = Color(0x33000000);
-  static const gradient40 = Color(0x66000000);
-  static const gradient60 = Color(0x99000000);
-  static const gradient80 = Color(0xCC000000);
-  static const gradient100 = Color(0xFF000000);
+  /// 👑 LEGEND GOLD - Achievements, premium features
+  /// #FFD700 - rgb(255, 215, 0)
+  static const legendGold = Color(0xFFFFD700);
 
-  static const premiumBackground = Color(0xFF000000);
+  // ═══════════════════════════════════════════════════════════
+  // ACCENT & UTILITY COLORS
+  // ═══════════════════════════════════════════════════════════
+
+  /// ✨ MYSTIC PURPLE - Magic moments, special features
+  /// #8B00FF - rgb(139, 0, 255)
+  static const mysticPurple = Color(0xFF8B00FF);
+
+  /// 🌿 GROWTH GREEN - Success states, progress indicators
+  /// #10B981 - rgb(16, 185, 129)
+  static const growthGreen = Color(0xFF10B981);
+
+  /// ❤️ PASSION RED - High intensity, warnings
+  /// #DC143C - rgb(220, 20, 60)
+  static const passionRed = Color(0xFFDC143C);
+
+  /// ☀️ WARNING AMBER - Alerts, attention needed
+  /// #F59E0B - rgb(245, 158, 11)
+  static const warningAmber = Color(0xFFF59E0B);
+
+  // ═══════════════════════════════════════════════════════════
+  // DANCE STYLE COLORS
+  // ═══════════════════════════════════════════════════════════
+
+  /// 🎤 Hip Hop
+  static const styleHipHop = Color(0xFF8B00FF);
+
+  /// 💃 Contemporary
+  static const styleContemporary = Color(0xFF00BFFF);
+
+  /// 🩰 Ballet
+  static const styleBallet = Color(0xFFEC4899);
+
+  /// 🎺 Jazz
+  static const styleJazz = Color(0xFFF59E0B);
+
+  /// 🔥 Latin
+  static const styleLatin = Color(0xFFEF4444);
+
+  /// 🌪️ Breaking
+  static const styleBreaking = Color(0xFF10B981);
+
+  // ═══════════════════════════════════════════════════════════
+  // NEUTRAL GRAY SCALE (Dark Mode Primary)
+  // ═══════════════════════════════════════════════════════════
+
+  static const gray950 = Color(0xFF0A0A0A); // Almost black
+  static const gray900 = Color(0xFF111827); // Dark bg
+  static const gray800 = Color(0xFF1F2937); // Card bg
+  static const gray700 = Color(0xFF374151); // Borders
+  static const gray600 = Color(0xFF4B5563); // Disabled
+  static const gray500 = Color(0xFF6B7280); // Muted text
+  static const gray400 = Color(0xFF9CA3AF); // Placeholder
+  static const gray300 = Color(0xFFD1D5DB); // Borders light
+  static const gray200 = Color(0xFFE5E7EB); // Dividers
+  static const gray100 = Color(0xFFF3F4F6); // Light bg
+  static const gray50 = Color(0xFFF9FAFB); // Subtle bg
+
 }

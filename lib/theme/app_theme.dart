@@ -1,91 +1,99 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// Forge.dance Design System Typography
+/// Based on the Forge Design System specification
 class AppTheme {
   AppTheme._();
 
-  static final title32 = GoogleFonts.nunito(
-    fontSize: 32,
-    fontWeight: FontWeight.w700,
+  // ═══════════════════════════════════════════════════════════
+  // DISPLAY FONT - Bebas Neue (Headers, titles, hero text)
+  // ═══════════════════════════════════════════════════════════
+
+  /// H1 - 48px - Page titles, major headings
+  static final h1 = GoogleFonts.bebasNeue(
+    fontSize: 48,
+    fontWeight: FontWeight.w400, // Bebas Neue only has one weight
+    height: 1.1,
+    letterSpacing: 0,
   );
 
-  static final title24 = GoogleFonts.nunito(
+  /// H2 - 36px - Section titles, feature headers
+  static final h2 = GoogleFonts.bebasNeue(
+    fontSize: 36,
+    fontWeight: FontWeight.w400,
+    height: 1.1,
+    letterSpacing: 0,
+  );
+
+  // ═══════════════════════════════════════════════════════════
+  // BODY FONT - Inter (All body text, UI elements)
+  // ═══════════════════════════════════════════════════════════
+
+  /// H3 - 30px - Card titles, prominent labels
+  static final h3 = GoogleFonts.inter(
+    fontSize: 30,
+    fontWeight: FontWeight.w600,
+    height: 1.2,
+  );
+
+  /// H4 - 24px - Subsection headings
+  static final h4 = GoogleFonts.inter(
     fontSize: 24,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w600,
+    height: 1.2,
   );
 
-  static final title20 = GoogleFonts.nunito(
+  /// H5 - 20px - Component titles
+  static final h5 = GoogleFonts.inter(
     fontSize: 20,
-    fontWeight: FontWeight.w700,
+    fontWeight: FontWeight.w500,
+    height: 1.3,
   );
 
-  static final title18 = GoogleFonts.nunito(
+  /// H6 - 18px - Small headings
+  static final h6 = GoogleFonts.inter(
     fontSize: 18,
-    fontWeight: FontWeight.w700,
-  );
-
-  static final title16 = GoogleFonts.nunito(
-    fontSize: 16,
-    fontWeight: FontWeight.w700,
-  );
-
-  static final title14 = GoogleFonts.nunito(
-    fontSize: 14,
-    fontWeight: FontWeight.w700,
-  );
-
-  static final title12 = GoogleFonts.nunito(
-    fontSize: 12,
-    fontWeight: FontWeight.w700,
-  );
-
-  static final title10 = GoogleFonts.nunito(
-    fontSize: 10,
-    fontWeight: FontWeight.w700,
-  );
-
-  static final subtitle16 = GoogleFonts.nunito(
-    fontSize: 16,
-    fontWeight: FontWeight.w600,
-  );
-
-  static final subtitle14 = GoogleFonts.nunito(
-    fontSize: 14,
-    fontWeight: FontWeight.w600,
-  );
-
-  static final subtitle12 = GoogleFonts.nunito(
-    fontSize: 12,
-    fontWeight: FontWeight.w600,
-  );
-
-  static final label16 = GoogleFonts.nunito(
-    fontSize: 16,
     fontWeight: FontWeight.w500,
+    height: 1.3,
   );
 
-  static final label14 = GoogleFonts.nunito(
-    fontSize: 14,
-    fontWeight: FontWeight.w500,
+  /// Body Large - 18px - Primary body text for emphasis
+  static final bodyLarge = GoogleFonts.inter(
+    fontSize: 18,
+    fontWeight: FontWeight.w400,
+    height: 1.5,
   );
 
-  static final label12 = GoogleFonts.nunito(
-    fontSize: 12,
-    fontWeight: FontWeight.w500,
-  );
-
-  static final body16 = GoogleFonts.nunito(
+  /// Body - 16px - Standard body text, descriptions
+  static final body = GoogleFonts.inter(
     fontSize: 16,
     fontWeight: FontWeight.w400,
+    height: 1.5,
   );
 
-  static final body14 = GoogleFonts.nunito(
+  /// Body Small - 14px - Secondary text, metadata
+  static final bodySmall = GoogleFonts.inter(
     fontSize: 14,
     fontWeight: FontWeight.w400,
+    height: 1.5,
   );
 
-  static final body12 = GoogleFonts.nunito(
+  /// Caption - 12px - Captions, timestamps, hints
+  static final caption = GoogleFonts.inter(
     fontSize: 12,
     fontWeight: FontWeight.w400,
+    height: 1.4,
+  );
+
+  // ═══════════════════════════════════════════════════════════
+  // MONOSPACE FONT - JetBrains Mono (Stats, timers, numbers)
+  // ═══════════════════════════════════════════════════════════
+
+  /// Mono - Stats, timers, numbers
+  static final mono = GoogleFonts.jetBrainsMono(
+    fontSize: 16,
+    fontWeight: FontWeight.w400,
+    height: 1.5,
   );
 }

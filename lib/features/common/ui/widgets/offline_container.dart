@@ -73,13 +73,13 @@ class _OfflineContainerState extends ConsumerState<OfflineContainer> {
                     const Icon(
                       Icons.signal_wifi_connected_no_internet_4,
                       size: 16,
-                      color: AppColors.mono0,
+                      color: AppColors.crystalWhite,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       LocaleKeys.offline.tr(),
-                      style: AppTheme.body14.copyWith(
-                        color: AppColors.mono0,
+                      style: AppTheme.bodySmall.copyWith(
+                        color: AppColors.crystalWhite,
                       ),
                     ),
                   ],

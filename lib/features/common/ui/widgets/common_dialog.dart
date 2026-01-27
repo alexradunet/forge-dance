@@ -23,7 +23,7 @@ class CommonDialog extends ConsumerWidget {
     required this.content,
     required this.primaryButtonLabel,
     this.primaryButtonAction,
-    this.primaryButtonBackground = AppColors.blueberry100,
+    this.primaryButtonBackground = AppColors.forgeFire,
     this.secondaryButtonLabel,
     this.secondaryButtonAction,
   });
@@ -46,9 +46,9 @@ class CommonDialog extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: AppTheme.title20),
+            Text(title, style: AppTheme.h5),
             const SizedBox(height: 16),
-            Text(content, style: AppTheme.body14),
+            Text(content, style: AppTheme.bodySmall),
             const SizedBox(height: 16),
             secondaryButtonLabel != null
                 ? Row(

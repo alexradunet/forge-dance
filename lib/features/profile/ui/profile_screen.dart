@@ -44,8 +44,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget build(BuildContext context) {
     final profile =
         ref.watch(profileViewModelProvider.select((it) => it.value?.profile));
-    final dangerousColor =
-        context.isDarkMode ? AppColors.rambutan80 : AppColors.rambutan100;
+    final dangerousColor = AppColors.passionRed;
     return Scaffold(
       backgroundColor: context.secondaryBackgroundColor,
       body: ListView(
@@ -73,13 +72,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       Center(
                         child: Text(
                           profile?.name ?? Constants.defaultName,
-                          style: AppTheme.title24,
+                          style: AppTheme.h2,
                         ),
                       ),
                       Center(
                         child: Text(
                           profile?.email ?? '',
-                          style: AppTheme.body14.copyWith(
+                          style: AppTheme.bodySmall.copyWith(
                             color: context.secondaryTextColor,
                           ),
                         ),
@@ -101,7 +100,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               LocaleKeys.general.tr(),
-              style: AppTheme.title20,
+              style: AppTheme.h5,
             ),
           ),
           const SizedBox(height: 8),
@@ -136,7 +135,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               LocaleKeys.preferences.tr(),
-              style: AppTheme.title20,
+              style: AppTheme.h5,
             ),
           ),
           const SizedBox(height: 8),
@@ -173,7 +172,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Text(
               LocaleKeys.dangerousZone.tr(),
-              style: AppTheme.title20,
+              style: AppTheme.h5,
             ),
           ),
           const SizedBox(height: 8),
@@ -195,7 +194,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           Center(
             child: Text(
               'Version $_version',
-              style: AppTheme.body12,
+              style: AppTheme.caption,
             ),
           ),
         ],

@@ -7,44 +7,53 @@ import '../theme/app_colors.dart';
 extension ThemeModeExtension on BuildContext {
   bool get isDarkMode => Theme.of(this).brightness == Brightness.dark;
 
+  // ═══════════════════════════════════════════════════════════
+  // FORGE DESIGN SYSTEM COLORS
+  // ═══════════════════════════════════════════════════════════
+
   Color get primaryBackgroundColor =>
-      isDarkMode ? AppColors.mono100 : AppColors.mono0;
+      isDarkMode ? AppColors.gray950 : AppColors.gray50;
 
   Color get secondaryBackgroundColor =>
-      isDarkMode ? AppColors.mono100 : AppColors.whiteBg;
+      isDarkMode ? AppColors.gray900 : AppColors.gray100;
 
   Color get secondaryWidgetColor =>
-      isDarkMode ? AppColors.mono90 : AppColors.mono0;
+      isDarkMode ? AppColors.gray800 : AppColors.gray50;
 
   Color get primaryTextColor =>
-      isDarkMode ? AppColors.mono20 : AppColors.mono100;
+      isDarkMode ? AppColors.crystalWhite : AppColors.gray950;
 
   Color get secondaryTextColor =>
-      isDarkMode ? AppColors.mono40 : AppColors.mono80;
+      isDarkMode ? AppColors.gray400 : AppColors.gray600;
 
-  Color get dividerColor => isDarkMode ? AppColors.mono80 : AppColors.mono20;
+  Color get dividerColor =>
+      isDarkMode ? AppColors.gray700 : AppColors.gray200;
 
   ThemeData get lightTheme => ThemeData.light().copyWith(
-        scaffoldBackgroundColor: AppColors.mono0,
+        scaffoldBackgroundColor: AppColors.gray50,
         colorScheme: Theme.of(this).colorScheme.copyWith(
               brightness: Brightness.light,
-              primary: AppColors.blueberry100,
-              error: AppColors.rambutan100,
+              primary: AppColors.forgeFire,
+              secondary: AppColors.electricBlue,
+              error: AppColors.passionRed,
+              surface: AppColors.gray100,
             ),
         textTheme: Theme.of(this).textTheme.apply(
-              bodyColor: AppColors.mono100,
+              bodyColor: AppColors.gray950,
             ),
       );
 
   ThemeData get darkTheme => ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: AppColors.mono100,
+        scaffoldBackgroundColor: AppColors.gray950,
         colorScheme: Theme.of(this).colorScheme.copyWith(
               brightness: Brightness.dark,
-              primary: AppColors.blueberry100,
-              error: AppColors.rambutan100,
+              primary: AppColors.forgeFire,
+              secondary: AppColors.electricBlue,
+              error: AppColors.passionRed,
+              surface: AppColors.gray900,
             ),
         textTheme: Theme.of(this).textTheme.apply(
-              bodyColor: AppColors.mono20,
+              bodyColor: AppColors.crystalWhite,
             ),
       );
 

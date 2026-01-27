@@ -117,7 +117,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ),
               Text(
                 'register'.tr(),
-                style: AppTheme.title32,
+                style: AppTheme.h1,
               ),
               const SizedBox(height: 24),
               CommonTextFormField(
@@ -147,7 +147,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 children: [
                   Text(
                     LocaleKeys.alreadyHaveAccount.tr(),
-                    style: AppTheme.body14,
+                    style: AppTheme.bodySmall,
                   ),
                   const SizedBox(width: 4),
                   TextButton(
@@ -156,7 +156,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     },
                     child: Text(
                       LocaleKeys.signIn.tr(),
-                      style: AppTheme.title14,
+                      style: AppTheme.bodySmall.copyWith(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],

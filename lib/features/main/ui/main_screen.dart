@@ -54,12 +54,12 @@ class _MainScreenState extends ConsumerState<MainScreen> {
       PersistentBottomNavBarItem(
         icon: HugeIcon(
           icon: HugeIcons.strokeRoundedAdd01,
-          color: AppColors.mono0,
+          color: AppColors.crystalWhite,
           size: 20,
         ),
         inactiveIcon: HugeIcon(
           icon: HugeIcons.strokeRoundedAdd01,
-          color: AppColors.mono0,
+          color: AppColors.crystalWhite,
           size: 20,
         ),
         activeColorPrimary: selectedColor,
@@ -85,10 +85,8 @@ class _MainScreenState extends ConsumerState<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedColor =
-        context.isDarkMode ? AppColors.blueberry100 : AppColors.blueberry100;
-    final unselectedColor =
-        context.isDarkMode ? AppColors.mono40 : AppColors.mono60;
+    final selectedColor = AppColors.forgeFire;
+    final unselectedColor = AppColors.gray400;
     final count = ref.watch(heroCountProvider);
     return Scaffold(
       body: PersistentTabView(
