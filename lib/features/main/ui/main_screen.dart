@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:hugeicons/hugeicons.dart';
-import 'package:ming_cute_icons/ming_cute_icons.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
 import '../../../extensions/build_context_extension.dart';
-import '../../../features/hero_list/ui/hero_list_screen.dart';
+import '../../../features/home/ui/home_screen.dart';
+import '../../../features/library/ui/library_screen.dart';
 import '../../../features/profile/ui/profile_screen.dart';
 import '../../../theme/app_colors.dart';
-import '../../hero_list/ui/view_model/hero_count_provider.dart';
-import '../../hero_list/ui/view_model/hero_list_view_model.dart';
+import '../../../theme/app_theme.dart';
 
 const List<Widget> _screens = [
-  HeroListScreen(),
-  HeroListScreen(),
+  HomeScreen(),
+  LibraryScreen(), // Learn/Library screen
+  HomeScreen(), // Social screen (placeholder)
   ProfileScreen(),
 ];
 
@@ -43,42 +42,39 @@ class _MainScreenState extends ConsumerState<MainScreen> {
     BuildContext context,
     Color selectedColor,
     Color unselectedColor,
-    int count,
   ) {
     return [
       PersistentBottomNavBarItem(
-        icon: Icon(MingCuteIcons.mgc_lightning_fill, color: selectedColor),
-        inactiveIcon:
-            Icon(MingCuteIcons.mgc_lightning_line, color: unselectedColor),
-      ),
-      PersistentBottomNavBarItem(
-        icon: HugeIcon(
-          icon: HugeIcons.strokeRoundedAdd01,
-          color: AppColors.crystalWhite,
-          size: 20,
-        ),
-        inactiveIcon: HugeIcon(
-          icon: HugeIcons.strokeRoundedAdd01,
-          color: AppColors.crystalWhite,
-          size: 20,
-        ),
+        icon: const Icon(Icons.home),
+        inactiveIcon: const Icon(Icons.home_outlined),
+        title: 'Home',
         activeColorPrimary: selectedColor,
         inactiveColorPrimary: unselectedColor,
-        onPressed: (_) async {
-          final randomHero = sampleHeroes[count % sampleHeroes.length];
-          await ref.read(heroListViewModelProvider.notifier).addHero(
-                name: randomHero.name,
-                description: randomHero.description,
-                imageUrl: randomHero.imageUrl,
-                power: randomHero.power,
-              );
-          ref.read(heroCountProvider.notifier).increment();
-        },
+        textStyle: AppTheme.caption,
       ),
       PersistentBottomNavBarItem(
-        icon: Icon(MingCuteIcons.mgc_user_3_fill, color: selectedColor),
-        inactiveIcon:
-            Icon(MingCuteIcons.mgc_user_3_line, color: unselectedColor),
+        icon: const Icon(Icons.school),
+        inactiveIcon: const Icon(Icons.school_outlined),
+        title: 'Learn',
+        activeColorPrimary: selectedColor,
+        inactiveColorPrimary: unselectedColor,
+        textStyle: AppTheme.caption,
+      ),
+      PersistentBottomNavBarItem(
+        icon: const Icon(Icons.people),
+        inactiveIcon: const Icon(Icons.people_outline),
+        title: 'Social',
+        activeColorPrimary: selectedColor,
+        inactiveColorPrimary: unselectedColor,
+        textStyle: AppTheme.caption,
+      ),
+      PersistentBottomNavBarItem(
+        icon: const Icon(Icons.person),
+        inactiveIcon: const Icon(Icons.person_outline),
+        title: 'Profile',
+        activeColorPrimary: selectedColor,
+        inactiveColorPrimary: unselectedColor,
+        textStyle: AppTheme.caption,
       ),
     ];
   }
@@ -87,7 +83,6 @@ class _MainScreenState extends ConsumerState<MainScreen> {
   Widget build(BuildContext context) {
     final selectedColor = AppColors.forgeFire;
     final unselectedColor = AppColors.gray400;
-    final count = ref.watch(heroCountProvider);
     return Scaffold(
       body: PersistentTabView(
         context,
@@ -97,17 +92,16 @@ class _MainScreenState extends ConsumerState<MainScreen> {
           context,
           selectedColor,
           unselectedColor,
-          count,
         ),
         confineToSafeArea: true,
-        backgroundColor: context.secondaryWidgetColor,
+        backgroundColor: AppColors.gray800,
         handleAndroidBackButtonPress: true,
         resizeToAvoidBottomInset: true,
         stateManagement: true,
         hideNavigationBarWhenKeyboardAppears: true,
         decoration: NavBarDecoration(
           borderRadius: BorderRadius.vertical(top: Radius.circular(20.0)),
-          colorBehindNavBar: context.secondaryBackgroundColor,
+          colorBehindNavBar: AppColors.gray950,
         ),
         popBehaviorOnSelectedNavBarItemPress: PopBehavior.all,
         animationSettings: const NavBarAnimationSettings(
@@ -127,7 +121,7 @@ class _MainScreenState extends ConsumerState<MainScreen> {
             curve: Curves.bounceInOut,
           ),
         ),
-        navBarStyle: NavBarStyle.style17,
+        navBarStyle: NavBarStyle.style1,
       ),
     );
   }
