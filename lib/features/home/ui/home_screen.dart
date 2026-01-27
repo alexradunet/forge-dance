@@ -233,13 +233,6 @@ class _FeaturedWorkoutCard extends StatelessWidget {
       height: 400,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.forgeFire.withOpacity(0.2),
-            blurRadius: 20,
-            spreadRadius: 2,
-          ),
-        ],
       ),
       child: Stack(
         children: [
@@ -312,7 +305,7 @@ class _FeaturedWorkoutCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        'DAILY DROP',
+                        'Workout of the Day',
                         style: AppTheme.caption.copyWith(
                           fontSize: 10,
                           fontWeight: FontWeight.w600,
@@ -321,13 +314,6 @@ class _FeaturedWorkoutCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
-                    Text(
-                      "TODAY'S FORGE CHALLENGE",
-                      style: AppTheme.caption.copyWith(
-                        fontSize: 10,
-                        color: AppColors.crystalWhite,
-                      ),
-                    ),
                   ],
                 ),
                 const Spacer(),
