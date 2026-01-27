@@ -63,7 +63,7 @@ class AppearanceItem extends ConsumerWidget {
               },
               fillColor: WidgetStateProperty.resolveWith(
                     (states) => states.contains(WidgetState.selected)
-                    ? AppColors.blueberry100
+                    ? AppColors.forgeFire
                     : context.secondaryTextColor,
               ),
             ),

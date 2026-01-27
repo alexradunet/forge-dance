@@ -56,7 +56,7 @@ class PremiumScreen extends ConsumerWidget {
     final selectedIndex = premiumState.value?.selectedIndex ?? 1;
 
     return Scaffold(
-      backgroundColor: AppColors.premiumBackground,
+      backgroundColor: AppColors.gray950,
       body: Stack(
         children: [
           Image(image: AssetImage(Assets.premiumBackground)),
@@ -66,9 +66,9 @@ class PremiumScreen extends ConsumerWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  AppColors.gradient20,
-                  AppColors.gradient40,
-                  AppColors.gradient100,
+                  AppColors.gray950.withOpacity(0.33),
+                  AppColors.gray950.withOpacity(0.66),
+                  AppColors.gray950,
                 ],
               ),
             ),
@@ -84,11 +84,11 @@ class PremiumScreen extends ConsumerWidget {
                       SizedBox(width: 36),
                       Text(
                         LocaleKeys.premium,
-                        style: AppTheme.title32.copyWith(
-                          color: AppColors.mono0,
+                        style: AppTheme.h1.copyWith(
+                          color: AppColors.crystalWhite,
                         ),
                       ),
-                      CommonCloseButton(color: AppColors.mono0),
+                      CommonCloseButton(color: AppColors.crystalWhite),
                     ],
                   ),
                 ),
@@ -98,15 +98,15 @@ class PremiumScreen extends ConsumerWidget {
                     children: [
                       Text(
                         LocaleKeys.premiumBenefits,
-                        style: AppTheme.title24.copyWith(
-                          color: AppColors.mono0,
+                        style: AppTheme.h2.copyWith(
+                          color: AppColors.crystalWhite,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppColors.mono100.withAlpha(220),
+                          color: AppColors.gray950.withAlpha(220),
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Column(
@@ -123,8 +123,8 @@ class PremiumScreen extends ConsumerWidget {
                       const SizedBox(height: 24),
                       Text(
                         LocaleKeys.selectPlan,
-                        style: AppTheme.title24.copyWith(
-                          color: AppColors.mono0,
+                        style: AppTheme.h2.copyWith(
+                          color: AppColors.crystalWhite,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -145,8 +145,8 @@ class PremiumScreen extends ConsumerWidget {
                       const SizedBox(height: 24),
                       Text(
                         '* ${products[selectedIndex].description}',
-                        style: AppTheme.body14.copyWith(
-                          color: AppColors.mono20,
+                        style: AppTheme.bodySmall.copyWith(
+                          color: AppColors.gray200,
                         ),
                       ),
                       const SizedBox(height: 8),
@@ -154,8 +154,8 @@ class PremiumScreen extends ConsumerWidget {
                         Platform.isIOS
                             ? LocaleKeys.subscriptionInfoIos.tr()
                             : LocaleKeys.subscriptionInfoAndroid.tr(),
-                        style: AppTheme.body14.copyWith(
-                          color: AppColors.mono0,
+                        style: AppTheme.bodySmall.copyWith(
+                          color: AppColors.crystalWhite,
                         ),
                         textAlign: TextAlign.justify,
                       ),
@@ -183,10 +183,10 @@ class PremiumScreen extends ConsumerWidget {
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    AppColors.gradient0,
-                    AppColors.gradient100,
-                    AppColors.gradient100,
-                    AppColors.gradient100,
+                    AppColors.gray950.withOpacity(0),
+                    AppColors.gray950,
+                    AppColors.gray950,
+                    AppColors.gray950,
                   ],
                 ),
               ),
@@ -205,8 +205,9 @@ class PremiumScreen extends ConsumerWidget {
                         .restorePurchases(),
                     child: Text(
                       LocaleKeys.restorePurchases,
-                      style: AppTheme.title14.copyWith(
-                        color: AppColors.mono0,
+                      style: AppTheme.bodySmall.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.crystalWhite,
                       ),
                     ),
                   ),

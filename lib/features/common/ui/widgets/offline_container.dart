@@ -66,7 +66,7 @@ class _OfflineContainerState extends ConsumerState<OfflineContainer> {
                   top: MediaQuery.paddingOf(context).top + 2,
                   bottom: 2,
                 ),
-                color: AppColors.mono60,
+                color: AppColors.gray600,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

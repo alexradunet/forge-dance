@@ -15,8 +15,8 @@ class CircleButton extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.size = 64,
-    this.iconColor = AppColors.mono100,
-    this.backgroundColor = AppColors.mono20,
+    this.iconColor = AppColors.gray950,
+    this.backgroundColor = AppColors.gray200,
     this.isEnable = true,
   });
 
@@ -26,12 +26,12 @@ class CircleButton extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        color: isEnable ? backgroundColor : AppColors.mono40,
+        color: isEnable ? backgroundColor : AppColors.gray400,
         shape: BoxShape.circle,
       ),
       child: IconButton(
         iconSize: size / 2,
-        color: isEnable ? iconColor : AppColors.mono80,
+        color: isEnable ? iconColor : AppColors.gray800,
         onPressed: isEnable ? onPressed : null,
         icon: icon,
       ),

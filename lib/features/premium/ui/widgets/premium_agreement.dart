@@ -16,12 +16,12 @@ class PremiumAgreement extends StatelessWidget {
     return RichText(
       textAlign: TextAlign.justify,
       text: TextSpan(
-        style: AppTheme.body14.copyWith(color: AppColors.mono0),
+        style: AppTheme.bodySmall.copyWith(color: AppColors.crystalWhite),
         children: [
           TextSpan(text: LocaleKeys.premiumAgreementPrefix.tr()),
           TextSpan(
             text: LocaleKeys.termOfService.tr(),
-            style: AppTheme.title14,
+            style: AppTheme.bodySmall.copyWith(fontWeight: FontWeight.w600),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
                 context.tryLaunchUrl(Constants.termOfService);
@@ -30,7 +30,7 @@ class PremiumAgreement extends StatelessWidget {
           TextSpan(text: LocaleKeys.premiumAgreementMiddle.tr()),
           TextSpan(
             text: LocaleKeys.privacyPolicy.tr(),
-            style: AppTheme.title14,
+            style: AppTheme.bodySmall.copyWith(fontWeight: FontWeight.w600),
             recognizer: TapGestureRecognizer()
               ..onTap = () {
                 context.tryLaunchUrl(Constants.privacyPolicy);

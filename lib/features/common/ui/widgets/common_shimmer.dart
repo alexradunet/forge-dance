@@ -16,9 +16,9 @@ class CommonShimmer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
       baseColor:
-          context.isDarkMode ? AppColors.gradient40 : AppColors.gradient10,
+          context.isDarkMode ? AppColors.gray950.withOpacity(0.66) : AppColors.gray950.withOpacity(0.1),
       highlightColor:
-          context.isDarkMode ? AppColors.gradient20 : AppColors.gradient0,
+          context.isDarkMode ? AppColors.gray950.withOpacity(0.33) : AppColors.gray950.withOpacity(0),
       child: child,
     );
   }

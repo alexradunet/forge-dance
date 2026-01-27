@@ -19,7 +19,7 @@ class Avatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return CircleAvatar(
       radius: 48,
-      backgroundColor: AppColors.cempedak50,
+      backgroundColor: AppColors.legendGold.withOpacity(0.5),
       backgroundImage: AssetImage(Assets.avatar),
       foregroundImage: _foregroundImage(),
     );

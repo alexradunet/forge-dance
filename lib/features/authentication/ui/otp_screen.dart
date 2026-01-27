@@ -112,7 +112,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                     children: [
                       Text(
                         LocaleKeys.didNotReceiveOtp.tr(),
-                        style: AppTheme.body14.copyWith(
+                        style: AppTheme.bodySmall.copyWith(
                           color: context.secondaryTextColor,
                         ),
                       ),
@@ -139,7 +139,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                           padding: const EdgeInsets.only(top: 16, bottom: 32),
                           child: Text(
                             LocaleKeys.tryAgainAfter,
-                            style: AppTheme.body14.copyWith(
+                            style: AppTheme.bodySmall.copyWith(
                               color: context.secondaryTextColor,
                             ),
                           ).tr(args: ['$count']),

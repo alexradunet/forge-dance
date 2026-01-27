@@ -28,8 +28,8 @@ class ProductItem extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
             color: isSelected
-                ? AppColors.blueberry100.withAlpha(220)
-                : AppColors.mono100.withAlpha(220),
+                ? AppColors.forgeFire.withAlpha(220)
+                : AppColors.gray950.withAlpha(220),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
@@ -43,15 +43,15 @@ class ProductItem extends StatelessWidget {
                     horizontal: 8,
                   ),
                   decoration: const BoxDecoration(
-                    color: AppColors.rambutan80,
+                    color: AppColors.passionRed,
                     borderRadius: BorderRadius.vertical(
                       bottom: Radius.circular(8),
                     ),
                   ),
                   child: Text(
                     '- ${product.savePercent}%',
-                    style: AppTheme.body12.copyWith(
-                      color: AppColors.mono0,
+                    style: AppTheme.caption.copyWith(
+                      color: AppColors.crystalWhite,
                     ),
                   ),
                 ),
@@ -59,15 +59,15 @@ class ProductItem extends StatelessWidget {
               const SizedBox(height: 24),
               Text(
                 product.title,
-                style: AppTheme.title16.copyWith(
-                  color: AppColors.mono0,
+                style: AppTheme.h6.copyWith(
+                  color: AppColors.crystalWhite,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 product.currentPrice,
-                style: AppTheme.title20.copyWith(
-                  color: AppColors.mono0,
+                style: AppTheme.h5.copyWith(
+                  color: AppColors.crystalWhite,
                 ),
               ),
               const SizedBox(height: 16),
@@ -79,13 +79,15 @@ class ProductItem extends StatelessWidget {
                         horizontal: 12,
                       ),
                       decoration: BoxDecoration(
-                        color: AppColors.mono0.withAlpha(50),
+                        color: AppColors.crystalWhite.withAlpha(50),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Text(
                         product.label!,
-                        style: AppTheme.title10.copyWith(
-                          color: AppColors.mono0,
+                        style: AppTheme.caption.copyWith(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.crystalWhite,
                         ),
                       ),
                     )

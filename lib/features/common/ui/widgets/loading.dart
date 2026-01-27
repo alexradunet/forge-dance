@@ -11,7 +11,7 @@ class Loading extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       constraints: const BoxConstraints.expand(),
-      color: AppColors.mono100.withAlpha(175),
+      color: AppColors.gray950.withAlpha(175),
       child: Center(
         child: Lottie.asset(
           Assets.loading,

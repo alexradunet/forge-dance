@@ -21,16 +21,17 @@ class PremiumInfo extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.cempedak60,
-            AppColors.cempedak100,
+            AppColors.legendGold.withOpacity(0.6),
+            AppColors.legendGold,
           ],
         ),
       ),
       child: expiryDate == null
           ? Text(
               LocaleKeys.premiumLifetime.tr(),
-              style: AppTheme.title14.copyWith(
-                color: AppColors.mono0,
+              style: AppTheme.bodySmall.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppColors.gray950,
               ),
             )
           : Row(
@@ -38,22 +39,24 @@ class PremiumInfo extends StatelessWidget {
               children: [
                 Text(
                   LocaleKeys.premium.tr(),
-                  style: AppTheme.title14.copyWith(
-                    color: AppColors.mono0,
+                  style: AppTheme.bodySmall.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.gray950,
                   ),
                 ),
                 const SizedBox(width: 4),
                 Text(
                   LocaleKeys.until.tr(),
-                  style: AppTheme.body14.copyWith(
-                    color: AppColors.mono0,
+                  style: AppTheme.bodySmall.copyWith(
+                    color: AppColors.gray950,
                   ),
                 ),
                 const SizedBox(width: 4),
                 Text(
                   (expiryDate ?? DateTime.now()).toddMMYYYY(),
-                  style: AppTheme.title14.copyWith(
-                    color: AppColors.mono0,
+                  style: AppTheme.bodySmall.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.gray950,
                   ),
                 ),
               ],

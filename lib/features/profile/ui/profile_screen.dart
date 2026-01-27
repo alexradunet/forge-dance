@@ -220,7 +220,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         title: LocaleKeys.logOutTitle.tr(),
         content: LocaleKeys.logOutMessage.tr(),
         primaryButtonLabel: LocaleKeys.logOut.tr(),
-        primaryButtonBackground: AppColors.rambutan100,
+        primaryButtonBackground: AppColors.passionRed,
         secondaryButtonLabel: LocaleKeys.cancel.tr(),
         primaryButtonAction: () async {
           try {
@@ -252,7 +252,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         title: LocaleKeys.deleteAccountTitle.tr(),
         content: LocaleKeys.deleteAccountMessage.tr(),
         primaryButtonLabel: LocaleKeys.deleteAccount.tr(),
-        primaryButtonBackground: AppColors.rambutan100,
+        primaryButtonBackground: AppColors.passionRed,
         secondaryButtonLabel: LocaleKeys.cancel.tr(),
         primaryButtonAction: () async {
           try {

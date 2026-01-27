@@ -21,7 +21,7 @@ class ShimmerHeroGrid extends StatelessWidget {
         return CommonShimmer(
           child: Container(
             decoration: BoxDecoration(
-              color: AppColors.mono0,
+              color: AppColors.gray50,
               borderRadius: BorderRadius.circular(16),
             ),
           ),

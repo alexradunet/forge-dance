@@ -16,17 +16,17 @@ part 'premium_view_model.g.dart';
 
 final List<Benefit> benefits = [
   Benefit(
-    icon: Icon(HugeIcons.strokeRoundedAlert01, color: AppColors.mono0),
+    icon: Icon(HugeIcons.strokeRoundedAlert01, color: AppColors.crystalWhite),
     title: LocaleKeys.benefitTitle1.tr(),
     description: LocaleKeys.benefitDescription1.tr(),
   ),
   Benefit(
-    icon: Icon(HugeIcons.strokeRoundedInfinity01, color: AppColors.mono0),
+    icon: Icon(HugeIcons.strokeRoundedInfinity01, color: AppColors.crystalWhite),
     title: LocaleKeys.benefitTitle2.tr(),
     description: LocaleKeys.benefitDescription2.tr(),
   ),
   Benefit(
-    icon: Icon(HugeIcons.strokeRoundedChartHistogram, color: AppColors.mono0),
+    icon: Icon(HugeIcons.strokeRoundedChartHistogram, color: AppColors.crystalWhite),
     title: LocaleKeys.benefitTitle3.tr(),
     description: LocaleKeys.benefitDescription3.tr(),
   ),

@@ -21,9 +21,9 @@ class UpgradePremiumButton extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            AppColors.cempedak80,
-            AppColors.cempedak60,
-            AppColors.cempedak100,
+            AppColors.legendGold.withOpacity(0.8),
+            AppColors.legendGold.withOpacity(0.6),
+            AppColors.legendGold,
           ],
         ),
       ),
@@ -42,14 +42,17 @@ class UpgradePremiumButton extends StatelessWidget {
             children: [
               HugeIcon(
                 icon: HugeIcons.strokeRoundedNewReleases,
-                color: AppColors.mono0,
+                color: AppColors.gray950,
                 size: 16,
               ),
               const SizedBox(width: 4),
               Text(
                 LocaleKeys.premium.tr(),
                 style:
-                    AppTheme.title14.copyWith(color: AppColors.mono0),
+                    AppTheme.bodySmall.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.gray950,
+                    ),
               ),
             ],
           ),
