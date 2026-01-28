@@ -17,14 +17,14 @@ class SkeletonLoader extends StatelessWidget {
     this.borderRadius,
   });
 
-  const SkeletonLoader.avatar({
+  SkeletonLoader.avatar({
     super.key,
     double? size,
   })  : width = size ?? 56,
         height = size ?? 56,
         borderRadius = BorderRadius.circular(size ?? 56);
 
-  const SkeletonLoader.card({
+  SkeletonLoader.card({
     super.key,
     double? width,
     double? height,
@@ -32,7 +32,7 @@ class SkeletonLoader extends StatelessWidget {
         height = height ?? 200,
         borderRadius = BorderRadius.circular(16);
 
-  const SkeletonLoader.text({
+  SkeletonLoader.text({
     super.key,
     double? width,
     double height = 16,
@@ -80,7 +80,7 @@ class SkeletonListItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (hasAvatar) ...[
-            const SkeletonLoader.avatar(),
+            SkeletonLoader.avatar(),
             const SizedBox(width: AppSpacing.lg),
           ],
           Expanded(
