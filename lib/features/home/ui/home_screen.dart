@@ -96,7 +96,7 @@ class HomeScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-                child: _FeaturedWorkoutCard(),
+                child: FeaturedWorkoutCard(),
               ),
             ),
 
@@ -226,7 +226,7 @@ class HomeScreen extends ConsumerWidget {
 }
 
 /// Featured Workout Card
-class _FeaturedWorkoutCard extends StatelessWidget {
+class FeaturedWorkoutCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
