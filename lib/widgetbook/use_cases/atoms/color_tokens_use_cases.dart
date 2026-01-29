@@ -86,7 +86,7 @@ class ColorSwatch extends StatelessWidget {
 @widgetbook.UseCase(
   name: 'Primary Colors',
   type: ColorSwatch,
-  path: '[Tokens]/Colors',
+  path: 'Design System/Tokens',
 )
 Widget buildPrimaryColors(BuildContext context) {
   return Scaffold(
@@ -136,7 +136,7 @@ Widget buildPrimaryColors(BuildContext context) {
 @widgetbook.UseCase(
   name: 'Accent Colors',
   type: ColorSwatch,
-  path: '[Tokens]/Colors',
+  path: 'Design System/Tokens',
 )
 Widget buildAccentColors(BuildContext context) {
   return Scaffold(
@@ -208,7 +208,7 @@ Widget buildAccentColors(BuildContext context) {
 @widgetbook.UseCase(
   name: 'Neutral Scale',
   type: ColorSwatch,
-  path: '[Tokens]/Colors',
+  path: 'Design System/Tokens',
 )
 Widget buildNeutralColors(BuildContext context) {
   return Scaffold(

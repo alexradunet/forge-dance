@@ -7,7 +7,7 @@ import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
 @widgetbook.UseCase(
   name: 'Default',
   type: BeatPracticeCard,
-  path: '[Organisms]/Cards',
+  path: 'Design System/Organisms/Cards',
 )
 Widget buildBeatPracticeCardDefault(BuildContext context) {
   return Scaffold(

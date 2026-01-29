@@ -7,7 +7,7 @@ import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
 @widgetbook.UseCase(
   name: 'Default',
   type: ProfileAvatar,
-  path: '[Atoms]/Avatar',
+  path: 'Design System/Atoms/Avatar',
 )
 Widget buildProfileAvatarDefault(BuildContext context) {
   return Scaffold(

@@ -7,7 +7,7 @@ import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
 @widgetbook.UseCase(
   name: 'Default',
   type: ActivityHeatmapGrid,
-  path: '[Molecules]/Charts',
+  path: 'Design System/Molecules/Charts',
 )
 Widget buildActivityHeatmapDefault(BuildContext context) {
   return Scaffold(

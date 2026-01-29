@@ -7,7 +7,7 @@ import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
 @widgetbook.UseCase(
   name: 'Default',
   type: RadialProgressRing,
-  path: '[Molecules]/Progress',
+  path: 'Design System/Molecules/Progress',
 )
 Widget buildRadialProgressRingDefault(BuildContext context) {
   return Scaffold(

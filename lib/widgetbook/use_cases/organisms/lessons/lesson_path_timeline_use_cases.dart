@@ -7,7 +7,7 @@ import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
 @widgetbook.UseCase(
   name: 'Default',
   type: LessonPathTimeline,
-  path: '[Organisms]/Lessons',
+  path: 'Design System/Organisms/Lessons',
 )
 Widget buildLessonPathTimelineDefault(BuildContext context) {
   return Scaffold(

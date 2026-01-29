@@ -7,7 +7,7 @@ import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
 @widgetbook.UseCase(
   name: 'Default',
   type: PrincipleTheoryCard,
-  path: '[Organisms]/Cards',
+  path: 'Design System/Organisms/Cards',
 )
 Widget buildPrincipleTheoryCardDefault(BuildContext context) {
   return Scaffold(

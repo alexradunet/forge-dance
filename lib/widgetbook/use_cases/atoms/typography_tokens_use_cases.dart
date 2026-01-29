@@ -58,7 +58,7 @@ class TypographySample extends StatelessWidget {
 @widgetbook.UseCase(
   name: 'Display Headers',
   type: TypographySample,
-  path: '[Tokens]/Typography',
+  path: 'Design System/Tokens',
 )
 Widget buildDisplayHeaders(BuildContext context) {
   return Scaffold(
