@@ -52,6 +52,8 @@ export 'atoms/inputs/toggle_switch.dart';
 export 'atoms/inputs/radio_button.dart';
 export 'atoms/inputs/checkbox_item.dart';
 export 'atoms/inputs/slider_control.dart';
+export 'atoms/inputs/forge_text_input.dart';
+export 'atoms/inputs/forge_stepper.dart';
 
 // ───────────────────────────────────────────────────────────
 // MOLECULES
@@ -71,6 +73,7 @@ export 'molecules/cards/tall_feature_card.dart';
 export 'molecules/cards/square_tile.dart';
 export 'molecules/cards/medium_square_card.dart';
 export 'molecules/cards/hero_square_card.dart';
+export 'molecules/cards/lesson_progress_card.dart';
 
 // Controls
 export 'molecules/controls/segmented_control.dart';
@@ -103,6 +106,7 @@ export 'organisms/modals/forge_alert_dialog.dart';
 
 // Lessons
 export 'organisms/lessons/lesson_node.dart';
+export 'organisms/lessons/theory_deck_card.dart';
 
 // Progress
 export 'organisms/progress/progress_section.dart';
