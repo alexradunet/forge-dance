@@ -4,6 +4,12 @@
 // Central export file for easy imports of all design system components
 
 // ───────────────────────────────────────────────────────────
+// TOKENS (Colors, Spacing, Typography, Shadows, etc.)
+// ───────────────────────────────────────────────────────────
+
+export 'tokens/tokens.dart';
+
+// ───────────────────────────────────────────────────────────
 // ATOMS
 // ───────────────────────────────────────────────────────────
 
@@ -17,6 +23,7 @@ export 'atoms/buttons/fab_button.dart';
 // Badges
 export 'atoms/badges/status_badge.dart';
 export 'atoms/badges/difficulty_badge.dart';
+export 'atoms/badges/category_tag.dart';
 
 // Progress
 export 'atoms/progress/linear_progress.dart';
@@ -41,6 +48,10 @@ export 'atoms/empty_states/empty_state.dart';
 export 'atoms/inputs/text_input.dart';
 export 'atoms/inputs/password_input.dart';
 export 'atoms/inputs/search_input.dart';
+export 'atoms/inputs/toggle_switch.dart';
+export 'atoms/inputs/radio_button.dart';
+export 'atoms/inputs/checkbox_item.dart';
+export 'atoms/inputs/slider_control.dart';
 
 // ───────────────────────────────────────────────────────────
 // MOLECULES
@@ -51,6 +62,15 @@ export 'molecules/cards/module_card.dart';
 export 'molecules/cards/wod_card.dart';
 export 'molecules/cards/stat_card.dart';
 export 'molecules/cards/exercise_card.dart';
+export 'molecules/cards/wide_hero_card.dart';
+export 'molecules/cards/feature_card.dart';
+export 'molecules/cards/compact_card.dart';
+export 'molecules/cards/vertical_compact_card.dart';
+export 'molecules/cards/portrait_card.dart';
+export 'molecules/cards/tall_feature_card.dart';
+export 'molecules/cards/square_tile.dart';
+export 'molecules/cards/medium_square_card.dart';
+export 'molecules/cards/hero_square_card.dart';
 
 // Controls
 export 'molecules/controls/segmented_control.dart';
@@ -75,6 +95,11 @@ export 'molecules/charts/streak_heatmap.dart';
 
 // Navigation
 export 'organisms/navigation/bottom_nav_bar.dart';
+export 'organisms/navigation/forge_bottom_nav_bar.dart';
+
+// Modals
+export 'organisms/modals/forge_bottom_sheet.dart';
+export 'organisms/modals/forge_alert_dialog.dart';
 
 // Lessons
 export 'organisms/lessons/lesson_node.dart';

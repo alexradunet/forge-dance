@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../theme/app_colors.dart';
-import '../../../../theme/app_spacing.dart';
-import '../../../../theme/app_theme.dart';
+import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../design_system/tokens/app_spacing.dart';
+import '../../../../design_system/tokens/app_typography.dart';
 import '../../../../features/common/ui/widgets/material_ink_well.dart';
 
 /// Primary button atom - Forge Fire filled button for main CTAs

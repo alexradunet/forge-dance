@@ -5,7 +5,7 @@ import '/constants/constants.dart';
 
 import '/extensions/build_context_extension.dart';
 import '/generated/locale_keys.g.dart';
-import '/theme/app_theme.dart';
+import '/design_system/tokens/app_typography.dart';
 
 class SignInAgreement extends StatelessWidget {
   const SignInAgreement({super.key});

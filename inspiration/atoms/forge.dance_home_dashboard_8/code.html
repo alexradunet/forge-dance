@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Horizontal Card Variants</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#FF4500",
+                        "electric-blue": "#00BFFF",
+                        "surface-dark": "#1F2937",
+                        "bg-deep": "#0A0A0A",
+                        "text-main": "#FFFFFF",
+                        "text-muted": "#9CA3AF",
+                        "background-light": "#f8f6f5",
+                        "gold": "#FFD700",
+                        "mystic-purple": "#A855F7",
+                        "hip-hop-glow": "#D946EF",
+                    },
+                    fontFamily: {
+                        title: ["Bebas Neue", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                        display: "Plus Jakarta Sans"
+                    },
+                    spacing: {
+                        "4": "1rem"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem", // 24px
+                        full: "9999px"
+                    }
+                }
+            }
+        };
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        body {
+            min-height: max(884px, 100dvh);
+            background-color: #0A0A0A;
+        }
+        .grid-bg {
+            background-size: 20px 20px;
+            background-image: linear-gradient(to right, #333 1px, transparent 1px), linear-gradient(to bottom, #333 1px, transparent 1px);
+            opacity: 0.1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-bg-deep text-text-main font-body antialiased selection:bg-primary selection:text-white">
+<div class="fixed inset-0 grid-bg pointer-events-none z-0"></div>
+<div class="relative min-h-screen w-full flex flex-col pb-32 overflow-x-hidden z-10">
+<header class="px-6 pt-12 pb-6">
+<span class="text-text-muted text-xs font-bold uppercase tracking-widest block mb-1">Card Component Specifications</span>
+<h1 class="font-title text-4xl text-white leading-none tracking-wide">Horizontal<br/><span class="text-primary">Card Variants</span></h1>
+<p class="text-[10px] text-text-muted/60 font-mono mt-2">Variant 1 of 3: Standard Nomenclature</p>
+</header>
+<main class="flex-1 flex flex-col gap-10 px-6">
+<section class="flex flex-col gap-6">
+<div class="flex items-center justify-between border-b border-white/10 pb-2">
+<div>
+<h3 class="text-sm font-semibold text-text-muted uppercase tracking-wider">01. Wide Hero Card</h3>
+<p class="text-[10px] text-text-muted/60 font-mono mt-0.5">Featured content with immersive masking</p>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] bg-white/10 text-white font-mono">Layer 1</span>
+</div>
+<div class="flex flex-col gap-4">
+<div class="w-full bg-surface-dark rounded-3xl border border-white/10 overflow-hidden shadow-xl relative">
+<div class="aspect-[16/9] bg-bg-deep relative overflow-hidden group">
+<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1547153760-18fc86324498?q=80&amp;w=2574&amp;auto=format&amp;fit=crop')] bg-cover bg-center transition-transform duration-700 group-hover:scale-105"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-bg-deep/90 via-bg-deep/40 to-transparent"></div>
+<div class="absolute bottom-4 left-4 right-4">
+<span class="px-1.5 py-0.5 bg-primary/90 text-white text-[9px] font-bold rounded uppercase tracking-wider mb-2 inline-block backdrop-blur-sm">Trending</span>
+<h4 class="font-title text-2xl text-white leading-none tracking-wide">Urban Choreography</h4>
+<div class="flex items-center gap-2 mt-2">
+<span class="text-[10px] text-gray-300 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">visibility</span> 2.4k
+                                    </span>
+</div>
+</div>
+</div>
+</div>
+<div class="flex gap-2 text-[10px] font-mono text-text-muted/60">
+<span>Mask: Linear Gradient (0% -&gt; 40% -&gt; 90%)</span>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-6">
+<div class="flex items-center justify-between border-b border-white/10 pb-2">
+<div>
+<h3 class="text-sm font-semibold text-text-muted uppercase tracking-wider">02. Feature Card (Horizontal)</h3>
+<p class="text-[10px] text-text-muted/60 font-mono mt-0.5">Curriculum modules with glowing border</p>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] bg-white/10 text-white font-mono">Layer 2</span>
+</div>
+<div class="flex flex-col gap-4">
+<div class="w-full bg-surface-dark rounded-3xl border border-mystic-purple/50 overflow-hidden shadow-[0_0_15px_rgba(168,85,247,0.15)] relative">
+<div class="flex p-4 gap-4 items-center relative z-10">
+<div class="w-16 h-16 rounded-lg bg-bg-deep relative overflow-hidden shrink-0 border border-white/5">
+<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?q=80&amp;w=2669&amp;auto=format&amp;fit=crop')] bg-cover bg-center opacity-80"></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-[9px] text-mystic-purple font-bold uppercase tracking-wider">Hip Hop</span>
+<span class="w-1 h-1 rounded-full bg-mystic-purple animate-pulse"></span>
+</div>
+<h4 class="font-title text-xl text-white leading-none truncate">Freestyle Session</h4>
+<p class="text-[10px] text-text-muted mt-1 truncate">Technique breakdown with Master Jay</p>
+</div>
+<div class="w-8 h-8 rounded-full bg-mystic-purple/10 flex items-center justify-center shrink-0 border border-mystic-purple/20">
+<span class="material-symbols-outlined text-mystic-purple text-[18px]">play_arrow</span>
+</div>
+</div>
+<div class="absolute inset-0 rounded-3xl ring-1 ring-inset ring-mystic-purple/30 pointer-events-none"></div>
+</div>
+<div class="flex gap-2 text-[10px] font-mono text-text-muted/60">
+<span>Border: #A855F7 (Mystic Purple)</span>
+<span>|</span>
+<span>Shadow: 15px Blur</span>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-6">
+<div class="flex items-center justify-between border-b border-white/10 pb-2">
+<div>
+<h3 class="text-sm font-semibold text-text-muted uppercase tracking-wider">03. Compact Card (Horizontal)</h3>
+<p class="text-[10px] text-text-muted/60 font-mono mt-0.5">List item with integrated action atoms</p>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] bg-white/10 text-white font-mono">Layer 3</span>
+</div>
+<div class="flex flex-col gap-4">
+<div class="w-full bg-surface-dark rounded-3xl border border-white/10 overflow-hidden relative p-4">
+<div class="flex justify-between items-start mb-3">
+<div>
+<h4 class="font-title text-lg text-white leading-none mb-1">Daily Challenge</h4>
+<span class="text-[10px] text-text-muted">3/5 Completed</span>
+</div>
+<div class="bg-bg-deep/50 rounded px-2 py-1 border border-white/5">
+<span class="text-[10px] font-mono text-primary font-bold">+50 XP</span>
+</div>
+</div>
+<div class="flex gap-1 mb-4">
+<div class="h-1 flex-1 bg-primary rounded-full"></div>
+<div class="h-1 flex-1 bg-primary rounded-full"></div>
+<div class="h-1 flex-1 bg-primary rounded-full"></div>
+<div class="h-1 flex-1 bg-white/10 rounded-full"></div>
+<div class="h-1 flex-1 bg-white/10 rounded-full"></div>
+</div>
+<button class="w-full py-2.5 rounded bg-white text-bg-deep font-bold text-xs uppercase tracking-wider hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+                            Start Session
+                        </button>
+</div>
+<div class="flex gap-2 text-[10px] font-mono text-text-muted/60">
+<span>Components: Segment Bar + Primary Action</span>
+</div>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 z-40 w-full bg-[#0A0A0A]/90 backdrop-blur-lg border-t border-white/5 pb-6 pt-3 px-2 safe-area-pb">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-surface-dark px-3 py-1 rounded-t-lg border-t border-x border-white/5 text-[10px] text-text-muted font-mono uppercase tracking-widest">
+                System Nav
+            </div>
+<div class="flex items-center justify-around">
+<button class="flex flex-col items-center gap-1 p-2 text-primary w-16 group">
+<span class="material-symbols-outlined text-[24px] group-hover:-translate-y-0.5 transition-transform" style="font-variation-settings: 'FILL' 1;">layers</span>
+<span class="text-[10px] font-medium">Layers</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-white/40 hover:text-white transition-colors w-16 group">
+<span class="material-symbols-outlined text-[24px] group-hover:-translate-y-0.5 transition-transform">view_quilt</span>
+<span class="text-[10px] font-medium">Types</span>
+</button>
+<button class="relative -top-5 bg-gradient-to-br from-primary to-orange-600 rounded-full w-14 h-14 flex items-center justify-center shadow-[0_0_15px_rgba(255,69,0,0.5)] border-4 border-bg-deep">
+<span class="material-symbols-outlined text-white text-[28px]">token</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-white/40 hover:text-white transition-colors w-16 group">
+<span class="material-symbols-outlined text-[24px] group-hover:-translate-y-0.5 transition-transform">input</span>
+<span class="text-[10px] font-medium">Inputs</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-white/40 hover:text-white transition-colors w-16 group">
+<span class="material-symbols-outlined text-[24px] group-hover:-translate-y-0.5 transition-transform">palette</span>
+<span class="text-[10px] font-medium">Tokens</span>
+</button>
+</div>
+</nav>
+</div>
+</body></html>

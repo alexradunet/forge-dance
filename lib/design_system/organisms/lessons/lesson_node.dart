@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../theme/app_colors.dart';
-import '../../../theme/app_spacing.dart';
-import '../../../theme/app_theme.dart';
+import '../../../design_system/tokens/app_colors.dart';
+import '../../../design_system/tokens/app_spacing.dart';
+import '../../../design_system/tokens/app_typography.dart';
 import '../../atoms/progress/linear_progress.dart';
 
 /// Lesson node organism - Timeline component with states (completed, active, locked)
@@ -92,13 +92,11 @@ class LessonNode extends StatelessWidget {
                       ]
                     : null,
               ),
-              child: icon != null
-                  ? Icon(
+              child: Icon(
                       icon,
                       size: isCheckpoint ? 14 : 20,
                       color: iconColor,
-                    )
-                  : null,
+                    ),
             ),
             // Pulse animation for active
             if (state == LessonNodeState.active)

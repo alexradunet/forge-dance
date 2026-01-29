@@ -6,8 +6,8 @@ import 'package:hugeicons/hugeicons.dart';
 import '../../../../features/common/ui/widgets/material_ink_well.dart';
 import '../../../../generated/locale_keys.g.dart';
 import '../../../../routing/routes.dart';
-import '../../../../theme/app_colors.dart';
-import '../../../../theme/app_theme.dart';
+import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../design_system/tokens/app_typography.dart';
 
 class UpgradePremiumButton extends StatelessWidget {
   const UpgradePremiumButton({super.key});

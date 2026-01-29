@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '/extensions/build_context_extension.dart';
-import '/theme/app_colors.dart';
-import '/theme/app_theme.dart';
+import '/design_system/tokens/app_colors.dart';
+import '/design_system/tokens/app_typography.dart';
 import 'primary_button.dart';
 import 'secondary_button.dart';
 

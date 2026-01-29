@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../theme/app_colors.dart';
-import '../../../theme/app_theme.dart';
+import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../design_system/tokens/app_typography.dart';
 
 /// FORGE.DANCE Logo Widget
 /// Displays the orange square icon with flame, followed by "FORGE." in white and "DANCE" in orange

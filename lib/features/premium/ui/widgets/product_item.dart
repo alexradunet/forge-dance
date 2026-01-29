@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '/theme/app_colors.dart';
-import '/theme/app_theme.dart';
+import '/design_system/tokens/app_colors.dart';
+import '/design_system/tokens/app_typography.dart';
 import '../../../common/ui/widgets/material_ink_well.dart';
 import '../../model/product.dart';
 

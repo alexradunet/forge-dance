@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../../theme/app_colors.dart';
-import '../../../../theme/app_spacing.dart';
+import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../design_system/tokens/app_spacing.dart';
 
 /// Skeleton loader atom - For cards, lists, avatars
 class SkeletonLoader extends StatelessWidget {

@@ -5,7 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '/constants/assets.dart';
 import '/extensions/build_context_extension.dart';
 import '/generated/locale_keys.g.dart';
-import '/theme/app_theme.dart';
+import '/design_system/tokens/app_typography.dart';
 
 class CommonEmptyData extends StatelessWidget {
   const CommonEmptyData({super.key});

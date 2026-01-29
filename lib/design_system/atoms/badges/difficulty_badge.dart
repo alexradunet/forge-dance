@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../../../../theme/app_colors.dart';
-import '../../../../theme/app_spacing.dart';
-import '../../../../theme/app_theme.dart';
+import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../design_system/tokens/app_spacing.dart';
+import '../../../../design_system/tokens/app_typography.dart';
 
 /// Difficulty badge atom - For "Beg", "Int", "Adv" with solid/outlined variants
 class DifficultyBadge extends StatelessWidget {

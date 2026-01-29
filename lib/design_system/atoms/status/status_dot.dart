@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../theme/app_colors.dart';
+import '../../../../design_system/tokens/app_colors.dart';
 
 /// Status dot atom - Animated ping effect for live status
 class StatusDot extends StatefulWidget {

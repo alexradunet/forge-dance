@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:persistent_bottom_nav_bar/persistent_bottom_nav_bar.dart';
 
-import '../../../extensions/build_context_extension.dart';
 import '../../../features/home/ui/home_screen.dart';
 import '../../../features/library/ui/library_screen.dart';
 import '../../../features/profile/ui/profile_screen.dart';
-import '../../../theme/app_colors.dart';
-import '../../../theme/app_theme.dart';
+import '../../../design_system/tokens/app_colors.dart';
+import '../../../design_system/tokens/app_typography.dart';
 
 const List<Widget> _screens = [
   HomeScreen(),

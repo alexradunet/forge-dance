@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../theme/app_colors.dart';
-import '../../../theme/app_spacing.dart';
-import '../../../theme/app_theme.dart';
+import '../../../design_system/tokens/app_colors.dart';
+import '../../../design_system/tokens/app_spacing.dart';
+import '../../../design_system/tokens/app_typography.dart';
 import '../../common/ui/widgets/primary_button.dart';
 
 /// Forge.dance Home Screen
@@ -227,6 +227,8 @@ class HomeScreen extends ConsumerWidget {
 
 /// Featured Workout Card
 class FeaturedWorkoutCard extends StatelessWidget {
+  const FeaturedWorkoutCard({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(

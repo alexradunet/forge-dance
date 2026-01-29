@@ -8,8 +8,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '/constants/constants.dart';
 import '/generated/locale_keys.g.dart';
-import '/theme/app_colors.dart';
-import '/theme/app_theme.dart';
+import '/design_system/tokens/app_colors.dart';
+import '/design_system/tokens/app_typography.dart';
 
 class OfflineContainer extends ConsumerStatefulWidget {
   final Widget? child;

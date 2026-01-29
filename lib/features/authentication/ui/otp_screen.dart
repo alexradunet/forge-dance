@@ -12,7 +12,7 @@ import '../../../features/authentication/ui/view_model/authentication_view_model
 import '../../../features/common/ui/widgets/common_back_button.dart';
 import '../../../features/common/ui/widgets/primary_button.dart';
 import '../../../generated/locale_keys.g.dart';
-import '../../../theme/app_theme.dart';
+import '../../../design_system/tokens/app_typography.dart';
 
 class OtpScreen extends ConsumerStatefulWidget {
   final String email;

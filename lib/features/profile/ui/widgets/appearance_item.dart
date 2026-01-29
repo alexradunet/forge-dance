@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../extensions/build_context_extension.dart';
 import '../../../../features/common/ui/providers/app_theme_mode_provider.dart';
 import '../../../../features/profile/ui/widgets/common_rounded_item.dart';
-import '../../../../theme/app_colors.dart';
-import '../../../../theme/app_theme.dart';
+import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../design_system/tokens/app_typography.dart';
 
 class AppearanceItem extends ConsumerWidget {
   final Widget icon;

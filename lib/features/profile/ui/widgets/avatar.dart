@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../constants/assets.dart';
 import '../../../../extensions/string_extension.dart';
-import '../../../../theme/app_colors.dart';
+import '../../../../design_system/tokens/app_colors.dart';
 
 class Avatar extends StatelessWidget {
   final String? url;

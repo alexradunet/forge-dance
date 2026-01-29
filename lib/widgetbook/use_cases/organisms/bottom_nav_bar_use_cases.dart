@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-import '../../design_system/organisms/navigation/bottom_nav_bar.dart';
-import '../../theme/app_colors.dart';
+import '../../../design_system/organisms/navigation/bottom_nav_bar.dart';
+import '../../../design_system/tokens/app_colors.dart';
 
 // TODO: Fix type resolution issue with widgetbook_generator
 // @widgetbook.UseCase(

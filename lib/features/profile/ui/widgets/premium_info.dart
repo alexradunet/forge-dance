@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 
 import '/generated/locale_keys.g.dart';
 import '../../../../extensions/date_time_extension.dart';
-import '../../../../theme/app_colors.dart';
-import '../../../../theme/app_theme.dart';
+import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../design_system/tokens/app_typography.dart';
 
 class PremiumInfo extends StatelessWidget {
   final DateTime? expiryDate;

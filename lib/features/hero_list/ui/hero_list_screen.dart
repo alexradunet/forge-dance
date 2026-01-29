@@ -5,7 +5,7 @@ import 'package:uuid/uuid.dart';
 
 import '../../../extensions/build_context_extension.dart';
 import '../../../generated/locale_keys.g.dart';
-import '../../../theme/app_theme.dart';
+import '../../../design_system/tokens/app_typography.dart';
 import '../../common/ui/widgets/common_empty_data.dart';
 import '../../common/ui/widgets/common_error.dart';
 import '../model/hero.dart' as hero;

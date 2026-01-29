@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../constants/constants.dart';
 import '../../../routing/routes.dart';
-import '../../../theme/app_colors.dart';
-import '../../../theme/app_spacing.dart';
-import '../../../theme/app_theme.dart';
+import '../../../design_system/tokens/app_colors.dart';
+import '../../../design_system/tokens/app_spacing.dart';
+import '../../../design_system/tokens/app_typography.dart';
 import '../../authentication/repository/authentication_repository.dart';
 
 /// Forge.dance Splash Screen

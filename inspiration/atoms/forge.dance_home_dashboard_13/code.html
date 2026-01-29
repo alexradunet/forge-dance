@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html class="" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Forge.Dance User Avatar Component Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#FF4500",
+                        legend: "#FFD700",
+                        "surface-dark": "#121212",
+                        "bg-deep": "#0A0A0A",
+                        "text-main": "#FFFFFF",
+                        "text-muted": "#71717A",
+                    },
+                    fontFamily: {
+                        title: ["Bebas Neue", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                        display: ["Plus Jakarta Sans", "sans-serif"]
+                    }
+                }
+            }
+        };
+    </script>
+<style type="text/tailwindcss">
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        body {
+            background-color: #0A0A0A;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-bg-deep text-text-main font-body antialiased">
+<div class="relative min-h-screen w-full flex flex-col pb-12 overflow-x-hidden">
+<header class="flex flex-col gap-2 px-6 pt-12 pb-10 border-b border-white/5">
+<div class="flex items-center gap-2 mb-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="text-primary font-bold tracking-[0.2em] uppercase text-[10px]">Atomic Design System</span>
+</div>
+<h1 class="font-title text-5xl text-white leading-tight">User Avatar<br/>Components</h1>
+<p class="text-text-muted text-xs font-mono mt-1">FORGE.DANCE / ATOM-AV-01</p>
+</header>
+<main class="flex flex-col gap-12 px-6 py-10">
+<section class="flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h2 class="text-sm font-bold tracking-widest text-text-muted uppercase italic">01. Size Variants</h2>
+</div>
+<div class="flex flex-col gap-8 bg-surface-dark/40 rounded-3xl p-8 border border-white/5">
+<div class="flex items-end justify-between">
+<div class="flex flex-col items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden ring-1 ring-white/20">
+<img alt="Small Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClJXua1OfM9SaRLXgy-wMmm5mf2Ru2EDdfyf-izgIdaaI7TJj_yWsPTCAcd7r2vOjKGRl0eed2Pgx2CH-JbvCoeT-5rMMFmtex73NC-pV7S2x9KJsi5o-xvmKmJBPdr5eiI3ZsTO5O3HyfWmctYywJ5nS_aNLOigkBJD0SgrIqMxFf6ufS965IPwdvrm6fS53fAFiq_gU0kyy7P-msnWPPBnmzbJoHMcBPcP97XM_1KIWLsTFKjX9DVQSCWL9wQL6gwFz9uTsuRSBO"/>
+</div>
+<span class="text-[10px] font-mono text-text-muted uppercase">40px / SM</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="w-16 h-16 rounded-full overflow-hidden ring-1 ring-white/20">
+<img alt="Medium Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClJXua1OfM9SaRLXgy-wMmm5mf2Ru2EDdfyf-izgIdaaI7TJj_yWsPTCAcd7r2vOjKGRl0eed2Pgx2CH-JbvCoeT-5rMMFmtex73NC-pV7S2x9KJsi5o-xvmKmJBPdr5eiI3ZsTO5O3HyfWmctYywJ5nS_aNLOigkBJD0SgrIqMxFf6ufS965IPwdvrm6fS53fAFiq_gU0kyy7P-msnWPPBnmzbJoHMcBPcP97XM_1KIWLsTFKjX9DVQSCWL9wQL6gwFz9uTsuRSBO"/>
+</div>
+<span class="text-[10px] font-mono text-text-muted uppercase">64px / MD</span>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="w-20 h-20 rounded-full overflow-hidden ring-1 ring-white/20">
+<img alt="Large Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClJXua1OfM9SaRLXgy-wMmm5mf2Ru2EDdfyf-izgIdaaI7TJj_yWsPTCAcd7r2vOjKGRl0eed2Pgx2CH-JbvCoeT-5rMMFmtex73NC-pV7S2x9KJsi5o-xvmKmJBPdr5eiI3ZsTO5O3HyfWmctYywJ5nS_aNLOigkBJD0SgrIqMxFf6ufS965IPwdvrm6fS53fAFiq_gU0kyy7P-msnWPPBnmzbJoHMcBPcP97XM_1KIWLsTFKjX9DVQSCWL9wQL6gwFz9uTsuRSBO"/>
+</div>
+<span class="text-[10px] font-mono text-text-muted uppercase">80px / LG</span>
+</div>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h2 class="text-sm font-bold tracking-widest text-text-muted uppercase italic">02. Level &amp; Status</h2>
+</div>
+<div class="bg-surface-dark/40 rounded-3xl p-8 border border-white/5 flex flex-col items-center justify-center gap-6">
+<div class="relative">
+<div class="w-[88px] h-[88px] rounded-full border-2 border-primary p-1 flex items-center justify-center relative">
+<img alt="Level Avatar" class="w-full h-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClJXua1OfM9SaRLXgy-wMmm5mf2Ru2EDdfyf-izgIdaaI7TJj_yWsPTCAcd7r2vOjKGRl0eed2Pgx2CH-JbvCoeT-5rMMFmtex73NC-pV7S2x9KJsi5o-xvmKmJBPdr5eiI3ZsTO5O3HyfWmctYywJ5nS_aNLOigkBJD0SgrIqMxFf6ufS965IPwdvrm6fS53fAFiq_gU0kyy7P-msnWPPBnmzbJoHMcBPcP97XM_1KIWLsTFKjX9DVQSCWL9wQL6gwFz9uTsuRSBO"/>
+<div class="absolute -top-1 -right-1 w-6 h-6 bg-primary rounded-full flex items-center justify-center border-2 border-bg-deep text-[10px] font-black text-white italic">24</div>
+</div>
+<div class="absolute bottom-1 right-1 w-4 h-4 bg-[#22C55E] border-[3px] border-bg-deep rounded-full"></div>
+</div>
+<div class="flex flex-col items-center gap-1">
+<span class="text-[10px] font-mono text-text-muted uppercase">Forge Fire Ring + Online</span>
+<div class="w-12 h-0.5 bg-primary/30 rounded-full"></div>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h2 class="text-sm font-bold tracking-widest text-text-muted uppercase italic">03. Group Stack</h2>
+</div>
+<div class="bg-surface-dark/40 rounded-3xl p-8 border border-white/5 flex flex-col items-center justify-center gap-6">
+<div class="flex -space-x-4">
+<div class="w-12 h-12 rounded-full border-2 border-bg-deep overflow-hidden">
+<img alt="User 1" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClJXua1OfM9SaRLXgy-wMmm5mf2Ru2EDdfyf-izgIdaaI7TJj_yWsPTCAcd7r2vOjKGRl0eed2Pgx2CH-JbvCoeT-5rMMFmtex73NC-pV7S2x9KJsi5o-xvmKmJBPdr5eiI3ZsTO5O3HyfWmctYywJ5nS_aNLOigkBJD0SgrIqMxFf6ufS965IPwdvrm6fS53fAFiq_gU0kyy7P-msnWPPBnmzbJoHMcBPcP97XM_1KIWLsTFKjX9DVQSCWL9wQL6gwFz9uTsuRSBO"/>
+</div>
+<div class="w-12 h-12 rounded-full border-2 border-bg-deep overflow-hidden">
+<img alt="User 2" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClJXua1OfM9SaRLXgy-wMmm5mf2Ru2EDdfyf-izgIdaaI7TJj_yWsPTCAcd7r2vOjKGRl0eed2Pgx2CH-JbvCoeT-5rMMFmtex73NC-pV7S2x9KJsi5o-xvmKmJBPdr5eiI3ZsTO5O3HyfWmctYywJ5nS_aNLOigkBJD0SgrIqMxFf6ufS965IPwdvrm6fS53fAFiq_gU0kyy7P-msnWPPBnmzbJoHMcBPcP97XM_1KIWLsTFKjX9DVQSCWL9wQL6gwFz9uTsuRSBO"/>
+</div>
+<div class="w-12 h-12 rounded-full border-2 border-bg-deep overflow-hidden">
+<img alt="User 3" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClJXua1OfM9SaRLXgy-wMmm5mf2Ru2EDdfyf-izgIdaaI7TJj_yWsPTCAcd7r2vOjKGRl0eed2Pgx2CH-JbvCoeT-5rMMFmtex73NC-pV7S2x9KJsi5o-xvmKmJBPdr5eiI3ZsTO5O3HyfWmctYywJ5nS_aNLOigkBJD0SgrIqMxFf6ufS965IPwdvrm6fS53fAFiq_gU0kyy7P-msnWPPBnmzbJoHMcBPcP97XM_1KIWLsTFKjX9DVQSCWL9wQL6gwFz9uTsuRSBO"/>
+</div>
+<div class="w-12 h-12 rounded-full border-2 border-bg-deep bg-white/10 backdrop-blur-md flex items-center justify-center text-[11px] font-bold text-white tracking-tight">
+                            +12
+                        </div>
+</div>
+<span class="text-[10px] font-mono text-text-muted uppercase">Stacked View / 48px</span>
+</div>
+</section>
+<section class="flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<h2 class="text-sm font-bold tracking-widest text-text-muted uppercase italic">04. Achievement Badge</h2>
+</div>
+<div class="bg-surface-dark/40 rounded-3xl p-8 border border-white/5 flex flex-col items-center justify-center gap-6">
+<div class="relative group">
+<div class="w-20 h-20 rounded-full border-2 border-legend p-1 flex items-center justify-center">
+<img alt="Legend User" class="w-full h-full rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuClJXua1OfM9SaRLXgy-wMmm5mf2Ru2EDdfyf-izgIdaaI7TJj_yWsPTCAcd7r2vOjKGRl0eed2Pgx2CH-JbvCoeT-5rMMFmtex73NC-pV7S2x9KJsi5o-xvmKmJBPdr5eiI3ZsTO5O3HyfWmctYywJ5nS_aNLOigkBJD0SgrIqMxFf6ufS965IPwdvrm6fS53fAFiq_gU0kyy7P-msnWPPBnmzbJoHMcBPcP97XM_1KIWLsTFKjX9DVQSCWL9wQL6gwFz9uTsuRSBO"/>
+</div>
+<div class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-legend text-bg-deep px-2 py-0.5 rounded-full flex items-center gap-1 border-2 border-bg-deep">
+<span class="material-symbols-outlined text-[10px] !font-bold">military_tech</span>
+<span class="text-[9px] font-black uppercase italic tracking-tighter">Legend</span>
+</div>
+</div>
+<span class="text-[10px] font-mono text-text-muted uppercase">Legend Gold Variation</span>
+</div>
+</section>
+<section class="mt-8 border-t border-white/5 pt-8">
+<div class="grid grid-cols-2 gap-4">
+<div class="p-4 bg-white/5 rounded-xl border border-white/5">
+<p class="text-[10px] text-text-muted font-mono mb-1 uppercase">Border Radius</p>
+<p class="text-xs font-bold">Circle (9999px)</p>
+</div>
+<div class="p-4 bg-white/5 rounded-xl border border-white/5">
+<p class="text-[10px] text-text-muted font-mono mb-1 uppercase">Primary Color</p>
+<p class="text-xs font-bold text-primary">#FF4500</p>
+</div>
+<div class="p-4 bg-white/5 rounded-xl border border-white/5">
+<p class="text-[10px] text-text-muted font-mono mb-1 uppercase">Legend Color</p>
+<p class="text-xs font-bold text-legend">#FFD700</p>
+</div>
+<div class="p-4 bg-white/5 rounded-xl border border-white/5">
+<p class="text-[10px] text-text-muted font-mono mb-1 uppercase">Ring Width</p>
+<p class="text-xs font-bold text-white">2.0px Fixed</p>
+</div>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 w-full h-16 bg-bg-deep/80 backdrop-blur-xl border-t border-white/5 flex items-center justify-around px-6 z-50">
+<span class="material-symbols-outlined text-text-muted">category</span>
+<span class="material-symbols-outlined text-primary">person</span>
+<span class="material-symbols-outlined text-text-muted">layers</span>
+<span class="material-symbols-outlined text-text-muted">settings</span>
+</nav>
+</div>
+
+</body></html>

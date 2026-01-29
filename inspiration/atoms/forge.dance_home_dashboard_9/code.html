@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Forge.Dance - Selection &amp; Input Atoms</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#FF4500","electric-blue": "#00BFFF",
+                        "surface-dark": "#1C1C1E",
+                        "bg-deep": "#0A0A0A",
+                        "text-main": "#FFFFFF",
+                        "text-muted": "#A1A1AA",
+                        "background-light": "#f8f6f5",
+                        "background-dark": "#221510"
+                    },
+                    fontFamily: {
+                        title: ["Bebas Neue", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                        display: "Plus Jakarta Sans"
+                    },
+                    spacing: {
+                        "4": "1rem"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    }
+                }
+            }
+        };
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            min-height: max(884px, 100dvh);
+            background-color: #0A0A0A;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-bg-deep text-text-main font-body antialiased selection:bg-primary selection:text-white">
+<div class="relative min-h-screen w-full flex flex-col p-6 pb-24 max-w-md mx-auto">
+<header class="mb-10 pt-8">
+<div class="flex items-center gap-2 mb-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="text-primary text-[10px] font-bold uppercase tracking-[0.2em] font-body">Atomic Design System</span>
+</div>
+<h1 class="font-title text-4xl text-white leading-none">Selection &amp;<br/>Input Atoms</h1>
+<p class="text-text-muted mt-3 text-sm font-medium leading-relaxed">
+                Variant 2/3. Dedicated component sheet for selection and input atoms. Focuses on numerical and range inputs.
+            </p>
+</header>
+<main class="flex flex-col gap-12">
+<section>
+<div class="flex items-center justify-between mb-4 border-b border-white/10 pb-2">
+<h2 class="text-xl font-title text-white tracking-wide">01. Segmented Controls</h2>
+<span class="text-[10px] bg-white/5 px-2 py-1 rounded text-text-muted">MOLECULE</span>
+</div>
+<div class="flex flex-col gap-6">
+<div>
+<label class="text-[10px] text-text-muted font-bold uppercase tracking-wider mb-2 block">Binary State</label>
+<div class="bg-surface-dark p-1 rounded-xl flex w-full relative">
+<button class="flex-1 py-2.5 px-4 rounded-lg bg-primary text-white text-sm font-bold shadow-[0_2px_10px_rgba(255,69,0,0.3)] transition-all">
+                                STATS
+                            </button>
+<button class="flex-1 py-2.5 px-4 rounded-lg text-text-muted hover:text-white text-sm font-semibold transition-all">
+                                LEADERBOARD
+                            </button>
+</div>
+</div>
+<div>
+<label class="text-[10px] text-text-muted font-bold uppercase tracking-wider mb-2 block">Ternary State</label>
+<div class="bg-surface-dark p-1 rounded-xl flex w-full">
+<button class="flex-1 py-2.5 text-center rounded-lg text-text-muted hover:text-white text-sm font-semibold transition-all hover:bg-white/5">
+                                Day
+                            </button>
+<button class="flex-1 py-2.5 text-center rounded-lg bg-primary text-white text-sm font-bold shadow-[0_2px_10px_rgba(255,69,0,0.3)] transition-all">
+                                Week
+                            </button>
+<button class="flex-1 py-2.5 text-center rounded-lg text-text-muted hover:text-white text-sm font-semibold transition-all hover:bg-white/5">
+                                Month
+                            </button>
+</div>
+</div>
+</div>
+</section>
+<section>
+<div class="flex items-center justify-between mb-4 border-b border-white/10 pb-2">
+<h2 class="text-xl font-title text-white tracking-wide">02. Range Sliders</h2>
+<span class="text-[10px] bg-white/5 px-2 py-1 rounded text-text-muted">ATOM</span>
+</div>
+<div class="flex flex-col gap-8 bg-surface-dark rounded-2xl p-6 border border-white/5 shadow-lg">
+<div class="group">
+<div class="flex items-end justify-between mb-4">
+<label class="text-[10px] text-text-muted font-bold uppercase tracking-wider">BPM Range</label>
+<span class="text-xl font-bold text-primary font-title tracking-wide">128 BPM</span>
+</div>
+<div class="relative w-full h-8 flex items-center cursor-pointer select-none">
+<div class="absolute w-full h-1.5 bg-bg-deep rounded-full overflow-hidden border border-white/5">
+<div class="w-full h-full flex justify-between px-2">
+<div class="w-px h-full bg-white/10"></div>
+<div class="w-px h-full bg-white/10"></div>
+<div class="w-px h-full bg-white/10"></div>
+<div class="w-px h-full bg-white/10"></div>
+<div class="w-px h-full bg-white/10"></div>
+</div>
+</div>
+<div class="absolute h-1.5 bg-gradient-to-r from-primary/50 to-primary rounded-l-full" style="width: 60%"></div>
+<div class="absolute w-6 h-6 bg-surface-dark border-2 border-primary rounded-full shadow-[0_0_12px_rgba(255,69,0,0.8)] top-1/2 -translate-y-1/2 flex items-center justify-center transition-transform group-hover:scale-110" style="left: 60%">
+<div class="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+</div>
+</div>
+<div class="flex justify-between mt-1 text-[10px] text-text-muted font-medium font-mono">
+<span>60</span>
+<span>200</span>
+</div>
+</div>
+<div>
+<div class="flex items-end justify-between mb-3">
+<label class="text-[10px] text-text-muted font-bold uppercase tracking-wider">Sensitivity</label>
+<span class="text-sm font-bold text-white font-mono">75%</span>
+</div>
+<div class="relative w-full h-4 flex items-center cursor-pointer group">
+<div class="absolute w-full h-1 bg-bg-deep rounded-full"></div>
+<div class="absolute h-1 bg-white/40 group-hover:bg-white/60 transition-colors rounded-l-full" style="width: 75%"></div>
+<div class="absolute w-4 h-4 bg-white rounded-full shadow-lg top-1/2 -translate-y-1/2" style="left: 75%"></div>
+</div>
+</div>
+</div>
+</section>
+<section>
+<div class="flex items-center justify-between mb-4 border-b border-white/10 pb-2">
+<h2 class="text-xl font-title text-white tracking-wide">03. Stepper Controls</h2>
+<span class="text-[10px] bg-white/5 px-2 py-1 rounded text-text-muted">ATOM</span>
+</div>
+<div class="flex flex-col gap-4">
+<div class="bg-surface-dark rounded-2xl p-5 border border-white/5 flex items-center justify-between shadow-lg">
+<div class="flex flex-col">
+<span class="text-[10px] font-bold text-text-muted uppercase tracking-wider">Tempo</span>
+<span class="text-lg font-bold text-white">Target BPM</span>
+</div>
+<div class="flex items-center gap-3 bg-bg-deep rounded-xl p-1.5 border border-white/10">
+<button class="w-10 h-10 rounded-lg bg-surface-dark text-white hover:bg-white/10 active:bg-white/20 flex items-center justify-center transition-all">
+<span class="material-symbols-outlined text-[20px]">remove</span>
+</button>
+<span class="w-12 text-center font-title text-2xl text-primary tracking-wide">128</span>
+<button class="w-10 h-10 rounded-lg bg-surface-dark text-white hover:bg-white/10 active:bg-white/20 flex items-center justify-center transition-all">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<section>
+<div class="flex items-center justify-between mb-4 border-b border-white/10 pb-2">
+<h2 class="text-xl font-title text-white tracking-wide">04. Text Inputs</h2>
+<span class="text-[10px] bg-white/5 px-2 py-1 rounded text-text-muted">ATOM</span>
+</div>
+<div class="grid gap-4">
+<div>
+<label class="text-[10px] text-text-muted font-bold uppercase tracking-wider mb-2 block">Track Title</label>
+<div class="relative group">
+<input class="w-full bg-surface-dark border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-text-muted/50 focus:outline-none focus:border-primary/50 focus:bg-white/5 transition-all" placeholder="Enter name..." type="text"/>
+<div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-text-muted group-focus-within:text-primary transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</div>
+</div>
+</div>
+<div>
+<label class="text-[10px] text-text-muted font-bold uppercase tracking-wider mb-2 block">Duration</label>
+<div class="relative">
+<input class="w-full bg-surface-dark border border-primary rounded-xl px-4 py-3 text-sm text-white focus:outline-none shadow-[0_0_0_1px_rgba(255,69,0,1)] transition-all" type="text" value="3:45"/>
+<div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none text-primary">
+<span class="material-symbols-outlined text-[18px]">schedule</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+</body></html>

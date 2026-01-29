@@ -7,7 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../extensions/build_context_extension.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../../extensions/string_extension.dart';
-import '../../../theme/app_theme.dart';
+import '../../../design_system/tokens/app_typography.dart';
 import '../../../utils/global_loading.dart';
 import '../../common/ui/widgets/common_header.dart';
 import '../../common/ui/widgets/common_text_form_field.dart';

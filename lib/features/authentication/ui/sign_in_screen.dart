@@ -13,7 +13,7 @@ import '../../../features/common/ui/widgets/common_text_form_field.dart';
 import '../../../features/common/ui/widgets/primary_button.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../../routing/routes.dart';
-import '../../../theme/app_theme.dart';
+import '../../../design_system/tokens/app_typography.dart';
 import '../../../utils/validator.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {

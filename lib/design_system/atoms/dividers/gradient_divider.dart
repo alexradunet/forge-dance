@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../theme/app_colors.dart';
+import '../../../../design_system/tokens/app_colors.dart';
 
 /// Gradient divider atom - Horizontal/vertical with Forge Fire gradient
 class GradientDivider extends StatelessWidget {

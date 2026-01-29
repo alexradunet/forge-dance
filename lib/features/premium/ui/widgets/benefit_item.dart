@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '/theme/app_colors.dart';
-import '/theme/app_theme.dart';
+import '/design_system/tokens/app_colors.dart';
+import '/design_system/tokens/app_typography.dart';
 
 class BenefitItem extends StatelessWidget {
   final Icon icon;

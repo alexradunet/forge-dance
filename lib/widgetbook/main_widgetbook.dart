@@ -5,8 +5,8 @@ import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 import 'main_widgetbook.directories.g.dart';
-import '../theme/app_colors.dart';
-import '../theme/app_theme.dart';
+import '../design_system/tokens/app_colors.dart';
+import '../design_system/tokens/app_typography.dart';
 
 /// Entry point for running the design system Widgetbook.
 ///

@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Square Card Variants</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&amp;family=Inter:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#FF4500",
+                        "electric-blue": "#00BFFF",
+                        "surface-dark": "#1F2937",
+                        "bg-deep": "#0A0A0A",
+                        "text-main": "#FFFFFF",
+                        "text-muted": "#9CA3AF",
+                        "background-light": "#f8f6f5",
+                        "gold": "#FFD700",
+                        "mystic-purple": "#A855F7",
+                        "hip-hop-glow": "#D946EF",
+                    },
+                    fontFamily: {
+                        title: ["Bebas Neue", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                        display: "Plus Jakarta Sans"
+                    },
+                    spacing: {
+                        "4": "1rem"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        "2xl": "1rem",
+                        "3xl": "1.5rem",
+                        full: "9999px"
+                    }
+                }
+            }
+        };
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        body {
+            min-height: max(884px, 100dvh);
+            background-color: #0A0A0A;
+        }
+        .grid-bg {
+            background-size: 20px 20px;
+            background-image: linear-gradient(to right, #333 1px, transparent 1px), linear-gradient(to bottom, #333 1px, transparent 1px);
+            opacity: 0.1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-bg-deep text-text-main font-body antialiased selection:bg-primary selection:text-white">
+<div class="fixed inset-0 grid-bg pointer-events-none z-0"></div>
+<div class="relative min-h-screen w-full flex flex-col pb-32 overflow-x-hidden z-10">
+<header class="px-6 pt-12 pb-6">
+<span class="text-text-muted text-xs font-bold uppercase tracking-widest block mb-1">Card Component Specifications</span>
+<h1 class="font-title text-4xl text-white leading-none tracking-wide">Square<br/><span class="text-primary">Card Variants</span></h1>
+<p class="text-[10px] text-text-muted/60 font-mono mt-2">Variant 3 of 3: Square Layouts</p>
+</header>
+<main class="flex-1 flex flex-col gap-10 px-6">
+<section class="flex flex-col gap-6">
+<div class="flex items-center justify-between border-b border-white/10 pb-2">
+<div>
+<h3 class="text-sm font-semibold text-text-muted uppercase tracking-wider">01. Small Square Tile</h3>
+<p class="text-[10px] text-text-muted/60 font-mono mt-0.5">Category icons &amp; minimal labeling</p>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] bg-white/10 text-white font-mono">1:1 Small</span>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex gap-4 overflow-x-auto no-scrollbar pb-1">
+<button class="group relative w-28 h-28 shrink-0 bg-surface-dark rounded-xl border border-white/10 flex flex-col items-center justify-center gap-2 overflow-hidden hover:border-primary/50 transition-colors">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="p-2 rounded-full bg-white/5 group-hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-primary text-[24px]">graphic_eq</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-wider text-white">Rhythm</span>
+</button>
+<button class="group relative w-28 h-28 shrink-0 bg-surface-dark rounded-xl border border-white/10 flex flex-col items-center justify-center gap-2 overflow-hidden hover:border-electric-blue/50 transition-colors">
+<div class="absolute inset-0 bg-gradient-to-br from-electric-blue/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="p-2 rounded-full bg-white/5 group-hover:bg-electric-blue/20 transition-colors">
+<span class="material-symbols-outlined text-electric-blue text-[24px]">timer</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-wider text-white">HIIT</span>
+</button>
+<button class="group relative w-28 h-28 shrink-0 bg-surface-dark rounded-xl border border-white/10 flex flex-col items-center justify-center gap-2 overflow-hidden hover:border-gold/50 transition-colors">
+<div class="absolute inset-0 bg-gradient-to-br from-gold/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="p-2 rounded-full bg-white/5 group-hover:bg-gold/20 transition-colors">
+<span class="material-symbols-outlined text-gold text-[24px]">emoji_events</span>
+</div>
+<span class="text-[10px] font-bold uppercase tracking-wider text-white">Rank</span>
+</button>
+</div>
+<div class="flex gap-2 text-[10px] font-mono text-text-muted/60">
+<span>Aspect: 1:1</span>
+<span>|</span>
+<span>Type: Navigation/Category</span>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-6">
+<div class="flex items-center justify-between border-b border-white/10 pb-2">
+<div>
+<h3 class="text-sm font-semibold text-text-muted uppercase tracking-wider">02. Medium Square Card</h3>
+<p class="text-[10px] text-text-muted/60 font-mono mt-0.5">Style discovery &amp; rich media</p>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] bg-white/10 text-white font-mono">1:1 Medium</span>
+</div>
+<div class="flex flex-col gap-4">
+<div class="grid grid-cols-2 gap-4">
+<div class="aspect-square bg-bg-deep rounded-2xl relative overflow-hidden group border border-white/5 shadow-lg">
+<img alt="Dance" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAiKhdiMlAGUcGypLBTjWEU61QfWe8Cs4ylt6gfgHytit5p2_Hu9i4UjQ2WxFtx9WetAjx92xUKhJXmMSoVbxUHm-NPta_-8nWNW9yVGLglH14DfaqpWdYGSNXcrRQ03_CJVZhWHajpaGGJ27ND51l_7vcjPvcQk1WLR-vD8oIixdRh0PnXh9hwO6Lv9rPM6suz-tpT6LW6TsgEa55vBJD81z4MvJKo3doSC4BXiXleGkoxC04y5QZK5-kBU3nRe4P4PkK8TsJVW67l"/>
+<div class="absolute inset-0 bg-gradient-to-t from-bg-deep/90 via-transparent to-transparent"></div>
+<div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<div class="w-6 h-6 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px] text-white">arrow_outward</span>
+</div>
+</div>
+<div class="absolute bottom-3 left-3 right-3">
+<span class="text-[9px] text-primary font-bold uppercase tracking-wider block mb-1">New</span>
+<h4 class="font-title text-xl text-white leading-none tracking-wide">House Dance</h4>
+<p class="text-[9px] text-text-muted mt-1 truncate">Footwork mastery</p>
+</div>
+</div>
+<div class="aspect-square bg-bg-deep rounded-2xl relative overflow-hidden group border border-white/5 shadow-lg">
+<img alt="Dance" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-110 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8siCNuC0WKNiKk-hKMAQRIQ2WpBrNAq81CmbbifuwaybSBCO2PIpA8tVz6RQ42a5WFYj_LGPtdAZPxqKp0aH9msWOV_U4XFnlIUnldQHv-Qm82HM8NnmrjUAjVuo03BVReH7ZqJzT92O3yDGAFR7_SK-Zgjh45SMhrAsKJE69Pyp3orCkiJOERvMVnKfmOSgtipwJxv3P9oLj-wCk-FzV9PdSyGf2qwfe04-ZumCVX9fClZ6qp3MyRVfbL_9Q6wAcjwl_cqxjx4I7"/>
+<div class="absolute inset-0 bg-gradient-to-t from-bg-deep/90 via-transparent to-transparent"></div>
+<div class="absolute bottom-3 left-3 right-3">
+<span class="text-[9px] text-electric-blue font-bold uppercase tracking-wider block mb-1">Trending</span>
+<h4 class="font-title text-xl text-white leading-none tracking-wide">Krump 101</h4>
+<p class="text-[9px] text-text-muted mt-1 truncate">Expressive energy</p>
+</div>
+</div>
+</div>
+<div class="flex gap-2 text-[10px] font-mono text-text-muted/60">
+<span>Grid: 2 Columns</span>
+<span>|</span>
+<span>Overlay: Gradient Bottom</span>
+</div>
+</div>
+</section>
+<section class="flex flex-col gap-6">
+<div class="flex items-center justify-between border-b border-white/10 pb-2">
+<div>
+<h3 class="text-sm font-semibold text-text-muted uppercase tracking-wider">03. Hero Card (Large Square)</h3>
+<p class="text-[10px] text-text-muted/60 font-mono mt-0.5">Major challenges &amp; WODs</p>
+</div>
+<span class="px-2 py-0.5 rounded text-[10px] bg-white/10 text-white font-mono">1:1 Large</span>
+</div>
+<div class="flex flex-col gap-4">
+<div class="aspect-square w-full bg-surface-dark rounded-3xl border border-white/10 overflow-hidden relative shadow-2xl group">
+<div class="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1621976498727-9e5be3a8cc61?q=80&amp;w=2665&amp;auto=format&amp;fit=crop')] bg-cover bg-center transition-transform duration-1000 group-hover:scale-105"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-bg-deep via-bg-deep/50 to-transparent"></div>
+<div class="absolute top-5 right-5 z-20">
+<span class="px-2.5 py-1 bg-bg-deep/60 backdrop-blur border border-white/10 rounded-lg text-[10px] font-mono text-gold flex items-center gap-1.5 shadow-lg">
+<span class="material-symbols-outlined text-[12px] animate-pulse">star</span>
+<span>PREMIUM</span>
+</span>
+</div>
+<div class="absolute bottom-0 left-0 right-0 p-6 flex flex-col gap-4 z-20">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="px-1.5 py-0.5 bg-primary rounded text-[9px] font-bold text-white uppercase tracking-widest">Challenge</span>
+<span class="text-[10px] text-white/80 font-mono">Series 04</span>
+</div>
+<h2 class="font-title text-[56px] text-white leading-[0.85] tracking-wide mb-1 drop-shadow-lg">Summer<br/><span class="text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">Shred</span></h2>
+</div>
+<div class="flex items-center gap-4 text-xs text-gray-300 font-medium border-t border-white/10 pt-4">
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">calendar_today</span> 30 Days</span>
+<span class="w-1 h-1 bg-white/20 rounded-full"></span>
+<span class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[16px] text-primary">local_fire_department</span> High Intensity</span>
+</div>
+<button class="w-full mt-2 py-3.5 bg-white text-bg-deep font-black uppercase tracking-wider rounded-xl flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors shadow-lg shadow-black/20">
+<span class="material-symbols-outlined text-[18px]">bolt</span>
+                 Join Waitlist
+             </button>
+</div>
+</div>
+<div class="flex gap-2 text-[10px] font-mono text-text-muted/60">
+<span>Components: Hero Image + Action</span>
+</div>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 z-40 w-full bg-[#0A0A0A]/90 backdrop-blur-lg border-t border-white/5 pb-6 pt-3 px-2 safe-area-pb">
+<div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-surface-dark px-3 py-1 rounded-t-lg border-t border-x border-white/5 text-[10px] text-text-muted font-mono uppercase tracking-widest">
+                System Nav
+            </div>
+<div class="flex items-center justify-around">
+<button class="flex flex-col items-center gap-1 p-2 text-primary w-16 group">
+<span class="material-symbols-outlined text-[24px] group-hover:-translate-y-0.5 transition-transform" style="font-variation-settings: 'FILL' 1;">layers</span>
+<span class="text-[10px] font-medium">Layers</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-white/40 hover:text-white transition-colors w-16 group">
+<span class="material-symbols-outlined text-[24px] group-hover:-translate-y-0.5 transition-transform">view_quilt</span>
+<span class="text-[10px] font-medium">Types</span>
+</button>
+<button class="relative -top-5 bg-gradient-to-br from-primary to-orange-600 rounded-full w-14 h-14 flex items-center justify-center shadow-[0_0_15px_rgba(255,69,0,0.5)] border-4 border-bg-deep">
+<span class="material-symbols-outlined text-white text-[28px]">token</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-white/40 hover:text-white transition-colors w-16 group">
+<span class="material-symbols-outlined text-[24px] group-hover:-translate-y-0.5 transition-transform">input</span>
+<span class="text-[10px] font-medium">Inputs</span>
+</button>
+<button class="flex flex-col items-center gap-1 p-2 text-white/40 hover:text-white transition-colors w-16 group">
+<span class="material-symbols-outlined text-[24px] group-hover:-translate-y-0.5 transition-transform">palette</span>
+<span class="text-[10px] font-medium">Tokens</span>
+</button>
+</div>
+</nav>
+</div>
+</body></html>

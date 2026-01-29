@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../theme/app_colors.dart';
-import '../../../theme/app_spacing.dart';
-import '../../../theme/app_theme.dart';
 import '../../molecules/cards/wod_card.dart';
 
 /// Featured workout card organism - Hero card with gradient overlay, tags, CTA button
