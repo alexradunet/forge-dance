@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mvvm_riverpod/design_system/design_system.dart';
 
 import '../../../design_system/tokens/app_colors.dart';
 import '../../../design_system/tokens/app_spacing.dart';
 import '../../../design_system/tokens/app_typography.dart';
-import '../../atoms/badges/status_badge.dart';
-import '../../atoms/buttons/primary_button.dart';
+import '../../atoms/badges/app_badge.dart';
+import '../../atoms/buttons/app_button.dart';
 
 /// WOD card molecule - Featured workout card with image, tags, metadata
 class WODCard extends StatelessWidget {
@@ -74,9 +75,10 @@ class WODCard extends StatelessWidget {
                 // Tags
                 Row(
                   children: [
-                    StatusBadge(
-                      label: 'Workout of the Day',
-                      type: StatusBadgeType.new_,
+                    AppBadge(
+                      text: 'Workout of the Day',
+                      variant: AppBadgeVariant.solid,
+                      color: AppBadgeColor.brand,
                     ),
                   ],
                 ),
@@ -152,15 +154,16 @@ class WODCard extends StatelessWidget {
                 if (onStart != null)
                   SizedBox(
                     width: double.infinity,
-                    child: PrimaryButton(
+                    child: AppButton(
                       text: 'START WORKOUT',
-                      backgroundColor: AppColors.forgeFire,
+                      variant: AppButtonVariant.primary,
                       onPressed: onStart,
                       icon: const Icon(
                         Icons.bolt,
                         size: 20,
                         color: AppColors.crystalWhite,
                       ),
+                      width: double.infinity,
                     ),
                   ),
               ],

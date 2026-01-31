@@ -16,7 +16,7 @@ import '../../../../utils/global_loading.dart';
 import '../../../../features/common/ui/widgets/common_dialog.dart';
 import '../../model/profile.dart';
 import '../../ui/view_model/profile_view_model.dart';
-import '../../ui/widgets/profile_avatar.dart';
+import '../../../../design_system/atoms/avatars/user_avatar.dart';
 import '../../ui/widgets/profile_stats.dart';
 import '../../ui/widgets/achievements_carousel.dart';
 import '../../ui/widgets/rewards_grid.dart';
@@ -231,10 +231,11 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return Column(
       children: [
         const SizedBox(height: 24),
-        ProfileAvatar(
-          url: profile?.avatar,
-          levelBadge: 'Legend',
-          radius: 64,
+        UserAvatar(
+          imageUrl: profile?.avatar,
+          level: 42,
+          size: 128,
+          borderColor: AppColors.legendGold,
         ),
         const SizedBox(height: 20),
         Text(

@@ -1,55 +1,93 @@
 import 'package:flutter/material.dart';
-import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
+import 'package:widgetbook/widgetbook.dart';
 
-import 'package:flutter_mvvm_riverpod/design_system/atoms/badges/app_badge.dart';
-import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
+import 'package:flutter_mvvm_riverpod/design_system/design_system.dart';
 
 @widgetbook.UseCase(
   name: 'Playground',
   type: AppBadge,
-  path: 'Design System/Atoms/AppBadge',
+  path: 'Design System/Atoms/Badges',
 )
 Widget buildAppBadgePlayground(BuildContext context) {
   return Scaffold(
-    backgroundColor: AppColors.bgDeep,
+    backgroundColor: AppColors.gray950,
     body: Center(
       child: AppBadge(
-        text: context.knobs.string(label: 'Label', initialValue: 'Badge'),
+        text: context.knobs.string(label: 'Text', initialValue: 'Badge'),
         variant: context.knobs.list(
           label: 'Variant',
           options: AppBadgeVariant.values,
-          initialOption: AppBadgeVariant.defaultVariant,
+          initialOption: AppBadgeVariant.solid,
         ),
-        icon: context.knobs.boolean(label: 'Show Icon', initialValue: false)
-            ? Icons.star
-            : null,
+        color: context.knobs.list(
+          label: 'Color',
+          options: AppBadgeColor.values,
+          initialOption: AppBadgeColor.brand,
+        ),
+        shape: context.knobs.list(
+          label: 'Shape',
+          options: AppBadgeShape.values,
+          initialOption: AppBadgeShape.standard,
+        ),
       ),
     ),
   );
 }
 
 @widgetbook.UseCase(
-  name: 'All Variants',
+  name: 'Showcase',
   type: AppBadge,
-  path: 'Design System/Atoms/AppBadge',
+  path: 'Design System/Atoms/Badges',
 )
-Widget buildAppBadgeAllVariants(BuildContext context) {
-  return Scaffold(
-    backgroundColor: AppColors.bgDeep,
-    body: Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: AppBadgeVariant.values.map((variant) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: AppBadge(
-              text: variant.name.toUpperCase(),
-              variant: variant,
-            ),
-          );
-        }).toList(),
+Widget buildAppBadgeShowcase(BuildContext context) {
+  return const Scaffold(
+    backgroundColor: AppColors.gray950,
+    body: SingleChildScrollView(
+      padding: EdgeInsets.all(24),
+      child: Center(
+        child: Column(
+          children: [
+            _BadgeSection(title: 'Solid', variant: AppBadgeVariant.solid),
+            SizedBox(height: 32),
+            _BadgeSection(title: 'Outline', variant: AppBadgeVariant.outline),
+            SizedBox(height: 32),
+            _BadgeSection(title: 'Subtle', variant: AppBadgeVariant.subtle),
+          ],
+        ),
       ),
     ),
   );
+}
+
+class _BadgeSection extends StatelessWidget {
+  final String title;
+  final AppBadgeVariant variant;
+
+  const _BadgeSection({required this.title, required this.variant});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(title,
+            style: AppTypography.h5.copyWith(color: AppColors.crystalWhite)),
+        const SizedBox(height: 16),
+        Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          alignment: WrapAlignment.center,
+          children: AppBadgeColor.values
+              .map(
+                (color) => AppBadge(
+                  text: color.name,
+                  variant: variant,
+                  color: color,
+                ),
+              )
+              .toList(),
+        ),
+      ],
+    );
+  }
 }

@@ -76,7 +76,10 @@ class AppModuleCard extends StatelessWidget {
               top: 12,
               left: 12,
               child: AppBadge(
-                  text: category, variant: AppBadgeVariant.defaultVariant),
+                text: category,
+                variant: AppBadgeVariant.solid,
+                color: AppBadgeColor.brand,
+              ),
             ),
             Positioned(
               bottom: 12,
@@ -137,7 +140,8 @@ class AppModuleCard extends StatelessWidget {
             Positioned(
               top: 12,
               left: 12,
-              child: AppBadge(text: category, fontSize: 8),
+              child: AppBadge(
+                  text: category, fontSize: 8, color: AppBadgeColor.brand),
             ),
             Positioned(
               bottom: 12,
@@ -198,7 +202,7 @@ class AppModuleCard extends StatelessWidget {
             Positioned(
               top: 16,
               left: 16,
-              child: AppBadge(text: category),
+              child: AppBadge(text: category, color: AppBadgeColor.brand),
             ),
             Positioned(
               bottom: 16,
@@ -259,26 +263,17 @@ class AppModuleCard extends StatelessWidget {
             Positioned(
               top: 16,
               left: 16,
-              child: AppBadge(text: category),
+              child: AppBadge(text: category, color: AppBadgeColor.brand),
             ),
             if (badge != null)
               Positioned(
                 top: 16,
                 right: 16,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.forgeFire,
-                    borderRadius: BorderRadius.circular(100),
-                  ),
-                  child: Text(
-                    badge!,
-                    style: AppTypography.label.copyWith(
-                        color: AppColors.textMain,
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold),
-                  ),
+                child: AppBadge(
+                  text: badge!,
+                  fontSize: 9,
+                  color: AppBadgeColor.brand,
+                  shape: AppBadgeShape.pill,
                 ),
               ),
             Positioned(

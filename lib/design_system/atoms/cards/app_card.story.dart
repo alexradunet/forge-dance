@@ -55,3 +55,25 @@ Widget buildAppCardPlayground(BuildContext context) {
     ),
   );
 }
+
+@widgetbook.UseCase(
+  name: 'Loading State',
+  type: AppCard,
+  path: 'Design System/Atoms/AppCard',
+)
+Widget buildAppCardLoading(BuildContext context) {
+  return Scaffold(
+    backgroundColor: AppColors.bgDeep,
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: AppCard(
+          isLoading: true,
+          child: Container(
+              height:
+                  100), // Child should be ignored or hidden by isLoading logic
+        ),
+      ),
+    ),
+  );
+}

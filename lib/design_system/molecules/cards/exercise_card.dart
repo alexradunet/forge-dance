@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../design_system/tokens/app_colors.dart';
 import '../../../design_system/tokens/app_spacing.dart';
 import '../../../design_system/tokens/app_typography.dart';
-import '../../atoms/badges/difficulty_badge.dart';
+import '../../atoms/badges/app_badge.dart';
 import '../../../features/common/ui/widgets/material_ink_well.dart';
 
 /// Exercise card molecule - Library card variant for exercise items
@@ -92,10 +92,13 @@ class ExerciseCard extends StatelessWidget {
                         ],
                       ],
                       if (level != null)
-                        DifficultyBadge(
-                          level: _getDifficultyLevel(level!),
-                          isOutlined: false,
-                        ),
+                        if (level != null)
+                          AppBadge(
+                            text: _getBadgeText(level!),
+                            color: _getBadgeColor(level!),
+                            variant: AppBadgeVariant.solid,
+                            shape: AppBadgeShape.pill,
+                          ),
                     ],
                   ),
                   if (duration != null) ...[
@@ -150,9 +153,15 @@ class ExerciseCard extends StatelessWidget {
     );
   }
 
-  DifficultyLevel _getDifficultyLevel(int level) {
-    if (level <= 2) return DifficultyLevel.beginner;
-    if (level <= 4) return DifficultyLevel.intermediate;
-    return DifficultyLevel.advanced;
+  AppBadgeColor _getBadgeColor(int level) {
+    if (level <= 2) return AppBadgeColor.success;
+    if (level <= 4) return AppBadgeColor.warning;
+    return AppBadgeColor.brand;
+  }
+
+  String _getBadgeText(int level) {
+    if (level <= 2) return 'BEG';
+    if (level <= 4) return 'INT';
+    return 'ADV';
   }
 }

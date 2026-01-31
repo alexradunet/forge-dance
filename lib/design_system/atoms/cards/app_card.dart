@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_border_radius.dart';
@@ -15,6 +16,7 @@ class AppCard extends StatelessWidget {
   final List<BoxShadow>? boxShadow;
   final bool hasGlow;
   final VoidCallback? onTap;
+  final bool isLoading;
 
   const AppCard({
     super.key,
@@ -26,6 +28,7 @@ class AppCard extends StatelessWidget {
     this.boxShadow,
     this.hasGlow = false,
     this.onTap,
+    this.isLoading = false,
   });
 
   @override
@@ -42,7 +45,28 @@ class AppCard extends StatelessWidget {
         border: border ?? Border.all(color: AppColors.neutral800, width: 1),
         boxShadow: cardBoxShadow,
       ),
-      child: child,
+      child: isLoading
+          ? Shimmer.fromColors(
+              baseColor: AppColors.gray800,
+              highlightColor: AppColors.gray700,
+              period: const Duration(milliseconds: 1500),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: double.infinity,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      color: AppColors.gray800,
+                      borderRadius:
+                          BorderRadius.circular(AppBorderRadius.lg - 2),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : child,
     );
 
     if (onTap != null) {

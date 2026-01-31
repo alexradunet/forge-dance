@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../design_system/tokens/app_colors.dart';
 import '../../../design_system/tokens/app_spacing.dart';
 import '../../../design_system/tokens/app_typography.dart';
-import '../../atoms/badges/difficulty_badge.dart';
+import '../../atoms/badges/app_badge.dart';
 
 /// Module card molecule - Type X (2:3 aspect), Type XX (2:1), Type Double (square)
 class ModuleCard extends StatelessWidget {
@@ -25,6 +25,25 @@ class ModuleCard extends StatelessWidget {
     this.type = ModuleCardType.x,
     this.onTap,
   });
+
+  DifficultyLevel _getDifficultyLevel(DifficultyLevel? difficulty) {
+    return difficulty ?? DifficultyLevel.beginner;
+  }
+
+  AppBadgeColor _getBadgeColor(DifficultyLevel difficulty) {
+    switch (difficulty) {
+      case DifficultyLevel.beginner:
+        return AppBadgeColor.success;
+      case DifficultyLevel.intermediate:
+        return AppBadgeColor.warning;
+      case DifficultyLevel.advanced:
+        return AppBadgeColor.brand;
+    }
+  }
+
+  String _getBadgeText(DifficultyLevel difficulty) {
+    return difficulty.name.toUpperCase().substring(0, 3);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -86,9 +105,11 @@ class ModuleCard extends StatelessWidget {
                     if (difficulty != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                        child: DifficultyBadge(
-                          level: difficulty!,
-                          isOutlined: false,
+                        child: AppBadge(
+                          text: _getBadgeText(difficulty!),
+                          color: _getBadgeColor(difficulty!),
+                          variant: AppBadgeVariant.solid,
+                          shape: AppBadgeShape.pill,
                         ),
                       ),
                     Text(
@@ -168,9 +189,11 @@ class ModuleCard extends StatelessWidget {
                     if (difficulty != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                        child: DifficultyBadge(
-                          level: difficulty!,
-                          isOutlined: true,
+                        child: AppBadge(
+                          text: _getBadgeText(difficulty!),
+                          color: _getBadgeColor(difficulty!),
+                          variant: AppBadgeVariant.outline,
+                          shape: AppBadgeShape.pill,
                         ),
                       ),
                     Text(
@@ -250,9 +273,11 @@ class ModuleCard extends StatelessWidget {
                     if (difficulty != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                        child: DifficultyBadge(
-                          level: difficulty!,
-                          isOutlined: false,
+                        child: AppBadge(
+                          text: _getBadgeText(difficulty!),
+                          color: _getBadgeColor(difficulty!),
+                          variant: AppBadgeVariant.solid,
+                          shape: AppBadgeShape.pill,
                         ),
                       ),
                     Text(
@@ -289,4 +314,10 @@ enum ModuleCardType {
   x, // 2:3 aspect
   xx, // 2:1 aspect
   double, // 1:1 aspect (square)
+}
+
+enum DifficultyLevel {
+  beginner,
+  intermediate,
+  advanced,
 }

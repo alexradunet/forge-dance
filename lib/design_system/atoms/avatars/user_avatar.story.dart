@@ -70,3 +70,26 @@ Widget buildUserAvatarWithNotifications(BuildContext context) {
     ),
   );
 }
+
+@widgetbook.UseCase(
+  name: 'Loading State',
+  type: UserAvatar,
+  path: 'Design System/Atoms/Avatars',
+)
+Widget buildUserAvatarLoading(BuildContext context) {
+  return const Scaffold(
+    backgroundColor: AppColors.bgDeep,
+    body: Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          UserAvatar(isLoading: true, size: 40),
+          SizedBox(width: 16),
+          UserAvatar(isLoading: true, size: 56),
+          SizedBox(width: 16),
+          UserAvatar(isLoading: true, size: 80),
+        ],
+      ),
+    ),
+  );
+}

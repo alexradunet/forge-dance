@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_spacing.dart';
 import '../../../../design_system/tokens/app_typography.dart';
-import '../buttons/primary_button.dart';
+import '../buttons/app_button.dart';
 
 /// Empty state atom - With icon, title, description, and optional CTA
 class EmptyState extends StatelessWidget {
@@ -79,9 +79,10 @@ class EmptyState extends StatelessWidget {
             const SizedBox(height: AppSpacing.xxl),
             SizedBox(
               width: 200,
-              child: PrimaryButton(
+              child: AppButton(
                 text: actionLabel!,
                 onPressed: onAction,
+                variant: AppButtonVariant.primary,
                 icon: const Icon(
                   Icons.local_fire_department,
                   size: 20,

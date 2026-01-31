@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_spacing.dart';
@@ -13,6 +14,7 @@ class UserAvatar extends StatelessWidget {
   final int? notificationCount;
   final double size;
   final Color? borderColor;
+  final bool isLoading;
 
   const UserAvatar({
     super.key,
@@ -23,6 +25,7 @@ class UserAvatar extends StatelessWidget {
     this.notificationCount,
     this.size = 56,
     this.borderColor,
+    this.isLoading = false,
   });
 
   const UserAvatar.large({
@@ -34,6 +37,7 @@ class UserAvatar extends StatelessWidget {
     this.notificationCount,
     this.size = 80,
     this.borderColor,
+    this.isLoading = false,
   });
 
   const UserAvatar.medium({
@@ -45,6 +49,7 @@ class UserAvatar extends StatelessWidget {
     this.notificationCount,
     this.size = 56,
     this.borderColor,
+    this.isLoading = false,
   });
 
   const UserAvatar.small({
@@ -56,10 +61,27 @@ class UserAvatar extends StatelessWidget {
     this.notificationCount,
     this.size = 40,
     this.borderColor,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return Shimmer.fromColors(
+        baseColor: AppColors.gray800,
+        highlightColor: AppColors.gray700,
+        period: const Duration(milliseconds: 1500),
+        child: Container(
+          width: size,
+          height: size,
+          decoration: const BoxDecoration(
+            color: AppColors.gray800,
+            shape: BoxShape.circle,
+          ),
+        ),
+      );
+    }
+
     final border = borderColor ?? AppColors.forgeFire;
     final borderWidth = size > 60 ? 3.0 : 2.0;
 

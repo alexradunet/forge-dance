@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../design_system/tokens/app_colors.dart';
 import '../../../design_system/tokens/app_spacing.dart';
 import '../../../design_system/tokens/app_typography.dart';
-import '../../atoms/buttons/icon_button.dart';
+import '../../atoms/buttons/app_button.dart';
 
 /// Stepper control molecule - For numeric adjustments
 class StepperControl extends StatefulWidget {
@@ -76,7 +76,9 @@ class _StepperControlState extends State<StepperControl> {
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                widget.unit != null ? '${widget.label} ${widget.unit}' : widget.label,
+                widget.unit != null
+                    ? '${widget.label} ${widget.unit}'
+                    : widget.label,
                 style: AppTheme.h5.copyWith(
                   color: AppColors.crystalWhite,
                 ),
@@ -92,12 +94,13 @@ class _StepperControlState extends State<StepperControl> {
             ),
             child: Row(
               children: [
-                IconButtonAtom(
-                  icon: Icons.remove,
+                AppButton(
+                  icon: const Icon(Icons.remove),
                   onPressed: _decrement,
                   backgroundColor: AppColors.gray800,
-                  iconColor: AppColors.crystalWhite,
-                  size: 40,
+                  textColor: AppColors.crystalWhite,
+                  size: AppButtonSize.md,
+                  shape: AppButtonShape.circle,
                 ),
                 Container(
                   width: 48,
@@ -110,12 +113,13 @@ class _StepperControlState extends State<StepperControl> {
                     ),
                   ),
                 ),
-                IconButtonAtom(
-                  icon: Icons.add,
+                AppButton(
+                  icon: const Icon(Icons.add),
                   onPressed: _increment,
                   backgroundColor: AppColors.gray800,
-                  iconColor: AppColors.crystalWhite,
-                  size: 40,
+                  textColor: AppColors.crystalWhite,
+                  size: AppButtonSize.md,
+                  shape: AppButtonShape.circle,
                 ),
               ],
             ),

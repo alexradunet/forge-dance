@@ -24,7 +24,12 @@ Widget buildAppButtonPlayground(BuildContext context) {
         size: context.knobs.list(
           label: 'Size',
           options: AppButtonSize.values,
-          initialOption: AppButtonSize.defaultSize,
+          initialOption: AppButtonSize.md,
+        ),
+        shape: context.knobs.listOrNull(
+          label: 'Shape',
+          options: AppButtonShape.values,
+          initialOption: null,
         ),
         isLoading:
             context.knobs.boolean(label: 'Is Loading', initialValue: false),
@@ -89,13 +94,56 @@ Widget buildAppButtonAllSizes(BuildContext context) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
             child: AppButton(
-              text: size == AppButtonSize.icon ? null : 'Size ${size.name}',
+              text: 'Size ${size.name}',
               icon: const Icon(Icons.add),
               size: size,
               onPressed: () {},
             ),
           );
         }).toList(),
+      ),
+    ),
+  );
+}
+
+@widgetbook.UseCase(
+  name: 'FAB & Icon Buttons',
+  type: AppButton,
+  path: 'Design System/Atoms/AppButton',
+)
+Widget buildAppButtonFabIcon(BuildContext context) {
+  return Scaffold(
+    backgroundColor: AppColors.bgDeep,
+    body: Center(
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // FAB
+          AppButton(
+            icon: const Icon(Icons.add),
+            size: AppButtonSize.xl,
+            shape: AppButtonShape.circle,
+            variant: AppButtonVariant.primary,
+            onPressed: () {},
+          ),
+          const SizedBox(width: 24),
+          // Icon Button
+          AppButton(
+            icon: const Icon(Icons.settings),
+            size: AppButtonSize.md,
+            shape: AppButtonShape.circle,
+            variant: AppButtonVariant.secondary,
+            onPressed: () {},
+          ),
+          const SizedBox(width: 24),
+          // Ghost Icon
+          AppButton(
+            icon: const Icon(Icons.close),
+            size: AppButtonSize.md,
+            variant: AppButtonVariant.ghost,
+            onPressed: () {},
+          ),
+        ],
       ),
     ),
   );
