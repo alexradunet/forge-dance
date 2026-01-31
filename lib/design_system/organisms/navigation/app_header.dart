@@ -37,50 +37,62 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
             ? null
             : Border(bottom: BorderSide(color: Colors.white.withOpacity(0.05))),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          Row(
-            children: [
-              if (onBack != null) ...[
-                IconButton(
-                  icon: const Icon(Icons.arrow_back_ios,
-                      color: Colors.white, size: 20),
-                  onPressed: onBack,
-                ),
-                const SizedBox(width: 8),
-              ],
-              if (leftSlot != null) ...[
-                leftSlot!,
-                const SizedBox(width: AppSpacing.lg),
-              ],
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (subtitle != null)
-                    Text(
-                      subtitle!.toUpperCase(),
-                      style: AppTypography.label.copyWith(
-                        color: AppColors.textMuted,
-                        fontSize: 10,
-                        letterSpacing: 1.5,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  Text(
-                    title.toUpperCase(),
-                    style: AppTypography.h2.copyWith(
-                      color: AppColors.textMain,
-                      fontSize: 32,
-                      letterSpacing: 2,
-                    ),
+          // Left Slot (Back button + Custom Left)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (onBack != null) ...[
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back_ios,
+                        color: Colors.white, size: 20),
+                    onPressed: onBack,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                   ),
+                  const SizedBox(width: 16),
                 ],
+                if (leftSlot != null) leftSlot!,
+              ],
+            ),
+          ),
+
+          // Center Title
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (subtitle != null)
+                Text(
+                  subtitle!.toUpperCase(),
+                  style: AppTypography.label.copyWith(
+                    color: AppColors.textMuted,
+                    fontSize: 10,
+                    letterSpacing: 1.5,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              Text(
+                title.toUpperCase(),
+                style: AppTypography.h2.copyWith(
+                  color: AppColors.textMain,
+                  fontSize: 24, // Slightly smaller to fit center
+                  letterSpacing: 2,
+                ),
+                textAlign: TextAlign.center,
               ),
             ],
           ),
-          if (rightSlot != null) rightSlot!,
+
+          // Right Slot
+          if (rightSlot != null)
+            Align(
+              alignment: Alignment.centerRight,
+              child: rightSlot!,
+            ),
         ],
       ),
     );

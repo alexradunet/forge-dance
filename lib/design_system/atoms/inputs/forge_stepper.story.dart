@@ -45,22 +45,3 @@ Widget buildForgeStepperUnit(BuildContext context) {
     ),
   );
 }
-
-@widgetbook.UseCase(
-  name: 'Inline',
-  type: InlineForgeStepper,
-  path: 'Design System/Atoms/Inputs',
-)
-Widget buildInlineForgeStepper(BuildContext context) {
-  return Scaffold(
-    backgroundColor: AppColors.gray950,
-    body: Center(
-      child: InlineForgeStepper(
-        value: 3,
-        min: 1,
-        max: 10,
-        onChanged: (_) {},
-      ),
-    ),
-  );
-}

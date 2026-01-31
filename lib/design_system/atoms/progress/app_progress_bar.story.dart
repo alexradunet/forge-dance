@@ -68,27 +68,3 @@ Widget buildAppProgressBarSegmented(BuildContext context) {
     ),
   );
 }
-
-@widgetbook.UseCase(
-  name: 'Variants',
-  type: AppProgressBar,
-  path: 'Design System/Atoms/AppProgressBar',
-)
-Widget buildAppProgressBarVariants(BuildContext context) {
-  return Scaffold(
-    backgroundColor: AppColors.bgDeep,
-    body: Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const AppProgressBar(value: 0.3, color: AppColors.forgeFire),
-          const SizedBox(height: 16),
-          const AppProgressBar(value: 0.6, color: AppColors.electricBlue),
-          const SizedBox(height: 16),
-          const AppProgressBar(value: 0.8, color: AppColors.growthGreen),
-        ],
-      ),
-    ),
-  );
-}

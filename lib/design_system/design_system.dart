@@ -81,9 +81,6 @@ export 'organisms/navigation/bottom_nav_bar.dart';
 export 'organisms/modals/forge_bottom_sheet.dart';
 export 'organisms/modals/forge_alert_dialog.dart';
 
-// Lessons
-export 'organisms/lessons/theory_deck_card.dart';
-
 // Progress
 export 'organisms/progress/progress_section.dart';
 export 'organisms/progress/stats_breakdown.dart';
@@ -95,5 +92,5 @@ export 'organisms/workouts/featured_workout_card.dart';
 // TEMPLATES
 // ───────────────────────────────────────────────────────────
 
-export 'templates/home_dashboard_template.dart';
-export 'templates/full_height_card_template.dart';
+export 'templates/interactive_card_template.dart';
+export 'templates/swipeable_card_interactive_screen_template.dart';
