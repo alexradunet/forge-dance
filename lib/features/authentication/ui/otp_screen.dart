@@ -11,7 +11,7 @@ import '../../../extensions/build_context_extension.dart';
 import '../../../features/authentication/ui/view_model/authentication_view_model.dart';
 import 'package:go_router/go_router.dart';
 import '../../../design_system/tokens/app_colors.dart';
-import '../../../design_system/atoms/buttons/app_button.dart';
+import '../../../design_system/atoms/buttons/fg_button.dart';
 import '../../../design_system/organisms/navigation/app_header.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../../design_system/tokens/app_typography.dart';
@@ -149,7 +149,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                           ).tr(args: ['$count']),
                         )
                       : const SizedBox(height: 68),
-                  AppButton(
+                  FgButton(
                     onPressed: otpController.text.length == 6
                         ? () => ref
                             .read(authenticationViewModelProvider.notifier)

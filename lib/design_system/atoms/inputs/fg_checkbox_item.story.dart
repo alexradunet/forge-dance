@@ -5,14 +5,14 @@ import 'package:flutter_mvvm_riverpod/design_system/design_system.dart';
 
 @widgetbook.UseCase(
   name: 'Checked',
-  type: FgCheckboxItem,
+  type: FgFgCheckboxItem,
   path: 'Design System/Atoms/Inputs',
 )
 Widget buildCheckboxChecked(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: FgCheckboxItem(
+      child: FgFgCheckboxItem(
         state: CheckboxState.checked,
         onTap: () {},
       ),
@@ -22,14 +22,14 @@ Widget buildCheckboxChecked(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'Unchecked',
-  type: FgCheckboxItem,
+  type: FgFgCheckboxItem,
   path: 'Design System/Atoms/Inputs',
 )
 Widget buildCheckboxUnchecked(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: FgCheckboxItem(
+      child: FgFgCheckboxItem(
         state: CheckboxState.unchecked,
         onTap: () {},
       ),
@@ -39,14 +39,14 @@ Widget buildCheckboxUnchecked(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'Indeterminate',
-  type: FgCheckboxItem,
+  type: FgFgCheckboxItem,
   path: 'Design System/Atoms/Inputs',
 )
 Widget buildCheckboxIndeterminate(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: FgCheckboxItem(
+      child: FgFgCheckboxItem(
         state: CheckboxState.indeterminate,
         onTap: () {},
       ),

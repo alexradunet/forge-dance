@@ -15,8 +15,8 @@ import '../../../main.dart';
 import '../../../routing/routes.dart';
 import '../../../utils/global_loading.dart';
 import '../../../utils/validator.dart';
-import '../../../design_system/atoms/buttons/app_button.dart';
-import '../../../design_system/atoms/inputs/app_input.dart';
+import '../../../design_system/atoms/buttons/fg_button.dart';
+import '../../../design_system/atoms/inputs/fg_input.dart';
 import '../../../design_system/organisms/navigation/app_header.dart';
 import '../../../design_system/tokens/app_typography.dart';
 import '../../../features/authentication/ui/view_model/authentication_view_model.dart';
@@ -120,12 +120,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 style: AppTypography.h1.copyWith(color: Colors.white),
               ),
               const SizedBox(height: 24),
-              AppInput(
+              FgInput(
                 label: 'Email',
                 controller: _emailController,
               ),
               const SizedBox(height: 32),
-              AppButton(
+              FgButton(
                 onPressed: _isEmailValid
                     ? () {
                         ref

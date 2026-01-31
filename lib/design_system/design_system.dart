@@ -39,6 +39,7 @@ export 'atoms/inputs/fg_radio_button.dart';
 export 'atoms/inputs/fg_checkbox_item.dart';
 export 'atoms/inputs/fg_slider.dart';
 export 'atoms/inputs/fg_stepper.dart';
+export 'atoms/icons/fg_icon.dart';
 
 // ───────────────────────────────────────────────────────────
 // MOLECULES

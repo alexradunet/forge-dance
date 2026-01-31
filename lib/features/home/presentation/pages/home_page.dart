@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_typography.dart';
-import '../../../../design_system/atoms/progress/app_progress_bar.dart';
-import '../../../../design_system/atoms/app_icon.dart';
+import '../../../../design_system/atoms/progress/fg_progress_bar.dart';
+import '../../../../design_system/atoms/fg_icon.dart';
 import '../../../../design_system/molecules/cards/app_module_card.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/tokens/app_shadows.dart';
@@ -138,7 +138,7 @@ class HomePage extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          const AppIcon(
+          const FgIcon(
               icon: Icons.notifications_none, size: 20, color: Colors.white),
           Positioned(
             top: 12,
@@ -194,7 +194,7 @@ class HomePage extends StatelessWidget {
                             border: Border.all(
                                 color: Colors.white.withOpacity(0.05)),
                           ),
-                          child: const AppIcon(
+                          child: const FgIcon(
                             icon: Icons.local_fire_department,
                             color: AppColors.forgeFire,
                             size: 20,
@@ -228,7 +228,7 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 20),
-                const AppProgressBar(value: 0.82, height: 10),
+                const FgProgressBar(value: 0.82, height: 10),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

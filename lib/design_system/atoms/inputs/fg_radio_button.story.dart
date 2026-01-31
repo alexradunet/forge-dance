@@ -5,14 +5,14 @@ import 'package:flutter_mvvm_riverpod/design_system/design_system.dart';
 
 @widgetbook.UseCase(
   name: 'Selected',
-  type: FgRadioButton,
+  type: FgFgRadioButton,
   path: 'Design System/Atoms/Inputs',
 )
-Widget buildFgRadioButtonSelected(BuildContext context) {
+Widget buildFgFgRadioButtonSelected(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: FgRadioButton(
+      child: FgFgRadioButton(
         isSelected: true,
         onTap: () {},
       ),
@@ -22,14 +22,14 @@ Widget buildFgRadioButtonSelected(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'Unselected',
-  type: FgRadioButton,
+  type: FgFgRadioButton,
   path: 'Design System/Atoms/Inputs',
 )
-Widget buildFgRadioButtonUnselected(BuildContext context) {
+Widget buildFgFgRadioButtonUnselected(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: FgRadioButton(
+      child: FgFgRadioButton(
         isSelected: false,
         onTap: () {},
       ),

@@ -3,7 +3,7 @@ import '../../../../design_system/tokens/app_colors.dart';
 
 import '../../../../design_system/molecules/cards/app_module_card.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
-import '../../../../design_system/atoms/app_icon.dart';
+import '../../../../design_system/atoms/fg_icon.dart';
 
 class ExplorePage extends StatefulWidget {
   final Function(String)? onNavigate;
@@ -166,7 +166,7 @@ class _ExplorePageState extends State<ExplorePage> {
       ),
       child: Row(
         children: [
-          const AppIcon(icon: Icons.search, color: AppColors.textMuted),
+          const FgIcon(icon: Icons.search, color: AppColors.textMuted),
           const SizedBox(width: 12),
           Expanded(
             child: TextField(
@@ -190,7 +190,7 @@ class _ExplorePageState extends State<ExplorePage> {
                 color: Colors.white.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: const AppIcon(
+              child: const FgIcon(
                   icon: Icons.tune, color: AppColors.textMuted, size: 20),
             ),
           ),

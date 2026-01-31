@@ -8,7 +8,7 @@ import '../../../../design_system/organisms/cards/app_workout_intro_card.dart';
 import '../../../../design_system/organisms/cards/app_session_complete_card.dart';
 import '../../../../design_system/organisms/cards/app_interactive_card_deck.dart';
 import '../../../../design_system/organisms/cards/app_beat_tap_card.dart';
-import '../../../../design_system/atoms/buttons/app_button.dart';
+import '../../../../design_system/atoms/buttons/fg_button.dart';
 
 enum TrainingSessionState { intro, active, complete }
 
@@ -110,9 +110,9 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
   Widget _buildFloatingAction() {
     switch (_state) {
       case TrainingSessionState.intro:
-        return AppButton(
+        return FgButton(
           text: 'START WORKOUT',
-          variant: AppButtonVariant.primary,
+          variant: FgButtonVariant.primary,
           width: double.infinity,
           onPressed: _startWorkout,
         );
@@ -120,17 +120,17 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
         final isLast = _currentExercise == _totalExercises - 1;
         return AppFloatingActionBar(
           children: [
-            AppButton(
+            FgButton(
               text: 'PREV',
-              variant: AppButtonVariant.ghost,
+              variant: FgButtonVariant.ghost,
               isEnabled: _currentExercise > 0,
               onPressed: () {
                 // In a real app, this would control the deck
               },
             ),
-            AppButton(
+            FgButton(
               text: isLast ? 'FINISH' : 'NEXT',
-              variant: AppButtonVariant.primary,
+              variant: FgButtonVariant.primary,
               onPressed: isLast
                   ? _finishWorkout
                   : () {
@@ -140,9 +140,9 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
           ],
         );
       case TrainingSessionState.complete:
-        return AppButton(
+        return FgButton(
           text: 'BACK TO HOME',
-          variant: AppButtonVariant.primary,
+          variant: FgButtonVariant.primary,
           width: double.infinity,
           onPressed: () {
             if (widget.onClose != null) {

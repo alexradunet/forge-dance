@@ -8,8 +8,8 @@ import '../../../constants/assets.dart';
 import '../../../features/authentication/ui/view_model/authentication_view_model.dart';
 import '../../../features/authentication/ui/widgets/horizontal_divider.dart';
 import '../../../features/authentication/ui/widgets/social_sign_in.dart';
-import '../../../design_system/atoms/buttons/app_button.dart';
-import '../../../design_system/atoms/inputs/app_input.dart';
+import '../../../design_system/atoms/buttons/fg_button.dart';
+import '../../../design_system/atoms/inputs/fg_input.dart';
 import '../../../design_system/organisms/navigation/app_header.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../../routing/routes.dart';
@@ -71,12 +71,12 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                     style: AppTypography.h1.copyWith(color: Colors.white),
                   ),
                   const SizedBox(height: 24),
-                  AppInput(
+                  FgInput(
                     label: 'Email',
                     controller: _emailController,
                   ),
                   const SizedBox(height: 32),
-                  AppButton(
+                  FgButton(
                     onPressed: _isEmailValid
                         ? () {
                             ref
