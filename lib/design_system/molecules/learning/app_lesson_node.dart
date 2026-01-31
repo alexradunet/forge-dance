@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
-import '../../atoms/fg_icon.dart';
+import '../../atoms/icons/fg_icon.dart';
 
 enum AppLessonNodeType { theory, movement, drill, experiment }
 

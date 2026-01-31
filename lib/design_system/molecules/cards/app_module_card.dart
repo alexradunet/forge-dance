@@ -6,7 +6,7 @@ import '../../tokens/app_typography.dart';
 import '../../atoms/badges/fg_badge.dart';
 import '../../atoms/progress/fg_progress_bar.dart';
 import '../../atoms/buttons/fg_button.dart';
-import '../../atoms/fg_icon.dart';
+import '../../atoms/icons/fg_icon.dart';
 
 enum AppModuleCardType {
   small,

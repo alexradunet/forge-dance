@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'app_interactive_card.dart';
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
-import '../../atoms/fg_icon.dart';
+import '../../atoms/icons/fg_icon.dart';
 
 class AppAtomicCard extends StatelessWidget {
   final String title;

@@ -3,7 +3,7 @@ import '../../../../design_system/tokens/app_colors.dart';
 
 import '../../../../design_system/molecules/cards/app_module_card.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
-import '../../../../design_system/atoms/fg_icon.dart';
+import '../../../../design_system/atoms/icons/fg_icon.dart';
 
 class ExplorePage extends StatefulWidget {
   final Function(String)? onNavigate;
