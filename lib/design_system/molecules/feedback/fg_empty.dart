@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../../../../design_system/tokens/app_colors.dart';
-import '../../../../design_system/tokens/app_spacing.dart';
-import '../../../../design_system/tokens/app_typography.dart';
-import '../buttons/fg_button.dart';
+import '../../tokens/app_colors.dart';
+import '../../tokens/app_spacing.dart';
+import '../../tokens/app_typography.dart';
+import '../../atoms/buttons/fg_button.dart';
 
 /// Empty state atom - With icon, title, description, and optional CTA
 class FgEmpty extends StatelessWidget {

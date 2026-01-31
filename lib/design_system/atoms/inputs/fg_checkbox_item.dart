@@ -13,12 +13,12 @@ enum CheckboxState {
 
 /// Checkbox atom - Multi-selection control with check icon and glow effect
 /// Based on HTML mockup: forge.dance_home_dashboard_7 (03. Checkboxes)
-class FgFgCheckboxItem extends StatelessWidget {
+class FgCheckboxItem extends StatelessWidget {
   final CheckboxState state;
   final VoidCallback? onTap;
   final bool isEnabled;
 
-  const FgFgCheckboxItem({
+  const FgCheckboxItem({
     super.key,
     required this.state,
     this.onTap,
@@ -26,13 +26,13 @@ class FgFgCheckboxItem extends StatelessWidget {
   });
 
   /// Convenience constructor for simple boolean checked state
-  factory FgFgCheckboxItem.simple({
+  factory FgCheckboxItem.simple({
     Key? key,
     required bool isChecked,
     VoidCallback? onTap,
     bool isEnabled = true,
   }) {
-    return FgFgCheckboxItem(
+    return FgCheckboxItem(
       key: key,
       state: isChecked ? CheckboxState.checked : CheckboxState.unchecked,
       onTap: onTap,
@@ -121,7 +121,7 @@ class CheckboxListItem extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            FgFgCheckboxItem(
+            FgCheckboxItem(
               state: state,
               isEnabled: isEnabled,
             ),

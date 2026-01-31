@@ -14,8 +14,13 @@ export 'tokens/tokens.dart';
 // ───────────────────────────────────────────────────────────
 
 // Buttons
+// Buttons
 export 'atoms/buttons/fg_button.dart';
+export 'atoms/buttons/fg_icon_button.dart';
+export 'atoms/buttons/fg_filter_chip.dart';
 export 'atoms/badges/fg_badge.dart';
+export 'atoms/badges/fg_level_badge.dart';
+export 'atoms/branding/fg_logo.dart';
 
 // Progress
 export 'atoms/progress/fg_progress_bar.dart';
@@ -29,9 +34,6 @@ export 'atoms/status/fg_status_dot.dart';
 // Dividers
 export 'atoms/dividers/fg_divider.dart';
 
-// Empty States
-export 'atoms/empty_states/fg_empty.dart';
-
 // Inputs
 export 'atoms/inputs/fg_input.dart';
 export 'atoms/inputs/fg_toggle.dart';
@@ -39,6 +41,13 @@ export 'atoms/inputs/fg_radio_button.dart';
 export 'atoms/inputs/fg_checkbox_item.dart';
 export 'atoms/inputs/fg_slider.dart';
 export 'atoms/inputs/fg_stepper.dart';
+
+// Visuals
+export 'atoms/visuals/fg_glass_container.dart';
+export 'atoms/visuals/fg_gradient_overlay.dart';
+export 'atoms/visuals/fg_shimmer.dart';
+
+// Icons
 export 'atoms/icons/fg_icon.dart';
 
 // ───────────────────────────────────────────────────────────
@@ -70,6 +79,7 @@ export 'molecules/inputs/radio_group.dart';
 
 // Feedback
 export 'molecules/feedback/toast_notification.dart';
+export 'molecules/feedback/fg_empty.dart';
 
 // ───────────────────────────────────────────────────────────
 // ORGANISMS

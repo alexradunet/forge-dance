@@ -6,12 +6,12 @@ import '../../tokens/app_sizes.dart';
 
 /// Radio button atom - Single selection control with glow effect
 /// Based on HTML mockup: forge.dance_home_dashboard_7 (02. Radio Buttons)
-class FgFgRadioButton extends StatelessWidget {
+class FgRadioButton extends StatelessWidget {
   final bool isSelected;
   final VoidCallback? onTap;
   final bool isEnabled;
 
-  const FgFgRadioButton({
+  const FgRadioButton({
     super.key,
     required this.isSelected,
     this.onTap,
@@ -122,7 +122,7 @@ class RadioListItem extends StatelessWidget {
                         : AppColors.neutral600,
               ),
             ),
-            FgFgRadioButton(
+            FgRadioButton(
               isSelected: isSelected,
               isEnabled: isEnabled,
             ),

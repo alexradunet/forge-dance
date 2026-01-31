@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
-import '../../tokens/app_spacing.dart';
 
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;

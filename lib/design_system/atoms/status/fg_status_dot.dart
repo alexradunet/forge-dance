@@ -3,12 +3,12 @@ import 'package:flutter/material.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 
 /// Status dot atom - Animated ping effect for live status
-class FgFgStatusDot extends StatefulWidget {
+class FgStatusDot extends StatefulWidget {
   final bool isLive;
   final Color? color;
   final double size;
 
-  const FgFgStatusDot({
+  const FgStatusDot({
     super.key,
     this.isLive = true,
     this.color,
@@ -16,10 +16,10 @@ class FgFgStatusDot extends StatefulWidget {
   });
 
   @override
-  State<FgFgStatusDot> createState() => _FgFgStatusDotState();
+  State<FgStatusDot> createState() => _FgStatusDotState();
 }
 
-class _FgFgStatusDotState extends State<FgFgStatusDot>
+class _FgStatusDotState extends State<FgStatusDot>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;

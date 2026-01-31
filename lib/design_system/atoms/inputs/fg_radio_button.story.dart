@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 import 'package:flutter_mvvm_riverpod/design_system/design_system.dart';
 
 @widgetbook.UseCase(
-  name: 'Selected',
-  type: FgFgRadioButton,
+  name: 'Playground',
+  type: FgRadioButton,
   path: 'Design System/Atoms/Inputs',
 )
-Widget buildFgFgRadioButtonSelected(BuildContext context) {
+Widget buildRadioButtonPlayground(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: FgFgRadioButton(
-        isSelected: true,
+      child: FgRadioButton(
+        isSelected:
+            context.knobs.boolean(label: 'Selected', initialValue: true),
+        isEnabled: context.knobs.boolean(label: 'Enabled', initialValue: true),
         onTap: () {},
       ),
     ),
@@ -21,50 +24,76 @@ Widget buildFgFgRadioButtonSelected(BuildContext context) {
 }
 
 @widgetbook.UseCase(
-  name: 'Unselected',
-  type: FgFgRadioButton,
+  name: 'Showcase',
+  type: FgRadioButton,
   path: 'Design System/Atoms/Inputs',
 )
-Widget buildFgFgRadioButtonUnselected(BuildContext context) {
+Widget buildRadioButtonShowcase(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
-    body: Center(
-      child: FgFgRadioButton(
-        isSelected: false,
-        onTap: () {},
+    body: SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _RadioSection(
+            title: 'Individual Buttons',
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const FgRadioButton(isSelected: false),
+                  const SizedBox(width: 32),
+                  const FgRadioButton(isSelected: true),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 48),
+          _RadioSection(
+            title: 'List Items',
+            children: [
+              RadioListItem(
+                label: 'Option 1 - Selected',
+                isSelected: true,
+                onTap: () {},
+              ),
+              const SizedBox(height: 8),
+              RadioListItem(
+                label: 'Option 2 - Unselected',
+                isSelected: false,
+                onTap: () {},
+              ),
+              const SizedBox(height: 8),
+              const RadioListItem(
+                label: 'Option 3 - Disabled',
+                isSelected: false,
+                isEnabled: false,
+              ),
+            ],
+          ),
+        ],
       ),
     ),
   );
 }
 
-@widgetbook.UseCase(
-  name: 'With List Item',
-  type: RadioListItem,
-  path: 'Design System/Atoms/Inputs',
-)
-Widget buildRadioListItem(BuildContext context) {
-  return Scaffold(
-    backgroundColor: AppColors.gray950,
-    body: Center(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            RadioListItem(
-              label: 'Option 1 - Selected',
-              isSelected: true,
-              onTap: () {},
-            ),
-            const SizedBox(height: 8),
-            RadioListItem(
-              label: 'Option 2 - Unselected',
-              isSelected: false,
-              onTap: () {},
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
+class _RadioSection extends StatelessWidget {
+  final String title;
+  final List<Widget> children;
+
+  const _RadioSection({required this.title, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(title,
+            style: AppTypography.h5.copyWith(color: AppColors.crystalWhite)),
+        const SizedBox(height: 24),
+        ...children,
+      ],
+    );
+  }
 }

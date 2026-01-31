@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-import 'package:flutter_mvvm_riverpod/design_system/atoms/buttons/fg_button.dart';
-import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
+import 'package:flutter_mvvm_riverpod/design_system/design_system.dart';
 
 @widgetbook.UseCase(
   name: 'Playground',
@@ -42,109 +41,91 @@ Widget buildFgButtonPlayground(BuildContext context) {
 }
 
 @widgetbook.UseCase(
-  name: 'All Variants',
+  name: 'Showcase',
   type: FgButton,
   path: 'Design System/Atoms',
 )
-Widget buildFgButtonAllVariants(BuildContext context) {
+Widget buildFgButtonShowcase(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.bgDeep,
     body: SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-      child: Center(
-        child: Column(
-          children: FgButtonVariant.values.map((variant) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: Column(
-                children: [
-                  Text(
-                    variant.name.toUpperCase(),
-                    style: const TextStyle(
-                        color: AppColors.textMain, fontSize: 10),
-                  ),
-                  const SizedBox(height: 8),
-                  FgButton(
-                    text: 'Button',
-                    variant: variant,
-                    onPressed: () {},
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-        ),
-      ),
-    ),
-  );
-}
-
-@widgetbook.UseCase(
-  name: 'All Sizes',
-  type: FgButton,
-  path: 'Design System/Atoms',
-)
-Widget buildFgButtonAllSizes(BuildContext context) {
-  return Scaffold(
-    backgroundColor: AppColors.bgDeep,
-    body: Center(
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: FgButtonSize.values.map((size) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: FgButton(
-              text: 'Size ${size.name}',
-              icon: const Icon(Icons.add),
-              size: size,
-              onPressed: () {},
-            ),
-          );
-        }).toList(),
-      ),
-    ),
-  );
-}
-
-@widgetbook.UseCase(
-  name: 'FAB & Icon Buttons',
-  type: FgButton,
-  path: 'Design System/Atoms',
-)
-Widget buildFgButtonFabIcon(BuildContext context) {
-  return Scaffold(
-    backgroundColor: AppColors.bgDeep,
-    body: Center(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // FAB
-          FgButton(
-            icon: const Icon(Icons.add),
-            size: FgButtonSize.xl,
-            shape: FgButtonShape.circle,
-            variant: FgButtonVariant.primary,
-            onPressed: () {},
+          _ButtonSection(
+            title: 'Variants',
+            children: FgButtonVariant.values.map((v) {
+              return FgButton(
+                  text: v.name.toUpperCase(), variant: v, onPressed: () {});
+            }).toList(),
           ),
-          const SizedBox(width: 24),
-          // Icon Button
-          FgButton(
-            icon: const Icon(Icons.settings),
-            size: FgButtonSize.md,
-            shape: FgButtonShape.circle,
-            variant: FgButtonVariant.secondary,
-            onPressed: () {},
+          const SizedBox(height: 48),
+          _ButtonSection(
+            title: 'Sizes',
+            children: FgButtonSize.values.map((s) {
+              return FgButton(
+                  text: s.name.toUpperCase(), size: s, onPressed: () {});
+            }).toList(),
           ),
-          const SizedBox(width: 24),
-          // Ghost Icon
-          FgButton(
-            icon: const Icon(Icons.close),
-            size: FgButtonSize.md,
-            variant: FgButtonVariant.ghost,
-            onPressed: () {},
+          const SizedBox(height: 48),
+          const _ButtonSection(
+            title: 'Special Types',
+            children: [
+              // FAB
+              FgButton(
+                icon: Icon(Icons.add),
+                size: FgButtonSize.xl,
+                shape: FgButtonShape.circle,
+                onPressed: null,
+              ),
+              // Pill
+              FgButton(
+                text: 'PILL SHAPE',
+                shape: FgButtonShape.pill,
+                onPressed: null,
+              ),
+              // Loading
+              FgButton(
+                text: 'LOADING',
+                isLoading: true,
+                onPressed: null,
+              ),
+              // Disabled
+              FgButton(
+                text: 'DISABLED',
+                isEnabled: false,
+                onPressed: null,
+              ),
+            ],
           ),
         ],
       ),
     ),
   );
+}
+
+class _ButtonSection extends StatelessWidget {
+  final String title;
+  final List<Widget> children;
+
+  const _ButtonSection({required this.title, required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(title,
+            style: AppTypography.h4
+                .copyWith(color: AppColors.crystalWhite, letterSpacing: 1.2)),
+        const SizedBox(height: 24),
+        Wrap(
+          spacing: 16,
+          runSpacing: 16,
+          alignment: WrapAlignment.center,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: children,
+        ),
+      ],
+    );
+  }
 }
