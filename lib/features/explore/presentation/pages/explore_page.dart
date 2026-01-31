@@ -64,6 +64,7 @@ class _ExplorePageState extends State<ExplorePage> {
                   completedLessons: 0,
                   totalLessons: 5,
                   type: AppModuleCardType.large,
+                  onTap: () => widget.onNavigate?.call('lesson-path'),
                 ),
               ],
             ),
@@ -82,6 +83,7 @@ class _ExplorePageState extends State<ExplorePage> {
                   completedLessons: 3,
                   totalLessons: 5,
                   type: AppModuleCardType.small,
+                  onTap: () => widget.onNavigate?.call('lesson-path'),
                 ),
                 const SizedBox(width: 16),
                 AppModuleCard(
@@ -93,6 +95,7 @@ class _ExplorePageState extends State<ExplorePage> {
                   completedLessons: 0,
                   totalLessons: 4,
                   type: AppModuleCardType.small,
+                  onTap: () => widget.onNavigate?.call('lesson-path'),
                 ),
                 const SizedBox(width: 16),
                 AppModuleCard(
@@ -104,6 +107,7 @@ class _ExplorePageState extends State<ExplorePage> {
                   completedLessons: 2,
                   totalLessons: 6,
                   type: AppModuleCardType.small,
+                  onTap: () => widget.onNavigate?.call('lesson-path'),
                 ),
               ],
             ),
@@ -122,6 +126,7 @@ class _ExplorePageState extends State<ExplorePage> {
                   completedLessons: 0,
                   totalLessons: 8,
                   type: AppModuleCardType.large,
+                  onTap: () => widget.onNavigate?.call('lesson-path'),
                 ),
                 const SizedBox(width: 16),
                 AppModuleCard(
@@ -133,6 +138,7 @@ class _ExplorePageState extends State<ExplorePage> {
                   completedLessons: 1,
                   totalLessons: 7,
                   type: AppModuleCardType.large,
+                  onTap: () => widget.onNavigate?.call('lesson-path'),
                 ),
               ],
             ),

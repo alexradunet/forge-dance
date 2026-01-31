@@ -6,14 +6,14 @@ import '../../../explore/presentation/pages/explore_page.dart';
 import '../../../learning/presentation/pages/learning_path_page.dart';
 import '../../../workout/presentation/pages/training_session_page.dart';
 
-class AppMainScreen extends StatefulWidget {
-  const AppMainScreen({super.key});
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
 
   @override
-  State<AppMainScreen> createState() => _AppMainScreenState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
-class _AppMainScreenState extends State<AppMainScreen> {
+class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 2; // Default to Home
   String? _subPage;
 
@@ -77,11 +77,26 @@ class _AppMainScreenState extends State<AppMainScreen> {
         ExplorePage(
           onNavigate: (page) {
             setState(() {
-              _subPage = page;
+              if (page == 'home') {
+                _currentIndex = 2;
+                _subPage = null;
+              } else {
+                _subPage = page;
+              }
             });
           },
         ),
-        const HomePage(),
+        HomePage(
+          onNavigate: (page) {
+            setState(() {
+              if (page == 'explore') {
+                _currentIndex = 1;
+              } else {
+                _subPage = page;
+              }
+            });
+          },
+        ),
         const Center(
             child: Text('Stats',
                 style: TextStyle(

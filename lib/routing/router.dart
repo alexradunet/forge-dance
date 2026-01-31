@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../features/authentication/ui/otp_screen.dart';
 import '../features/authentication/ui/sign_in_screen.dart';
 import '../features/authentication/ui/register_screen.dart';
-import '../features/main/ui/main_screen.dart';
+import '../features/main/presentation/pages/main_screen.dart';
 import '../features/onboarding/ui/onboarding_screen.dart';
 import '../features/onboarding/ui/splash_screen.dart';
 import '../features/premium/ui/premium_screen.dart';

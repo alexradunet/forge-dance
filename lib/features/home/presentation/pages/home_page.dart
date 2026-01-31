@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../../design_system/tokens/app_colors.dart';
-import '../../../../design_system/tokens/app_spacing.dart';
 import '../../../../design_system/tokens/app_typography.dart';
 import '../../../../design_system/atoms/progress/app_progress_bar.dart';
 import '../../../../design_system/atoms/app_icon.dart';
@@ -10,7 +9,9 @@ import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/tokens/app_shadows.dart';
 
 class HomePage extends StatelessWidget {
-  const HomePage({super.key});
+  final Function(String)? onNavigate;
+
+  const HomePage({super.key, this.onNavigate});
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +46,7 @@ class HomePage extends StatelessWidget {
                     'Build raw explosive strength and fast-twitch muscle response through dynamic intervals.',
                 duration: '45m',
                 badge: 'LIVE',
+                onTap: () => onNavigate?.call('training'),
               ),
             ),
           ),
@@ -59,7 +61,7 @@ class HomePage extends StatelessWidget {
             child: _buildHorizontalSection(
               title: 'CONTINUE TRAINING',
               children: [
-                const AppModuleCard(
+                AppModuleCard(
                   title: 'Hip Opener Flow',
                   category: 'MOBILITY',
                   imageUrl:
@@ -67,9 +69,10 @@ class HomePage extends StatelessWidget {
                   progress: 65,
                   completedLessons: 5,
                   totalLessons: 8,
+                  onTap: () => onNavigate?.call('lesson-path'),
                 ),
                 const SizedBox(width: 16),
-                const AppModuleCard(
+                AppModuleCard(
                   title: 'Isolation Drills',
                   category: 'BODY CONTROL',
                   imageUrl:
@@ -77,6 +80,7 @@ class HomePage extends StatelessWidget {
                   progress: 40,
                   completedLessons: 3,
                   totalLessons: 7,
+                  onTap: () => onNavigate?.call('lesson-path'),
                 ),
               ],
             ),
@@ -88,7 +92,7 @@ class HomePage extends StatelessWidget {
               title: 'RECOMMENDED FOR YOU',
               showViewAll: true,
               children: [
-                const AppModuleCard(
+                AppModuleCard(
                   title: 'Footwork Fundamentals',
                   category: 'TECHNIQUE',
                   imageUrl:
@@ -97,9 +101,10 @@ class HomePage extends StatelessWidget {
                   completedLessons: 0,
                   totalLessons: 6,
                   type: AppModuleCardType.small,
+                  onTap: () => onNavigate?.call('lesson-path'),
                 ),
                 const SizedBox(width: 16),
-                const AppModuleCard(
+                AppModuleCard(
                   title: 'Breaking Basics',
                   category: 'POWER MOVES',
                   imageUrl:
@@ -108,6 +113,7 @@ class HomePage extends StatelessWidget {
                   completedLessons: 0,
                   totalLessons: 7,
                   type: AppModuleCardType.small,
+                  onTap: () => onNavigate?.call('lesson-path'),
                 ),
               ],
             ),
@@ -262,12 +268,15 @@ class HomePage extends StatelessWidget {
                     .copyWith(color: AppColors.textMain, fontSize: 20),
               ),
               if (showViewAll)
-                Text(
-                  'VIEW ALL',
-                  style: AppTypography.label.copyWith(
-                    color: AppColors.forgeFire,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.2,
+                GestureDetector(
+                  onTap: () => onNavigate?.call('explore'),
+                  child: Text(
+                    'VIEW ALL',
+                    style: AppTypography.label.copyWith(
+                      color: AppColors.forgeFire,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.2,
+                    ),
                   ),
                 ),
             ],
