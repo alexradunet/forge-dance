@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-
 /// Forge.dance Design System Shadows
 /// Box shadows and glow effects from HTML mockups
 class AppShadows {
@@ -11,10 +10,10 @@ class AppShadows {
   // ═══════════════════════════════════════════════════════════
 
   /// Primary glow - Forge Fire orange glow
-  /// 0 0 20px rgba(255, 69, 0, 0.25)
+  /// 0 0 25px rgba(255, 69, 0, 0.4)
   static const glowPrimary = BoxShadow(
-    color: Color(0x40FF4500), // 25% opacity
-    blurRadius: 20,
+    color: Color(0x66FF4500), // 40% opacity
+    blurRadius: 25,
     spreadRadius: 0,
   );
 
@@ -27,11 +26,19 @@ class AppShadows {
   );
 
   /// Blue glow - Electric Blue accents
-  /// 0 0 20px rgba(0, 191, 255, 0.25)
+  /// 0 0 20px rgba(0, 191, 255, 0.3)
   static const glowBlue = BoxShadow(
-    color: Color(0x4000BFFF), // 25% opacity
+    color: Color(0x4D00BFFF), // 30% opacity
     blurRadius: 20,
     spreadRadius: 0,
+  );
+
+  /// Card shadow - generic dark card elevation
+  /// 0 4px 20px rgba(0, 0, 0, 0.5)
+  static const shadowCard = BoxShadow(
+    color: Color(0x80000000), // 50% opacity
+    blurRadius: 20,
+    offset: Offset(0, 4),
   );
 
   /// Gold glow - Legend Gold achievements

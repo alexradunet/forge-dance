@@ -1,0 +1,157 @@
+import 'package:flutter/material.dart';
+
+import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../design_system/molecules/navigation/app_floating_action_bar.dart';
+import '../../../../design_system/molecules/progress/app_progress_segments.dart';
+import '../../../../design_system/organisms/navigation/app_header.dart';
+import '../../../../design_system/organisms/cards/app_workout_intro_card.dart';
+import '../../../../design_system/organisms/cards/app_session_complete_card.dart';
+import '../../../../design_system/organisms/cards/app_interactive_card_deck.dart';
+import '../../../../design_system/organisms/cards/app_beat_tap_card.dart';
+import '../../../../design_system/atoms/buttons/app_button.dart';
+
+enum TrainingSessionState { intro, active, complete }
+
+class TrainingSessionPage extends StatefulWidget {
+  final VoidCallback? onClose;
+
+  const TrainingSessionPage({super.key, this.onClose});
+
+  @override
+  State<TrainingSessionPage> createState() => _TrainingSessionPageState();
+}
+
+class _TrainingSessionPageState extends State<TrainingSessionPage> {
+  TrainingSessionState _state = TrainingSessionState.intro;
+  int _currentExercise = 0;
+  final int _totalExercises = 5;
+
+  void _startWorkout() {
+    setState(() {
+      _state = TrainingSessionState.active;
+    });
+  }
+
+  void _finishWorkout() {
+    setState(() {
+      _state = TrainingSessionState.complete;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.bgDeep,
+      body: Stack(
+        children: [
+          Column(
+            children: [
+              AppHeader(
+                title: 'DAILY PRACTICE',
+                subtitle: _state == TrainingSessionState.complete
+                    ? 'Completed'
+                    : 'Today\'s WOD',
+              ),
+              if (_state == TrainingSessionState.active)
+                AppProgressSegments(
+                  total: _totalExercises,
+                  current: _currentExercise,
+                  isCumulative: true,
+                ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24),
+                  child: _buildMainContent(),
+                ),
+              ),
+              const SizedBox(height: 100), // Space for FAB
+            ],
+          ),
+          Positioned(
+            bottom: 24,
+            left: 24,
+            right: 24,
+            child: _buildFloatingAction(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMainContent() {
+    switch (_state) {
+      case TrainingSessionState.intro:
+        return const AppWorkoutIntroCard(
+          title: 'Body Control',
+          duration: '25 min',
+          intensity: 'Medium',
+          description:
+              'Master your movement with this fundamental sequence designed to improve awareness and stability.',
+        );
+      case TrainingSessionState.active:
+        return AppInteractiveCardDeck(
+          cards: List.generate(
+            _totalExercises,
+            (index) => AppBeatTapCard(
+              title: 'EXERCISE ${index + 1}',
+            ),
+          ),
+          onIndexChanged: (index) {
+            setState(() {
+              _currentExercise = index;
+            });
+          },
+        );
+      case TrainingSessionState.complete:
+        return const AppSessionCompleteCard();
+    }
+  }
+
+  Widget _buildFloatingAction() {
+    switch (_state) {
+      case TrainingSessionState.intro:
+        return AppButton(
+          text: 'START WORKOUT',
+          variant: AppButtonVariant.primary,
+          width: double.infinity,
+          onPressed: _startWorkout,
+        );
+      case TrainingSessionState.active:
+        final isLast = _currentExercise == _totalExercises - 1;
+        return AppFloatingActionBar(
+          children: [
+            AppButton(
+              text: 'PREV',
+              variant: AppButtonVariant.ghost,
+              isEnabled: _currentExercise > 0,
+              onPressed: () {
+                // In a real app, this would control the deck
+              },
+            ),
+            AppButton(
+              text: isLast ? 'FINISH' : 'NEXT',
+              variant: AppButtonVariant.primary,
+              onPressed: isLast
+                  ? _finishWorkout
+                  : () {
+                      // In a real app, this would control the deck
+                    },
+            ),
+          ],
+        );
+      case TrainingSessionState.complete:
+        return AppButton(
+          text: 'BACK TO HOME',
+          variant: AppButtonVariant.primary,
+          width: double.infinity,
+          onPressed: () {
+            if (widget.onClose != null) {
+              widget.onClose!();
+            } else {
+              Navigator.pop(context);
+            }
+          },
+        );
+    }
+  }
+}

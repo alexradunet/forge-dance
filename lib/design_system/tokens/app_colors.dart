@@ -10,76 +10,82 @@ class AppColors {
   // ═══════════════════════════════════════════════════════════
 
   /// 🔥 FORGE FIRE - Primary brand color, CTAs, highlights
-  /// #FF4500 - rgb(255, 69, 0)
+  /// #FF4500
   static const forgeFire = Color(0xFFFF4500);
+
+  /// Legacy variations (kept for compatibility)
   static const forgeFireDark = Color(0xFFDC3A00);
   static const forgeFireLight = Color(0xFFFF6B33);
 
   /// ⚡ ELECTRIC BLUE - Secondary actions, progress, energy
-  /// #00BFFF - rgb(0, 191, 255)
+  /// #00BFFF
   static const electricBlue = Color(0xFF00BFFF);
+
+  /// Legacy variations
   static const electricBlueDark = Color(0xFF0099CC);
   static const electricBlueLight = Color(0xFF33CCFF);
 
-  /// 💎 CRYSTAL WHITE - Text on dark backgrounds, highlights
-  /// #F0F8FF - rgb(240, 248, 255)
-  static const crystalWhite = Color(0xFFF0F8FF);
-
-  /// 🌑 STEEL GRAY - Primary background, surfaces
-  /// #2C2C2C - rgb(44, 44, 44)
-  static const steelGray = Color(0xFF2C2C2C);
-  static const steelGrayLight = Color(0xFF3A3A3A);
-
   /// 👑 LEGEND GOLD - Achievements, premium features
-  /// #FFD700 - rgb(255, 215, 0)
+  /// #FFD700
   static const legendGold = Color(0xFFFFD700);
 
-  // ═══════════════════════════════════════════════════════════
-  // ACCENT & UTILITY COLORS
-  // ═══════════════════════════════════════════════════════════
-
   /// ✨ MYSTIC PURPLE - Magic moments, special features
-  /// #8B00FF - rgb(139, 0, 255)
-  static const mysticPurple = Color(0xFF8B00FF);
-
-  /// 🌿 GROWTH GREEN - Success states, progress indicators
-  /// #10B981 - rgb(16, 185, 129)
-  static const growthGreen = Color(0xFF10B981);
-
-  /// ❤️ PASSION RED - High intensity, warnings
-  /// #DC143C - rgb(220, 20, 60)
-  static const passionRed = Color(0xFFDC143C);
-
-  /// ☀️ WARNING AMBER - Alerts, attention needed
-  /// #F59E0B - rgb(245, 158, 11)
-  static const warningAmber = Color(0xFFF59E0B);
+  /// #A855F7
+  static const mysticPurple = Color(0xFFA855F7);
 
   // ═══════════════════════════════════════════════════════════
-  // SURFACE & BACKGROUND COLORS (from HTML mockups)
+  // SURFACE & BACKGROUND COLORS
   // ═══════════════════════════════════════════════════════════
-
-  /// Surface Dark - Card backgrounds
-  /// #1E1E1E
-  static const surfaceDark = Color(0xFF1E1E1E);
-
-  /// Surface Light - Elevated surfaces
-  /// #2C2C2C
-  static const surfaceLight = Color(0xFF2C2C2C);
 
   /// Background Deep - App background
   /// #0A0A0A
   static const bgDeep = Color(0xFF0A0A0A);
 
-  /// Text Main - Primary text
+  /// Surface Dark
+  /// #121212
+  static const surfaceDark = Color(0xFF121212);
+
+  /// Surface Card
+  /// #1E1E1E
+  static const surfaceCard = Color(0xFF1E1E1E);
+
+  /// Surface Light
+  /// #2C2C2C
+  static const surfaceLight = Color(0xFF2C2C2C);
+
+  // ═══════════════════════════════════════════════════════════
+  // TEXT COLORS
+  // ═══════════════════════════════════════════════════════════
+
+  /// Text Main
   /// #FFFFFF
   static const textMain = Color(0xFFFFFFFF);
 
-  /// Text Muted - Secondary text
+  /// Text Muted
   /// #A1A1AA
   static const textMuted = Color(0xFFA1A1AA);
 
-  /// Border Subtle - Subtle borders
-  /// rgba(255,255,255,0.08)
+  /// Text Dark
+  /// #71717A
+  static const textDark = Color(0xFF71717A);
+
+  /// Legacy Crystal White (often used as Text Main or Highlight)
+  /// #F0F8FF
+  static const crystalWhite = Color(0xFFF0F8FF);
+
+  // ═══════════════════════════════════════════════════════════
+  // ACCENT & UTILITY COLORS (Legacy & Functional)
+  // ═══════════════════════════════════════════════════════════
+
+  /// 🌿 GROWTH GREEN - Success states, progress indicators
+  static const growthGreen = Color(0xFF10B981);
+
+  /// ❤️ PASSION RED - High intensity, warnings
+  static const passionRed = Color(0xFFDC143C);
+
+  /// ☀️ WARNING AMBER - Alerts, attention needed
+  static const warningAmber = Color(0xFFF59E0B);
+
   static const borderSubtle = Color(0x14FFFFFF);
 
   // ═══════════════════════════════════════════════════════════
@@ -88,11 +94,7 @@ class AppColors {
 
   /// 🎤 Hip Hop
   static const styleHipHop = Color(0xFF8B00FF);
-
-  /// Hip Hop Purple (alias for category tags)
-  static const hipHopPurple = Color(0xFFA855F7);
-
-  /// 🎇 Hip Hop Glow
+  static const hipHopPurple = Color(0xFFA855F7); // Alias/Variation
   static const hipHopGlow = Color(0xFFD946EF);
 
   /// 💃 Contemporary
@@ -106,45 +108,41 @@ class AppColors {
 
   /// 🔥 Latin
   static const styleLatin = Color(0xFFEF4444);
-
-  /// 💗 Latin Rose
   static const latinRose = Color(0xFFEC4899);
 
   /// 🌪️ Breaking
   static const styleBreaking = Color(0xFF10B981);
-
-  /// 💙 Breaking Blue
   static const breakingBlue = Color(0xFF3B82F6);
 
   // ═══════════════════════════════════════════════════════════
-  // NEUTRAL SCALE (from HTML mockups)
+  // NEUTRAL SCALE
   // ═══════════════════════════════════════════════════════════
 
-  static const neutral950 = Color(0xFF0A0A0A); // App background
-  static const neutral900 = Color(0xFF171717); // Dark surfaces
-  static const neutral800 = Color(0xFF262626); // Card surfaces
-  static const neutral700 = Color(0xFF404040); // Elevated borders
-  static const neutral600 = Color(0xFF525252); // Disabled elements
-  static const neutral500 = Color(0xFF737373); // Muted text
-  static const neutral400 = Color(0xFFA3A3A3); // Placeholder text
-  static const neutral300 = Color(0xFFD4D4D4); // Light borders
-  static const neutral200 = Color(0xFFE5E5E5); // Dividers
-  static const neutral100 = Color(0xFFF5F5F5); // Light surfaces
-  static const neutral50 = Color(0xFFF9FAFB); // High contrast text
+  static const neutral950 = Color(0xFF0A0A0A);
+  static const neutral900 = Color(0xFF171717);
+  static const neutral800 = Color(0xFF262626);
+  static const neutral700 = Color(0xFF404040);
+  static const neutral600 = Color(0xFF525252);
+  static const neutral500 = Color(0xFF737373);
+  static const neutral400 = Color(0xFFA3A3A3);
+  static const neutral300 = Color(0xFFD4D4D4);
+  static const neutral200 = Color(0xFFE5E5E5);
+  static const neutral100 = Color(0xFFF5F5F5);
+  static const neutral50 = Color(0xFFF9FAFB);
 
   // ═══════════════════════════════════════════════════════════
-  // LEGACY GRAY SCALE (for backwards compatibility mapping)
+  // LEGACY GRAY SCALE (Mapped to Neutral)
   // ═══════════════════════════════════════════════════════════
 
   static const gray950 = neutral950;
-  static const gray900 = Color(0xFF111827);
-  static const gray800 = Color(0xFF1F2937);
-  static const gray700 = Color(0xFF374151);
-  static const gray600 = Color(0xFF4B5563);
-  static const gray500 = Color(0xFF6B7280);
-  static const gray400 = Color(0xFF9CA3AF);
-  static const gray300 = Color(0xFFD1D5DB);
-  static const gray200 = Color(0xFFE5E7EB);
-  static const gray100 = Color(0xFFF3F4F6);
-  static const gray50 = Color(0xFFF9FAFB);
+  static const gray900 = neutral900;
+  static const gray800 = neutral800;
+  static const gray700 = neutral700;
+  static const gray600 = neutral600;
+  static const gray500 = neutral500;
+  static const gray400 = neutral400;
+  static const gray300 = neutral300;
+  static const gray200 = neutral200;
+  static const gray100 = neutral100;
+  static const gray50 = neutral50;
 }
