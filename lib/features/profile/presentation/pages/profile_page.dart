@@ -7,38 +7,40 @@ import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '/constants/constants.dart';
-import '/extensions/build_context_extension.dart';
-import '/extensions/profile_extension.dart';
-import '/generated/locale_keys.g.dart';
-import '/routing/routes.dart';
-import '/design_system/tokens/app_colors.dart';
-import '/utils/global_loading.dart';
+import '../../../../constants/constants.dart';
+import '../../../../extensions/build_context_extension.dart';
+import '../../../../generated/locale_keys.g.dart';
+import '../../../../routing/routes.dart';
+import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../utils/global_loading.dart';
 import '../../../../features/common/ui/widgets/common_dialog.dart';
-import '../model/profile.dart';
-import 'view_model/profile_view_model.dart';
-import 'widgets/profile_avatar.dart';
-import 'widgets/profile_stats.dart';
-import 'widgets/achievements_carousel.dart';
-import 'widgets/rewards_grid.dart';
-import 'widgets/profile_menu.dart';
+import '../../model/profile.dart';
+import '../../ui/view_model/profile_view_model.dart';
+import '../../ui/widgets/profile_avatar.dart';
+import '../../ui/widgets/profile_stats.dart';
+import '../../ui/widgets/achievements_carousel.dart';
+import '../../ui/widgets/rewards_grid.dart';
+import '../../ui/widgets/profile_menu.dart';
 
-/// Redesigned Profile Screen matching dashboard_1 mockup
-class ProfileScreenV2 extends ConsumerStatefulWidget {
-  const ProfileScreenV2({super.key});
+class ProfilePage extends ConsumerStatefulWidget {
+  const ProfilePage({super.key});
 
   @override
-  ConsumerState createState() => _ProfileScreenV2State();
+  ConsumerState createState() => _ProfilePageState();
 }
 
-class _ProfileScreenV2State extends ConsumerState<ProfileScreenV2> {
+class _ProfilePageState extends ConsumerState<ProfilePage> {
   var _version = '';
 
   // Mock data - replace with actual data from backend
   final List<Achievement> _achievements = const [
-    Achievement(name: 'Groove Master', icon: Icons.emoji_events, isUnlocked: true),
+    Achievement(
+        name: 'Groove Master', icon: Icons.emoji_events, isUnlocked: true),
     Achievement(name: 'Perfect Week', icon: Icons.stars, isUnlocked: true),
-    Achievement(name: 'Inferno Streak', icon: Icons.local_fire_department, isUnlocked: true),
+    Achievement(
+        name: 'Inferno Streak',
+        icon: Icons.local_fire_department,
+        isUnlocked: true),
     Achievement(name: 'Rhythm King', icon: Icons.music_note, isUnlocked: false),
   ];
 
@@ -72,12 +74,8 @@ class _ProfileScreenV2State extends ConsumerState<ProfileScreenV2> {
       backgroundColor: AppColors.bgDeep,
       body: Stack(
         children: [
-          // Background gradients
           _buildBackgroundGradients(),
-          // Main content
           _buildMainContent(profile),
-          // Bottom navigation (matching mockup)
-          _buildBottomNavBar(),
         ],
       ),
     );
@@ -131,15 +129,12 @@ class _ProfileScreenV2State extends ConsumerState<ProfileScreenV2> {
   Widget _buildMainContent(Profile? profile) {
     return CustomScrollView(
       slivers: [
-        // Header with title and settings
         SliverToBoxAdapter(
           child: _buildHeader(),
         ),
-        // Profile info
         SliverToBoxAdapter(
           child: _buildProfileInfo(profile),
         ),
-        // Stats grid
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -150,7 +145,6 @@ class _ProfileScreenV2State extends ConsumerState<ProfileScreenV2> {
             ),
           ),
         ),
-        // Achievements carousel
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.only(top: 32),
@@ -162,24 +156,21 @@ class _ProfileScreenV2State extends ConsumerState<ProfileScreenV2> {
             ),
           ),
         ),
-        // Recent rewards
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.only(top: 32),
             child: RewardsGrid(rewards: _rewards),
           ),
         ),
-        // Settings sections
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
             child: _buildSettingsMenu(profile),
           ),
         ),
-        // Version info and spacing for bottom nav
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 140),
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
             child: Center(
               child: Text(
                 'Version $_version',
@@ -230,9 +221,6 @@ class _ProfileScreenV2State extends ConsumerState<ProfileScreenV2> {
               color: AppColors.textMuted,
               size: 24,
             ),
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.transparent,
-            ),
           ),
         ],
       ),
@@ -251,7 +239,7 @@ class _ProfileScreenV2State extends ConsumerState<ProfileScreenV2> {
         const SizedBox(height: 20),
         Text(
           profile?.name ?? 'Alex "Pulse" Chen',
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.white,
@@ -345,136 +333,6 @@ class _ProfileScreenV2State extends ConsumerState<ProfileScreenV2> {
     );
   }
 
-  Widget _buildBottomNavBar() {
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      child: Container(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-        child: Container(
-          height: 84,
-          decoration: BoxDecoration(
-            color: const Color(0xFF121212).withOpacity(0.95),
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.1),
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.5),
-                blurRadius: 20,
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _buildNavItem(Icons.home, 'Home', false),
-              _buildNavItem(Icons.explore, 'Explore', false),
-              _buildIgniteButton(),
-              _buildNavItem(Icons.bar_chart, 'Stats', false),
-              _buildNavItem(Icons.person, 'Profile', true),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          size: 26,
-          color: isActive ? AppColors.forgeFire : AppColors.textMuted,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-            color: isActive ? AppColors.forgeFire : AppColors.textMuted,
-          ),
-        ),
-        if (isActive)
-          Container(
-            margin: const EdgeInsets.only(top: 4),
-            width: 4,
-            height: 4,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.forgeFire,
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.forgeFire.withOpacity(0.5),
-                  blurRadius: 8,
-                ),
-              ],
-            ),
-          )
-        else
-          const SizedBox(height: 8),
-      ],
-    );
-  }
-
-  Widget _buildIgniteButton() {
-    return Transform.translate(
-      offset: const Offset(0, -20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 72,
-            height: 72,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.forgeFire,
-                  const Color(0xFFE03E00),
-                ],
-              ),
-              border: Border.all(
-                color: AppColors.bgDeep,
-                width: 6,
-              ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.forgeFire.withOpacity(0.6),
-                  blurRadius: 35,
-                ),
-              ],
-            ),
-            child: Center(
-              child: Icon(
-                Icons.local_fire_department,
-                size: 36,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'IGNITE',
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              color: AppColors.forgeFire,
-              letterSpacing: 1.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   void _getPackageInfo() {
     PackageInfo.fromPlatform().then((info) {
       setState(() {
@@ -482,7 +340,7 @@ class _ProfileScreenV2State extends ConsumerState<ProfileScreenV2> {
       });
     }).catchError((error) {
       debugPrint(
-          '${Constants.tag} [_ProfileScreenV2State._getPackageInfo] Error: $error');
+          '${Constants.tag} [_ProfilePageState._getPackageInfo] Error: $error');
     });
   }
 
@@ -505,7 +363,8 @@ class _ProfileScreenV2State extends ConsumerState<ProfileScreenV2> {
             }
           } catch (error) {
             if (context.mounted) {
-              context.showErrorSnackBar(LocaleKeys.unexpectedErrorOccurred.tr());
+              context
+                  .showErrorSnackBar(LocaleKeys.unexpectedErrorOccurred.tr());
             }
           } finally {
             if (context.mounted) {
@@ -537,7 +396,8 @@ class _ProfileScreenV2State extends ConsumerState<ProfileScreenV2> {
             }
           } catch (error) {
             if (context.mounted) {
-              context.showErrorSnackBar(LocaleKeys.unexpectedErrorOccurred.tr());
+              context
+                  .showErrorSnackBar(LocaleKeys.unexpectedErrorOccurred.tr());
             }
           } finally {
             if (context.mounted) {

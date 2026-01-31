@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../../design_system/organisms/navigation/app_bottom_nav.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import '../../../explore/presentation/pages/explore_page.dart';
-import '../../../learning/presentation/pages/learning_path_page.dart';
+import '../../../library/presentation/pages/collection_page.dart';
+import '../../../stats/presentation/pages/stats_page.dart';
+import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../workout/presentation/pages/training_session_page.dart';
 
 class MainScreen extends StatefulWidget {
@@ -43,18 +45,6 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget _buildBody() {
-    if (_subPage == 'lesson-path') {
-      return LearningPathPage(
-        onNavigate: (page) {
-          setState(() {
-            _subPage = page == 'explore' ? null : page;
-            if (page == 'explore') _currentIndex = 1;
-            if (page == 'training') _subPage = 'training';
-          });
-        },
-      );
-    }
-
     if (_subPage == 'training') {
       return TrainingSessionPage(
         onClose: () {
@@ -68,12 +58,7 @@ class _MainScreenState extends State<MainScreen> {
     return IndexedStack(
       index: _currentIndex,
       children: [
-        const Center(
-            child: Text('Collection',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold))),
+        const CollectionPage(),
         ExplorePage(
           onNavigate: (page) {
             setState(() {
@@ -97,18 +82,8 @@ class _MainScreenState extends State<MainScreen> {
             });
           },
         ),
-        const Center(
-            child: Text('Stats',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold))),
-        const Center(
-            child: Text('Profile',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold))),
+        const StatsPage(),
+        const ProfilePage(),
       ],
     );
   }

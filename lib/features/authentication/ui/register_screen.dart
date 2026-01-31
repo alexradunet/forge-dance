@@ -13,15 +13,16 @@ import '../../../extensions/build_context_extension.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../../main.dart';
 import '../../../routing/routes.dart';
-import '../../../design_system/tokens/app_typography.dart';
 import '../../../utils/global_loading.dart';
 import '../../../utils/validator.dart';
-import '../../common/ui/widgets/common_text_form_field.dart';
-import '../../common/ui/widgets/primary_button.dart';
-import 'view_model/authentication_view_model.dart';
-import 'widgets/horizontal_divider.dart';
-import 'widgets/sign_in_agreement.dart';
-import 'widgets/social_sign_in.dart';
+import '../../../design_system/atoms/buttons/app_button.dart';
+import '../../../design_system/atoms/inputs/app_input.dart';
+import '../../../design_system/organisms/navigation/app_header.dart';
+import '../../../design_system/tokens/app_typography.dart';
+import '../../../features/authentication/ui/view_model/authentication_view_model.dart';
+import '../../../features/authentication/ui/widgets/horizontal_divider.dart';
+import '../../../features/authentication/ui/widgets/sign_in_agreement.dart';
+import '../../../features/authentication/ui/widgets/social_sign_in.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
@@ -116,30 +117,31 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ),
               Text(
                 'register'.tr(),
-                style: AppTheme.h1,
+                style: AppTypography.h1.copyWith(color: Colors.white),
               ),
               const SizedBox(height: 24),
-              CommonTextFormField(
+              AppInput(
                 label: 'Email',
                 controller: _emailController,
-                validator: notEmptyEmailValidator,
               ),
               const SizedBox(height: 32),
-              PrimaryButton(
-                isEnable: _isEmailValid,
+              AppButton(
+                onPressed: _isEmailValid
+                    ? () {
+                        ref
+                            .read(authenticationViewModelProvider.notifier)
+                            .signInWithMagicLink(_emailController.text);
+                        context.push(
+                          Routes.otp,
+                          extra: {
+                            'email': _emailController.text,
+                            'isRegister': true,
+                          },
+                        );
+                      }
+                    : null,
                 text: LocaleKeys.continueText.tr(),
-                onPressed: () {
-                  ref
-                      .read(authenticationViewModelProvider.notifier)
-                      .signInWithMagicLink(_emailController.text);
-                  context.push(
-                    Routes.otp,
-                    extra: {
-                      'email': _emailController.text,
-                      'isRegister': true,
-                    },
-                  );
-                },
+                width: double.infinity,
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -155,7 +157,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     },
                     child: Text(
                       LocaleKeys.signIn.tr(),
-                      style: AppTheme.bodySmall.copyWith(fontWeight: FontWeight.w600),
+                      style: AppTheme.bodySmall
+                          .copyWith(fontWeight: FontWeight.w600),
                     ),
                   ),
                 ],

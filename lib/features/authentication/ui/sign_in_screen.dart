@@ -8,9 +8,9 @@ import '../../../constants/assets.dart';
 import '../../../features/authentication/ui/view_model/authentication_view_model.dart';
 import '../../../features/authentication/ui/widgets/horizontal_divider.dart';
 import '../../../features/authentication/ui/widgets/social_sign_in.dart';
-import '../../../features/common/ui/widgets/common_back_button.dart';
-import '../../../features/common/ui/widgets/common_text_form_field.dart';
-import '../../../features/common/ui/widgets/primary_button.dart';
+import '../../../design_system/atoms/buttons/app_button.dart';
+import '../../../design_system/atoms/inputs/app_input.dart';
+import '../../../design_system/organisms/navigation/app_header.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../../routing/routes.dart';
 import '../../../design_system/tokens/app_typography.dart';
@@ -68,30 +68,31 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   ),
                   Text(
                     LocaleKeys.signIn.tr(),
-                    style: AppTheme.h1,
+                    style: AppTypography.h1.copyWith(color: Colors.white),
                   ),
                   const SizedBox(height: 24),
-                  CommonTextFormField(
+                  AppInput(
                     label: 'Email',
                     controller: _emailController,
-                    validator: notEmptyEmailValidator,
                   ),
                   const SizedBox(height: 32),
-                  PrimaryButton(
-                    isEnable: _isEmailValid,
+                  AppButton(
+                    onPressed: _isEmailValid
+                        ? () {
+                            ref
+                                .read(authenticationViewModelProvider.notifier)
+                                .signInWithMagicLink(_emailController.text);
+                            context.push(
+                              Routes.otp,
+                              extra: {
+                                'email': _emailController.text,
+                                'isRegister': false,
+                              },
+                            );
+                          }
+                        : null,
                     text: LocaleKeys.continueText.tr(),
-                    onPressed: () {
-                      ref
-                          .read(authenticationViewModelProvider.notifier)
-                          .signInWithMagicLink(_emailController.text);
-                      context.push(
-                        Routes.otp,
-                        extra: {
-                          'email': _emailController.text,
-                          'isRegister': false,
-                        },
-                      );
-                    },
+                    width: double.infinity,
                   ),
                   const SizedBox(height: 16),
                   const HorizontalDivider(),
@@ -102,9 +103,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
               ),
             ),
             Positioned(
-              top: 16,
-              left: 16,
-              child: CommonBackButton(),
+              top: 0,
+              left: 0,
+              right: 0,
+              child: AppHeader(
+                title: '',
+                onBack: () => context.pop(),
+              ),
             ),
           ],
         ),

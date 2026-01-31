@@ -9,8 +9,10 @@ import 'package:pinput/pinput.dart';
 import '../../../constants/assets.dart';
 import '../../../extensions/build_context_extension.dart';
 import '../../../features/authentication/ui/view_model/authentication_view_model.dart';
-import '../../../features/common/ui/widgets/common_back_button.dart';
-import '../../../features/common/ui/widgets/primary_button.dart';
+import 'package:go_router/go_router.dart';
+import '../../../design_system/tokens/app_colors.dart';
+import '../../../design_system/atoms/buttons/app_button.dart';
+import '../../../design_system/organisms/navigation/app_header.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../../design_system/tokens/app_typography.dart';
 
@@ -84,11 +86,12 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                   ),
                   Text(
                     LocaleKeys.otpEnterTitle.tr(),
-                    style: AppTheme.h5,
+                    style: AppTypography.h5.copyWith(color: Colors.white),
                   ),
                   Text(
                     LocaleKeys.otpEnterDescription.tr(),
-                    style: AppTheme.body,
+                    style:
+                        AppTypography.body.copyWith(color: AppColors.textMuted),
                   ),
                   const SizedBox(height: 16),
                   Center(
@@ -98,9 +101,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                       defaultPinTheme: PinTheme(
                         width: 48,
                         height: 48,
-                        textStyle: AppTheme.body,
+                        textStyle: AppTypography.body,
                         decoration: BoxDecoration(
-                          border: Border.all(color: context.secondaryTextColor),
+                          border: Border.all(color: AppColors.neutral700),
                           borderRadius: BorderRadius.circular(16),
                         ),
                       ),
@@ -112,8 +115,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                     children: [
                       Text(
                         LocaleKeys.didNotReceiveOtp.tr(),
-                        style: AppTheme.bodySmall.copyWith(
-                          color: context.secondaryTextColor,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: AppColors.textMuted,
                         ),
                       ),
                       TextButton(
@@ -129,7 +132,8 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                             : null,
                         child: Text(
                           LocaleKeys.resendOtp.tr(),
-                          style: AppTheme.caption.copyWith(fontWeight: FontWeight.w600),
+                          style: AppTypography.caption
+                              .copyWith(fontWeight: FontWeight.w600),
                         ),
                       ),
                     ],
@@ -139,31 +143,37 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                           padding: const EdgeInsets.only(top: 16, bottom: 32),
                           child: Text(
                             LocaleKeys.tryAgainAfter,
-                            style: AppTheme.bodySmall.copyWith(
-                              color: context.secondaryTextColor,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.textMuted,
                             ),
                           ).tr(args: ['$count']),
                         )
                       : const SizedBox(height: 68),
-                  PrimaryButton(
+                  AppButton(
+                    onPressed: otpController.text.length == 6
+                        ? () => ref
+                            .read(authenticationViewModelProvider.notifier)
+                            .verifyOtp(
+                              email: widget.email,
+                              token: otpController.text,
+                              isRegister: widget.isRegister,
+                            )
+                        : null,
                     text: LocaleKeys.confirm.tr(),
-                    isEnable: otpController.text.length == 6,
-                    onPressed: () => ref
-                        .read(authenticationViewModelProvider.notifier)
-                        .verifyOtp(
-                          email: widget.email,
-                          token: otpController.text,
-                          isRegister: widget.isRegister,
-                        ),
+                    width: double.infinity,
                   ),
                   const SizedBox(height: 32),
                 ],
               ),
             ),
             Positioned(
-              top: 16,
-              left: 16,
-              child: CommonBackButton(),
+              top: 0,
+              left: 0,
+              right: 0,
+              child: AppHeader(
+                title: '',
+                onBack: () => context.pop(),
+              ),
             ),
           ],
         ),
