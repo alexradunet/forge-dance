@@ -62,23 +62,15 @@ export 'atoms/icons/fg_icon.dart';
 // ───────────────────────────────────────────────────────────
 
 // Cards
-export 'molecules/cards/wide_hero_card.dart';
-export 'molecules/cards/feature_card.dart';
-export 'molecules/cards/vertical_compact_card.dart';
-export 'molecules/cards/portrait_card.dart';
-export 'molecules/cards/tall_feature_card.dart';
+export 'molecules/cards/fg_content_card.dart';
 export 'molecules/cards/square_tile.dart';
-export 'molecules/cards/medium_square_card.dart';
-export 'molecules/cards/hero_square_card.dart';
 
 // Layout
 export 'molecules/layout/fg_carousel.dart';
 
 // Controls
 export 'molecules/controls/segmented_control.dart';
-export 'molecules/controls/bpm_widget.dart';
 export 'molecules/controls/stepper_control.dart';
-export 'molecules/controls/pagination_dots.dart';
 
 // Learning
 export 'molecules/learning/app_lesson_node.dart';
@@ -105,9 +97,6 @@ export 'organisms/modals/forge_alert_dialog.dart';
 // Progress
 export 'organisms/progress/progress_section.dart';
 export 'organisms/progress/stats_breakdown.dart';
-
-// Workouts
-export 'organisms/workouts/featured_workout_card.dart';
 
 // ───────────────────────────────────────────────────────────
 // TEMPLATES

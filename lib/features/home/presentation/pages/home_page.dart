@@ -4,7 +4,7 @@ import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_typography.dart';
 import '../../../../design_system/atoms/progress/fg_progress_bar.dart';
 import '../../../../design_system/atoms/icons/fg_icon.dart';
-import '../../../../design_system/molecules/cards/app_module_card.dart';
+import '../../../../design_system/molecules/cards/fg_content_card.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/tokens/app_shadows.dart';
 
@@ -33,19 +33,13 @@ class HomePage extends StatelessWidget {
           SliverToBoxAdapter(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              child: AppModuleCard(
+              child: FgContentCard.hero(
                 title: 'EXPLOSIVE POWER',
-                category: "TODAY'S WOD",
+                subtitle:
+                    'Build raw explosive strength and fast-twitch muscle response through dynamic intervals.',
+                tags: const ['TODAY\'S WOD', 'LIVE'],
                 imageUrl:
                     'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
-                progress: 0,
-                completedLessons: 0,
-                totalLessons: 1,
-                type: AppModuleCardType.hero,
-                description:
-                    'Build raw explosive strength and fast-twitch muscle response through dynamic intervals.',
-                duration: '45m',
-                badge: 'LIVE',
                 onTap: () => onNavigate?.call('training'),
               ),
             ),
@@ -61,25 +55,23 @@ class HomePage extends StatelessWidget {
             child: _buildHorizontalSection(
               title: 'CONTINUE TRAINING',
               children: [
-                AppModuleCard(
+                FgContentCard(
                   title: 'Hip Opener Flow',
-                  category: 'MOBILITY',
+                  tags: const ['MOBILITY'],
                   imageUrl:
                       'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=400&auto=format&fit=crop&q=80',
-                  progress: 65,
-                  completedLessons: 5,
-                  totalLessons: 8,
+                  progress: 0.65,
+                  footerLabel: '5/8 Lessons',
                   onTap: () => onNavigate?.call('lesson-path'),
                 ),
                 const SizedBox(width: 16),
-                AppModuleCard(
+                FgContentCard(
                   title: 'Isolation Drills',
-                  category: 'BODY CONTROL',
+                  tags: const ['BODY CONTROL'],
                   imageUrl:
                       'https://images.unsplash.com/photo-1508700929628-666bc8bd84ea?w=400&auto=format&fit=crop&q=80',
-                  progress: 40,
-                  completedLessons: 3,
-                  totalLessons: 7,
+                  progress: 0.40,
+                  footerLabel: '3/7 Lessons',
                   onTap: () => onNavigate?.call('lesson-path'),
                 ),
               ],
@@ -92,27 +84,25 @@ class HomePage extends StatelessWidget {
               title: 'RECOMMENDED FOR YOU',
               showViewAll: true,
               children: [
-                AppModuleCard(
+                FgContentCard(
                   title: 'Footwork Fundamentals',
-                  category: 'TECHNIQUE',
+                  tags: const ['TECHNIQUE'],
                   imageUrl:
                       'https://images.unsplash.com/photo-1716996642138-e655f2a8dcd5?w=400&auto=format&fit=crop&q=80',
                   progress: 0,
-                  completedLessons: 0,
-                  totalLessons: 6,
-                  type: AppModuleCardType.small,
+                  footerLabel: '0/6 Lessons',
+                  width: 180,
                   onTap: () => onNavigate?.call('lesson-path'),
                 ),
                 const SizedBox(width: 16),
-                AppModuleCard(
+                FgContentCard(
                   title: 'Breaking Basics',
-                  category: 'POWER MOVES',
+                  tags: const ['POWER MOVES'],
                   imageUrl:
                       'https://images.unsplash.com/photo-1506411393232-79727bc447af?w=400&auto=format&fit=crop&q=80',
                   progress: 0,
-                  completedLessons: 0,
-                  totalLessons: 7,
-                  type: AppModuleCardType.small,
+                  footerLabel: '0/7 Lessons',
+                  width: 180,
                   onTap: () => onNavigate?.call('lesson-path'),
                 ),
               ],

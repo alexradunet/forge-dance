@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 
-import '../../../../design_system/molecules/cards/app_module_card.dart';
+import '../../../../design_system/molecules/cards/fg_content_card.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/atoms/icons/fg_icon.dart';
 
@@ -43,27 +43,23 @@ class _ExplorePageState extends State<ExplorePage> {
               title: "Fundamentals",
               titleColor: AppColors.forgeFire,
               children: [
-                AppModuleCard(
+                FgContentCard(
                   title: "Body Control I",
-                  category: "Rhythm",
+                  tags: const ["Rhythm"],
                   imageUrl:
                       "https://images.unsplash.com/photo-1550525811-e5869dd03032?w=800&q=80",
-                  progress: 25,
-                  completedLessons: 2,
-                  totalLessons: 8,
-                  type: AppModuleCardType.large,
+                  progress: 0.25,
+                  footerLabel: "2/8 Lessons",
                   onTap: () => widget.onNavigate?.call('lesson-path'),
                 ),
                 const SizedBox(width: 16),
-                AppModuleCard(
+                FgContentCard(
                   title: "Isolations Master",
-                  category: "Tech",
+                  tags: const ["Tech"],
                   imageUrl:
                       "https://images.unsplash.com/photo-1547153760-18fc86324498?w=800&q=80",
                   progress: 0,
-                  completedLessons: 0,
-                  totalLessons: 5,
-                  type: AppModuleCardType.large,
+                  footerLabel: "0/5 Lessons",
                   onTap: () => widget.onNavigate?.call('lesson-path'),
                 ),
               ],
@@ -74,39 +70,36 @@ class _ExplorePageState extends State<ExplorePage> {
               title: "Street Styles",
               titleColor: Colors.blueAccent,
               children: [
-                AppModuleCard(
+                FgContentCard(
                   title: "Top Rock",
-                  category: "Breaking",
+                  tags: const ["Breaking"],
                   imageUrl:
                       "https://images.unsplash.com/photo-1535525153412-5a42439a210d?w=800&q=80",
-                  progress: 60,
-                  completedLessons: 3,
-                  totalLessons: 5,
-                  type: AppModuleCardType.small,
+                  progress: 0.60,
+                  footerLabel: "3/5 Lessons",
+                  width: 180,
                   onTap: () => widget.onNavigate?.call('lesson-path'),
                 ),
                 const SizedBox(width: 16),
-                AppModuleCard(
+                FgContentCard(
                   title: "Boogaloo",
-                  category: "Popping",
+                  tags: const ["Popping"],
                   imageUrl:
                       "https://images.unsplash.com/photo-1547481887-a26e2cacb2f2?w=800&q=80",
                   progress: 0,
-                  completedLessons: 0,
-                  totalLessons: 4,
-                  type: AppModuleCardType.small,
+                  footerLabel: "0/4 Lessons",
+                  width: 180,
                   onTap: () => widget.onNavigate?.call('lesson-path'),
                 ),
                 const SizedBox(width: 16),
-                AppModuleCard(
+                FgContentCard(
                   title: "House",
-                  category: "House",
+                  tags: const ["House"],
                   imageUrl:
                       "https://images.unsplash.com/photo-1504609813442-a8924e83f76e?w=800&q=80",
-                  progress: 35,
-                  completedLessons: 2,
-                  totalLessons: 6,
-                  type: AppModuleCardType.small,
+                  progress: 0.35,
+                  footerLabel: "2/6 Lessons",
+                  width: 180,
                   onTap: () => widget.onNavigate?.call('lesson-path'),
                 ),
               ],
@@ -117,27 +110,23 @@ class _ExplorePageState extends State<ExplorePage> {
               title: "Choreography",
               titleColor: Colors.purpleAccent,
               children: [
-                AppModuleCard(
+                FgContentCard(
                   title: "Urban Flow",
-                  category: "New Arrival",
+                  tags: const ["New Arrival"],
                   imageUrl:
                       "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800&q=80",
                   progress: 0,
-                  completedLessons: 0,
-                  totalLessons: 8,
-                  type: AppModuleCardType.large,
+                  footerLabel: "0/8 Lessons",
                   onTap: () => widget.onNavigate?.call('lesson-path'),
                 ),
                 const SizedBox(width: 16),
-                AppModuleCard(
+                FgContentCard(
                   title: "Contemporary Fusion",
-                  category: "Advanced",
+                  tags: const ["Advanced"],
                   imageUrl:
                       "https://images.unsplash.com/photo-1518834107812-67b0b7c58434?w=800&q=80",
-                  progress: 15,
-                  completedLessons: 1,
-                  totalLessons: 7,
-                  type: AppModuleCardType.large,
+                  progress: 0.15,
+                  footerLabel: "1/7 Lessons",
                   onTap: () => widget.onNavigate?.call('lesson-path'),
                 ),
               ],
