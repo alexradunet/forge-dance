@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class AppIcon extends StatelessWidget {
+class FgIcon extends StatelessWidget {
   final IconData icon;
   final double size;
   final Color? color;
   final bool filled;
 
-  const AppIcon({
+  const FgIcon({
     super.key,
     required this.icon,
     this.size = 24,

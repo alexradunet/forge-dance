@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'app_interactive_card.dart';
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
-import '../../atoms/app_icon.dart';
+import '../../atoms/fg_icon.dart';
 
 class AppAtomicCard extends StatelessWidget {
   final String title;
@@ -59,7 +59,7 @@ class AppAtomicCard extends StatelessWidget {
         const SizedBox(height: 4),
         Row(
           children: [
-            AppIcon(icon: icon, size: 14, color: AppColors.forgeFire),
+            FgIcon(icon: icon, size: 14, color: AppColors.forgeFire),
             const SizedBox(width: 4),
             Text(
               value.toUpperCase(),

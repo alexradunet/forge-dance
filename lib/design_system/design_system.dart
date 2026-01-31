@@ -14,31 +14,31 @@ export 'tokens/tokens.dart';
 // ───────────────────────────────────────────────────────────
 
 // Buttons
-export 'atoms/buttons/app_button.dart';
-export 'atoms/badges/app_badge.dart';
+export 'atoms/buttons/fg_button.dart';
+export 'atoms/badges/fg_badge.dart';
 
 // Progress
-export 'atoms/progress/app_progress_bar.dart';
+export 'atoms/progress/fg_progress_bar.dart';
 
 // Avatars
-export 'atoms/avatars/user_avatar.dart';
+export 'atoms/avatars/fg_avatar.dart';
 
 // Status
-export 'atoms/status/status_dot.dart';
+export 'atoms/status/fg_status_dot.dart';
 
 // Dividers
-export 'atoms/dividers/gradient_divider.dart';
+export 'atoms/dividers/fg_divider.dart';
 
 // Empty States
-export 'atoms/empty_states/empty_state.dart';
+export 'atoms/empty_states/fg_empty.dart';
 
 // Inputs
-export 'atoms/inputs/app_input.dart';
-export 'atoms/inputs/toggle_switch.dart';
-export 'atoms/inputs/radio_button.dart';
-export 'atoms/inputs/checkbox_item.dart';
-export 'atoms/inputs/slider_control.dart';
-export 'atoms/inputs/forge_stepper.dart';
+export 'atoms/inputs/fg_input.dart';
+export 'atoms/inputs/fg_toggle.dart';
+export 'atoms/inputs/fg_radio_button.dart';
+export 'atoms/inputs/fg_checkbox_item.dart';
+export 'atoms/inputs/fg_slider.dart';
+export 'atoms/inputs/fg_stepper.dart';
 
 // ───────────────────────────────────────────────────────────
 // MOLECULES

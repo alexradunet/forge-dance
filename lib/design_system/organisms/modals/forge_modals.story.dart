@@ -6,7 +6,7 @@ import 'package:flutter_mvvm_riverpod/design_system/design_system.dart';
 @widgetbook.UseCase(
   name: 'Bottom Sheet',
   type: ForgeBottomSheet,
-  path: 'Design System/Organisms/Modals',
+  path: 'Design System/Organisms',
 )
 Widget buildForgeBottomSheet(BuildContext context) {
   return Scaffold(
@@ -45,7 +45,7 @@ Widget buildForgeBottomSheet(BuildContext context) {
 @widgetbook.UseCase(
   name: 'Action Sheet',
   type: ForgeActionSheet,
-  path: 'Design System/Organisms/Modals',
+  path: 'Design System/Organisms',
 )
 Widget buildForgeActionSheet(BuildContext context) {
   return Scaffold(
@@ -85,7 +85,7 @@ Widget buildForgeActionSheet(BuildContext context) {
 @widgetbook.UseCase(
   name: 'Alert Dialog',
   type: ForgeAlertDialog,
-  path: 'Design System/Organisms/Modals',
+  path: 'Design System/Organisms',
 )
 Widget buildForgeAlertDialog(BuildContext context) {
   return Scaffold(
@@ -96,7 +96,8 @@ Widget buildForgeAlertDialog(BuildContext context) {
           ForgeAlertDialog.show(
             context: context,
             title: 'Quit Workout?',
-            message: "You're on a 5-day streak! If you quit now, you'll lose your progress for this session.",
+            message:
+                "You're on a 5-day streak! If you quit now, you'll lose your progress for this session.",
             icon: Icons.local_fire_department,
             primaryActionLabel: 'Quit Workout',
             secondaryActionLabel: 'Resume',

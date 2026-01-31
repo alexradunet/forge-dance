@@ -5,28 +5,28 @@ import 'package:flutter_mvvm_riverpod/design_system/design_system.dart';
 
 @widgetbook.UseCase(
   name: 'Live',
-  type: StatusDot,
-  path: 'Design System/Atoms/Status',
+  type: FgStatusDot,
+  path: 'Design System/Atoms',
 )
-Widget buildStatusDotLive(BuildContext context) {
+Widget buildFgStatusDotLive(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: StatusDot(isLive: true),
+      child: FgStatusDot(isLive: true),
     ),
   );
 }
 
 @widgetbook.UseCase(
   name: 'Offline',
-  type: StatusDot,
-  path: 'Design System/Atoms/Status',
+  type: FgStatusDot,
+  path: 'Design System/Atoms',
 )
-Widget buildStatusDotOffline(BuildContext context) {
+Widget buildFgStatusDotOffline(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: StatusDot(isLive: false),
+      child: FgStatusDot(isLive: false),
     ),
   );
 }

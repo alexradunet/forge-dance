@@ -56,9 +56,9 @@ Widget buildSwipeableCardInteractiveScreen(BuildContext context) {
             'Isolate your spine - head, shoulders, chest, hips.'),
       ),
     ],
-    bottomAction: AppButton(
+    bottomAction: FgButton(
       text: 'Mark Complete',
-      variant: AppButtonVariant.primary,
+      variant: FgButtonVariant.primary,
       onPressed: () {},
     ),
   );

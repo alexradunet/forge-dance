@@ -6,12 +6,12 @@ import '../../tokens/app_sizes.dart';
 
 /// Toggle switch atom - Binary on/off control with glow effect
 /// Based on HTML mockup: forge.dance_home_dashboard_7 (01. Toggles)
-class ToggleSwitch extends StatefulWidget {
+class FgToggle extends StatefulWidget {
   final bool value;
   final ValueChanged<bool>? onChanged;
   final bool isEnabled;
 
-  const ToggleSwitch({
+  const FgToggle({
     super.key,
     required this.value,
     this.onChanged,
@@ -19,10 +19,10 @@ class ToggleSwitch extends StatefulWidget {
   });
 
   @override
-  State<ToggleSwitch> createState() => _ToggleSwitchState();
+  State<FgToggle> createState() => _FgToggleState();
 }
 
-class _ToggleSwitchState extends State<ToggleSwitch> {
+class _FgToggleState extends State<FgToggle> {
   @override
   Widget build(BuildContext context) {
     final isActive = widget.value;
@@ -134,7 +134,7 @@ class ToggleListItem extends StatelessWidget {
               ],
             ),
           ),
-          ToggleSwitch(
+          FgToggle(
             value: value,
             onChanged: onChanged,
             isEnabled: isEnabled,

@@ -6,7 +6,7 @@ import '../../../../design_system/tokens/app_spacing.dart';
 import '../../../../design_system/tokens/app_typography.dart';
 // import '../../../../design_system/tokens/app_shadows.dart'; // Unused
 
-enum AppButtonVariant {
+enum FgButtonVariant {
   primary, // ForgeFire, Shadow
   secondary, // Outline ElectricBlue
   tertiary, // SurfaceLight (Filled)
@@ -14,26 +14,26 @@ enum AppButtonVariant {
   destructive, // Red
 }
 
-enum AppButtonSize {
+enum FgButtonSize {
   sm, // H: 32
   md, // H: 40
   lg, // H: 48
   xl, // H: 56
 }
 
-enum AppButtonShape {
+enum FgButtonShape {
   rounded, // Default radius
   pill, // High radius (24+)
   circle, // Circular (for FAB/Icon)
 }
 
-class AppButton extends StatelessWidget {
+class FgButton extends StatelessWidget {
   final String? text;
   final VoidCallback? onPressed;
   final Widget? icon;
-  final AppButtonVariant variant;
-  final AppButtonSize size;
-  final AppButtonShape? shape; // Defaults based on variant/size
+  final FgButtonVariant variant;
+  final FgButtonSize size;
+  final FgButtonShape? shape; // Defaults based on variant/size
   final bool isLoading;
   final bool isEnabled;
   final double? width;
@@ -45,13 +45,13 @@ class AppButton extends StatelessWidget {
   final Color? textColor;
   final Color? borderColor;
 
-  const AppButton({
+  const FgButton({
     super.key,
     this.text,
     this.onPressed,
     this.icon,
-    this.variant = AppButtonVariant.primary,
-    this.size = AppButtonSize.md,
+    this.variant = FgButtonVariant.primary,
+    this.size = FgButtonSize.md,
     this.shape,
     this.isLoading = false,
     this.isEnabled = true,
@@ -73,7 +73,7 @@ class AppButton extends StatelessWidget {
     final padding = _getPadding();
     final borderRadius = _getBorderRadius(buttonHeight);
     final boxShape =
-        (shape == AppButtonShape.circle) ? BoxShape.circle : BoxShape.rectangle;
+        (shape == FgButtonShape.circle) ? BoxShape.circle : BoxShape.rectangle;
 
     return Opacity(
       opacity: isEnabled ? 1.0 : 0.5,
@@ -149,7 +149,7 @@ class AppButton extends StatelessWidget {
         style: AppTypography.bodySmall.copyWith(
           color: color,
           fontWeight: FontWeight.w600,
-          decoration: variant == AppButtonVariant.ghost &&
+          decoration: variant == FgButtonVariant.ghost &&
                   text != null &&
                   _isLinkStyle()
               ? TextDecoration.underline
@@ -170,15 +170,15 @@ class AppButton extends StatelessWidget {
   Color _getBackgroundColor() {
     if (backgroundColor != null) return backgroundColor!;
     switch (variant) {
-      case AppButtonVariant.primary:
+      case FgButtonVariant.primary:
         return AppColors.forgeFire;
-      case AppButtonVariant.secondary: // Was Outline
+      case FgButtonVariant.secondary: // Was Outline
         return Colors.transparent;
-      case AppButtonVariant.tertiary: // Was Secondary
+      case FgButtonVariant.tertiary: // Was Secondary
         return AppColors.surfaceLight;
-      case AppButtonVariant.ghost:
+      case FgButtonVariant.ghost:
         return Colors.transparent;
-      case AppButtonVariant.destructive:
+      case FgButtonVariant.destructive:
         return AppColors.passionRed;
     }
   }
@@ -186,47 +186,47 @@ class AppButton extends StatelessWidget {
   Color _getForegroundColor() {
     if (textColor != null) return textColor!;
     switch (variant) {
-      case AppButtonVariant.primary:
-      case AppButtonVariant.destructive:
+      case FgButtonVariant.primary:
+      case FgButtonVariant.destructive:
         return AppColors.textMain;
-      case AppButtonVariant.secondary:
+      case FgButtonVariant.secondary:
         return AppColors.electricBlue;
-      case AppButtonVariant.tertiary:
+      case FgButtonVariant.tertiary:
         return AppColors.textMain;
-      case AppButtonVariant.ghost:
+      case FgButtonVariant.ghost:
         return AppColors.electricBlue;
     }
   }
 
   Color? _getBorderColor() {
     if (borderColor != null) return borderColor!;
-    if (variant == AppButtonVariant.secondary) return AppColors.electricBlue;
+    if (variant == FgButtonVariant.secondary) return AppColors.electricBlue;
     return null;
   }
 
   double _getHeight() {
     if (height != null) return height!;
     switch (size) {
-      case AppButtonSize.sm:
+      case FgButtonSize.sm:
         return 32.0;
-      case AppButtonSize.md:
+      case FgButtonSize.md:
         return 40.0;
-      case AppButtonSize.lg:
+      case FgButtonSize.lg:
         return 48.0;
-      case AppButtonSize.xl:
+      case FgButtonSize.xl:
         return 56.0;
     }
   }
 
   double _getIconSize() {
     switch (size) {
-      case AppButtonSize.sm:
+      case FgButtonSize.sm:
         return 16;
-      case AppButtonSize.md:
+      case FgButtonSize.md:
         return 18;
-      case AppButtonSize.lg:
+      case FgButtonSize.lg:
         return 20;
-      case AppButtonSize.xl:
+      case FgButtonSize.xl:
         return 24;
     }
   }
@@ -234,35 +234,35 @@ class AppButton extends StatelessWidget {
   EdgeInsets _getPadding() {
     if (text == null) return EdgeInsets.zero; // Icon only
     switch (size) {
-      case AppButtonSize.sm:
+      case FgButtonSize.sm:
         return const EdgeInsets.symmetric(horizontal: AppSpacing.md);
-      case AppButtonSize.md:
+      case FgButtonSize.md:
         return const EdgeInsets.symmetric(horizontal: AppSpacing.lg);
-      case AppButtonSize.lg:
+      case FgButtonSize.lg:
         return const EdgeInsets.symmetric(horizontal: AppSpacing.lg);
-      case AppButtonSize.xl:
+      case FgButtonSize.xl:
         return const EdgeInsets.symmetric(horizontal: AppSpacing.xxl);
     }
   }
 
   BorderRadius _getBorderRadius(double height) {
     if (shape != null) {
-      if (shape == AppButtonShape.pill)
+      if (shape == FgButtonShape.pill)
         return BorderRadius.circular(height / 2);
-      if (shape == AppButtonShape.rounded)
+      if (shape == FgButtonShape.rounded)
         return BorderRadius.circular(12); // Default rounded
       // Circle is handled in decoration
     }
     // Defaults
-    if (variant == AppButtonVariant.primary)
+    if (variant == FgButtonVariant.primary)
       return BorderRadius.circular(24); // Matches PrimaryButton
-    if (variant == AppButtonVariant.secondary)
+    if (variant == FgButtonVariant.secondary)
       return BorderRadius.circular(12); // Matches SecondaryButton
     return BorderRadius.circular(12);
   }
 
   List<BoxShadow>? _getShadow(Color bgColor) {
-    if (variant == AppButtonVariant.primary && isEnabled && !isLoading) {
+    if (variant == FgButtonVariant.primary && isEnabled && !isLoading) {
       return [
         BoxShadow(
           color: bgColor.withOpacity(0.3),

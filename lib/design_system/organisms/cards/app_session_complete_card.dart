@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
-import '../../atoms/app_icon.dart';
+import '../../atoms/fg_icon.dart';
 
 class AppSessionCompleteCard extends StatelessWidget {
   final String title;
@@ -73,7 +73,7 @@ class AppSessionCompleteCard extends StatelessWidget {
                       )
                     ],
                   ),
-                  child: const AppIcon(
+                  child: const FgIcon(
                     icon: Icons.emoji_events,
                     size: 48,
                     color: AppColors.forgeFire,
@@ -124,7 +124,7 @@ class AppSessionCompleteCard extends StatelessWidget {
                   color: Colors.white.withOpacity(0.1),
                   shape: BoxShape.circle,
                 ),
-                child: AppIcon(icon: stat.icon, size: 16, color: Colors.white),
+                child: FgIcon(icon: stat.icon, size: 16, color: Colors.white),
               ),
               const SizedBox(width: 12),
               Text(

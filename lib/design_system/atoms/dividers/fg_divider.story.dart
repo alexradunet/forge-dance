@@ -5,16 +5,16 @@ import 'package:flutter_mvvm_riverpod/design_system/design_system.dart';
 
 @widgetbook.UseCase(
   name: 'Horizontal',
-  type: GradientDivider,
-  path: 'Design System/Atoms/Dividers',
+  type: FgDivider,
+  path: 'Design System/Atoms',
 )
-Widget buildGradientDividerHorizontal(BuildContext context) {
+Widget buildFgDividerHorizontal(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: GradientDivider(),
+        child: FgDivider(),
       ),
     ),
   );
@@ -22,10 +22,10 @@ Widget buildGradientDividerHorizontal(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'Vertical',
-  type: GradientDivider,
-  path: 'Design System/Atoms/Dividers',
+  type: FgDivider,
+  path: 'Design System/Atoms',
 )
-Widget buildGradientDividerVertical(BuildContext context) {
+Widget buildFgDividerVertical(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
@@ -33,7 +33,7 @@ Widget buildGradientDividerVertical(BuildContext context) {
         padding: const EdgeInsets.all(24),
         child: SizedBox(
           height: 100,
-          child: GradientDivider.vertical(),
+          child: FgDivider.vertical(),
         ),
       ),
     ),

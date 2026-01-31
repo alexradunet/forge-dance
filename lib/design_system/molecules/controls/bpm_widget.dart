@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../design_system/tokens/app_colors.dart';
 import '../../../design_system/tokens/app_spacing.dart';
 import '../../../design_system/tokens/app_typography.dart';
-import '../../atoms/buttons/app_button.dart';
+import '../../atoms/buttons/fg_button.dart';
 
 /// BPM widget molecule - Tempo control with slider and +/- buttons
 class BPMWidget extends StatefulWidget {
@@ -104,13 +104,13 @@ class _BPMWidgetState extends State<BPMWidget> {
           const SizedBox(height: AppSpacing.lg),
           Row(
             children: [
-              AppButton(
+              FgButton(
                 icon: const Icon(Icons.remove),
                 onPressed: _decrement,
                 backgroundColor: AppColors.gray800,
                 textColor: AppColors.crystalWhite,
-                size: AppButtonSize.md,
-                shape: AppButtonShape.circle,
+                size: FgButtonSize.md,
+                shape: FgButtonShape.circle,
               ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
@@ -162,13 +162,13 @@ class _BPMWidgetState extends State<BPMWidget> {
                 ),
               ),
               const SizedBox(width: AppSpacing.md),
-              AppButton(
+              FgButton(
                 icon: const Icon(Icons.add),
                 onPressed: _increment,
                 backgroundColor: AppColors.gray800,
                 textColor: AppColors.crystalWhite,
-                size: AppButtonSize.md,
-                shape: AppButtonShape.circle,
+                size: FgButtonSize.md,
+                shape: FgButtonShape.circle,
               ),
             ],
           ),

@@ -5,14 +5,14 @@ import 'package:flutter_mvvm_riverpod/design_system/design_system.dart';
 
 @widgetbook.UseCase(
   name: 'Default',
-  type: EmptyState,
-  path: 'Design System/Atoms/Empty States',
+  type: FgEmpty,
+  path: 'Design System/Atoms',
 )
-Widget buildEmptyStateDefault(BuildContext context) {
+Widget buildFgEmptyDefault(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: EmptyState(
+      child: FgEmpty(
         icon: Icons.inbox,
         title: 'No Workouts Yet',
         description: 'Start your first workout to see it here',
@@ -23,14 +23,14 @@ Widget buildEmptyStateDefault(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'With Action',
-  type: EmptyState,
-  path: 'Design System/Atoms/Empty States',
+  type: FgEmpty,
+  path: 'Design System/Atoms',
 )
-Widget buildEmptyStateWithAction(BuildContext context) {
+Widget buildFgEmptyWithAction(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: EmptyState(
+      child: FgEmpty(
         icon: Icons.search_off,
         title: 'No Results',
         description: 'Try adjusting your search',

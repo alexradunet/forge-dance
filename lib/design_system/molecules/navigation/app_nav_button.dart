@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
-import '../../atoms/app_icon.dart';
+import '../../atoms/fg_icon.dart';
 
 class AppNavButton extends StatelessWidget {
   final IconData icon;
@@ -36,7 +36,7 @@ class AppNavButton extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AppIcon(
+            FgIcon(
               icon: icon,
               size: 24,
               color: isActive ? AppColors.forgeFire : AppColors.textMuted,

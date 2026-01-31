@@ -2,33 +2,33 @@ import 'package:flutter/material.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-import 'package:flutter_mvvm_riverpod/design_system/atoms/buttons/app_button.dart';
+import 'package:flutter_mvvm_riverpod/design_system/atoms/buttons/fg_button.dart';
 import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
 
 @widgetbook.UseCase(
   name: 'Playground',
-  type: AppButton,
-  path: 'Design System/Atoms/AppButton',
+  type: FgButton,
+  path: 'Design System/Atoms',
 )
-Widget buildAppButtonPlayground(BuildContext context) {
+Widget buildFgButtonPlayground(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.bgDeep,
     body: Center(
-      child: AppButton(
+      child: FgButton(
         text: context.knobs.string(label: 'Text', initialValue: 'Click Me'),
         variant: context.knobs.list(
           label: 'Variant',
-          options: AppButtonVariant.values,
-          initialOption: AppButtonVariant.primary,
+          options: FgButtonVariant.values,
+          initialOption: FgButtonVariant.primary,
         ),
         size: context.knobs.list(
           label: 'Size',
-          options: AppButtonSize.values,
-          initialOption: AppButtonSize.md,
+          options: FgButtonSize.values,
+          initialOption: FgButtonSize.md,
         ),
         shape: context.knobs.listOrNull(
           label: 'Shape',
-          options: AppButtonShape.values,
+          options: FgButtonShape.values,
           initialOption: null,
         ),
         isLoading:
@@ -43,17 +43,17 @@ Widget buildAppButtonPlayground(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'All Variants',
-  type: AppButton,
-  path: 'Design System/Atoms/AppButton',
+  type: FgButton,
+  path: 'Design System/Atoms',
 )
-Widget buildAppButtonAllVariants(BuildContext context) {
+Widget buildFgButtonAllVariants(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.bgDeep,
     body: SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Center(
         child: Column(
-          children: AppButtonVariant.values.map((variant) {
+          children: FgButtonVariant.values.map((variant) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 16),
               child: Column(
@@ -64,7 +64,7 @@ Widget buildAppButtonAllVariants(BuildContext context) {
                         color: AppColors.textMain, fontSize: 10),
                   ),
                   const SizedBox(height: 8),
-                  AppButton(
+                  FgButton(
                     text: 'Button',
                     variant: variant,
                     onPressed: () {},
@@ -81,19 +81,19 @@ Widget buildAppButtonAllVariants(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'All Sizes',
-  type: AppButton,
-  path: 'Design System/Atoms/AppButton',
+  type: FgButton,
+  path: 'Design System/Atoms',
 )
-Widget buildAppButtonAllSizes(BuildContext context) {
+Widget buildFgButtonAllSizes(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.bgDeep,
     body: Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: AppButtonSize.values.map((size) {
+        children: FgButtonSize.values.map((size) {
           return Padding(
             padding: const EdgeInsets.only(bottom: 16),
-            child: AppButton(
+            child: FgButton(
               text: 'Size ${size.name}',
               icon: const Icon(Icons.add),
               size: size,
@@ -108,10 +108,10 @@ Widget buildAppButtonAllSizes(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'FAB & Icon Buttons',
-  type: AppButton,
-  path: 'Design System/Atoms/AppButton',
+  type: FgButton,
+  path: 'Design System/Atoms',
 )
-Widget buildAppButtonFabIcon(BuildContext context) {
+Widget buildFgButtonFabIcon(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.bgDeep,
     body: Center(
@@ -119,28 +119,28 @@ Widget buildAppButtonFabIcon(BuildContext context) {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           // FAB
-          AppButton(
+          FgButton(
             icon: const Icon(Icons.add),
-            size: AppButtonSize.xl,
-            shape: AppButtonShape.circle,
-            variant: AppButtonVariant.primary,
+            size: FgButtonSize.xl,
+            shape: FgButtonShape.circle,
+            variant: FgButtonVariant.primary,
             onPressed: () {},
           ),
           const SizedBox(width: 24),
           // Icon Button
-          AppButton(
+          FgButton(
             icon: const Icon(Icons.settings),
-            size: AppButtonSize.md,
-            shape: AppButtonShape.circle,
-            variant: AppButtonVariant.secondary,
+            size: FgButtonSize.md,
+            shape: FgButtonShape.circle,
+            variant: FgButtonVariant.secondary,
             onPressed: () {},
           ),
           const SizedBox(width: 24),
           // Ghost Icon
-          AppButton(
+          FgButton(
             icon: const Icon(Icons.close),
-            size: AppButtonSize.md,
-            variant: AppButtonVariant.ghost,
+            size: FgButtonSize.md,
+            variant: FgButtonVariant.ghost,
             onPressed: () {},
           ),
         ],

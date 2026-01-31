@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../design_system/tokens/app_colors.dart';
 import '../../design_system/tokens/app_spacing.dart';
 import '../../design_system/organisms/navigation/app_header.dart';
-import '../../design_system/atoms/progress/app_progress_bar.dart';
+import '../../design_system/atoms/progress/fg_progress_bar.dart';
 import '../../design_system/molecules/navigation/app_floating_action_bar.dart';
 import '../../design_system/organisms/cards/app_interactive_card_deck.dart';
 
@@ -78,7 +78,7 @@ class _SwipeableCardInteractiveScreenTemplateState
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       horizontal: _horizontalPadding),
-                  child: AppProgressBar.segmented(
+                  child: FgProgressBar.segmented(
                     total: widget.cards.length,
                     current: _currentIndex,
                     height: 4,

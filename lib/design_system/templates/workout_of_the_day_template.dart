@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mvvm_riverpod/design_system/atoms/buttons/app_button.dart';
+import 'package:flutter_mvvm_riverpod/design_system/atoms/buttons/fg_button.dart';
 import 'package:flutter_mvvm_riverpod/design_system/organisms/navigation/app_header.dart';
 import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
 import 'package:flutter_mvvm_riverpod/design_system/tokens/app_spacing.dart';
@@ -72,9 +72,9 @@ class WorkoutOfTheDayTemplate extends StatelessWidget {
                     AppSpacing.lg,
                     MediaQuery.of(context).padding.bottom + AppSpacing.lg,
                   ),
-                  child: AppButton(
+                  child: FgButton(
                     text: startButtonText.toUpperCase(),
-                    variant: AppButtonVariant.primary,
+                    variant: FgButtonVariant.primary,
                     width: double.infinity,
                     onPressed: onStartWorkout,
                   ),

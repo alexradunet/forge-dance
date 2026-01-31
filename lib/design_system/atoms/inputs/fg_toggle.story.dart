@@ -5,14 +5,14 @@ import 'package:flutter_mvvm_riverpod/design_system/design_system.dart';
 
 @widgetbook.UseCase(
   name: 'Active',
-  type: ToggleSwitch,
+  type: FgToggle,
   path: 'Design System/Atoms/Inputs',
 )
-Widget buildToggleSwitchActive(BuildContext context) {
+Widget buildFgToggleActive(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: ToggleSwitch(
+      child: FgToggle(
         value: true,
         onChanged: (_) {},
       ),
@@ -22,14 +22,14 @@ Widget buildToggleSwitchActive(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'Inactive',
-  type: ToggleSwitch,
+  type: FgToggle,
   path: 'Design System/Atoms/Inputs',
 )
-Widget buildToggleSwitchInactive(BuildContext context) {
+Widget buildFgToggleInactive(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: ToggleSwitch(
+      child: FgToggle(
         value: false,
         onChanged: (_) {},
       ),

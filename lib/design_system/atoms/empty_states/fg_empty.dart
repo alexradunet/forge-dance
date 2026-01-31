@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_spacing.dart';
 import '../../../../design_system/tokens/app_typography.dart';
-import '../buttons/app_button.dart';
+import '../buttons/fg_button.dart';
 
 /// Empty state atom - With icon, title, description, and optional CTA
-class EmptyState extends StatelessWidget {
+class FgEmpty extends StatelessWidget {
   final IconData icon;
   final String title;
   final String description;
@@ -14,7 +14,7 @@ class EmptyState extends StatelessWidget {
   final VoidCallback? onAction;
   final Color? iconColor;
 
-  const EmptyState({
+  const FgEmpty({
     super.key,
     required this.icon,
     required this.title,
@@ -79,10 +79,10 @@ class EmptyState extends StatelessWidget {
             const SizedBox(height: AppSpacing.xxl),
             SizedBox(
               width: 200,
-              child: AppButton(
+              child: FgButton(
                 text: actionLabel!,
                 onPressed: onAction,
-                variant: AppButtonVariant.primary,
+                variant: FgButtonVariant.primary,
                 icon: const Icon(
                   Icons.local_fire_department,
                   size: 20,

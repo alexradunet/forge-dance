@@ -5,14 +5,14 @@ import 'package:flutter_mvvm_riverpod/design_system/design_system.dart';
 
 @widgetbook.UseCase(
   name: 'Large',
-  type: UserAvatar,
-  path: 'Design System/Atoms/Avatars',
+  type: FgAvatar,
+  path: 'Design System/Atoms',
 )
-Widget buildUserAvatarLarge(BuildContext context) {
+Widget buildFgAvatarLarge(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: UserAvatar.large(
+      child: FgAvatar.large(
         initials: 'JD',
         level: 5,
         isOnline: true,
@@ -23,14 +23,14 @@ Widget buildUserAvatarLarge(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'Medium',
-  type: UserAvatar,
-  path: 'Design System/Atoms/Avatars',
+  type: FgAvatar,
+  path: 'Design System/Atoms',
 )
-Widget buildUserAvatarMedium(BuildContext context) {
+Widget buildFgAvatarMedium(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: UserAvatar.medium(
+      child: FgAvatar.medium(
         initials: 'AB',
         level: 3,
       ),
@@ -40,14 +40,14 @@ Widget buildUserAvatarMedium(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'Small',
-  type: UserAvatar,
-  path: 'Design System/Atoms/Avatars',
+  type: FgAvatar,
+  path: 'Design System/Atoms',
 )
-Widget buildUserAvatarSmall(BuildContext context) {
+Widget buildFgAvatarSmall(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: UserAvatar.small(
+      child: FgAvatar.small(
         initials: 'CD',
       ),
     ),
@@ -56,14 +56,14 @@ Widget buildUserAvatarSmall(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'With Notifications',
-  type: UserAvatar,
-  path: 'Design System/Atoms/Avatars',
+  type: FgAvatar,
+  path: 'Design System/Atoms',
 )
-Widget buildUserAvatarWithNotifications(BuildContext context) {
+Widget buildFgAvatarWithNotifications(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: UserAvatar.medium(
+      child: FgAvatar.medium(
         initials: 'EF',
         notificationCount: 3,
       ),
@@ -73,21 +73,21 @@ Widget buildUserAvatarWithNotifications(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'Loading State',
-  type: UserAvatar,
-  path: 'Design System/Atoms/Avatars',
+  type: FgAvatar,
+  path: 'Design System/Atoms',
 )
-Widget buildUserAvatarLoading(BuildContext context) {
+Widget buildFgAvatarLoading(BuildContext context) {
   return const Scaffold(
     backgroundColor: AppColors.bgDeep,
     body: Center(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          UserAvatar(isLoading: true, size: 40),
+          FgAvatar(isLoading: true, size: 40),
           SizedBox(width: 16),
-          UserAvatar(isLoading: true, size: 56),
+          FgAvatar(isLoading: true, size: 56),
           SizedBox(width: 16),
-          UserAvatar(isLoading: true, size: 80),
+          FgAvatar(isLoading: true, size: 80),
         ],
       ),
     ),

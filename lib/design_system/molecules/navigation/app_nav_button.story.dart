@@ -5,11 +5,34 @@ import 'package:flutter_mvvm_riverpod/design_system/molecules/navigation/app_nav
 import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
 
 @widgetbook.UseCase(
-  name: 'App Nav Button',
+  name: 'Playground',
   type: AppNavButton,
   path: 'Design System/Molecules/Navigation',
 )
-Widget buildAppNavButton(BuildContext context) {
+Widget buildAppNavButtonPlayground(BuildContext context) {
+  return Scaffold(
+    backgroundColor: AppColors.bgDeep,
+    body: Center(
+      child: AppNavButton(
+        icon: context.knobs.list(
+          label: 'Icon',
+          options: [Icons.home, Icons.search, Icons.menu, Icons.person],
+          initialOption: Icons.home,
+        ),
+        label: context.knobs.string(label: 'Label', initialValue: 'Home'),
+        isActive: context.knobs.boolean(label: 'Is Active', initialValue: true),
+        onTap: () {},
+      ),
+    ),
+  );
+}
+
+@widgetbook.UseCase(
+  name: 'Showcase',
+  type: AppNavButton,
+  path: 'Design System/Molecules/Navigation',
+)
+Widget buildAppNavButtonShowcase(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.bgDeep,
     body: Center(
@@ -18,15 +41,14 @@ Widget buildAppNavButton(BuildContext context) {
         children: [
           AppNavButton(
             icon: Icons.home,
-            label: 'Home',
-            isActive:
-                context.knobs.boolean(label: 'Is Active', initialValue: true),
+            label: 'Active',
+            isActive: true,
             onTap: () {},
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 32),
           AppNavButton(
             icon: Icons.search,
-            label: 'Explore',
+            label: 'Inactive',
             isActive: false,
             onTap: () {},
           ),

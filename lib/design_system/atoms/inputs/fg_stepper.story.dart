@@ -5,14 +5,14 @@ import 'package:flutter_mvvm_riverpod/design_system/design_system.dart';
 
 @widgetbook.UseCase(
   name: 'Default',
-  type: ForgeStepper,
+  type: FgStepper,
   path: 'Design System/Atoms/Inputs',
 )
-Widget buildForgeStepperDefault(BuildContext context) {
+Widget buildFgStepperDefault(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: ForgeStepper(
+      child: FgStepper(
         value: 5,
         min: 0,
         max: 10,
@@ -25,14 +25,14 @@ Widget buildForgeStepperDefault(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'With Unit',
-  type: ForgeStepper,
+  type: FgStepper,
   path: 'Design System/Atoms/Inputs',
 )
-Widget buildForgeStepperUnit(BuildContext context) {
+Widget buildFgStepperUnit(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: ForgeStepper(
+      child: FgStepper(
         value: 30,
         min: 5,
         max: 60,

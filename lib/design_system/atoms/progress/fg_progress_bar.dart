@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../tokens/app_colors.dart';
 
-class AppProgressBar extends StatelessWidget {
+class FgProgressBar extends StatelessWidget {
   final double value; // 0.0 to 1.0
   final double height;
   final Color? color;
@@ -11,7 +11,7 @@ class AppProgressBar extends StatelessWidget {
   final double spacing;
   final bool isCumulative;
 
-  const AppProgressBar({
+  const FgProgressBar({
     super.key,
     required this.value,
     this.height = 8,
@@ -23,7 +23,7 @@ class AppProgressBar extends StatelessWidget {
   });
 
   /// Factory for segmented progress using integer steps
-  factory AppProgressBar.segmented({
+  factory FgProgressBar.segmented({
     required int total,
     required int current,
     double height = 8,
@@ -33,7 +33,7 @@ class AppProgressBar extends StatelessWidget {
     bool isCumulative = true,
     Key? key,
   }) {
-    return AppProgressBar(
+    return FgProgressBar(
       key: key,
       value: total > 0 ? (current + 1) / total : 0,
       segments: total,

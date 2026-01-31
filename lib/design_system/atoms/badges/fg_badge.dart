@@ -4,18 +4,18 @@ import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
 import '../../tokens/app_border_radius.dart';
 
-enum AppBadgeVariant {
+enum FgBadgeVariant {
   solid,
   outline,
   subtle,
 }
 
-enum AppBadgeShape {
+enum FgBadgeShape {
   standard,
   pill,
 }
 
-enum AppBadgeColor {
+enum FgBadgeColor {
   brand,
   success,
   warning,
@@ -27,21 +27,21 @@ enum AppBadgeColor {
   gold,
 }
 
-class AppBadge extends StatelessWidget {
+class FgBadge extends StatelessWidget {
   final String text;
-  final AppBadgeVariant variant;
-  final AppBadgeColor color;
-  final AppBadgeShape shape;
+  final FgBadgeVariant variant;
+  final FgBadgeColor color;
+  final FgBadgeShape shape;
   final IconData? icon;
   final VoidCallback? onTap;
   final double fontSize;
 
-  const AppBadge({
+  const FgBadge({
     super.key,
     required this.text,
-    this.variant = AppBadgeVariant.solid,
-    this.color = AppBadgeColor.brand,
-    this.shape = AppBadgeShape.standard,
+    this.variant = FgBadgeVariant.solid,
+    this.color = FgBadgeColor.brand,
+    this.shape = FgBadgeShape.standard,
     this.icon,
     this.onTap,
     this.fontSize = 10,
@@ -50,7 +50,7 @@ class AppBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = _getColors();
-    final borderRadius = shape == AppBadgeShape.pill
+    final borderRadius = shape == FgBadgeShape.pill
         ? BorderRadius.circular(999)
         : AppBorderRadius.small;
 
@@ -93,20 +93,20 @@ class AppBadge extends StatelessWidget {
     final baseColor = _getBaseColor();
 
     switch (variant) {
-      case AppBadgeVariant.solid:
+      case FgBadgeVariant.solid:
         return _BadgeColors(
           background: baseColor,
           foreground: _getSolidForeground(baseColor),
         );
-      case AppBadgeVariant.outline:
+      case FgBadgeVariant.outline:
         return _BadgeColors(
           background: Colors.transparent,
           foreground: baseColor,
           border: baseColor,
         );
-      case AppBadgeVariant.subtle:
+      case FgBadgeVariant.subtle:
         // Adjust for visibility on dark background
-        final isNeutral = color == AppBadgeColor.neutral;
+        final isNeutral = color == FgBadgeColor.neutral;
         return _BadgeColors(
           background: isNeutral
               ? AppColors.crystalWhite.withOpacity(0.05)
@@ -120,31 +120,31 @@ class AppBadge extends StatelessWidget {
 
   Color _getBaseColor() {
     switch (color) {
-      case AppBadgeColor.brand:
+      case FgBadgeColor.brand:
         return AppColors.forgeFire;
-      case AppBadgeColor.success:
+      case FgBadgeColor.success:
         return AppColors.growthGreen;
-      case AppBadgeColor.warning:
+      case FgBadgeColor.warning:
         return AppColors.warningAmber;
-      case AppBadgeColor.error:
+      case FgBadgeColor.error:
         return AppColors.passionRed;
-      case AppBadgeColor.neutral:
+      case FgBadgeColor.neutral:
         return AppColors.gray400;
-      case AppBadgeColor.purple:
+      case FgBadgeColor.purple:
         return AppColors.hipHopPurple;
-      case AppBadgeColor.blue:
+      case FgBadgeColor.blue:
         return AppColors.breakingBlue;
-      case AppBadgeColor.rose:
+      case FgBadgeColor.rose:
         return AppColors.latinRose;
-      case AppBadgeColor.gold:
+      case FgBadgeColor.gold:
         return AppColors.legendGold;
     }
   }
 
   Color _getSolidForeground(Color bg) {
-    if (color == AppBadgeColor.warning ||
-        color == AppBadgeColor.success ||
-        color == AppBadgeColor.gold) {
+    if (color == FgBadgeColor.warning ||
+        color == FgBadgeColor.success ||
+        color == FgBadgeColor.gold) {
       return AppColors.gray950;
     }
     return AppColors.crystalWhite;

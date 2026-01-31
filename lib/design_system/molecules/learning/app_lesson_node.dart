@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
-import '../../atoms/app_icon.dart';
+import '../../atoms/fg_icon.dart';
 
 enum AppLessonNodeType { theory, movement, drill, experiment }
 
@@ -128,7 +128,7 @@ class AppLessonNode extends StatelessWidget {
                 : null),
       ),
       child: Center(
-        child: AppIcon(
+        child: FgIcon(
           icon: icon,
           size: 24,
           color: isLocked ? Colors.white.withOpacity(0.3) : AppColors.textMain,

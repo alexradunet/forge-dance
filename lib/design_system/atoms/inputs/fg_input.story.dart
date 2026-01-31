@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-import 'package:flutter_mvvm_riverpod/design_system/atoms/inputs/app_input.dart';
+import 'package:flutter_mvvm_riverpod/design_system/atoms/inputs/fg_input.dart';
 import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
 
 @widgetbook.UseCase(
   name: 'Default',
-  type: AppInput,
+  type: FgInput,
   path: 'Design System/Atoms/Inputs',
 )
-Widget buildAppInputDefault(BuildContext context) {
+Widget buildFgInputDefault(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.bgDeep,
     body: Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: AppInput(
+        child: FgInput(
           label: context.knobs
               .string(label: 'Label', initialValue: 'Email Address'),
           placeholder: context.knobs
@@ -34,16 +34,16 @@ Widget buildAppInputDefault(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'Password',
-  type: AppInput,
+  type: FgInput,
   path: 'Design System/Atoms/Inputs',
 )
-Widget buildAppInputPassword(BuildContext context) {
+Widget buildFgInputPassword(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.bgDeep,
     body: Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: AppInput.password(
+        child: FgInput.password(
           label: 'Password',
           placeholder: 'Enter your password',
         ),
@@ -54,10 +54,10 @@ Widget buildAppInputPassword(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'Search',
-  type: AppInput,
+  type: FgInput,
   path: 'Design System/Atoms/Inputs',
 )
-Widget buildAppInputSearch(BuildContext context) {
+Widget buildFgInputSearch(BuildContext context) {
   final controller = TextEditingController();
 
   return Scaffold(
@@ -65,7 +65,7 @@ Widget buildAppInputSearch(BuildContext context) {
     body: Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: AppInput.search(
+        child: FgInput.search(
           placeholder: 'Search for lessons...',
           controller: controller,
           showFilter: true,
@@ -79,16 +79,16 @@ Widget buildAppInputSearch(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'Multiline',
-  type: AppInput,
+  type: FgInput,
   path: 'Design System/Atoms/Inputs',
 )
-Widget buildAppInputMultiline(BuildContext context) {
+Widget buildFgInputMultiline(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.bgDeep,
     body: Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
-        child: AppInput.multiline(
+        child: FgInput.multiline(
           label: 'Feedback',
           placeholder: 'Tell us what you think...',
         ),

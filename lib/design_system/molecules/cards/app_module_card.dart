@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import '../../tokens/app_colors.dart';
 
 import '../../tokens/app_typography.dart';
-import '../../atoms/badges/app_badge.dart';
-import '../../atoms/progress/app_progress_bar.dart';
-import '../../atoms/buttons/app_button.dart';
-import '../../atoms/app_icon.dart';
+import '../../atoms/badges/fg_badge.dart';
+import '../../atoms/progress/fg_progress_bar.dart';
+import '../../atoms/buttons/fg_button.dart';
+import '../../atoms/fg_icon.dart';
 
 enum AppModuleCardType {
   small,
@@ -75,10 +75,10 @@ class AppModuleCard extends StatelessWidget {
             Positioned(
               top: 12,
               left: 12,
-              child: AppBadge(
+              child: FgBadge(
                 text: category,
-                variant: AppBadgeVariant.solid,
-                color: AppBadgeColor.brand,
+                variant: FgBadgeVariant.solid,
+                color: FgBadgeColor.brand,
               ),
             ),
             Positioned(
@@ -112,7 +112,7 @@ class AppModuleCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  AppProgressBar(value: progress / 100, height: 4),
+                  FgProgressBar(value: progress / 100, height: 4),
                 ],
               ),
             ),
@@ -140,8 +140,8 @@ class AppModuleCard extends StatelessWidget {
             Positioned(
               top: 12,
               left: 12,
-              child: AppBadge(
-                  text: category, fontSize: 8, color: AppBadgeColor.brand),
+              child: FgBadge(
+                  text: category, fontSize: 8, color: FgBadgeColor.brand),
             ),
             Positioned(
               bottom: 12,
@@ -174,7 +174,7 @@ class AppModuleCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  AppProgressBar(value: progress / 100, height: 4),
+                  FgProgressBar(value: progress / 100, height: 4),
                 ],
               ),
             ),
@@ -202,7 +202,7 @@ class AppModuleCard extends StatelessWidget {
             Positioned(
               top: 16,
               left: 16,
-              child: AppBadge(text: category, color: AppBadgeColor.brand),
+              child: FgBadge(text: category, color: FgBadgeColor.brand),
             ),
             Positioned(
               bottom: 16,
@@ -235,7 +235,7 @@ class AppModuleCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  AppProgressBar(value: progress / 100, height: 6),
+                  FgProgressBar(value: progress / 100, height: 6),
                 ],
               ),
             ),
@@ -263,17 +263,17 @@ class AppModuleCard extends StatelessWidget {
             Positioned(
               top: 16,
               left: 16,
-              child: AppBadge(text: category, color: AppBadgeColor.brand),
+              child: FgBadge(text: category, color: FgBadgeColor.brand),
             ),
             if (badge != null)
               Positioned(
                 top: 16,
                 right: 16,
-                child: AppBadge(
+                child: FgBadge(
                   text: badge!,
                   fontSize: 9,
-                  color: AppBadgeColor.brand,
-                  shape: AppBadgeShape.pill,
+                  color: FgBadgeColor.brand,
+                  shape: FgBadgeShape.pill,
                 ),
               ),
             Positioned(
@@ -302,11 +302,11 @@ class AppModuleCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 16),
-                  AppButton(
+                  FgButton(
                     text:
                         'START TRAINING${duration != null ? ' • $duration' : ''}',
-                    variant: AppButtonVariant.primary,
-                    icon: const AppIcon(icon: Icons.play_arrow),
+                    variant: FgButtonVariant.primary,
+                    icon: const FgIcon(icon: Icons.play_arrow),
                     width: double.infinity,
                     onPressed: onTap,
                   ),

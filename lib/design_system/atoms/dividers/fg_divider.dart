@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 
 /// Gradient divider atom - Horizontal/vertical with Forge Fire gradient
-class GradientDivider extends StatelessWidget {
+class FgDivider extends StatelessWidget {
   final bool isVertical;
   final Color? startColor;
   final Color? endColor;
   final double thickness;
 
-  const GradientDivider({
+  const FgDivider({
     super.key,
     this.isVertical = false,
     this.startColor,
@@ -17,7 +17,7 @@ class GradientDivider extends StatelessWidget {
     this.thickness = 1.0,
   });
 
-  const GradientDivider.horizontal({
+  const FgDivider.horizontal({
     super.key,
     Color? startColor,
     Color? endColor,
@@ -26,7 +26,7 @@ class GradientDivider extends StatelessWidget {
         startColor = startColor ?? Colors.transparent,
         endColor = endColor ?? AppColors.forgeFire;
 
-  const GradientDivider.vertical({
+  const FgDivider.vertical({
     super.key,
     Color? startColor,
     Color? endColor,

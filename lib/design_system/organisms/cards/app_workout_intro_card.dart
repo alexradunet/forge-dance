@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
-import '../../atoms/app_icon.dart';
+import '../../atoms/fg_icon.dart';
 
 class AppWorkoutIntroCard extends StatelessWidget {
   final String title;
@@ -65,7 +65,7 @@ class AppWorkoutIntroCard extends StatelessWidget {
                     border:
                         Border.all(color: AppColors.forgeFire.withOpacity(0.4)),
                   ),
-                  child: const AppIcon(
+                  child: const FgIcon(
                     icon: Icons.fitness_center,
                     size: 40,
                     color: AppColors.forgeFire,
@@ -109,7 +109,7 @@ class AppWorkoutIntroCard extends StatelessWidget {
   Widget _buildMetaItem(IconData icon, String text) {
     return Row(
       children: [
-        AppIcon(icon: icon, size: 16, color: AppColors.textMuted),
+        FgIcon(icon: icon, size: 16, color: AppColors.textMuted),
         const SizedBox(width: 4),
         Text(
           text,

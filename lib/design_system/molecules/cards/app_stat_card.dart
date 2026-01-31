@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
-import '../../atoms/app_icon.dart';
+import '../../atoms/fg_icon.dart';
 
 class AppStatCard extends StatelessWidget {
   final IconData icon;
@@ -48,7 +48,7 @@ class AppStatCard extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  AppIcon(
+                  FgIcon(
                     icon: icon,
                     size: 20,
                     color: iconColor ?? AppColors.forgeFire,

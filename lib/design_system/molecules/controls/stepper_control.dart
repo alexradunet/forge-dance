@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../design_system/tokens/app_colors.dart';
 import '../../../design_system/tokens/app_spacing.dart';
 import '../../../design_system/tokens/app_typography.dart';
-import '../../atoms/buttons/app_button.dart';
+import '../../atoms/buttons/fg_button.dart';
 
 /// Stepper control molecule - For numeric adjustments
 class StepperControl extends StatefulWidget {
@@ -94,13 +94,13 @@ class _StepperControlState extends State<StepperControl> {
             ),
             child: Row(
               children: [
-                AppButton(
+                FgButton(
                   icon: const Icon(Icons.remove),
                   onPressed: _decrement,
                   backgroundColor: AppColors.gray800,
                   textColor: AppColors.crystalWhite,
-                  size: AppButtonSize.md,
-                  shape: AppButtonShape.circle,
+                  size: FgButtonSize.md,
+                  shape: FgButtonShape.circle,
                 ),
                 Container(
                   width: 48,
@@ -113,13 +113,13 @@ class _StepperControlState extends State<StepperControl> {
                     ),
                   ),
                 ),
-                AppButton(
+                FgButton(
                   icon: const Icon(Icons.add),
                   onPressed: _increment,
                   backgroundColor: AppColors.gray800,
                   textColor: AppColors.crystalWhite,
-                  size: AppButtonSize.md,
-                  shape: AppButtonShape.circle,
+                  size: FgButtonSize.md,
+                  shape: FgButtonShape.circle,
                 ),
               ],
             ),

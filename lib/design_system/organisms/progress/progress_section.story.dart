@@ -5,11 +5,11 @@ import 'package:flutter_mvvm_riverpod/design_system/organisms/progress/progress_
 import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
 
 @widgetbook.UseCase(
-  name: 'Progress Section',
+  name: 'Playground',
   type: ProgressSection,
   path: 'Design System/Organisms/Progress',
 )
-Widget buildProgressSection(BuildContext context) {
+Widget buildProgressSectionPlayground(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.bgDeep,
     body: Center(
@@ -21,13 +21,55 @@ Widget buildProgressSection(BuildContext context) {
           actionLabel: context.knobs
               .string(label: 'Action Label', initialValue: 'View All'),
           onAction: () {},
-          stats: [], // Can populate with dummy data if needed, but structure is complex for knobs
+          stats: [],
           levelProgress: ProgressData(
-            label: 'Level 5',
-            current: 750,
+            label: context.knobs
+                .string(label: 'Level Label', initialValue: 'Level 5'),
+            current: context.knobs.int.slider(
+                label: 'Current XP', initialValue: 750, min: 0, max: 1000),
             target: 1000,
-            message: '250 XP to next level',
+            message: context.knobs
+                .string(label: 'Message', initialValue: '250 XP to next level'),
           ),
+        ),
+      ),
+    ),
+  );
+}
+
+@widgetbook.UseCase(
+  name: 'Showcase',
+  type: ProgressSection,
+  path: 'Design System/Organisms/Progress',
+)
+Widget buildProgressSectionShowcase(BuildContext context) {
+  return Scaffold(
+    backgroundColor: AppColors.bgDeep,
+    body: SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            ProgressSection(
+              title: 'Overview',
+              stats: [
+                StatCardData(
+                    label: 'Workouts', value: '12', icon: 'fitness_center'),
+                StatCardData(label: 'Minutes', value: '340', icon: 'timer'),
+              ],
+            ),
+            const SizedBox(height: 32),
+            ProgressSection(
+              title: 'Level Progress',
+              levelProgress: ProgressData(
+                label: 'Beginner II',
+                current: 300,
+                target: 500,
+                message: 'Keep going!',
+              ),
+              stats: [],
+            ),
+          ],
         ),
       ),
     ),

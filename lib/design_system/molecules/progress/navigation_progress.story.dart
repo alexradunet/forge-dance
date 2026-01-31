@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 import '../../../../design_system/molecules/navigation/app_floating_action_bar.dart';
-import '../../../../design_system/atoms/buttons/app_button.dart';
+import '../../../../design_system/atoms/buttons/fg_button.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 
 @widgetbook.UseCase(
@@ -18,14 +18,14 @@ Widget buildAppFloatingActionBar(BuildContext context) {
         padding: const EdgeInsets.symmetric(horizontal: 24),
         child: AppFloatingActionBar(
           children: [
-            AppButton(
+            FgButton(
               text: 'CANCEL',
-              variant: AppButtonVariant.ghost,
+              variant: FgButtonVariant.ghost,
               onPressed: () {},
             ),
-            AppButton(
+            FgButton(
               text: 'CONTINUE',
-              variant: AppButtonVariant.primary,
+              variant: FgButtonVariant.primary,
               onPressed: () {},
             ),
           ],

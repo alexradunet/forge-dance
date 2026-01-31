@@ -4,15 +4,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
-import 'main_widgetbook.directories.g.dart';
-import '../design_system/tokens/app_colors.dart';
-import '../design_system/tokens/app_typography.dart';
+import 'widgetbook.directories.g.dart';
+import 'tokens/app_colors.dart';
+import 'tokens/app_typography.dart';
 
 /// Entry point for running the design system Widgetbook.
 ///
 /// Run with:
 /// `flutter run -t lib/widgetbook/main_widgetbook.dart`
-/// 
+///
 /// After making changes to use cases, regenerate directories with:
 /// `dart run build_runner build -d`
 Future<void> main() async {

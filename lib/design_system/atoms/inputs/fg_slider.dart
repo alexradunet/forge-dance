@@ -6,7 +6,7 @@ import '../../tokens/app_typography.dart';
 
 /// Slider control atom - Range input with glow thumb and gradient track
 /// Based on HTML mockup: forge.dance_home_dashboard_9 (02. Range Sliders)
-class SliderControl extends StatelessWidget {
+class FgSlider extends StatelessWidget {
   final double value;
   final double min;
   final double max;
@@ -17,7 +17,7 @@ class SliderControl extends StatelessWidget {
   final bool showTicks;
   final bool isEnabled;
 
-  const SliderControl({
+  const FgSlider({
     super.key,
     required this.value,
     this.min = 0,

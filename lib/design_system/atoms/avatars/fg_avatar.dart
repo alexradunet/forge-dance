@@ -6,7 +6,7 @@ import '../../../../design_system/tokens/app_spacing.dart';
 import '../../../../design_system/tokens/app_typography.dart';
 
 /// User avatar atom - With level badges, online status, notification counts
-class UserAvatar extends StatelessWidget {
+class FgAvatar extends StatelessWidget {
   final String? imageUrl;
   final String? initials;
   final int? level;
@@ -16,7 +16,7 @@ class UserAvatar extends StatelessWidget {
   final Color? borderColor;
   final bool isLoading;
 
-  const UserAvatar({
+  const FgAvatar({
     super.key,
     this.imageUrl,
     this.initials,
@@ -28,7 +28,7 @@ class UserAvatar extends StatelessWidget {
     this.isLoading = false,
   });
 
-  const UserAvatar.large({
+  const FgAvatar.large({
     super.key,
     this.imageUrl,
     this.initials,
@@ -40,7 +40,7 @@ class UserAvatar extends StatelessWidget {
     this.isLoading = false,
   });
 
-  const UserAvatar.medium({
+  const FgAvatar.medium({
     super.key,
     this.imageUrl,
     this.initials,
@@ -52,7 +52,7 @@ class UserAvatar extends StatelessWidget {
     this.isLoading = false,
   });
 
-  const UserAvatar.small({
+  const FgAvatar.small({
     super.key,
     this.imageUrl,
     this.initials,

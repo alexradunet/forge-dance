@@ -5,14 +5,14 @@ import '../../tokens/app_typography.dart';
 import '../../tokens/app_animation.dart';
 import '../../tokens/app_border_radius.dart';
 
-enum AppInputVariant {
+enum FgInputVariant {
   standard,
   password,
   search,
   multiline,
 }
 
-class AppInput extends StatefulWidget {
+class FgInput extends StatefulWidget {
   final String? label;
   final String? placeholder;
   final String? errorText;
@@ -25,9 +25,9 @@ class AppInput extends StatefulWidget {
   final bool isEnabled;
   final bool autofocus;
   final FocusNode? focusNode;
-  final AppInputVariant variant;
+  final FgInputVariant variant;
 
-  const AppInput({
+  const FgInput({
     super.key,
     this.label,
     this.placeholder,
@@ -41,10 +41,10 @@ class AppInput extends StatefulWidget {
     this.isEnabled = true,
     this.autofocus = false,
     this.focusNode,
-    this.variant = AppInputVariant.standard,
+    this.variant = FgInputVariant.standard,
   });
 
-  factory AppInput.password({
+  factory FgInput.password({
     Key? key,
     String? label = 'Password',
     String? placeholder = 'Enter password',
@@ -54,7 +54,7 @@ class AppInput extends StatefulWidget {
     ValueChanged<String>? onSubmitted,
     bool isEnabled = true,
   }) {
-    return AppInput(
+    return FgInput(
       key: key,
       label: label,
       placeholder: placeholder,
@@ -64,11 +64,11 @@ class AppInput extends StatefulWidget {
       onSubmitted: onSubmitted,
       isEnabled: isEnabled,
       prefixIcon: Icons.lock_outline,
-      variant: AppInputVariant.password,
+      variant: FgInputVariant.password,
     );
   }
 
-  factory AppInput.search({
+  factory FgInput.search({
     Key? key,
     String? placeholder = 'Search...',
     TextEditingController? controller,
@@ -79,7 +79,7 @@ class AppInput extends StatefulWidget {
     bool showFilter = false,
     VoidCallback? onFilterPressed,
   }) {
-    return AppInput(
+    return FgInput(
       key: key,
       placeholder: placeholder,
       controller: controller,
@@ -87,7 +87,7 @@ class AppInput extends StatefulWidget {
       onSubmitted: onSubmitted,
       isEnabled: isEnabled,
       prefixIcon: Icons.search,
-      variant: AppInputVariant.search,
+      variant: FgInputVariant.search,
       suffixWidget: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -102,7 +102,7 @@ class AppInput extends StatefulWidget {
     );
   }
 
-  factory AppInput.multiline({
+  factory FgInput.multiline({
     Key? key,
     String? label,
     String? placeholder,
@@ -110,22 +110,22 @@ class AppInput extends StatefulWidget {
     ValueChanged<String>? onChanged,
     bool isEnabled = true,
   }) {
-    return AppInput(
+    return FgInput(
       key: key,
       label: label,
       placeholder: placeholder,
       controller: controller,
       onChanged: onChanged,
       isEnabled: isEnabled,
-      variant: AppInputVariant.multiline,
+      variant: FgInputVariant.multiline,
     );
   }
 
   @override
-  State<AppInput> createState() => _AppInputState();
+  State<FgInput> createState() => _FgInputState();
 }
 
-class _AppInputState extends State<AppInput> {
+class _FgInputState extends State<FgInput> {
   late FocusNode _focusNode;
   bool _isFocused = false;
   bool _obscureText = false;
@@ -136,7 +136,7 @@ class _AppInputState extends State<AppInput> {
     _focusNode = widget.focusNode ?? FocusNode();
     _focusNode.addListener(_handleFocusChange);
 
-    if (widget.variant == AppInputVariant.password) {
+    if (widget.variant == FgInputVariant.password) {
       _obscureText = true;
     }
   }
@@ -158,7 +158,7 @@ class _AppInputState extends State<AppInput> {
   @override
   Widget build(BuildContext context) {
     final hasError = widget.errorText != null && widget.errorText!.isNotEmpty;
-    final isMultimedia = widget.variant == AppInputVariant.multiline;
+    final isMultimedia = widget.variant == FgInputVariant.multiline;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -265,7 +265,7 @@ class _AppInputState extends State<AppInput> {
               ),
 
               // Suffix widget
-              if (widget.variant == AppInputVariant.password)
+              if (widget.variant == FgInputVariant.password)
                 Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: IconButton(

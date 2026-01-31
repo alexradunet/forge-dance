@@ -5,11 +5,11 @@ import 'package:flutter_mvvm_riverpod/design_system/molecules/cards/feature_card
 import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
 
 @widgetbook.UseCase(
-  name: 'Feature Card',
+  name: 'Playground',
   type: FeatureCard,
   path: 'Design System/Molecules/Cards',
 )
-Widget buildFeatureCard(BuildContext context) {
+Widget buildFeatureCardPlayground(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.bgDeep,
     body: Center(
@@ -26,6 +26,42 @@ Widget buildFeatureCard(BuildContext context) {
           accentColor: context.knobs.color(
               label: 'Accent Color', initialValue: AppColors.mysticPurple),
           onTap: () {},
+        ),
+      ),
+    ),
+  );
+}
+
+@widgetbook.UseCase(
+  name: 'Showcase',
+  type: FeatureCard,
+  path: 'Design System/Molecules/Cards',
+)
+Widget buildFeatureCardShowcase(BuildContext context) {
+  return Scaffold(
+    backgroundColor: AppColors.bgDeep,
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FeatureCard(
+              title: 'Introduction to Rhythm',
+              subtitle: 'Feel the beat',
+              categoryLabel: 'Musicality',
+              accentColor: AppColors.forgeFire,
+              onTap: () {},
+            ),
+            const SizedBox(height: 16),
+            FeatureCard(
+              title: 'Advanced Spins',
+              subtitle: 'Control and balance',
+              categoryLabel: 'Technique',
+              accentColor: AppColors.breakingBlue,
+              onTap: () {},
+            ),
+          ],
         ),
       ),
     ),

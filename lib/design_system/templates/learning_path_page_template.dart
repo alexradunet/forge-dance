@@ -32,7 +32,7 @@ class LearningPathPageTemplate extends StatelessWidget {
                   onBack: onBack,
                 ),
               ),
-              // Replaced AppProgressBar with just spacing if needed, or nothing
+              // Replaced FgProgressBar with just spacing if needed, or nothing
               const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
               SliverPadding(

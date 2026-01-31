@@ -6,29 +6,29 @@ import 'package:flutter_mvvm_riverpod/design_system/design_system.dart';
 
 @widgetbook.UseCase(
   name: 'Playground',
-  type: AppBadge,
-  path: 'Design System/Atoms/Badges',
+  type: FgBadge,
+  path: 'Design System/Atoms',
 )
-Widget buildAppBadgePlayground(BuildContext context) {
+Widget buildFgBadgePlayground(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.gray950,
     body: Center(
-      child: AppBadge(
+      child: FgBadge(
         text: context.knobs.string(label: 'Text', initialValue: 'Badge'),
         variant: context.knobs.list(
           label: 'Variant',
-          options: AppBadgeVariant.values,
-          initialOption: AppBadgeVariant.solid,
+          options: FgBadgeVariant.values,
+          initialOption: FgBadgeVariant.solid,
         ),
         color: context.knobs.list(
           label: 'Color',
-          options: AppBadgeColor.values,
-          initialOption: AppBadgeColor.brand,
+          options: FgBadgeColor.values,
+          initialOption: FgBadgeColor.brand,
         ),
         shape: context.knobs.list(
           label: 'Shape',
-          options: AppBadgeShape.values,
-          initialOption: AppBadgeShape.standard,
+          options: FgBadgeShape.values,
+          initialOption: FgBadgeShape.standard,
         ),
       ),
     ),
@@ -37,10 +37,10 @@ Widget buildAppBadgePlayground(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'Showcase',
-  type: AppBadge,
-  path: 'Design System/Atoms/Badges',
+  type: FgBadge,
+  path: 'Design System/Atoms',
 )
-Widget buildAppBadgeShowcase(BuildContext context) {
+Widget buildFgBadgeShowcase(BuildContext context) {
   return const Scaffold(
     backgroundColor: AppColors.gray950,
     body: SingleChildScrollView(
@@ -48,11 +48,11 @@ Widget buildAppBadgeShowcase(BuildContext context) {
       child: Center(
         child: Column(
           children: [
-            _BadgeSection(title: 'Solid', variant: AppBadgeVariant.solid),
+            _BadgeSection(title: 'Solid', variant: FgBadgeVariant.solid),
             SizedBox(height: 32),
-            _BadgeSection(title: 'Outline', variant: AppBadgeVariant.outline),
+            _BadgeSection(title: 'Outline', variant: FgBadgeVariant.outline),
             SizedBox(height: 32),
-            _BadgeSection(title: 'Subtle', variant: AppBadgeVariant.subtle),
+            _BadgeSection(title: 'Subtle', variant: FgBadgeVariant.subtle),
           ],
         ),
       ),
@@ -62,7 +62,7 @@ Widget buildAppBadgeShowcase(BuildContext context) {
 
 class _BadgeSection extends StatelessWidget {
   final String title;
-  final AppBadgeVariant variant;
+  final FgBadgeVariant variant;
 
   const _BadgeSection({required this.title, required this.variant});
 
@@ -77,9 +77,9 @@ class _BadgeSection extends StatelessWidget {
           spacing: 16,
           runSpacing: 16,
           alignment: WrapAlignment.center,
-          children: AppBadgeColor.values
+          children: FgBadgeColor.values
               .map(
-                (color) => AppBadge(
+                (color) => FgBadge(
                   text: color.name,
                   variant: variant,
                   color: color,

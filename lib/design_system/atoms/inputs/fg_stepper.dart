@@ -6,7 +6,7 @@ import '../../tokens/app_animation.dart';
 
 /// Stepper control atom - Increment/decrement for numeric values
 /// Based on HTML mockup: forge.dance_home_dashboard patterns
-class ForgeStepper extends StatelessWidget {
+class FgStepper extends StatelessWidget {
   final int value;
   final int min;
   final int max;
@@ -17,7 +17,7 @@ class ForgeStepper extends StatelessWidget {
   final bool isEnabled;
   final bool showBounds;
 
-  const ForgeStepper({
+  const FgStepper({
     super.key,
     required this.value,
     this.min = 0,
@@ -191,7 +191,7 @@ class _StepperButtonState extends State<_StepperButton> {
 }
 
 /// Horizontal stepper with compact inline design
-class InlineForgeStepper extends StatelessWidget {
+class InlineFgStepper extends StatelessWidget {
   final int value;
   final int min;
   final int max;
@@ -200,7 +200,7 @@ class InlineForgeStepper extends StatelessWidget {
   final String? label;
   final bool isEnabled;
 
-  const InlineForgeStepper({
+  const InlineFgStepper({
     super.key,
     required this.value,
     this.min = 0,
