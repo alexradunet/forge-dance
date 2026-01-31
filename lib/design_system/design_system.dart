@@ -46,6 +46,10 @@ export 'atoms/inputs/fg_stepper.dart';
 export 'atoms/visuals/fg_glass_container.dart';
 export 'atoms/visuals/fg_gradient_overlay.dart';
 export 'atoms/visuals/fg_shimmer.dart';
+export 'atoms/visuals/fg_tooltip.dart';
+export 'atoms/visuals/fg_aspect_ratio.dart';
+export 'atoms/typography/fg_label.dart';
+export 'atoms/surfaces/fg_card.dart';
 
 // Icons
 export 'atoms/icons/fg_icon.dart';
@@ -63,6 +67,9 @@ export 'molecules/cards/tall_feature_card.dart';
 export 'molecules/cards/square_tile.dart';
 export 'molecules/cards/medium_square_card.dart';
 export 'molecules/cards/hero_square_card.dart';
+
+// Layout
+export 'molecules/layout/fg_carousel.dart';
 
 // Controls
 export 'molecules/controls/segmented_control.dart';

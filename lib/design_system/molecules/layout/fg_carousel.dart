@@ -1,27 +1,31 @@
 import 'package:flutter/material.dart';
 
-class AppInteractiveCardDeck extends StatefulWidget {
-  final List<Widget> cards;
-  final Function(int)? onIndexChanged;
+/// A carousel widget for cycling through elements.
+///
+/// Wraps a [PageView] with standardized physics and optional scaling effects.
+class FgCarousel extends StatefulWidget {
+  final List<Widget> items;
+  final ValueChanged<int>? onIndexChanged;
   final bool isEnabled;
   final double viewportFraction;
   final EdgeInsetsGeometry? padding;
+  final bool enableScaleEffect;
 
-  const AppInteractiveCardDeck({
+  const FgCarousel({
     super.key,
-    required this.cards,
+    required this.items,
     this.onIndexChanged,
     this.isEnabled = true,
     this.viewportFraction = 1.0,
     this.padding,
+    this.enableScaleEffect = false,
   });
 
   @override
-  State<AppInteractiveCardDeck> createState() => _AppInteractiveCardDeckState();
+  State<FgCarousel> createState() => _FgCarouselState();
 }
 
-class _AppInteractiveCardDeckState extends State<AppInteractiveCardDeck>
-    with SingleTickerProviderStateMixin {
+class _FgCarouselState extends State<FgCarousel> {
   late PageController _pageController;
   int _currentIndex = 0;
 
@@ -32,7 +36,7 @@ class _AppInteractiveCardDeckState extends State<AppInteractiveCardDeck>
   }
 
   @override
-  void didUpdateWidget(AppInteractiveCardDeck oldWidget) {
+  void didUpdateWidget(FgCarousel oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.viewportFraction != widget.viewportFraction) {
       _pageController.dispose();
@@ -49,13 +53,13 @@ class _AppInteractiveCardDeckState extends State<AppInteractiveCardDeck>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.cards.isEmpty) return const SizedBox.shrink();
+    if (widget.items.isEmpty) return const SizedBox.shrink();
 
     return Padding(
       padding: widget.padding ?? EdgeInsets.zero,
       child: PageView.builder(
         controller: _pageController,
-        itemCount: widget.cards.length,
+        itemCount: widget.items.length,
         physics: widget.isEnabled
             ? const BouncingScrollPhysics()
             : const NeverScrollableScrollPhysics(),
@@ -66,21 +70,17 @@ class _AppInteractiveCardDeckState extends State<AppInteractiveCardDeck>
           widget.onIndexChanged?.call(index);
         },
         itemBuilder: (context, index) {
-          // If viewportFraction is 1.0, we don't need scaling usually,
-          // but we can keep it subtle or remove it.
-          // If users want strictly same width, no scaling is better.
-          final isCurrent = index == _currentIndex;
-          final useScale = widget.viewportFraction < 1.0;
-
-          if (!useScale) {
-            return widget.cards[index];
+          if (!widget.enableScaleEffect) {
+            return widget.items[index];
           }
+
+          final isCurrent = index == _currentIndex;
 
           return AnimatedScale(
             scale: isCurrent ? 1.0 : 0.9,
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeOutCubic,
-            child: widget.cards[index],
+            child: widget.items[index],
           );
         },
       ),

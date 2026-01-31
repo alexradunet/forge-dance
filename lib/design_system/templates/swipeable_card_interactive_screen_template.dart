@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mvvm_riverpod/design_system/design_system.dart';
 
 import '../../design_system/tokens/app_colors.dart';
 import '../../design_system/tokens/app_spacing.dart';
 import '../../design_system/organisms/navigation/app_header.dart';
 import '../../design_system/atoms/progress/fg_progress_bar.dart';
 import '../../design_system/molecules/navigation/app_floating_action_bar.dart';
-import '../../design_system/organisms/cards/app_interactive_card_deck.dart';
 
 /// Template for Interactive Screens with a Swipeable Card Deck
 /// Automatically manages progress based on current card index
@@ -94,8 +94,8 @@ class _SwipeableCardInteractiveScreenTemplateState
                     top: AppSpacing.md,
                     bottom: 100, // Bottom padding for FAB
                   ),
-                  child: AppInteractiveCardDeck(
-                    cards: widget.cards,
+                  child: FgCarousel(
+                    items: widget.cards,
                     // Use viewport fraction 1.0 and explicit padding to ensure precise width matching
                     viewportFraction: 1.0,
                     padding: const EdgeInsets.symmetric(

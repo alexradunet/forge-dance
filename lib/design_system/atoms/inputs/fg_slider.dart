@@ -105,9 +105,9 @@ class FgSlider extends StatelessWidget {
                 Container(
                   height: showBpmStyle ? 6 : 4,
                   decoration: BoxDecoration(
-                    color: AppColors.bgDeep,
-                    borderRadius:
-                        BorderRadius.circular(showBpmStyle ? 3 : 2),
+                    color:
+                        AppColors.gray800, // Changed from bgDeep to be visible
+                    borderRadius: BorderRadius.circular(showBpmStyle ? 3 : 2),
                     border: showBpmStyle
                         ? Border.all(color: AppColors.borderSubtle, width: 1)
                         : null,
@@ -119,8 +119,7 @@ class FgSlider extends StatelessWidget {
                             5,
                             (index) => Container(
                               width: 1,
-                              color:
-                                  AppColors.crystalWhite.withOpacity(0.1),
+                              color: AppColors.crystalWhite.withOpacity(0.1),
                             ),
                           ),
                         )
@@ -133,18 +132,24 @@ class FgSlider extends StatelessWidget {
                   curve: AppAnimation.easeOut,
                   height: showBpmStyle ? 6 : 4,
                   width: percentage *
-                      (MediaQuery.of(context).size.width - 48), // Account for padding
+                      (MediaQuery.of(context).size.width -
+                          48), // Account for padding
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: showBpmStyle
+                      colors: !isEnabled
                           ? [
-                              AppColors.forgeFire.withOpacity(0.5),
-                              AppColors.forgeFire,
+                              AppColors.gray700,
+                              AppColors.gray600,
                             ]
-                          : [
-                              AppColors.crystalWhite.withOpacity(0.4),
-                              AppColors.crystalWhite.withOpacity(0.6),
-                            ],
+                          : showBpmStyle
+                              ? [
+                                  AppColors.forgeFire.withOpacity(0.5),
+                                  AppColors.forgeFire,
+                                ]
+                              : [
+                                  AppColors.crystalWhite.withOpacity(0.4),
+                                  AppColors.crystalWhite.withOpacity(0.6),
+                                ],
                     ),
                     borderRadius: const BorderRadius.only(
                       topLeft: Radius.circular(3),
@@ -164,29 +169,34 @@ class FgSlider extends StatelessWidget {
                     width: 24,
                     height: 24,
                     decoration: BoxDecoration(
-                      color: AppColors.surfaceDark,
+                      color:
+                          isEnabled ? AppColors.surfaceDark : AppColors.gray800,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: showBpmStyle
-                            ? AppColors.forgeFire
-                            : AppColors.crystalWhite,
+                        color: !isEnabled
+                            ? AppColors.gray600
+                            : showBpmStyle
+                                ? AppColors.forgeFire
+                                : AppColors.crystalWhite,
                         width: 2,
                       ),
-                      boxShadow: showBpmStyle
-                          ? [
-                              BoxShadow(
-                                color: AppColors.forgeFire.withOpacity(0.8),
-                                blurRadius: 12,
-                                spreadRadius: 0,
-                              ),
-                            ]
-                          : [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.3),
-                                blurRadius: 4,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
+                      boxShadow: !isEnabled
+                          ? null // No shadow when disabled
+                          : showBpmStyle
+                              ? [
+                                  BoxShadow(
+                                    color: AppColors.forgeFire.withOpacity(0.8),
+                                    blurRadius: 12,
+                                    spreadRadius: 0,
+                                  ),
+                                ]
+                              : [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    blurRadius: 4,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
                     ),
                     child: showBpmStyle
                         ? Center(

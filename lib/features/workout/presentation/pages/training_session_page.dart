@@ -6,7 +6,7 @@ import '../../../../design_system/molecules/progress/app_progress_segments.dart'
 import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/organisms/cards/app_workout_intro_card.dart';
 import '../../../../design_system/organisms/cards/app_session_complete_card.dart';
-import '../../../../design_system/organisms/cards/app_interactive_card_deck.dart';
+import '../../../../design_system/design_system.dart';
 import '../../../../design_system/organisms/cards/app_beat_tap_card.dart';
 import '../../../../design_system/atoms/buttons/fg_button.dart';
 
@@ -89,8 +89,10 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
               'Master your movement with this fundamental sequence designed to improve awareness and stability.',
         );
       case TrainingSessionState.active:
-        return AppInteractiveCardDeck(
-          cards: List.generate(
+        return FgCarousel(
+          viewportFraction: 1.0, // Or whatever the previous default was
+          enableScaleEffect: true, // Assuming the deck had this
+          items: List.generate(
             _totalExercises,
             (index) => AppBeatTapCard(
               title: 'EXERCISE ${index + 1}',
