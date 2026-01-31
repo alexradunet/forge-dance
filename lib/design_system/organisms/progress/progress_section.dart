@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mvvm_riverpod/design_system/atoms/progress/app_progress_bar.dart';
 
 import '../../../design_system/tokens/app_colors.dart';
 import '../../../design_system/tokens/app_spacing.dart';
 import '../../../design_system/tokens/app_typography.dart';
-import '../../molecules/cards/stat_card.dart';
-import '../../atoms/progress/linear_progress.dart';
 
 /// Progress section organism - Combines stat cards, progress bars, level indicators
 class ProgressSection extends StatelessWidget {
@@ -60,13 +59,6 @@ class ProgressSection extends StatelessWidget {
                   padding: EdgeInsets.only(
                     right: index < stats.length - 1 ? AppSpacing.md : 0,
                   ),
-                  child: StatCard(
-                    label: stat.label,
-                    value: stat.value,
-                    unit: stat.unit,
-                    icon: stat.icon,
-                    iconColor: stat.iconColor,
-                  ),
                 ),
               );
             }),
@@ -101,9 +93,9 @@ class ProgressSection extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.md),
-                LinearProgress(
-                  progress: levelProgress!.current / levelProgress!.target,
-                  segments: 5,
+                AppProgressBar(
+                  value: levelProgress!.current / levelProgress!.target,
+                  height: 6,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(

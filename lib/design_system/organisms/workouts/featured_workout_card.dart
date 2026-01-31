@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import '../../molecules/cards/wod_card.dart';
+import 'package:flutter_mvvm_riverpod/design_system/design_system.dart';
 
 /// Featured workout card organism - Hero card with gradient overlay, tags, CTA button
 /// This is essentially a wrapper around WODCard with specific styling for featured content
@@ -28,15 +27,10 @@ class FeaturedWorkoutCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WODCard(
+    return FeatureCard(
       title: title,
       subtitle: subtitle,
       imageUrl: imageUrl,
-      level: level,
-      duration: duration,
-      focus: focus,
-      forgePoints: forgePoints,
-      onStart: onStart,
     );
   }
 }

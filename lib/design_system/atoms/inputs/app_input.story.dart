@@ -6,28 +6,26 @@ import 'package:flutter_mvvm_riverpod/design_system/atoms/inputs/app_input.dart'
 import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
 
 @widgetbook.UseCase(
-  name: 'Playground',
+  name: 'Default',
   type: AppInput,
-  path: 'Design System/Atoms/AppInput',
+  path: 'Design System/Atoms/Inputs',
 )
-Widget buildAppInputPlayground(BuildContext context) {
+Widget buildAppInputDefault(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.bgDeep,
     body: Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: AppInput(
-          label: context.knobs.string(label: 'Label', initialValue: 'Email'),
-          hintText: context.knobs
-              .string(label: 'Hint', initialValue: 'Enter your email'),
-          errorText:
-              context.knobs.boolean(label: 'Show Error', initialValue: false)
-                  ? 'Invalid email address'
-                  : null,
+          label: context.knobs
+              .string(label: 'Label', initialValue: 'Email Address'),
+          placeholder: context.knobs
+              .string(label: 'Placeholder', initialValue: 'Enter your email'),
+          prefixIcon: Icons.email_outlined,
+          errorText: context.knobs.stringOrNull(label: 'Error Text'),
+          helperText: context.knobs.stringOrNull(label: 'Helper Text'),
           isEnabled:
-              context.knobs.boolean(label: 'Is Enabled', initialValue: true),
-          obscureText:
-              context.knobs.boolean(label: 'Obscure Text', initialValue: false),
+              context.knobs.boolean(label: 'Enabled', initialValue: true),
         ),
       ),
     ),
@@ -35,40 +33,65 @@ Widget buildAppInputPlayground(BuildContext context) {
 }
 
 @widgetbook.UseCase(
-  name: 'States',
+  name: 'Password',
   type: AppInput,
-  path: 'Design System/Atoms/AppInput',
+  path: 'Design System/Atoms/Inputs',
 )
-Widget buildAppInputStates(BuildContext context) {
+Widget buildAppInputPassword(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.bgDeep,
-    body: SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: const [
-          AppInput(
-            label: 'Default',
-            hintText: 'Type something...',
-          ),
-          SizedBox(height: 24),
-          AppInput(
-            label: 'With Prefix Icon',
-            hintText: 'Search...',
-            prefixIcon: Icon(Icons.search, color: AppColors.textMuted),
-          ),
-          SizedBox(height: 24),
-          AppInput(
-            label: 'With Error',
-            hintText: 'Wrong input',
-            errorText: 'This field is required',
-          ),
-          SizedBox(height: 24),
-          AppInput(
-            label: 'Disabled',
-            hintText: 'Cannot type here',
-            isEnabled: false,
-          ),
-        ],
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: AppInput.password(
+          label: 'Password',
+          placeholder: 'Enter your password',
+        ),
+      ),
+    ),
+  );
+}
+
+@widgetbook.UseCase(
+  name: 'Search',
+  type: AppInput,
+  path: 'Design System/Atoms/Inputs',
+)
+Widget buildAppInputSearch(BuildContext context) {
+  final controller = TextEditingController();
+
+  return Scaffold(
+    backgroundColor: AppColors.bgDeep,
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: AppInput.search(
+          placeholder: 'Search for lessons...',
+          controller: controller,
+          showFilter: true,
+          onFilterPressed: () {},
+          onClear: () {},
+        ),
+      ),
+    ),
+  );
+}
+
+@widgetbook.UseCase(
+  name: 'Multiline',
+  type: AppInput,
+  path: 'Design System/Atoms/Inputs',
+)
+Widget buildAppInputMultiline(BuildContext context) {
+  return Scaffold(
+    backgroundColor: AppColors.bgDeep,
+    body: Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: AppInput.multiline(
+          label: 'Feedback',
+          placeholder: 'Tell us what you think...',
+        ),
       ),
     ),
   );

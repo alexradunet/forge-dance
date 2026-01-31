@@ -18,7 +18,7 @@ export 'atoms/buttons/app_button.dart';
 export 'atoms/badges/app_badge.dart';
 
 // Progress
-export 'atoms/progress/linear_progress.dart';
+export 'atoms/progress/app_progress_bar.dart';
 
 // Avatars
 export 'atoms/avatars/user_avatar.dart';
@@ -33,14 +33,11 @@ export 'atoms/dividers/gradient_divider.dart';
 export 'atoms/empty_states/empty_state.dart';
 
 // Inputs
-export 'atoms/inputs/text_input.dart';
-export 'atoms/inputs/password_input.dart';
-export 'atoms/inputs/search_input.dart';
+export 'atoms/inputs/app_input.dart';
 export 'atoms/inputs/toggle_switch.dart';
 export 'atoms/inputs/radio_button.dart';
 export 'atoms/inputs/checkbox_item.dart';
 export 'atoms/inputs/slider_control.dart';
-export 'atoms/inputs/forge_text_input.dart';
 export 'atoms/inputs/forge_stepper.dart';
 
 // ───────────────────────────────────────────────────────────
@@ -48,26 +45,23 @@ export 'atoms/inputs/forge_stepper.dart';
 // ───────────────────────────────────────────────────────────
 
 // Cards
-export 'molecules/cards/module_card.dart';
-export 'molecules/cards/wod_card.dart';
-export 'molecules/cards/stat_card.dart';
-export 'molecules/cards/exercise_card.dart';
 export 'molecules/cards/wide_hero_card.dart';
 export 'molecules/cards/feature_card.dart';
-export 'molecules/cards/compact_card.dart';
 export 'molecules/cards/vertical_compact_card.dart';
 export 'molecules/cards/portrait_card.dart';
 export 'molecules/cards/tall_feature_card.dart';
 export 'molecules/cards/square_tile.dart';
 export 'molecules/cards/medium_square_card.dart';
 export 'molecules/cards/hero_square_card.dart';
-export 'molecules/cards/lesson_progress_card.dart';
 
 // Controls
 export 'molecules/controls/segmented_control.dart';
 export 'molecules/controls/bpm_widget.dart';
 export 'molecules/controls/stepper_control.dart';
 export 'molecules/controls/pagination_dots.dart';
+
+// Learning
+export 'molecules/learning/app_lesson_node.dart';
 
 // Inputs
 export 'molecules/inputs/checkbox_group.dart';
@@ -76,24 +70,18 @@ export 'molecules/inputs/radio_group.dart';
 // Feedback
 export 'molecules/feedback/toast_notification.dart';
 
-// Charts
-export 'molecules/charts/activity_chart.dart';
-export 'molecules/charts/streak_heatmap.dart';
-
 // ───────────────────────────────────────────────────────────
 // ORGANISMS
 // ───────────────────────────────────────────────────────────
 
 // Navigation
 export 'organisms/navigation/bottom_nav_bar.dart';
-export 'organisms/navigation/forge_bottom_nav_bar.dart';
 
 // Modals
 export 'organisms/modals/forge_bottom_sheet.dart';
 export 'organisms/modals/forge_alert_dialog.dart';
 
 // Lessons
-export 'organisms/lessons/lesson_node.dart';
 export 'organisms/lessons/theory_deck_card.dart';
 
 // Progress

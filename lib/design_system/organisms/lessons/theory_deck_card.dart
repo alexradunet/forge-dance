@@ -4,6 +4,7 @@ import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
 import '../../tokens/app_border_radius.dart';
 import '../../tokens/app_animation.dart';
+import '../../atoms/progress/app_progress_bar.dart';
 
 /// Theory Deck Card - Interactive flashcard-style lesson card
 /// Based on HTML mockup: forge_theory__interactive_deck (Beat Tap, Creative Experiment)
@@ -42,39 +43,11 @@ class TheoryDeckCard extends StatelessWidget {
         // Progress bar
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            children: List.generate(
-              totalSteps,
-              (index) {
-                final isActive = index == currentStep - 1;
-                final isCompleted = index < currentStep - 1;
-                return Expanded(
-                  child: Container(
-                    height: 6,
-                    margin: EdgeInsets.only(
-                      right: index < totalSteps - 1 ? 8 : 0,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isActive
-                          ? accentColor
-                          : isCompleted
-                              ? accentColor.withAlpha((0.3 * 255).round())
-                              : AppColors.crystalWhite.withAlpha((0.2 * 255).round()),
-                      borderRadius: BorderRadius.circular(3),
-                      boxShadow: isActive
-                          ? [
-                              BoxShadow(
-                                color: accentColor.withAlpha((0.5 * 255).round()),
-                                blurRadius: 8,
-                                spreadRadius: 0,
-                              ),
-                            ]
-                          : null,
-                    ),
-                  ),
-                );
-              },
-            ),
+          child: AppProgressBar.segmented(
+            total: totalSteps,
+            current: currentStep - 1,
+            height: 6,
+            color: accentColor,
           ),
         ),
 
@@ -96,7 +69,8 @@ class TheoryDeckCard extends StatelessWidget {
                     color: AppColors.surfaceDark,
                     borderRadius: AppBorderRadius.xxLarge,
                     border: Border.all(
-                      color: AppColors.crystalWhite.withAlpha((0.1 * 255).round()),
+                      color:
+                          AppColors.crystalWhite.withAlpha((0.1 * 255).round()),
                       width: 1,
                     ),
                   ),
@@ -114,7 +88,8 @@ class TheoryDeckCard extends StatelessWidget {
                     color: AppColors.surfaceDark,
                     borderRadius: AppBorderRadius.xxLarge,
                     border: Border.all(
-                      color: AppColors.crystalWhite.withAlpha((0.1 * 255).round()),
+                      color:
+                          AppColors.crystalWhite.withAlpha((0.1 * 255).round()),
                       width: 1,
                     ),
                   ),
@@ -163,10 +138,12 @@ class TheoryDeckCard extends StatelessWidget {
                                   width: 36,
                                   height: 36,
                                   decoration: BoxDecoration(
-                                    color: AppColors.crystalWhite.withAlpha((0.05 * 255).round()),
+                                    color: AppColors.crystalWhite
+                                        .withAlpha((0.05 * 255).round()),
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                      color: AppColors.crystalWhite.withAlpha((0.1 * 255).round()),
+                                      color: AppColors.crystalWhite
+                                          .withAlpha((0.1 * 255).round()),
                                       width: 1,
                                     ),
                                   ),
@@ -225,14 +202,16 @@ class TheoryDeckCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             border: Border(
                               top: BorderSide(
-                                color: AppColors.crystalWhite.withAlpha((0.1 * 255).round()),
+                                color: AppColors.crystalWhite
+                                    .withAlpha((0.1 * 255).round()),
                                 width: 1,
                               ),
                             ),
                           ),
                           child: ClipRRect(
                             child: Container(
-                              color: AppColors.bgDeep.withAlpha((0.6 * 255).round()),
+                              color: AppColors.bgDeep
+                                  .withAlpha((0.6 * 255).round()),
                               child: bottomContent,
                             ),
                           ),
@@ -333,12 +312,14 @@ class _BeatTapZoneState extends State<BeatTapZone>
             // Streak badge
             if (widget.streak > 0)
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
                   color: AppColors.crystalWhite.withAlpha((0.05 * 255).round()),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: AppColors.crystalWhite.withAlpha((0.1 * 255).round()),
+                    color:
+                        AppColors.crystalWhite.withAlpha((0.1 * 255).round()),
                     width: 1,
                   ),
                 ),
@@ -430,7 +411,8 @@ class _BeatTapZoneState extends State<BeatTapZone>
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.forgeFire.withAlpha((0.4 * 255).round()),
+                              color: AppColors.forgeFire
+                                  .withAlpha((0.4 * 255).round()),
                               blurRadius: _isPressed ? 30 : 15,
                               spreadRadius: _isPressed ? 5 : 0,
                             ),
@@ -443,7 +425,8 @@ class _BeatTapZoneState extends State<BeatTapZone>
                               Icons.touch_app,
                               color: _isPressed
                                   ? AppColors.crystalWhite
-                                  : AppColors.forgeFire.withAlpha((0.5 * 255).round()),
+                                  : AppColors.forgeFire
+                                      .withAlpha((0.5 * 255).round()),
                               size: 32,
                             ),
                             const SizedBox(height: 4),
@@ -452,7 +435,8 @@ class _BeatTapZoneState extends State<BeatTapZone>
                               style: AppTypography.h2.copyWith(
                                 color: _isPressed
                                     ? AppColors.crystalWhite
-                                    : AppColors.forgeFire.withAlpha((0.8 * 255).round()),
+                                    : AppColors.forgeFire
+                                        .withAlpha((0.8 * 255).round()),
                                 fontSize: 20,
                                 letterSpacing: 2,
                               ),

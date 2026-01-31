@@ -2,118 +2,359 @@ import 'package:flutter/material.dart';
 
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
+import '../../tokens/app_animation.dart';
 import '../../tokens/app_border_radius.dart';
-import '../../tokens/app_spacing.dart';
 
-class AppInput extends StatelessWidget {
+enum AppInputVariant {
+  standard,
+  password,
+  search,
+  multiline,
+}
+
+class AppInput extends StatefulWidget {
   final String? label;
-  final String? hintText;
+  final String? placeholder;
   final String? errorText;
-  final bool obscureText;
-  final Widget? prefixIcon;
-  final Widget? suffixIcon;
+  final String? helperText;
   final TextEditingController? controller;
   final ValueChanged<String>? onChanged;
-  final TextInputType? keyboardType;
+  final ValueChanged<String>? onSubmitted;
+  final IconData? prefixIcon;
+  final Widget? suffixWidget;
   final bool isEnabled;
   final bool autofocus;
+  final FocusNode? focusNode;
+  final AppInputVariant variant;
 
   const AppInput({
     super.key,
     this.label,
-    this.hintText,
+    this.placeholder,
     this.errorText,
-    this.obscureText = false,
-    this.prefixIcon,
-    this.suffixIcon,
+    this.helperText,
     this.controller,
     this.onChanged,
-    this.keyboardType,
+    this.onSubmitted,
+    this.prefixIcon,
+    this.suffixWidget,
     this.isEnabled = true,
     this.autofocus = false,
+    this.focusNode,
+    this.variant = AppInputVariant.standard,
   });
+
+  factory AppInput.password({
+    Key? key,
+    String? label = 'Password',
+    String? placeholder = 'Enter password',
+    TextEditingController? controller,
+    String? errorText,
+    ValueChanged<String>? onChanged,
+    ValueChanged<String>? onSubmitted,
+    bool isEnabled = true,
+  }) {
+    return AppInput(
+      key: key,
+      label: label,
+      placeholder: placeholder,
+      controller: controller,
+      errorText: errorText,
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
+      isEnabled: isEnabled,
+      prefixIcon: Icons.lock_outline,
+      variant: AppInputVariant.password,
+    );
+  }
+
+  factory AppInput.search({
+    Key? key,
+    String? placeholder = 'Search...',
+    TextEditingController? controller,
+    ValueChanged<String>? onChanged,
+    ValueChanged<String>? onSubmitted,
+    VoidCallback? onClear,
+    bool isEnabled = true,
+    bool showFilter = false,
+    VoidCallback? onFilterPressed,
+  }) {
+    return AppInput(
+      key: key,
+      placeholder: placeholder,
+      controller: controller,
+      onChanged: onChanged,
+      onSubmitted: onSubmitted,
+      isEnabled: isEnabled,
+      prefixIcon: Icons.search,
+      variant: AppInputVariant.search,
+      suffixWidget: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (controller != null && onClear != null)
+            _ClearButton(controller: controller, onClear: onClear),
+          if (showFilter && onFilterPressed != null) ...[
+            const SizedBox(width: 8),
+            _FilterButton(onPressed: onFilterPressed),
+          ],
+        ],
+      ),
+    );
+  }
+
+  factory AppInput.multiline({
+    Key? key,
+    String? label,
+    String? placeholder,
+    TextEditingController? controller,
+    ValueChanged<String>? onChanged,
+    bool isEnabled = true,
+  }) {
+    return AppInput(
+      key: key,
+      label: label,
+      placeholder: placeholder,
+      controller: controller,
+      onChanged: onChanged,
+      isEnabled: isEnabled,
+      variant: AppInputVariant.multiline,
+    );
+  }
+
+  @override
+  State<AppInput> createState() => _AppInputState();
+}
+
+class _AppInputState extends State<AppInput> {
+  late FocusNode _focusNode;
+  bool _isFocused = false;
+  bool _obscureText = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = widget.focusNode ?? FocusNode();
+    _focusNode.addListener(_handleFocusChange);
+
+    if (widget.variant == AppInputVariant.password) {
+      _obscureText = true;
+    }
+  }
+
+  @override
+  void dispose() {
+    if (widget.focusNode == null) {
+      _focusNode.dispose();
+    }
+    super.dispose();
+  }
+
+  void _handleFocusChange() {
+    setState(() {
+      _isFocused = _focusNode.hasFocus;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final hasError = widget.errorText != null && widget.errorText!.isNotEmpty;
+    final isMultimedia = widget.variant == AppInputVariant.multiline;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (label != null) ...[
-          Text(
-            label!,
-            style: AppTypography.label.copyWith(
-              color: AppColors.textMuted,
+        // Label
+        if (widget.label != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: Text(
+              widget.label!.toUpperCase(),
+              style: AppTypography.overline.copyWith(
+                color: hasError
+                    ? AppColors.passionRed
+                    : _isFocused
+                        ? AppColors.forgeFire
+                        : AppColors.textMuted,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
-          const SizedBox(height: AppSpacing.sm),
-        ],
-        TextField(
-          controller: controller,
-          onChanged: onChanged,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          enabled: isEnabled,
-          autofocus: autofocus,
-          style: AppTypography.body.copyWith(
-            color: AppColors.textMain,
+
+        // Input container with glow effect
+        AnimatedContainer(
+          duration: AppAnimation.fast,
+          curve: AppAnimation.easeOut,
+          decoration: BoxDecoration(
+            color: AppColors.surfaceDark,
+            borderRadius: AppBorderRadius.extraLarge,
+            border: Border.all(
+              color: hasError
+                  ? AppColors.passionRed
+                  : _isFocused
+                      ? AppColors.forgeFire.withAlpha(128)
+                      : AppColors.crystalWhite.withAlpha(26),
+              width: _isFocused ? 1.5 : 1,
+            ),
+            boxShadow: _isFocused && !hasError
+                ? [
+                    BoxShadow(
+                      color: AppColors.forgeFire.withAlpha(51),
+                      blurRadius: 12,
+                      spreadRadius: 0,
+                    ),
+                  ]
+                : null,
           ),
-          cursorColor: AppColors.forgeFire,
-          decoration: InputDecoration(
-            hintText: hintText,
-            hintStyle: AppTypography.body.copyWith(
-              color: AppColors.textDark,
-            ),
-            errorText: errorText,
-            errorStyle: AppTypography.caption.copyWith(
-              color: AppColors.passionRed,
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.lg,
-              vertical: AppSpacing.md,
-            ),
-            filled: true,
-            fillColor: AppColors.surfaceDark.withOpacity(0.5),
-            prefixIcon: prefixIcon,
-            suffixIcon: suffixIcon,
-            enabledBorder: OutlineInputBorder(
-              borderRadius: AppBorderRadius.medium,
-              borderSide: const BorderSide(
-                color: AppColors.neutral700,
-                width: 1,
+          child: Row(
+            crossAxisAlignment: isMultimedia
+                ? CrossAxisAlignment.start
+                : CrossAxisAlignment.center,
+            children: [
+              // Prefix icon
+              if (widget.prefixIcon != null)
+                Padding(
+                  padding: EdgeInsets.only(
+                    left: 16,
+                    top: isMultimedia ? 14 : 0,
+                  ),
+                  child: Icon(
+                    widget.prefixIcon,
+                    color: _isFocused
+                        ? AppColors.crystalWhite
+                        : AppColors.textMuted,
+                    size: 20,
+                  ),
+                ),
+
+              // Text field
+              Expanded(
+                child: TextField(
+                  controller: widget.controller,
+                  focusNode: _focusNode,
+                  onChanged: widget.onChanged,
+                  onSubmitted: widget.onSubmitted,
+                  obscureText: _obscureText,
+                  keyboardType: isMultimedia
+                      ? TextInputType.multiline
+                      : TextInputType.text,
+                  enabled: widget.isEnabled,
+                  autofocus: widget.autofocus,
+                  maxLines: isMultimedia ? 5 : 1,
+                  minLines: isMultimedia ? 3 : 1,
+                  style: AppTypography.bodySmall.copyWith(
+                    color: widget.isEnabled
+                        ? AppColors.crystalWhite
+                        : AppColors.textMuted,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  cursorColor: AppColors.forgeFire,
+                  decoration: InputDecoration(
+                    hintText: widget.placeholder,
+                    hintStyle: AppTypography.bodySmall.copyWith(
+                      color: AppColors.textMuted.withAlpha(153),
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: widget.prefixIcon != null ? 12 : 16,
+                      vertical: 14,
+                    ),
+                    isDense: true,
+                  ),
+                ),
               ),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: AppBorderRadius.medium,
-              borderSide: const BorderSide(
-                color: AppColors.forgeFire,
-                width: 1.5,
-              ),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: AppBorderRadius.medium,
-              borderSide: const BorderSide(
-                color: AppColors.passionRed,
-                width: 1,
-              ),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: AppBorderRadius.medium,
-              borderSide: const BorderSide(
-                color: AppColors.passionRed,
-                width: 1.5,
-              ),
-            ),
-            disabledBorder: OutlineInputBorder(
-              borderRadius: AppBorderRadius.medium,
-              borderSide: BorderSide(
-                color: AppColors.neutral700.withOpacity(0.5),
-                width: 1,
-              ),
-            ),
+
+              // Suffix widget
+              if (widget.variant == AppInputVariant.password)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: IconButton(
+                    icon: Icon(
+                      _obscureText
+                          ? Icons.visibility_outlined
+                          : Icons.visibility_off_outlined,
+                      color: AppColors.textMuted,
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureText = !_obscureText;
+                      });
+                    },
+                  ),
+                )
+              else if (widget.suffixWidget != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: widget.suffixWidget,
+                ),
+            ],
           ),
         ),
+
+        // Error or helper text
+        if (hasError || widget.helperText != null)
+          Padding(
+            padding: const EdgeInsets.only(top: 6, left: 4),
+            child: Text(
+              widget.errorText ?? widget.helperText ?? '',
+              style: AppTypography.caption.copyWith(
+                color: hasError ? AppColors.passionRed : AppColors.textMuted,
+                fontSize: 11,
+              ),
+            ),
+          ),
       ],
+    );
+  }
+}
+
+class _ClearButton extends StatelessWidget {
+  final TextEditingController controller;
+  final VoidCallback onClear;
+
+  const _ClearButton({required this.controller, required this.onClear});
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: controller,
+      builder: (context, value, child) {
+        if (value.text.isEmpty) return const SizedBox.shrink();
+
+        return IconButton(
+          icon: const Icon(Icons.close, color: AppColors.textMuted, size: 18),
+          onPressed: () {
+            controller.clear();
+            onClear();
+          },
+        );
+      },
+    );
+  }
+}
+
+class _FilterButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _FilterButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: AppColors.crystalWhite.withAlpha(13),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Icon(
+          Icons.tune,
+          color: AppColors.textMuted,
+          size: 18,
+        ),
+      ),
     );
   }
 }
