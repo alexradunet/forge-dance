@@ -17,7 +17,7 @@ Widget buildSliderPlayground(BuildContext context) {
         padding: const EdgeInsets.all(32),
         child: FgSlider(
           value: context.knobs.double
-              .slider(label: 'Value', initialValue: 0.5, min: 0, max: 1),
+              .slider(label: 'Value', initialValue: 50, min: 0, max: 100),
           isEnabled:
               context.knobs.boolean(label: 'Enabled', initialValue: true),
           showBpmStyle:

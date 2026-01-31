@@ -24,6 +24,7 @@ export 'atoms/branding/fg_logo.dart';
 
 // Progress
 export 'atoms/progress/fg_progress_bar.dart';
+export 'atoms/progress/fg_spinner.dart';
 
 // Avatars
 export 'atoms/avatars/fg_avatar.dart';
@@ -48,6 +49,8 @@ export 'atoms/visuals/fg_gradient_overlay.dart';
 export 'atoms/visuals/fg_shimmer.dart';
 export 'atoms/visuals/fg_tooltip.dart';
 export 'atoms/visuals/fg_aspect_ratio.dart';
+export 'atoms/visuals/fg_image.dart';
+export 'atoms/visuals/fg_rating.dart';
 export 'atoms/typography/fg_label.dart';
 export 'atoms/surfaces/fg_card.dart';
 
