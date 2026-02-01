@@ -98,10 +98,3 @@ export 'organisms/modals/forge_alert_dialog.dart';
 // Progress
 export 'organisms/progress/progress_section.dart';
 export 'organisms/progress/stats_breakdown.dart';
-
-// ───────────────────────────────────────────────────────────
-// TEMPLATES
-// ───────────────────────────────────────────────────────────
-
-export 'templates/interactive_card_template.dart';
-export 'templates/swipeable_card_interactive_screen_template.dart';
