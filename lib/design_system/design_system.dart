@@ -76,9 +76,6 @@ export 'molecules/feedback/fg_empty.dart';
 // ORGANISMS
 // ───────────────────────────────────────────────────────────
 
-// Navigation
-export 'organisms/navigation/bottom_nav_bar.dart';
-
 // Modals
 export 'organisms/modals/forge_bottom_sheet.dart';
 export 'organisms/modals/forge_alert_dialog.dart';
