@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/molecules/navigation/app_floating_action_bar.dart';
-import '../../../../design_system/molecules/progress/app_progress_segments.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/organisms/cards/app_workout_intro_card.dart';
 import '../../../../design_system/organisms/cards/app_session_complete_card.dart';
 import '../../../../design_system/design_system.dart';
-import '../../../../design_system/organisms/cards/app_beat_tap_card.dart';
 import '../../../../design_system/atoms/buttons/fg_button.dart';
 
 enum TrainingSessionState { intro, active, complete }
@@ -52,12 +50,6 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
                     ? 'Completed'
                     : 'Today\'s WOD',
               ),
-              if (_state == TrainingSessionState.active)
-                AppProgressSegments(
-                  total: _totalExercises,
-                  current: _currentExercise,
-                  isCumulative: true,
-                ),
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 24),
@@ -94,9 +86,7 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
           enableScaleEffect: true, // Assuming the deck had this
           items: List.generate(
             _totalExercises,
-            (index) => AppBeatTapCard(
-              title: 'EXERCISE ${index + 1}',
-            ),
+            (index) => const SizedBox.shrink(),
           ),
           onIndexChanged: (index) {
             setState(() {
