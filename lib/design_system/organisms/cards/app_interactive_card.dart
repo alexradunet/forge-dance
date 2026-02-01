@@ -27,8 +27,6 @@ class AppInteractiveCard extends StatefulWidget {
   final VoidCallback? onToggleFavorite;
   final Widget? footer;
 
-  final bool mini;
-
   const AppInteractiveCard({
     super.key,
     required this.title,
@@ -49,7 +47,6 @@ class AppInteractiveCard extends StatefulWidget {
     this.isFavorited = false,
     this.onToggleFavorite,
     this.footer,
-    this.mini = false,
   });
 
   @override
@@ -68,31 +65,37 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
 
   @override
   Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0, end: _isFlipped ? 180 : 0),
-      duration: const Duration(milliseconds: 600),
-      curve: Curves.easeInOutBack,
-      builder: (context, angle, child) {
-        final isBackVisible = angle >= 90;
+    return LayoutBuilder(builder: (context, constraints) {
+      // Determine if we are in a "mini" context based on width.
+      // Adjust threshold as needed. 220 seems like a reasonable cutoff for a full card vs tile.
+      final isMini = constraints.maxWidth < 220;
 
-        return Transform(
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.001) // perspective
-            ..rotateY(angle * pi / 180),
-          alignment: Alignment.center,
-          child: isBackVisible
-              ? Transform(
-                  transform: Matrix4.identity()..rotateY(pi),
-                  alignment: Alignment.center,
-                  child: _buildBack(),
-                )
-              : _buildFront(),
-        );
-      },
-    );
+      return TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0, end: _isFlipped ? 180 : 0),
+        duration: const Duration(milliseconds: 600),
+        curve: Curves.easeInOutBack,
+        builder: (context, angle, child) {
+          final isBackVisible = angle >= 90;
+
+          return Transform(
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001) // perspective
+              ..rotateY(angle * pi / 180),
+            alignment: Alignment.center,
+            child: isBackVisible
+                ? Transform(
+                    transform: Matrix4.identity()..rotateY(pi),
+                    alignment: Alignment.center,
+                    child: _buildBack(isMini),
+                  )
+                : _buildFront(isMini),
+          );
+        },
+      );
+    });
   }
 
-  Widget _buildFront() {
+  Widget _buildFront(bool isMini) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surfaceCard,
@@ -177,7 +180,7 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
                                 widget.subtitle!.toUpperCase(),
                                 style: AppTypography.label.copyWith(
                                   color: AppColors.forgeFire,
-                                  fontSize: widget.mini ? 8 : 9,
+                                  fontSize: isMini ? 8 : 9,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -187,7 +190,7 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
                             textAlign: TextAlign.center,
                             style: AppTypography.h1.copyWith(
                               color: Colors.white,
-                              fontSize: widget.mini ? 24 : 56,
+                              fontSize: isMini ? 20 : 56, // Scaled font size
                               height: 0.9,
                               letterSpacing: 1.2,
                               shadows: [
@@ -204,7 +207,7 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
                   ),
 
                   // Play Button Overlay
-                  if (!widget.mini)
+                  if (!isMini)
                     Center(
                       child: GestureDetector(
                         onTap: widget.onPlayTap,
@@ -226,7 +229,7 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
                     ),
 
                   // Top Right: Favorite
-                  if (!widget.mini)
+                  if (!isMini)
                     Positioned(
                       top: 16,
                       right: 16,
@@ -255,7 +258,7 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
                     ),
 
                   // Bottom Right: Flip
-                  if (!widget.mini)
+                  if (!isMini)
                     Positioned(
                       bottom: 16,
                       right: 16,
@@ -277,7 +280,7 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
                     ),
 
                   // Progress Bar
-                  if (!widget.mini)
+                  if (!isMini)
                     Positioned(
                       bottom: 0,
                       left: 0,
@@ -301,7 +304,7 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
                     ),
 
                   // Progress Handle
-                  if (!widget.mini)
+                  if (!isMini)
                     Positioned(
                       bottom: 0,
                       left: (widget.progress * -10)
@@ -326,7 +329,7 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
             ),
 
             // Footer Strip
-            if (!widget.mini)
+            if (!isMini)
               Container(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -355,7 +358,7 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
     );
   }
 
-  Widget _buildBack() {
+  Widget _buildBack(bool isMini) {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surfaceCard,

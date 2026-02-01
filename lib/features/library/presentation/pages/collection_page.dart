@@ -8,7 +8,7 @@ import '../../../../design_system/atoms/visuals/fg_background.dart';
 
 import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/organisms/cards/app_interactive_card.dart';
-import '../../../../design_system/molecules/cards/app_mini_interactive_card.dart';
+
 import '../../../../design_system/atoms/icons/fg_icon.dart';
 import '../../../../design_system/organisms/modals/app_filter_sheet.dart';
 
@@ -194,7 +194,6 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
                   level: item['level'],
                   style: item['type'] == 'workout' ? 'Workout' : 'Interactive',
                   difficulty: item['level'] ?? item['intensity'],
-                  mini: false,
                   isFavorited: false,
                   onTap: () {},
                 ),
@@ -265,13 +264,16 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
       itemBuilder: (context, index) {
         final item = _items[index];
         if (item['type'] == 'interactive') {
-          return AppMiniInteractiveCard(
+          return AppInteractiveCard(
             title: item['title'],
             level: item['level'],
             backgroundImage: item['backgroundImage'],
+            backTitle: 'PATTERN INFO',
+            backSubtitle: 'Rhythm Structure',
             onTap: () => _showCardPopup(context, item),
           );
         }
+        return null; // Handle non-interactive items if needed or return empty container
       },
     );
   }
