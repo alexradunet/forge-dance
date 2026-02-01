@@ -26,6 +26,7 @@ class AppInteractiveCard extends StatefulWidget {
   final bool isFavorited;
   final VoidCallback? onToggleFavorite;
   final Widget? footer;
+  final bool initialFlipped;
 
   const AppInteractiveCard({
     super.key,
@@ -47,6 +48,7 @@ class AppInteractiveCard extends StatefulWidget {
     this.isFavorited = false,
     this.onToggleFavorite,
     this.footer,
+    this.initialFlipped = false,
   });
 
   @override
@@ -55,7 +57,13 @@ class AppInteractiveCard extends StatefulWidget {
 
 class _AppInteractiveCardState extends State<AppInteractiveCard>
     with SingleTickerProviderStateMixin {
-  bool _isFlipped = false;
+  late bool _isFlipped;
+
+  @override
+  void initState() {
+    super.initState();
+    _isFlipped = widget.initialFlipped;
+  }
 
   void _toggleFlip() {
     setState(() {

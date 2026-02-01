@@ -172,7 +172,8 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
     );
   }
 
-  void _showCardPopup(BuildContext context, Map<String, dynamic> item) {
+  void _showCardPopup(
+      BuildContext context, Map<String, dynamic> item, bool isFlipped) {
     showDialog(
       context: context,
       barrierColor: Colors.black.withOpacity(0.9),
@@ -197,6 +198,7 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
                   difficulty: item['level'] ?? item['intensity'],
                   isFavorited: false,
                   onTap: () {},
+                  initialFlipped: isFlipped,
                 ),
               ),
             ),
@@ -271,7 +273,7 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
             backgroundImage: item['backgroundImage'],
             backTitle: 'PATTERN INFO',
             backSubtitle: 'Rhythm Structure',
-            onTap: () => _showCardPopup(context, item),
+            onTap: (isFlipped) => _showCardPopup(context, item, isFlipped),
           );
         }
         return null; // Handle non-interactive items if needed or return empty container

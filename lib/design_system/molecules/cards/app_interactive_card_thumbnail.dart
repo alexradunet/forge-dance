@@ -11,7 +11,7 @@ class AppInteractiveCardThumbnail extends StatefulWidget {
   final String? subtitle;
   final String backgroundImage;
   final String? level;
-  final VoidCallback? onTap;
+  final Function(bool)? onTap;
 
   // Back content specific to thumbnails (simplified)
   final String? backTitle;
@@ -93,7 +93,7 @@ class _AppInteractiveCardThumbnailState
       ),
       clipBehavior: Clip.antiAlias,
       child: GestureDetector(
-        onTap: widget.onTap,
+        onTap: () => widget.onTap?.call(_isFlipped),
         child: Column(
           children: [
             Expanded(
@@ -224,55 +224,77 @@ class _AppInteractiveCardThumbnailState
             Border.all(color: AppColors.forgeFire.withOpacity(0.5), width: 2),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          Positioned.fill(
-            child: CustomPaint(
-              painter: TechPatternPainter(
-                color: Colors.white,
-                opacity: 0.1,
-                spacing: 20.0,
-                isGrid: true,
+      child: GestureDetector(
+        onTap: () => widget.onTap?.call(_isFlipped),
+        behavior: HitTestBehavior.opaque,
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: CustomPaint(
+                painter: TechPatternPainter(
+                  color: Colors.white,
+                  opacity: 0.1,
+                  spacing: 20.0,
+                  isGrid: true,
+                ),
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (widget.backSubtitle != null)
-                  Text(
-                    widget.backSubtitle!.toUpperCase(),
-                    style: AppTypography.label
-                        .copyWith(color: AppColors.forgeFire, fontSize: 8),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (widget.backSubtitle != null)
+                    Text(
+                      widget.backSubtitle!.toUpperCase(),
+                      style: AppTypography.label
+                          .copyWith(color: AppColors.forgeFire, fontSize: 8),
+                    ),
+                  const SizedBox(height: 4),
+                  if (widget.backTitle != null)
+                    Text(
+                      widget.backTitle!.toUpperCase(),
+                      style: AppTypography.h3
+                          .copyWith(color: Colors.white, fontSize: 16),
+                    ),
+                  const SizedBox(height: 12),
+                  // Hardcoded rhythm visual for now as per original mini card design
+                  // Since this is a thumbnail, it serves as a preview.
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _buildRhythmBar('Kick', 0.8, Colors.orange),
+                        const SizedBox(height: 8),
+                        _buildRhythmBar('Snare', 0.6, Colors.blue),
+                        const SizedBox(height: 8),
+                        _buildRhythmBar('Hi-Hat', 0.9, Colors.purple),
+                      ],
+                    ),
                   ),
-                const SizedBox(height: 4),
-                if (widget.backTitle != null)
-                  Text(
-                    widget.backTitle!.toUpperCase(),
-                    style: AppTypography.h3
-                        .copyWith(color: Colors.white, fontSize: 16),
-                  ),
-                const SizedBox(height: 12),
-                // Hardcoded rhythm visual for now as per original mini card design
-                // Since this is a thumbnail, it serves as a preview.
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _buildRhythmBar('Kick', 0.8, Colors.orange),
-                      const SizedBox(height: 8),
-                      _buildRhythmBar('Snare', 0.6, Colors.blue),
-                      const SizedBox(height: 8),
-                      _buildRhythmBar('Hi-Hat', 0.9, Colors.purple),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+            Positioned(
+              bottom: 8,
+              right: 8,
+              child: GestureDetector(
+                onTap: _toggleFlip,
+                child: Container(
+                  width: 24,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white.withOpacity(0.1),
+                    border: Border.all(color: Colors.white.withOpacity(0.2)),
+                  ),
+                  child:
+                      const Icon(Icons.replay, color: Colors.white, size: 14),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
