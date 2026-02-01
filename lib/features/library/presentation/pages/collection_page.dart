@@ -272,13 +272,6 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
             backgroundImage: item['backgroundImage'],
             onTap: () => _showCardPopup(context, item),
           );
-        } else {
-          return AppMiniWorkoutCard(
-            title: item['title'],
-            duration: item['duration'],
-            intensity: item['intensity'],
-            onTap: () {}, // Can add workout popup if needed
-          );
         }
       },
     );
