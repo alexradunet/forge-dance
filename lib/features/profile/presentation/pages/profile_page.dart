@@ -1,27 +1,17 @@
-import 'dart:io';
-
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../../../../constants/constants.dart';
-import '../../../../extensions/build_context_extension.dart';
-import '../../../../generated/locale_keys.g.dart';
 import '../../../../routing/routes.dart';
 import '../../../../design_system/tokens/app_colors.dart';
-import '../../../../utils/global_loading.dart';
-import '../../../../features/common/ui/widgets/common_dialog.dart';
 import '../../model/profile.dart';
 import '../../ui/view_model/profile_view_model.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/atoms/avatars/fg_avatar.dart';
-import '../../ui/widgets/profile_stats.dart';
-import '../../ui/widgets/achievements_carousel.dart';
-import '../../ui/widgets/profile_menu.dart';
 import '../../../../design_system/atoms/visuals/fg_background.dart';
+import '../../ui/widgets/level_grid.dart';
+import '../../model/level_model.dart';
+import '../pages/level_progression_page.dart'; // Added import
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -31,24 +21,33 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
-  var _version = '';
-
-  // Mock data - replace with actual data from backend
-  final List<Achievement> _achievements = const [
-    Achievement(
-        name: 'Groove Master', icon: Icons.emoji_events, isUnlocked: true),
-    Achievement(name: 'Perfect Week', icon: Icons.stars, isUnlocked: true),
-    Achievement(
-        name: 'Inferno Streak',
-        icon: Icons.local_fire_department,
-        isUnlocked: true),
-    Achievement(name: 'Rhythm King', icon: Icons.music_note, isUnlocked: false),
-  ];
-
   @override
   void initState() {
     super.initState();
-    _getPackageInfo();
+  }
+
+  void _openLevelProgression(BuildContext context, {int? levelId}) {
+    // Find index of levelId or default to current user level
+    // For now, defaulting to first 'current' level or 0
+    final levels = DanceLevel.getAllLevels();
+    int initialIndex = 0;
+
+    if (levelId != null) {
+      initialIndex = levels.indexWhere((l) => l.id == levelId);
+    } else {
+      initialIndex = levels.indexWhere((l) => l.isCurrent);
+    }
+
+    if (initialIndex == -1) initialIndex = 0;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => LevelProgressionPage(
+        initialLevelIndex: initialIndex,
+      ),
+    );
   }
 
   @override
@@ -72,9 +71,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             title: 'PROFILE',
             subtitle: 'Pro Dancer • Lvl 42',
             rightSlot: IconButton(
-              onPressed: () {
-                // Navigate to settings
-              },
+              onPressed: () => context.push(Routes.settings),
               icon: const Icon(
                 Icons.settings,
                 color: AppColors.textMuted,
@@ -88,43 +85,42 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: ProfileStatsRow(
-              streak: 128,
-              totalFP: '14k',
-              rank: '#08',
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 32),
-            child: AchievementsCarousel(
-              achievements: _achievements,
-              onViewAll: () {
-                // TODO: Navigate to achievements page
-              },
-            ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 32, 24, 0),
-            child: _buildSettingsMenu(profile),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 24, 24, 120),
-            child: Center(
-              child: Text(
-                'Version $_version',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textMuted.withOpacity(0.5),
-                ),
+            padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+            child: GestureDetector(
+              onTap: () => _openLevelProgression(context),
+              child: Row(
+                children: [
+                  Text(
+                    'SKILL MASTERY',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1.5,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Divider(
+                      color: Colors.white.withOpacity(0.1),
+                      height: 1,
+                    ),
+                  ),
+                  Icon(
+                    Icons.chevron_right,
+                    color: AppColors.textMuted,
+                    size: 16,
+                  ),
+                ],
               ),
             ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: LevelGrid(
+            levels: DanceLevel.getAllLevels(),
+            onLevelTap: (level) =>
+                _openLevelProgression(context, levelId: level.id),
           ),
         ),
       ],
@@ -162,162 +158,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         const SizedBox(height: 24),
       ],
-    );
-  }
-
-  Widget _buildSettingsMenu(Profile? profile) {
-    return Column(
-      children: [
-        ProfileMenuSection(
-          title: 'General',
-          items: [
-            ProfileMenuItem(
-              icon: Icons.person_outline,
-              label: LocaleKeys.accountInformation.tr(),
-              onTap: () => context.push(
-                Routes.accountInformation,
-                extra: profile ?? Profile(),
-              ),
-            ),
-            ProfileMenuItem(
-              icon: Icons.palette_outlined,
-              label: LocaleKeys.appearances.tr(),
-              onTap: () => context.push(Routes.appearances),
-            ),
-            ProfileMenuItem(
-              icon: Icons.language,
-              label: LocaleKeys.language.tr(),
-              onTap: () => context.push(Routes.languages),
-            ),
-            ProfileMenuItem(
-              icon: Icons.diamond_outlined,
-              label: 'Go Premium',
-              textColor: AppColors.legendGold,
-              onTap: () => context.push(Routes.premium),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        ProfileMenuSection(
-          title: 'Support',
-          items: [
-            ProfileMenuItem(
-              icon: Icons.article_outlined,
-              label: LocaleKeys.termOfService.tr(),
-              onTap: () => context.tryLaunchUrl(Constants.termOfService),
-            ),
-            ProfileMenuItem(
-              icon: Icons.shield_outlined,
-              label: LocaleKeys.privacyPolicy.tr(),
-              onTap: () => context.tryLaunchUrl(Constants.privacyPolicy),
-            ),
-            ProfileMenuItem(
-              icon: Icons.star_outline,
-              label: LocaleKeys.rateUs.tr(),
-              onTap: () => context.tryLaunchUrl(
-                Platform.isIOS ? Constants.appStore : Constants.playStore,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 24),
-        ProfileMenuSection(
-          title: 'Account',
-          items: [
-            ProfileMenuItem(
-              icon: Icons.logout,
-              label: LocaleKeys.logOut.tr(),
-              textColor: AppColors.passionRed,
-              showArrow: false,
-              onTap: () => _signOut(context),
-            ),
-            ProfileMenuItem(
-              icon: Icons.delete_outline,
-              label: LocaleKeys.deleteAccount.tr(),
-              textColor: AppColors.passionRed,
-              showArrow: false,
-              onTap: () => _deleteAccount(context),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  void _getPackageInfo() {
-    PackageInfo.fromPlatform().then((info) {
-      setState(() {
-        _version = info.version;
-      });
-    }).catchError((error) {
-      debugPrint(
-          '${Constants.tag} [_ProfilePageState._getPackageInfo] Error: $error');
-    });
-  }
-
-  void _signOut(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => CommonDialog(
-        title: LocaleKeys.logOutTitle.tr(),
-        content: LocaleKeys.logOutMessage.tr(),
-        primaryButtonLabel: LocaleKeys.logOut.tr(),
-        primaryButtonBackground: AppColors.passionRed,
-        secondaryButtonLabel: LocaleKeys.cancel.tr(),
-        primaryButtonAction: () async {
-          try {
-            Global.showLoading(context);
-            await ref.read(profileViewModelProvider.notifier).signOut();
-          } on AuthException catch (error) {
-            if (context.mounted) {
-              context.showErrorSnackBar(error.message);
-            }
-          } catch (error) {
-            if (context.mounted) {
-              context
-                  .showErrorSnackBar(LocaleKeys.unexpectedErrorOccurred.tr());
-            }
-          } finally {
-            if (context.mounted) {
-              Global.hideLoading();
-              context.pushReplacement(Routes.register);
-            }
-          }
-        },
-      ),
-    );
-  }
-
-  void _deleteAccount(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (dialogContext) => CommonDialog(
-        title: LocaleKeys.deleteAccountTitle.tr(),
-        content: LocaleKeys.deleteAccountMessage.tr(),
-        primaryButtonLabel: LocaleKeys.deleteAccount.tr(),
-        primaryButtonBackground: AppColors.passionRed,
-        secondaryButtonLabel: LocaleKeys.cancel.tr(),
-        primaryButtonAction: () async {
-          try {
-            Global.showLoading(context);
-            await ref.read(profileViewModelProvider.notifier).signOut();
-          } on AuthException catch (error) {
-            if (context.mounted) {
-              context.showErrorSnackBar(error.message);
-            }
-          } catch (error) {
-            if (context.mounted) {
-              context
-                  .showErrorSnackBar(LocaleKeys.unexpectedErrorOccurred.tr());
-            }
-          } finally {
-            if (context.mounted) {
-              Global.hideLoading();
-              context.pushReplacement(Routes.register);
-            }
-          }
-        },
-      ),
     );
   }
 }

@@ -15,6 +15,7 @@ class SwipeableCardScreenTemplate extends StatelessWidget {
   final Widget? actionZone;
   final VoidCallback? onBack;
   final bool useFullWidth;
+  final List<Color>? customStepColors;
 
   const SwipeableCardScreenTemplate({
     super.key,
@@ -29,6 +30,7 @@ class SwipeableCardScreenTemplate extends StatelessWidget {
     this.actionZone,
     this.onBack,
     this.useFullWidth = false,
+    this.customStepColors,
   });
 
   @override
@@ -57,6 +59,25 @@ class SwipeableCardScreenTemplate extends StatelessWidget {
                     final bool isActive = index == currentStep;
                     final bool isPast = index < currentStep;
 
+                    // Determine color based on customStepColors if provided
+                    Color stepColor;
+                    if (customStepColors != null &&
+                        index < customStepColors!.length) {
+                      final customColor = customStepColors![index];
+                      // If custom colors used:
+                      // Active: Full Opacity
+                      // Past/Future: Lower Opacity but visible to show the "Belt" color
+                      stepColor =
+                          isActive ? customColor : customColor.withOpacity(0.3);
+                    } else {
+                      // Default behavior (Workout style)
+                      stepColor = isActive
+                          ? AppColors.forgeFire
+                          : isPast
+                              ? Colors.white.withOpacity(0.4)
+                              : Colors.white.withOpacity(0.1);
+                    }
+
                     return Expanded(
                       child: GestureDetector(
                         onTap: () => onStepClick?.call(index),
@@ -65,17 +86,17 @@ class SwipeableCardScreenTemplate extends StatelessWidget {
                           margin: const EdgeInsets.symmetric(horizontal: 2),
                           height: 4,
                           decoration: BoxDecoration(
-                            color: isActive
-                                ? AppColors.forgeFire
-                                : isPast
-                                    ? Colors.white.withOpacity(0.4)
-                                    : Colors.white.withOpacity(0.1),
+                            color: stepColor,
                             borderRadius: BorderRadius.circular(2),
                             boxShadow: isActive
                                 ? [
                                     BoxShadow(
-                                      color:
-                                          AppColors.forgeFire.withOpacity(0.5),
+                                      color: (customStepColors != null &&
+                                                  index <
+                                                      customStepColors!.length
+                                              ? customStepColors![index]
+                                              : AppColors.forgeFire)
+                                          .withOpacity(0.5),
                                       blurRadius: 10,
                                     )
                                   ]
