@@ -7,6 +7,7 @@ import '../../../library/presentation/pages/collection_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../workout/presentation/pages/training_session_page.dart';
 import '../../../learn/ui/module_view_screen.dart';
+import '../../../learn/ui/lesson_player_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -34,9 +35,6 @@ class _MainScreenState extends State<MainScreen> {
               onTabChange: (index) {
                 setState(() {
                   _currentIndex = index;
-                  // The AppBottomNav widget itself needs to be updated to reflect the new label/icon for index 3.
-                  // This change is internal to AppBottomNav and cannot be made from MainScreen directly.
-                  // Assuming AppBottomNav will be updated to show 'Workout' with Icons.fitness_center for index 3.
                   _subPage = null; // Clear sub-page on tab change
                 });
               },
@@ -63,6 +61,21 @@ class _MainScreenState extends State<MainScreen> {
         onBack: () {
           setState(() {
             _subPage = null;
+          });
+        },
+        onLessonNavigate: (page) {
+          setState(() {
+            _subPage = page;
+          });
+        },
+      );
+    }
+
+    if (_subPage == 'lesson-player') {
+      return LessonPlayerScreen(
+        onBack: () {
+          setState(() {
+            _subPage = 'lesson-path';
           });
         },
       );

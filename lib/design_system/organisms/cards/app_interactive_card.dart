@@ -25,6 +25,9 @@ class AppInteractiveCard extends StatefulWidget {
   final VoidCallback? onPlayTap;
   final bool isFavorited;
   final VoidCallback? onToggleFavorite;
+  final Widget? footer;
+
+  final bool mini;
 
   const AppInteractiveCard({
     super.key,
@@ -45,6 +48,8 @@ class AppInteractiveCard extends StatefulWidget {
     this.onPlayTap,
     this.isFavorited = false,
     this.onToggleFavorite,
+    this.footer,
+    this.mini = false,
   });
 
   @override
@@ -103,234 +108,249 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
         ],
       ),
       clipBehavior: Clip.antiAlias,
-      child: Column(
-        children: [
-          // Main Content Area (Flex Grow)
-          Expanded(
-            child: Stack(
-              children: [
-                // Media Layer
-                Positioned.fill(
-                  child: Image.network(
-                    widget.backgroundImage,
-                    fit: BoxFit.cover,
-                    color: Colors.black.withOpacity(0.6),
-                    colorBlendMode: BlendMode.darken,
-                  ),
-                ),
-
-                // Tech Pattern Overlay
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: TechPatternPainter(
-                      color: Colors.white,
-                      opacity: 0.1,
-                      spacing: 16.0,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Column(
+          children: [
+            // Main Content Area (Flex Grow)
+            Expanded(
+              child: Stack(
+                children: [
+                  // Media Layer
+                  Positioned.fill(
+                    child: Image.network(
+                      widget.backgroundImage,
+                      fit: BoxFit.cover,
+                      color: Colors.black.withOpacity(0.6),
+                      colorBlendMode: BlendMode.darken,
                     ),
                   ),
-                ),
 
-                // Overlay Gradient
-                Positioned.fill(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.black.withOpacity(0.4),
-                          Colors.transparent,
-                          Colors.black.withOpacity(0.8),
+                  // Tech Pattern Overlay
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: TechPatternPainter(
+                        color: Colors.white,
+                        opacity: 0.1,
+                        spacing: 16.0,
+                      ),
+                    ),
+                  ),
+
+                  // Overlay Gradient
+                  Positioned.fill(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.black.withOpacity(0.4),
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.8),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+
+                  // Centered Title & Subtitle
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (widget.subtitle != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 8, vertical: 2),
+                              margin: const EdgeInsets.only(bottom: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.6),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                    color:
+                                        AppColors.forgeFire.withOpacity(0.3)),
+                              ),
+                              child: Text(
+                                widget.subtitle!.toUpperCase(),
+                                style: AppTypography.label.copyWith(
+                                  color: AppColors.forgeFire,
+                                  fontSize: widget.mini ? 8 : 9,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          Text(
+                            widget.title.toUpperCase(),
+                            textAlign: TextAlign.center,
+                            style: AppTypography.h1.copyWith(
+                              color: Colors.white,
+                              fontSize: widget.mini ? 24 : 56,
+                              height: 0.9,
+                              letterSpacing: 1.2,
+                              shadows: [
+                                Shadow(
+                                    color: Colors.black.withOpacity(0.8),
+                                    blurRadius: 10,
+                                    offset: const Offset(0, 4)),
+                              ],
+                            ),
+                          ),
                         ],
                       ),
                     ),
                   ),
-                ),
 
-                // Centered Title & Subtitle
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (widget.subtitle != null)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 2),
-                            margin: const EdgeInsets.only(bottom: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.6),
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(
-                                  color: AppColors.forgeFire.withOpacity(0.3)),
-                            ),
-                            child: Text(
-                              widget.subtitle!.toUpperCase(),
-                              style: AppTypography.label.copyWith(
-                                color: AppColors.forgeFire,
-                                fontSize: 9,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
+                  // Play Button Overlay
+                  if (!widget.mini)
+                    Center(
+                      child: GestureDetector(
+                        onTap: widget.onPlayTap,
+                        child: Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.1),
+                            border: Border.all(
+                                color: Colors.white.withOpacity(0.3)),
                           ),
-                        Text(
-                          widget.title.toUpperCase(),
-                          textAlign: TextAlign.center,
-                          style: AppTypography.h1.copyWith(
-                            color: Colors.white,
-                            fontSize: 56,
-                            height: 0.9,
-                            letterSpacing: 1.2,
-                            shadows: [
-                              Shadow(
-                                  color: Colors.black.withOpacity(0.8),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4)),
-                            ],
+                          child: const Center(
+                            child: Icon(Icons.play_arrow,
+                                color: Colors.white, size: 32),
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
 
-                // Play Button Overlay
-                Center(
-                  child: GestureDetector(
-                    onTap: widget.onPlayTap,
-                    child: Container(
-                      width: 64,
-                      height: 64,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
+                  // Top Right: Favorite
+                  if (!widget.mini)
+                    Positioned(
+                      top: 16,
+                      right: 16,
+                      child: GestureDetector(
+                        onTap: widget.onToggleFavorite,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.black.withOpacity(0.4),
+                            border: Border.all(
+                                color: Colors.white.withOpacity(0.2)),
+                          ),
+                          child: Icon(
+                            widget.isFavorited
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: widget.isFavorited
+                                ? AppColors.forgeFire
+                                : Colors.white,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  // Bottom Right: Flip
+                  if (!widget.mini)
+                    Positioned(
+                      bottom: 16,
+                      right: 16,
+                      child: GestureDetector(
+                        onTap: _toggleFlip,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.black.withOpacity(0.4),
+                            border: Border.all(
+                                color: Colors.white.withOpacity(0.2)),
+                          ),
+                          child: const Icon(Icons.replay,
+                              color: Colors.white, size: 20),
+                        ),
+                      ),
+                    ),
+
+                  // Progress Bar
+                  if (!widget.mini)
+                    Positioned(
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        height: 2,
                         color: Colors.white.withOpacity(0.1),
-                        border:
-                            Border.all(color: Colors.white.withOpacity(0.3)),
-                      ),
-                      child: const Center(
-                        child: Icon(Icons.play_arrow,
-                            color: Colors.white, size: 32),
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Top Right: Favorite
-                Positioned(
-                  top: 16,
-                  right: 16,
-                  child: GestureDetector(
-                    onTap: widget.onToggleFavorite,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.black.withOpacity(0.4),
-                        border:
-                            Border.all(color: Colors.white.withOpacity(0.2)),
-                      ),
-                      child: Icon(
-                        widget.isFavorited
-                            ? Icons.favorite
-                            : Icons.favorite_border,
-                        color: widget.isFavorited
-                            ? AppColors.forgeFire
-                            : Colors.white,
-                        size: 20,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: (widget.progress * 100).toInt(),
+                              child: Container(color: AppColors.forgeFire),
+                            ),
+                            Expanded(
+                              flex: ((1 - widget.progress) * 100).toInt(),
+                              child: const SizedBox(),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
 
-                // Bottom Right: Flip
-                Positioned(
-                  bottom: 16,
-                  right: 16,
-                  child: GestureDetector(
-                    onTap: _toggleFlip,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.black.withOpacity(0.4),
-                        border:
-                            Border.all(color: Colors.white.withOpacity(0.2)),
+                  // Progress Handle
+                  if (!widget.mini)
+                    Positioned(
+                      bottom: 0,
+                      left: (widget.progress * -10)
+                          .toDouble(), // Pseudo-offset alignment
+                      child: Container(
+                        padding: EdgeInsets.only(
+                            left: MediaQuery.of(context).size.width *
+                                0.4 *
+                                widget.progress),
+                        child: Container(
+                          width: 6,
+                          height: 6,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
                       ),
-                      child: const Icon(Icons.replay,
-                          color: Colors.white, size: 20),
                     ),
-                  ),
-                ),
+                ],
+              ),
+            ),
 
-                // Progress Bar
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    height: 2,
-                    color: Colors.white.withOpacity(0.1),
-                    child: Row(
+            // Footer Strip
+            if (!widget.mini)
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                color: Colors.black.withOpacity(0.6),
+                child: widget.footer ??
+                    Row(
                       children: [
-                        Expanded(
-                          flex: (widget.progress * 100).toInt(),
-                          child: Container(color: AppColors.forgeFire),
-                        ),
-                        Expanded(
-                          flex: ((1 - widget.progress) * 100).toInt(),
-                          child: const SizedBox(),
-                        ),
+                        _buildFooterStat('STYLE', widget.style ?? 'Hip Hop',
+                            Icons.style, Colors.blueAccent),
+                        Container(
+                            width: 1,
+                            height: 24,
+                            color: Colors.white.withOpacity(0.1),
+                            margin: const EdgeInsets.symmetric(horizontal: 16)),
+                        _buildFooterStat(
+                            'DIFFICULTY',
+                            widget.difficulty ?? 'Easy',
+                            Icons.signal_cellular_alt,
+                            Colors.greenAccent),
                       ],
                     ),
-                  ),
-                ),
-
-                // Progress Handle
-                Positioned(
-                  bottom: 0,
-                  left: (widget.progress * -10)
-                      .toDouble(), // Pseudo-offset alignment
-                  child: Container(
-                    padding: EdgeInsets.only(
-                        left: MediaQuery.of(context).size.width *
-                            0.4 *
-                            widget.progress),
-                    child: Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Footer Strip
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-            color: Colors.black.withOpacity(0.6),
-            child: Row(
-              children: [
-                _buildFooterStat('STYLE', widget.style ?? 'Hip Hop',
-                    Icons.style, Colors.blueAccent),
-                Container(
-                    width: 1,
-                    height: 24,
-                    color: Colors.white.withOpacity(0.1),
-                    margin: const EdgeInsets.symmetric(horizontal: 16)),
-                _buildFooterStat('DIFFICULTY', widget.difficulty ?? 'Easy',
-                    Icons.signal_cellular_alt, Colors.greenAccent),
-              ],
-            ),
-          ),
-        ],
+              ),
+          ],
+        ),
       ),
     );
   }

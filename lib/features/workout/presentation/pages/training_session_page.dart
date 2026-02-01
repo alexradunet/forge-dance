@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import '../../../../design_system/organisms/cards/app_interactive_card.dart';
 import '../../../../design_system/templates/swipeable_card_screen_template.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_typography.dart';
@@ -23,6 +25,7 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
   int _timeLeft = 45; // Mock timer
 
   void _startWorkout() {
+    HapticFeedback.mediumImpact();
     setState(() {
       _state = TrainingSessionState.active;
       _currentExerciseIndex = 0;
@@ -30,6 +33,7 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
   }
 
   void _nextExercise() {
+    HapticFeedback.lightImpact();
     if (_currentExerciseIndex < _totalExercises - 1) {
       setState(() {
         _currentExerciseIndex++;
@@ -43,22 +47,8 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
     }
   }
 
-  void _prevExercise() {
-    if (_currentExerciseIndex > 0) {
-      setState(() {
-        _currentExerciseIndex--;
-        _timeLeft = 45;
-        _isTimerRunning = false;
-      });
-    } else {
-      // Back to intro? or do nothing
-      setState(() {
-        _state = TrainingSessionState.intro;
-      });
-    }
-  }
-
   void _toggleTimer() {
+    HapticFeedback.selectionClick();
     setState(() {
       _isTimerRunning = !_isTimerRunning;
     });
@@ -66,282 +56,228 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
 
   @override
   Widget build(BuildContext context) {
-    // If completed, maybe show a different screen or just the card?
-    // Using the template for all states for consistency.
-
     return SwipeableCardScreenTemplate(
       title: 'Daily Practice',
       subtitle: _state == TrainingSessionState.complete
           ? 'Session Complete'
           : 'Body Control • 25 min',
       onBack: widget.onClose ?? () => Navigator.of(context).pop(),
-      // Show progress only when active
-      progressSteps:
-          _state == TrainingSessionState.active ? _totalExercises : 0,
-      currentStep: _currentExerciseIndex,
-      onStepClick: _state == TrainingSessionState.active
-          ? (index) {
-              setState(() => _currentExerciseIndex = index);
-            }
-          : null,
-
-      actionZone: _buildActionZone(),
-
+      progressSteps: _totalExercises,
+      currentStep: _state == TrainingSessionState.intro
+          ? -1
+          : (_state == TrainingSessionState.complete
+              ? _totalExercises
+              : _currentExerciseIndex),
+      onStepClick: null,
+      actionZone: null, // Controls now inside cards
       children: _buildCentralCard(),
     );
   }
 
   Widget _buildCentralCard() {
-    return AspectRatio(
-      aspectRatio: 3 / 4,
-      child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.surfaceCard,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Colors.white.withOpacity(0.1)),
-          boxShadow: const [
-            BoxShadow(
-              color: Colors.black,
-              blurRadius: 20,
-              offset: Offset(0, 10),
-            ),
-          ],
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: _buildCardContent(),
-      ),
+    return SizedBox(
+      height: double.infinity,
+      child: _buildCardContent(),
     );
   }
 
   Widget _buildCardContent() {
     if (_state == TrainingSessionState.intro) {
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.network(
+      return AppInteractiveCard(
+        title: 'BODY CONTROL',
+        subtitle: 'WORKOUT OF THE DAY',
+        backgroundImage:
             'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?q=80&w=2069&auto=format&fit=crop',
-            fit: BoxFit.cover,
-            color: Colors.black.withOpacity(0.4),
-            colorBlendMode: BlendMode.darken,
-          ),
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.end,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.forgeFire,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Text(
-                    'WORKOUT OF THE DAY',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'BODY CONTROL',
-                  style: AppTypography.h1
-                      .copyWith(color: Colors.white, fontSize: 40),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Master your movement with this fundamental sequence designed to improve awareness and stability.',
-                  style: TextStyle(color: Colors.white70, height: 1.5),
-                ),
-                const SizedBox(height: 24),
-              ],
+        style: 'Modern',
+        difficulty: 'Intermediate',
+        progress: 0,
+        backTitle: 'WORKOUT OVERVIEW',
+        backSubtitle: 'Technique Goals',
+        backContent: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Master your movement with this fundamental sequence designed to improve awareness and stability.',
+              style: TextStyle(color: Colors.white70, height: 1.5),
             ),
+            const SizedBox(height: 24),
+            _buildInfoRow(Icons.fitness_center, '5 EXERCISES'),
+            _buildInfoRow(Icons.timer, '25 MINUTES'),
+            _buildInfoRow(Icons.bolt, '350 CALORIES'),
+          ],
+        ),
+        footer: SizedBox(
+          width: double.infinity,
+          child: FgButton(
+            text: 'START SESSION',
+            variant: FgButtonVariant.primary,
+            onPressed: _startWorkout,
           ),
-        ],
+        ),
       );
     } else if (_state == TrainingSessionState.complete) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.check_circle_outline,
-                size: 80, color: AppColors.forgeFire),
-            const SizedBox(height: 24),
-            Text(
-              'SESSION COMPLETE',
-              style: AppTypography.h2.copyWith(color: Colors.white),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'Great work! You\'ve completed today\'s training.',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.white70),
-            ),
-          ],
+      return AppInteractiveCard(
+        title: 'SESSION COMPLETE',
+        subtitle: 'GREAT WORK!',
+        backgroundImage:
+            'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=2000',
+        style: 'Training',
+        difficulty: 'Complete',
+        progress: 1.0,
+        backTitle: 'STATS SUMMARY',
+        backSubtitle: 'Daily Progress',
+        // COMPLETE STATE
+        backContent: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.check_circle_outline,
+                  size: 60, color: AppColors.forgeFire),
+              const SizedBox(height: 16),
+              Text('You earned 500 XP!',
+                  style: AppTypography.h3.copyWith(color: Colors.white)),
+              const SizedBox(height: 8),
+              const Text('Keep it up for a 3-day streak!',
+                  style: TextStyle(color: Colors.white60)),
+            ],
+          ),
+        ),
+        footer: SizedBox(
+          width: double.infinity,
+          child: FgButton(
+            text: 'FINISH',
+            variant: FgButtonVariant.primary,
+            onPressed: widget.onClose ?? () => Navigator.of(context).pop(),
+          ),
         ),
       );
     } else {
       // Active State - Exercise Card
-      return Stack(
-        fit: StackFit.expand,
-        children: [
-          // Background (could vary per exercise)
-          Container(
-            color: AppColors.surfaceDark,
-          ),
-
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Header
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'EXERCISE ${_currentExerciseIndex + 1}',
-                      style: const TextStyle(
-                          color: AppColors.forgeFire,
-                          fontWeight: FontWeight.bold),
-                    ),
-                    const Icon(Icons.info_outline, color: Colors.white54),
-                  ],
-                ),
-                const SizedBox(height: 24),
-
-                // Title
-                Text(
-                  _getExerciseName(_currentExerciseIndex),
-                  style: AppTypography.h2.copyWith(color: Colors.white),
-                ),
-
-                const Spacer(),
-
-                // Timer / Reps Center
-                Center(
-                  child: Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                          color: AppColors.forgeFire.withOpacity(0.3),
-                          width: 4),
-                    ),
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            '$_timeLeft',
-                            style: const TextStyle(
-                              fontFamily: 'Bebas Neue',
-                              fontSize: 80,
-                              color: Colors.white,
-                              height: 1.0,
-                            ),
-                          ),
-                          const Text(
-                            'SECONDS',
-                            style: TextStyle(
-                                color: AppColors.textMuted,
-                                fontSize: 14,
-                                letterSpacing: 2),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                const Spacer(),
-
-                // Footer
-                Center(
-                  child: Text(
-                    _isTimerRunning ? 'STAY FOCUSED' : 'TAP TO START',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
-                      letterSpacing: 2,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-              ],
-            ),
-          ),
-        ],
-      );
-    }
-  }
-
-  Widget? _buildActionZone() {
-    if (_state == TrainingSessionState.intro) {
-      return FgButton(
-        text: 'START SESSION',
-        variant: FgButtonVariant.primary,
-        width: double.infinity,
-        onPressed: _startWorkout,
-      );
-    } else if (_state == TrainingSessionState.complete) {
-      return FgButton(
-        text: 'FINISH',
-        variant: FgButtonVariant.primary,
-        width: double.infinity,
-        onPressed: widget.onClose ?? () => Navigator.of(context).pop(),
-      );
-    } else {
-      // Active Controls
-      return Container(
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      return AppInteractiveCard(
+        title: _getExerciseName(_currentExerciseIndex),
+        subtitle: 'EXERCISE ${_currentExerciseIndex + 1} OF $_totalExercises',
+        backgroundImage:
+            'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=2000',
+        style: 'Drill',
+        difficulty: 'Active',
+        progress: (_currentExerciseIndex + 1) / _totalExercises,
+        onPlayTap: _toggleTimer,
+        isPlaying: _isTimerRunning,
+        backTitle: 'INSTRUCTIONS',
+        backSubtitle: 'Proper Form',
+        // ACTIVE STATE
+        backContent: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            IconButton(
-              onPressed: _prevExercise,
-              icon: const Icon(Icons.skip_previous, color: Colors.white),
-              iconSize: 32,
+            const Text(
+              'Focus on controlled movements and steady breathing.',
+              style: TextStyle(color: Colors.white70, height: 1.5),
             ),
-
-            // Play/Pause
-            GestureDetector(
-              onTap: _toggleTimer,
-              child: Container(
-                width: 72,
-                height: 72,
-                decoration: BoxDecoration(
-                  color: AppColors.forgeFire,
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.forgeFire.withOpacity(0.4),
-                      blurRadius: 20,
+            const SizedBox(height: 24),
+            Text('1. Start in a neutral position',
+                style: AppTypography.bodySmall.copyWith(color: Colors.white)),
+            const SizedBox(height: 8),
+            Text('2. Engage your core',
+                style: AppTypography.bodySmall.copyWith(color: Colors.white)),
+            const SizedBox(height: 8),
+            Text('3. Follow through with intentionality',
+                style: AppTypography.bodySmall.copyWith(color: Colors.white)),
+            // Removed Spacer/TimeLeft from back content as it's now in footer
+          ],
+        ),
+        footer: Row(
+          children: [
+            // Timer Toggle
+            Expanded(
+              flex: 2,
+              child: GestureDetector(
+                onTap: _toggleTimer,
+                child: Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: BoxDecoration(
+                    color: _isTimerRunning
+                        ? AppColors.forgeFire.withOpacity(0.2)
+                        : Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: _isTimerRunning
+                          ? AppColors.forgeFire
+                          : Colors.white.withOpacity(0.2),
                     ),
-                  ],
-                ),
-                child: Icon(
-                  _isTimerRunning ? Icons.pause : Icons.play_arrow,
-                  color: Colors.white,
-                  size: 36,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        _isTimerRunning ? Icons.pause : Icons.play_arrow,
+                        color: _isTimerRunning
+                            ? AppColors.forgeFire
+                            : Colors.white,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        '$_timeLeft s',
+                        style: AppTypography.h4.copyWith(
+                          color: Colors.white,
+                          fontSize: 20,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-
-            IconButton(
-              onPressed: _nextExercise,
-              icon: const Icon(Icons.skip_next, color: Colors.white),
-              iconSize: 32,
+            const SizedBox(width: 16),
+            // Info / Step
+            Expanded(
+              flex: 1,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('STEP',
+                      style: AppTypography.label
+                          .copyWith(fontSize: 10, color: Colors.white54)),
+                  Text('${_currentExerciseIndex + 1} / $_totalExercises',
+                      style: AppTypography.h5
+                          .copyWith(fontSize: 16, color: Colors.white)),
+                ],
+              ),
             ),
+            const SizedBox(width: 16),
+            // Next Button
+            GestureDetector(
+                onTap: _nextExercise,
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.skip_next,
+                      color: Colors.white, size: 20),
+                )),
           ],
         ),
       );
     }
+  }
+
+  Widget _buildInfoRow(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: AppColors.forgeFire),
+          const SizedBox(width: 12),
+          Text(text,
+              style: const TextStyle(
+                  color: Colors.white, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
   }
 
   String _getExerciseName(int index) {

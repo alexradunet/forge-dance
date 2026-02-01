@@ -14,6 +14,7 @@ class SwipeableCardScreenTemplate extends StatelessWidget {
   final Widget children;
   final Widget? actionZone;
   final VoidCallback? onBack;
+  final bool useFullWidth;
 
   const SwipeableCardScreenTemplate({
     super.key,
@@ -27,6 +28,7 @@ class SwipeableCardScreenTemplate extends StatelessWidget {
     required this.children,
     this.actionZone,
     this.onBack,
+    this.useFullWidth = false,
   });
 
   @override
@@ -89,11 +91,12 @@ class SwipeableCardScreenTemplate extends StatelessWidget {
             // Main Content / Deck Area
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(22, 24, 22, 0),
+                padding: EdgeInsets.fromLTRB(
+                    useFullWidth ? 0 : 24, 24, useFullWidth ? 0 : 24, 0),
                 child: Center(
                   child: ConstrainedBox(
-                    constraints:
-                        const BoxConstraints(maxWidth: 450), // max-w-md approx
+                    constraints: BoxConstraints(
+                        maxWidth: useFullWidth ? double.infinity : 500),
                     child: children,
                   ),
                 ),
@@ -101,7 +104,7 @@ class SwipeableCardScreenTemplate extends StatelessWidget {
             ),
 
             // Action Zone
-            if (actionZone != null)
+            if (actionZone != null) ...[
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 400),
                 transitionBuilder: (child, animation) {
@@ -125,9 +128,9 @@ class SwipeableCardScreenTemplate extends StatelessWidget {
                   child: actionZone,
                 ),
               ),
-
-            // Bottom Spacer
-            const SizedBox(height: 90),
+              const SizedBox(height: 90),
+            ] else
+              const SizedBox(height: 100), // Height of BottomNav + some padding
           ],
         ),
       ),

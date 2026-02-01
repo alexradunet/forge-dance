@@ -18,7 +18,7 @@ class AppBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.fromLTRB(
-          16, 8, 16, 16 + MediaQuery.of(context).padding.bottom),
+          24, 8, 24, 16 + MediaQuery.of(context).padding.bottom),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: BackdropFilter(

@@ -34,6 +34,7 @@ class AppMiniInteractiveCard extends StatelessWidget {
       backTitle: 'PATTERN INFO',
       backSubtitle: 'Rhythm Structure',
       backContent: _buildBackContent(),
+      mini: true,
     );
   }
 

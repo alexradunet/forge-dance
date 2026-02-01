@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../constants/constants.dart';
 import '../../../routing/routes.dart';
 import '../../../design_system/tokens/app_colors.dart';
 import '../../../design_system/tokens/app_spacing.dart';
 import '../../../design_system/tokens/app_typography.dart';
-import '../../authentication/repository/authentication_repository.dart';
 import '../../../design_system/atoms/visuals/fg_background.dart';
 
 /// Forge.dance Splash Screen
@@ -146,16 +144,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   Future<void> _checkLoginStatus() async {
-    final isLoggedIn =
-        await ref.read(authenticationRepositoryProvider).isLogin();
-    debugPrint(
-        '${Constants.tag} [SplashScreen._checkLoginStatus] isLoggedIn = $isLoggedIn');
+    // Simply wait for animation and go to main
     await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
-    if (isLoggedIn) {
-      context.pushReplacement(Routes.main);
-    } else {
-      context.pushReplacement(Routes.register);
-    }
+    context.pushReplacement(Routes.main);
   }
 }

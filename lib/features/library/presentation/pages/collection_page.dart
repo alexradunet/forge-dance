@@ -6,6 +6,7 @@ import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/atoms/visuals/fg_background.dart';
 
 import '../../../../design_system/organisms/navigation/app_header.dart';
+import '../../../../design_system/organisms/cards/app_interactive_card.dart';
 import '../../../../design_system/molecules/cards/app_mini_interactive_card.dart';
 import '../../../../design_system/molecules/cards/app_mini_workout_card.dart';
 import '../../../../design_system/atoms/icons/fg_icon.dart';
@@ -150,6 +151,48 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
 class _CollectionContent extends StatelessWidget {
   const _CollectionContent();
 
+  void _showCardPopup(BuildContext context,
+      {required String title,
+      required String backgroundImage,
+      String? level,
+      String? subtitle,
+      String? style,
+      String? difficulty}) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.9),
+      builder: (context) {
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 500,
+              maxHeight: 800, // Allow significant height for the card
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: AspectRatio(
+                aspectRatio: 9 / 16,
+                child: AppInteractiveCard(
+                  title: title,
+                  subtitle: subtitle,
+                  backgroundImage: backgroundImage,
+                  level: level,
+                  style: style,
+                  difficulty: difficulty,
+                  mini: false,
+                  isFavorited: false, // Static for now
+                  onTap: () {
+                    // Optional: Close on card tap if desired
+                  },
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -164,17 +207,31 @@ class _CollectionContent extends StatelessWidget {
           crossAxisSpacing: 16,
           childAspectRatio: 0.7,
           children: [
-            const AppMiniInteractiveCard(
+            AppMiniInteractiveCard(
               title: 'BASIC BOUNCE',
               level: 'BEGINNER',
               backgroundImage:
                   'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=2000',
+              onTap: () => _showCardPopup(
+                context,
+                title: 'BASIC BOUNCE',
+                level: 'BEGINNER',
+                backgroundImage:
+                    'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=2000',
+              ),
             ),
-            const AppMiniInteractiveCard(
+            AppMiniInteractiveCard(
               title: 'RHYTHM GAME',
               level: 'INTERMEDIATE',
               backgroundImage:
                   'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=2000',
+              onTap: () => _showCardPopup(
+                context,
+                title: 'RHYTHM GAME',
+                level: 'INTERMEDIATE',
+                backgroundImage:
+                    'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=2000',
+              ),
             ),
             AppMiniWorkoutCard(
               title: 'HIIT BLAST',
@@ -188,17 +245,31 @@ class _CollectionContent extends StatelessWidget {
               intensity: 'LOW',
               onTap: () {},
             ),
-            const AppMiniInteractiveCard(
+            AppMiniInteractiveCard(
               title: 'POPPING BASICS',
               level: 'BEGINNER',
               backgroundImage:
                   'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=2000',
+              onTap: () => _showCardPopup(
+                context,
+                title: 'POPPING BASICS',
+                level: 'BEGINNER',
+                backgroundImage:
+                    'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=2000',
+              ),
             ),
-            const AppMiniInteractiveCard(
+            AppMiniInteractiveCard(
               title: 'HOUSE GROOVES',
               level: 'INTERMEDIATE',
               backgroundImage:
                   'https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&q=80&w=2000',
+              onTap: () => _showCardPopup(
+                context,
+                title: 'HOUSE GROOVES',
+                level: 'INTERMEDIATE',
+                backgroundImage:
+                    'https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&q=80&w=2000',
+              ),
             ),
             AppMiniWorkoutCard(
               title: 'CORE STRENGTH',
@@ -212,11 +283,18 @@ class _CollectionContent extends StatelessWidget {
               intensity: 'LOW',
               onTap: () {},
             ),
-            const AppMiniInteractiveCard(
+            AppMiniInteractiveCard(
               title: 'BREAKING FOOTWORK',
               level: 'ADVANCED',
               backgroundImage:
                   'https://images.unsplash.com/photo-1535525153412-5a42439a210d?auto=format&fit=crop&q=80&w=2000',
+              onTap: () => _showCardPopup(
+                context,
+                title: 'BREAKING FOOTWORK',
+                level: 'ADVANCED',
+                backgroundImage:
+                    'https://images.unsplash.com/photo-1535525153412-5a42439a210d?auto=format&fit=crop&q=80&w=2000',
+              ),
             ),
             AppMiniWorkoutCard(
               title: 'ENDURANCE',

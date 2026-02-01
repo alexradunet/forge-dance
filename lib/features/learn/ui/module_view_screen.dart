@@ -3,19 +3,20 @@ import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/organisms/lessons/lesson_path_timeline.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/atoms/visuals/fg_background.dart';
-import 'lesson_player_screen.dart';
 
 /// Module View Screen matching dashboard_4 mockup (Lesson Path)
 class ModuleViewScreen extends StatelessWidget {
   final String moduleTitle;
   final String moduleSubtitle;
   final VoidCallback? onBack;
+  final Function(String)? onLessonNavigate;
 
   const ModuleViewScreen({
     super.key,
     this.moduleTitle = 'Hip Hop Foundations',
     this.moduleSubtitle = 'Module 1 • Path',
     this.onBack,
+    this.onLessonNavigate,
   });
 
   @override
@@ -46,11 +47,7 @@ class ModuleViewScreen extends StatelessWidget {
                       onNavigate: (tab) {
                         debugPrint('Navigate to: $tab');
                         if (tab == 'ignite') {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => const LessonPlayerScreen(),
-                            ),
-                          );
+                          onLessonNavigate?.call('lesson-player');
                         }
                       },
                     ),
