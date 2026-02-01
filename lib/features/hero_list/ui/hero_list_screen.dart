@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../../extensions/build_context_extension.dart';
 import '../../../generated/locale_keys.g.dart';
-import '../../../design_system/tokens/app_typography.dart';
+import '../../../design_system/organisms/navigation/app_header.dart';
+import '../../../design_system/atoms/visuals/fg_background.dart';
 import '../../common/ui/widgets/common_empty_data.dart';
 import '../../common/ui/widgets/common_error.dart';
 import '../model/hero.dart' as hero;
@@ -95,55 +95,59 @@ class HeroListScreen extends ConsumerWidget {
     final heroListState = ref.watch(heroListViewModelProvider);
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          context.tr(_getGreeting()),
-          style: AppTheme.h1,
-        ),
-        automaticallyImplyLeading: false,
-        backgroundColor: context.primaryBackgroundColor,
-        foregroundColor: context.primaryTextColor,
-      ),
-      body: heroListState.when(
-        data: (state) {
-          if (state.isLoading) {
-            return const ShimmerHeroGrid();
-          }
-
-          if (state.errorMessage != null) {
-            return const CommonError();
-          }
-
-          if (state.heroes.isEmpty) {
-            return const CommonEmptyData();
-          }
-
-          return GridView.builder(
-            padding: const EdgeInsets.all(16),
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 8.0,
-              mainAxisSpacing: 8.0,
-              childAspectRatio: 0.8,
+      backgroundColor: Colors.transparent,
+      body: FgBackground(
+        child: Column(
+          children: [
+            AppHeader(
+              title: context.tr(_getGreeting()),
             ),
-            itemCount: state.heroes.length,
-            itemBuilder: (context, index) {
-              final hero = state.heroes[index];
-              return HeroItem(
-                name: hero.name,
-                imageUrl: hero.imageUrl,
-                isFavorite: hero.isFavorite,
-                onFavoritePressed: () {
-                  ref
-                      .read(heroListViewModelProvider.notifier)
-                      .toggleFavorite(hero.id);
+            Expanded(
+              child: heroListState.when(
+                data: (state) {
+                  if (state.isLoading) {
+                    return const ShimmerHeroGrid();
+                  }
+
+                  if (state.errorMessage != null) {
+                    return const CommonError();
+                  }
+
+                  if (state.heroes.isEmpty) {
+                    return const CommonEmptyData();
+                  }
+
+                  return GridView.builder(
+                    padding: const EdgeInsets.all(16),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 8.0,
+                      mainAxisSpacing: 8.0,
+                      childAspectRatio: 0.8,
+                    ),
+                    itemCount: state.heroes.length,
+                    itemBuilder: (context, index) {
+                      final hero = state.heroes[index];
+                      return HeroItem(
+                        name: hero.name,
+                        imageUrl: hero.imageUrl,
+                        isFavorite: hero.isFavorite,
+                        onFavoritePressed: () {
+                          ref
+                              .read(heroListViewModelProvider.notifier)
+                              .toggleFavorite(hero.id);
+                        },
+                      );
+                    },
+                  );
                 },
-              );
-            },
-          );
-        },
-        loading: () => const ShimmerHeroGrid(),
-        error: (error, stack) => Center(child: Text(error.toString())),
+                loading: () => const ShimmerHeroGrid(),
+                error: (error, stack) => Center(child: Text(error.toString())),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

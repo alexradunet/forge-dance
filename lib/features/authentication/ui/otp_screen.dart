@@ -16,6 +16,8 @@ import '../../../design_system/organisms/navigation/app_header.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../../design_system/tokens/app_typography.dart';
 
+import '../../../design_system/atoms/visuals/fg_background.dart';
+
 class OtpScreen extends ConsumerStatefulWidget {
   final String email;
   final bool isRegister;
@@ -68,111 +70,111 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Stack(
+      backgroundColor: Colors.transparent,
+      body: FgBackground(
+        child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: SvgPicture.asset(
-                      Assets.otp,
-                      fit: BoxFit.fitWidth,
-                      alignment: Alignment.bottomCenter,
-                      semanticsLabel: 'OTP',
-                    ),
-                  ),
-                  Text(
-                    LocaleKeys.otpEnterTitle.tr(),
-                    style: AppTypography.h5.copyWith(color: Colors.white),
-                  ),
-                  Text(
-                    LocaleKeys.otpEnterDescription.tr(),
-                    style:
-                        AppTypography.body.copyWith(color: AppColors.textMuted),
-                  ),
-                  const SizedBox(height: 16),
-                  Center(
-                    child: Pinput(
-                      length: 6,
-                      controller: otpController,
-                      defaultPinTheme: PinTheme(
-                        width: 48,
-                        height: 48,
-                        textStyle: AppTypography.body,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.neutral700),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        LocaleKeys.didNotReceiveOtp.tr(),
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: isEnableResendButton
-                            ? () async {
-                                otpController.clear();
-                                await ref
-                                    .read(authenticationViewModelProvider
-                                        .notifier)
-                                    .signInWithMagicLink(widget.email);
-                                startTimer();
-                              }
-                            : null,
-                        child: Text(
-                          LocaleKeys.resendOtp.tr(),
-                          style: AppTypography.caption
-                              .copyWith(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                    ],
-                  ),
-                  count < 60
-                      ? Padding(
-                          padding: const EdgeInsets.only(top: 16, bottom: 32),
-                          child: Text(
-                            LocaleKeys.tryAgainAfter,
-                            style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.textMuted,
-                            ),
-                          ).tr(args: ['$count']),
-                        )
-                      : const SizedBox(height: 68),
-                  FgButton(
-                    onPressed: otpController.text.length == 6
-                        ? () => ref
-                            .read(authenticationViewModelProvider.notifier)
-                            .verifyOtp(
-                              email: widget.email,
-                              token: otpController.text,
-                              isRegister: widget.isRegister,
-                            )
-                        : null,
-                    text: LocaleKeys.confirm.tr(),
-                    width: double.infinity,
-                  ),
-                  const SizedBox(height: 32),
-                ],
-              ),
+            AppHeader(
+              title: 'VERIFICATION',
+              onBack: () => context.pop(),
             ),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: AppHeader(
-                title: '',
-                onBack: () => context.pop(),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 200,
+                      child: SvgPicture.asset(
+                        Assets.otp,
+                        fit: BoxFit.contain,
+                        alignment: Alignment.center,
+                        semanticsLabel: 'OTP',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      LocaleKeys.otpEnterTitle.tr(),
+                      style: AppTypography.h5.copyWith(color: Colors.white),
+                    ),
+                    Text(
+                      LocaleKeys.otpEnterDescription.tr(),
+                      style: AppTypography.body
+                          .copyWith(color: AppColors.textMuted),
+                    ),
+                    const SizedBox(height: 24),
+                    Center(
+                      child: Pinput(
+                        length: 6,
+                        controller: otpController,
+                        defaultPinTheme: PinTheme(
+                          width: 48,
+                          height: 48,
+                          textStyle: AppTypography.body,
+                          decoration: BoxDecoration(
+                            border: Border.all(color: AppColors.neutral700),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          LocaleKeys.didNotReceiveOtp.tr(),
+                          style: AppTypography.bodySmall.copyWith(
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: isEnableResendButton
+                              ? () async {
+                                  otpController.clear();
+                                  await ref
+                                      .read(authenticationViewModelProvider
+                                          .notifier)
+                                      .signInWithMagicLink(widget.email);
+                                  startTimer();
+                                }
+                              : null,
+                          child: Text(
+                            LocaleKeys.resendOtp.tr(),
+                            style: AppTypography.caption
+                                .copyWith(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                    count < 60
+                        ? Padding(
+                            padding: const EdgeInsets.only(top: 16, bottom: 32),
+                            child: Text(
+                              LocaleKeys.tryAgainAfter,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: AppColors.textMuted,
+                              ),
+                            ).tr(args: ['$count']),
+                          )
+                        : const SizedBox(height: 68),
+                    FgButton(
+                      onPressed: otpController.text.length == 6
+                          ? () => ref
+                              .read(authenticationViewModelProvider.notifier)
+                              .verifyOtp(
+                                email: widget.email,
+                                token: otpController.text,
+                                isRegister: widget.isRegister,
+                              )
+                          : null,
+                      text: LocaleKeys.confirm.tr(),
+                      width: double.infinity,
+                    ),
+                    const SizedBox(height: 32),
+                  ],
+                ),
               ),
             ),
           ],

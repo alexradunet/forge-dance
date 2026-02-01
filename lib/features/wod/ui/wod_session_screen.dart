@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '/design_system/tokens/app_colors.dart';
+import '../../../../design_system/tokens/app_colors.dart';
+import '../../../design_system/organisms/navigation/app_header.dart';
 
 /// Step data for WOD session
 class WodStep {
@@ -140,64 +140,19 @@ class WodSessionScreen extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        MediaQuery.paddingOf(context).top + 12,
-        16,
-        8,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          IconButton(
-            onPressed: () => Navigator.of(context).pop(),
-            icon: Icon(Icons.close, color: Colors.white),
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.white.withOpacity(0.1),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
+    return AppHeader(
+      title: 'DAILY WOD',
+      isTransparent: true,
+      onBack: () => Navigator.of(context).pop(),
+      rightSlot: IconButton(
+        onPressed: () {},
+        icon: const Icon(Icons.more_vert, color: Colors.white),
+        style: IconButton.styleFrom(
+          backgroundColor: Colors.white.withOpacity(0.1),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.local_fire_department,
-                  size: 14,
-                  color: AppColors.forgeFire,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  'DAILY WOD',
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: () {},
-            icon: Icon(Icons.more_vert, color: Colors.white),
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.white.withOpacity(0.1),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

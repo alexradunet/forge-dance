@@ -20,7 +20,7 @@ class LearningPathPageTemplate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgDeep,
+      backgroundColor: Colors.transparent,
       body: FgBackground(
         child: CustomScrollView(
           slivers: [

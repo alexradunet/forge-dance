@@ -8,6 +8,9 @@ import '../../../features/common/ui/widgets/primary_button.dart';
 import '../../../features/profile/ui/view_model/profile_view_model.dart';
 import '../../../routing/routes.dart';
 
+import '../../../design_system/organisms/navigation/app_header.dart';
+import '../../../design_system/atoms/visuals/fg_background.dart';
+
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -44,39 +47,51 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              GestureDetector(
-                onTap: () {
-                  // TODO: Implement image picker
-                },
-                child: CircleAvatar(
-                  radius: 50,
-                  backgroundColor: Colors.grey[300],
-                  child: const Icon(
-                    Icons.camera_alt,
-                    size: 40,
-                    color: Colors.grey,
-                  ),
+      backgroundColor: Colors.transparent,
+      body: FgBackground(
+        child: Column(
+          children: [
+            const AppHeader(
+              title: 'GETTING STARTED',
+              subtitle: 'Set up your profile',
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 24),
+                    GestureDetector(
+                      onTap: () {
+                        // TODO: Implement image picker
+                      },
+                      child: CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.grey[300],
+                        child: const Icon(
+                          Icons.camera_alt,
+                          size: 40,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+                    CommonTextFormField(
+                      label: 'Your Name',
+                      controller: _nameController,
+                    ),
+                    const Spacer(),
+                    PrimaryButton(
+                      text: 'Continue',
+                      onPressed: () => _saveNameAndContinue(context),
+                      isEnable: _isButtonEnabled,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                 ),
               ),
-              const SizedBox(height: 24),
-              CommonTextFormField(
-                label: 'Your Name',
-                controller: _nameController,
-              ),
-              const Spacer(),
-              PrimaryButton(
-                text: 'Continue',
-                onPressed: () => _saveNameAndContinue(context),
-                isEnable: _isButtonEnabled,
-              ),
-              const SizedBox(height: 16),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

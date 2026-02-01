@@ -24,6 +24,8 @@ import '../../../features/authentication/ui/widgets/horizontal_divider.dart';
 import '../../../features/authentication/ui/widgets/sign_in_agreement.dart';
 import '../../../features/authentication/ui/widgets/social_sign_in.dart';
 
+import '../../../design_system/atoms/visuals/fg_background.dart';
+
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
@@ -101,77 +103,92 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
 
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: SvgPicture.asset(
-                  Assets.welcome,
-                  fit: BoxFit.fitWidth,
-                  alignment: Alignment.bottomCenter,
-                  semanticsLabel: 'Welcome',
+      backgroundColor: Colors.transparent,
+      body: FgBackground(
+        child: Column(
+          children: [
+            AppHeader(
+              title: 'JOIN THE FORGE',
+              subtitle: 'Start your rhythm journey',
+              onBack: context.canPop() ? () => context.pop() : null,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 200,
+                      child: SvgPicture.asset(
+                        Assets.welcome,
+                        fit: BoxFit.contain,
+                        alignment: Alignment.center,
+                        semanticsLabel: 'Welcome',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'register'.tr(),
+                      style: AppTypography.h1.copyWith(color: Colors.white),
+                    ),
+                    const SizedBox(height: 24),
+                    FgInput(
+                      label: 'Email',
+                      controller: _emailController,
+                    ),
+                    const SizedBox(height: 32),
+                    FgButton(
+                      onPressed: _isEmailValid
+                          ? () {
+                              ref
+                                  .read(
+                                      authenticationViewModelProvider.notifier)
+                                  .signInWithMagicLink(_emailController.text);
+                              context.push(
+                                Routes.otp,
+                                extra: {
+                                  'email': _emailController.text,
+                                  'isRegister': true,
+                                },
+                              );
+                            }
+                          : null,
+                      text: LocaleKeys.continueText.tr(),
+                      width: double.infinity,
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          LocaleKeys.alreadyHaveAccount.tr(),
+                          style: AppTheme.bodySmall,
+                        ),
+                        const SizedBox(width: 4),
+                        TextButton(
+                          onPressed: () {
+                            context.push(Routes.login);
+                          },
+                          child: Text(
+                            LocaleKeys.signIn.tr(),
+                            style: AppTheme.bodySmall
+                                .copyWith(fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    const HorizontalDivider(),
+                    const SizedBox(height: 16),
+                    const SocialSignIn(),
+                    const SizedBox(height: 16),
+                    const SignInAgreement(),
+                    const SizedBox(height: 32),
+                  ],
                 ),
               ),
-              Text(
-                'register'.tr(),
-                style: AppTypography.h1.copyWith(color: Colors.white),
-              ),
-              const SizedBox(height: 24),
-              FgInput(
-                label: 'Email',
-                controller: _emailController,
-              ),
-              const SizedBox(height: 32),
-              FgButton(
-                onPressed: _isEmailValid
-                    ? () {
-                        ref
-                            .read(authenticationViewModelProvider.notifier)
-                            .signInWithMagicLink(_emailController.text);
-                        context.push(
-                          Routes.otp,
-                          extra: {
-                            'email': _emailController.text,
-                            'isRegister': true,
-                          },
-                        );
-                      }
-                    : null,
-                text: LocaleKeys.continueText.tr(),
-                width: double.infinity,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    LocaleKeys.alreadyHaveAccount.tr(),
-                    style: AppTheme.bodySmall,
-                  ),
-                  const SizedBox(width: 4),
-                  TextButton(
-                    onPressed: () {
-                      context.push(Routes.login);
-                    },
-                    child: Text(
-                      LocaleKeys.signIn.tr(),
-                      style: AppTheme.bodySmall
-                          .copyWith(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              const HorizontalDivider(),
-              const SizedBox(height: 16),
-              const SocialSignIn(),
-              const SizedBox(height: 16),
-              const SignInAgreement(),
-              const SizedBox(height: 32),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

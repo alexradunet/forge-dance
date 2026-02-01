@@ -16,6 +16,7 @@ import '../../../../utils/global_loading.dart';
 import '../../../../features/common/ui/widgets/common_dialog.dart';
 import '../../model/profile.dart';
 import '../../ui/view_model/profile_view_model.dart';
+import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/atoms/avatars/fg_avatar.dart';
 import '../../ui/widgets/profile_stats.dart';
 import '../../ui/widgets/achievements_carousel.dart';
@@ -83,7 +84,20 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
-          child: _buildHeader(),
+          child: AppHeader(
+            title: 'PROFILE',
+            subtitle: 'Pro Dancer • Lvl 42',
+            rightSlot: IconButton(
+              onPressed: () {
+                // Navigate to settings
+              },
+              icon: const Icon(
+                Icons.settings,
+                color: AppColors.textMuted,
+                size: 24,
+              ),
+            ),
+          ),
         ),
         SliverToBoxAdapter(
           child: _buildProfileInfo(profile),
@@ -136,47 +150,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildHeader() {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        24,
-        MediaQuery.paddingOf(context).top + 12,
-        24,
-        8,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'PROFILE',
-            style: TextStyle(
-              fontFamily: 'Bebas Neue',
-              fontSize: 42,
-              color: Colors.white,
-              letterSpacing: 2,
-              shadows: [
-                Shadow(
-                  color: Colors.black.withOpacity(0.5),
-                  blurRadius: 8,
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: () {
-              // Navigate to settings
-            },
-            icon: Icon(
-              Icons.settings,
-              color: AppColors.textMuted,
-              size: 24,
-            ),
-          ),
-        ],
-      ),
     );
   }
 

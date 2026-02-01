@@ -9,6 +9,8 @@ import '../../../common/ui/widgets/primary_button.dart';
 
 import '../../../../design_system/atoms/visuals/fg_background.dart';
 
+import '../../../../design_system/organisms/navigation/app_header.dart';
+
 class CollectionPage extends ConsumerStatefulWidget {
   const CollectionPage({super.key});
 
@@ -36,33 +38,15 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
           slivers: [
             // Header
             SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  24,
-                  MediaQuery.paddingOf(context).top + 12,
-                  24,
-                  8,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'COLLECTION',
-                      style: TextStyle(
-                        fontFamily: 'Bebas Neue',
-                        fontSize: 42,
-                        color: Colors.white,
-                        letterSpacing: 2,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.search,
-                        color: AppColors.textMain,
-                      ),
-                    ),
-                  ],
+              child: AppHeader(
+                title: 'COLLECTION',
+                subtitle: 'Your Library',
+                rightSlot: IconButton(
+                  onPressed: () {},
+                  icon: const Icon(
+                    Icons.search,
+                    color: AppColors.textMain,
+                  ),
                 ),
               ),
             ),

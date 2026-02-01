@@ -9,7 +9,8 @@ import '../../../generated/locale_keys.g.dart';
 import '../../../extensions/string_extension.dart';
 import '../../../design_system/tokens/app_typography.dart';
 import '../../../utils/global_loading.dart';
-import '../../common/ui/widgets/common_header.dart';
+import '../../../design_system/organisms/navigation/app_header.dart';
+import '../../../design_system/atoms/visuals/fg_background.dart';
 import '../../common/ui/widgets/common_text_form_field.dart';
 import '../../common/ui/widgets/primary_button.dart';
 import '../../common/ui/widgets/secondary_button.dart';
@@ -64,80 +65,87 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          CommonHeader(header: LocaleKeys.accountInformation.tr()),
-          Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Avatar(url: avatar ?? widget.originalProfile.avatar),
-                    const SizedBox(width: 16),
-                    SizedBox(
-                      width: 120,
-                      child: SecondaryButton(
-                        text: LocaleKeys.selectAvatar.tr(),
-                        onPressed: _selectImage,
+      backgroundColor: Colors.transparent,
+      body: FgBackground(
+        child: Column(
+          children: [
+            AppHeader(
+              title: LocaleKeys.accountInformation.tr(),
+              onBack: () => context.pop(),
+            ),
+            Expanded(
+              child: ListView(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Avatar(url: avatar ?? widget.originalProfile.avatar),
+                      const SizedBox(width: 16),
+                      SizedBox(
+                        width: 120,
+                        child: SecondaryButton(
+                          text: LocaleKeys.selectAvatar.tr(),
+                          onPressed: _selectImage,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 32),
-                Text(LocaleKeys.email.tr(), style: AppTheme.caption),
-                const SizedBox(height: 6),
-                Text(
-                  widget.originalProfile.email.orEmpty(),
-                  style: AppTheme.body,
-                ),
-                const SizedBox(height: 32),
-                CommonTextFormField(
-                  label: LocaleKeys.name.tr(),
-                  controller: nameController,
-                ),
-              ],
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                  Text(LocaleKeys.email.tr(), style: AppTheme.caption),
+                  const SizedBox(height: 6),
+                  Text(
+                    widget.originalProfile.email.orEmpty(),
+                    style: AppTheme.body,
+                  ),
+                  const SizedBox(height: 32),
+                  CommonTextFormField(
+                    label: LocaleKeys.name.tr(),
+                    controller: nameController,
+                  ),
+                ],
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(
-              left: 24,
-              right: 24,
-              bottom: 32,
+            Padding(
+              padding: const EdgeInsets.only(
+                left: 24,
+                right: 24,
+                bottom: 32,
+              ),
+              child: PrimaryButton(
+                text: LocaleKeys.confirm.tr(),
+                isEnable: avatar != widget.originalProfile.avatar ||
+                    name != widget.originalProfile.name,
+                onPressed: () async {
+                  try {
+                    Global.showLoading(context);
+                    await ref
+                        .read(profileViewModelProvider.notifier)
+                        .updateProfile(
+                          avatar: avatar,
+                          name: name,
+                        );
+                    if (context.mounted) {
+                      context.pop();
+                    }
+                  } on PostgrestException catch (error) {
+                    if (context.mounted) {
+                      context.showErrorSnackBar(error.message);
+                    }
+                  } catch (error) {
+                    if (context.mounted) {
+                      context.showErrorSnackBar(
+                          LocaleKeys.unexpectedErrorOccurred.tr());
+                    }
+                  } finally {
+                    Global.hideLoading();
+                  }
+                },
+              ),
             ),
-            child: PrimaryButton(
-              text: LocaleKeys.confirm.tr(),
-              isEnable: avatar != widget.originalProfile.avatar ||
-                  name != widget.originalProfile.name,
-              onPressed: () async {
-                try {
-                  Global.showLoading(context);
-                  await ref
-                      .read(profileViewModelProvider.notifier)
-                      .updateProfile(
-                        avatar: avatar,
-                        name: name,
-                      );
-                  if (context.mounted) {
-                    context.pop();
-                  }
-                } on PostgrestException catch (error) {
-                  if (context.mounted) {
-                    context.showErrorSnackBar(error.message);
-                  }
-                } catch (error) {
-                  if (context.mounted) {
-                    context
-                        .showErrorSnackBar(LocaleKeys.unexpectedErrorOccurred.tr());
-                  }
-                } finally {
-                  Global.hideLoading();
-                }
-              },
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

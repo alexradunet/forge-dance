@@ -8,6 +8,7 @@ import '../../../design_system/tokens/app_colors.dart';
 import '../../../design_system/tokens/app_spacing.dart';
 import '../../../design_system/tokens/app_typography.dart';
 import '../../authentication/repository/authentication_repository.dart';
+import '../../../design_system/atoms/visuals/fg_background.dart';
 
 /// Forge.dance Splash Screen
 /// Minimalist design with logo, tagline, and progress indicator
@@ -44,8 +45,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: SafeArea(
+      backgroundColor: Colors.transparent,
+      body: FgBackground(
+        showGrid: false,
         child: Stack(
           children: [
             // Main content - centered vertically

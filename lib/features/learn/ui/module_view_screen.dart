@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/organisms/lessons/lesson_path_timeline.dart';
+import '../../../../design_system/organisms/navigation/app_header.dart';
+import '../../../../design_system/atoms/visuals/fg_background.dart';
 
 /// Module View Screen matching dashboard_4 mockup
 class ModuleViewScreen extends StatelessWidget {
@@ -21,147 +22,82 @@ class ModuleViewScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgDeep,
-      body: Stack(
-        children: [
-          // Background
-          _buildBackgroundGradients(),
-          // Main content
-          CustomScrollView(
-            slivers: [
-              // Header
-              SliverToBoxAdapter(
-                child: _buildHeader(context),
-              ),
-              // Progress bar
-              SliverToBoxAdapter(
-                child: _buildProgressBar(),
-              ),
-              // Lesson path
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: LessonPathTimeline(
-                    nodes: _getMockLessons(),
+      backgroundColor: Colors.transparent,
+      body: FgBackground(
+        child: Stack(
+          children: [
+            CustomScrollView(
+              slivers: [
+                // Header
+                SliverToBoxAdapter(
+                  child: _buildHeader(context),
+                ),
+                // Progress bar
+                SliverToBoxAdapter(
+                  child: _buildProgressBar(),
+                ),
+                // Lesson path
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: LessonPathTimeline(
+                      nodes: _getMockLessons(),
+                    ),
                   ),
                 ),
-              ),
-              // Boss challenge (trophy)
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
-                  child: _buildBossChallenge(),
+                // Boss challenge (trophy)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                    child: _buildBossChallenge(),
+                  ),
                 ),
-              ),
-            ],
-          ),
-          // Start button
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: _buildStartButton(context),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBackgroundGradients() {
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                AppColors.forgeFire.withOpacity(0.1),
-                AppColors.bgDeep,
-                AppColors.bgDeep,
               ],
             ),
-          ),
+            // Start button
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: _buildStartButton(context),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildHeader(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        MediaQuery.paddingOf(context).top + 12,
-        16,
-        24,
-      ),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: onBack ?? () => Navigator.of(context).pop(),
-            icon: Icon(Icons.arrow_back, color: Colors.white),
-            style: IconButton.styleFrom(
-              backgroundColor: Colors.white.withOpacity(0.05),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+    return AppHeader(
+      title: moduleTitle,
+      subtitle: moduleSubtitle,
+      onBack: onBack ?? () => Navigator.of(context).pop(),
+      rightSlot: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceDark,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.1)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.check_circle,
+              size: 14,
+              color: AppColors.forgeFire,
+            ),
+            const SizedBox(width: 4),
+            Text(
+              progress,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  moduleSubtitle.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.forgeFire,
-                    letterSpacing: 1.5,
-                  ),
-                ),
-                Text(
-                  moduleTitle,
-                  style: TextStyle(
-                    fontFamily: 'Bebas Neue',
-                    fontSize: 28,
-                    color: Colors.white,
-                    letterSpacing: 1.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          // Progress indicator
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceDark,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.1)),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.check_circle,
-                  size: 14,
-                  color: AppColors.forgeFire,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  progress,
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

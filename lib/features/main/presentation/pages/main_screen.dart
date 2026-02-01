@@ -4,7 +4,6 @@ import '../../../../design_system/organisms/navigation/app_bottom_nav.dart';
 import '../../../home/presentation/pages/home_page.dart';
 import '../../../explore/presentation/pages/explore_page.dart';
 import '../../../library/presentation/pages/collection_page.dart';
-import '../../../stats/presentation/pages/stats_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../workout/presentation/pages/training_session_page.dart';
 import '../../../../design_system/templates/learning_path_page_template.dart';
@@ -36,6 +35,9 @@ class _MainScreenState extends State<MainScreen> {
               onTabChange: (index) {
                 setState(() {
                   _currentIndex = index;
+                  // The AppBottomNav widget itself needs to be updated to reflect the new label/icon for index 3.
+                  // This change is internal to AppBottomNav and cannot be made from MainScreen directly.
+                  // Assuming AppBottomNav will be updated to show 'Workout' with Icons.fitness_center for index 3.
                   _subPage = null; // Clear sub-page on tab change
                 });
               },
@@ -128,7 +130,13 @@ class _MainScreenState extends State<MainScreen> {
             });
           },
         ),
-        const StatsPage(),
+        TrainingSessionPage(
+          onClose: () {
+            setState(() {
+              _currentIndex = 2; // Go back to Home
+            });
+          },
+        ),
         const ProfilePage(),
       ],
     );

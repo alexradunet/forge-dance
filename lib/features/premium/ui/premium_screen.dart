@@ -19,6 +19,8 @@ import 'widgets/benefit_item.dart';
 import 'widgets/premium_agreement.dart';
 import 'widgets/product_item.dart';
 
+import '../../../design_system/organisms/navigation/app_header.dart';
+
 class PremiumScreen extends ConsumerWidget {
   const PremiumScreen({super.key});
 
@@ -56,7 +58,7 @@ class PremiumScreen extends ConsumerWidget {
     final selectedIndex = premiumState.value?.selectedIndex ?? 1;
 
     return Scaffold(
-      backgroundColor: AppColors.gray950,
+      backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           Image(image: AssetImage(Assets.premiumBackground)),
@@ -66,106 +68,92 @@ class PremiumScreen extends ConsumerWidget {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  AppColors.gray950.withOpacity(0.33),
-                  AppColors.gray950.withOpacity(0.66),
                   AppColors.gray950,
                 ],
               ),
             ),
           ),
-          SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(width: 36),
-                      Text(
-                        LocaleKeys.premium,
-                        style: AppTheme.h1.copyWith(
-                          color: AppColors.crystalWhite,
-                        ),
+          Column(
+            children: [
+              AppHeader(
+                title: LocaleKeys.premium.tr(),
+                rightSlot:
+                    const CommonCloseButton(color: AppColors.crystalWhite),
+                isTransparent: true,
+              ),
+              Expanded(
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 256),
+                  children: [
+                    Text(
+                      LocaleKeys.premiumBenefits,
+                      style: AppTheme.h2.copyWith(
+                        color: AppColors.crystalWhite,
                       ),
-                      CommonCloseButton(color: AppColors.crystalWhite),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: ListView(
-                    padding: EdgeInsets.fromLTRB(16, 0, 16, 256),
-                    children: [
-                      Text(
-                        LocaleKeys.premiumBenefits,
-                        style: AppTheme.h2.copyWith(
-                          color: AppColors.crystalWhite,
-                        ),
+                    ),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: AppColors.gray950.withAlpha(220),
+                        borderRadius: BorderRadius.circular(16),
                       ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.gray950.withAlpha(220),
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: Column(
-                          spacing: 16,
-                          children: benefits
-                              .map((benefit) => BenefitItem(
-                                    icon: benefit.icon,
-                                    title: benefit.title,
-                                    description: benefit.description,
-                                  ))
-                              .toList(),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        LocaleKeys.selectPlan,
-                        style: AppTheme.h2.copyWith(
-                          color: AppColors.crystalWhite,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
+                      child: Column(
                         spacing: 16,
-                        children: products
-                            .mapIndexed(
-                              (index, product) => ProductItem(
-                                product: product,
-                                isSelected: selectedIndex == index,
-                                onTap: () => ref
-                                    .read(premiumViewModelProvider.notifier)
-                                    .selectProduct(index),
-                              ),
-                            )
+                        children: benefits
+                            .map((benefit) => BenefitItem(
+                                  icon: benefit.icon,
+                                  title: benefit.title,
+                                  description: benefit.description,
+                                ))
                             .toList(),
                       ),
-                      const SizedBox(height: 24),
-                      Text(
-                        '* ${products[selectedIndex].description}',
-                        style: AppTheme.bodySmall.copyWith(
-                          color: AppColors.gray200,
-                        ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      LocaleKeys.selectPlan,
+                      style: AppTheme.h2.copyWith(
+                        color: AppColors.crystalWhite,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        Platform.isIOS
-                            ? LocaleKeys.subscriptionInfoIos.tr()
-                            : LocaleKeys.subscriptionInfoAndroid.tr(),
-                        style: AppTheme.bodySmall.copyWith(
-                          color: AppColors.crystalWhite,
-                        ),
-                        textAlign: TextAlign.justify,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      spacing: 16,
+                      children: products
+                          .mapIndexed(
+                            (index, product) => ProductItem(
+                              product: product,
+                              isSelected: selectedIndex == index,
+                              onTap: () => ref
+                                  .read(premiumViewModelProvider.notifier)
+                                  .selectProduct(index),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      '* ${products[selectedIndex].description}',
+                      style: AppTheme.bodySmall.copyWith(
+                        color: AppColors.gray200,
                       ),
-                      const SizedBox(height: 8),
-                      PremiumAgreement(),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      Platform.isIOS
+                          ? LocaleKeys.subscriptionInfoIos.tr()
+                          : LocaleKeys.subscriptionInfoAndroid.tr(),
+                      style: AppTheme.bodySmall.copyWith(
+                        color: AppColors.crystalWhite,
+                      ),
+                      textAlign: TextAlign.justify,
+                    ),
+                    const SizedBox(height: 8),
+                    PremiumAgreement(),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
           Positioned(
             left: 0,

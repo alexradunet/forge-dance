@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/molecules/navigation/app_floating_action_bar.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/organisms/cards/app_workout_intro_card.dart';
 import '../../../../design_system/organisms/cards/app_session_complete_card.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../design_system/atoms/buttons/fg_button.dart';
-
-import '../../../../design_system/atoms/visuals/fg_background.dart';
 
 enum TrainingSessionState { intro, active, complete }
 

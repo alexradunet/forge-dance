@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import '../../design_system/tokens/app_colors.dart';
-import '../../design_system/tokens/app_spacing.dart';
+import '../tokens/app_spacing.dart';
+import '../atoms/visuals/fg_background.dart';
 
 /// Home dashboard template - Layout structure for home screen
 class HomeDashboardTemplate extends StatelessWidget {
@@ -23,22 +22,14 @@ class HomeDashboardTemplate extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.gray950,
-      body: SafeArea(
+      backgroundColor: Colors.transparent,
+      body: FgBackground(
         child: CustomScrollView(
           slivers: [
             // Header Section
             if (header != null)
               SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    AppSpacing.xxl,
-                    AppSpacing.lg,
-                    AppSpacing.xxl,
-                    AppSpacing.md,
-                  ),
-                  child: header!,
-                ),
+                child: header!,
               ),
 
             // Featured Content

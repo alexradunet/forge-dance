@@ -26,9 +26,9 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
     return Container(
       padding: EdgeInsets.fromLTRB(
         24,
-        MediaQuery.of(context).padding.top + 12,
+        MediaQuery.of(context).padding.top + 24,
         24,
-        20, // Slightly more padding at bottom
+        24,
       ),
       decoration: BoxDecoration(
         color: isTransparent ? null : AppColors.bgDeep,

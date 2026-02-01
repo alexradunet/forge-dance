@@ -16,6 +16,8 @@ import '../../../routing/routes.dart';
 import '../../../design_system/tokens/app_typography.dart';
 import '../../../utils/validator.dart';
 
+import '../../../design_system/atoms/visuals/fg_background.dart';
+
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
 
@@ -50,65 +52,66 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Stack(
+      backgroundColor: Colors.transparent,
+      body: FgBackground(
+        child: Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: SvgPicture.asset(
-                      Assets.login,
-                      fit: BoxFit.fitWidth,
-                      alignment: Alignment.bottomCenter,
-                      semanticsLabel: 'Sign in',
-                    ),
-                  ),
-                  Text(
-                    LocaleKeys.signIn.tr(),
-                    style: AppTypography.h1.copyWith(color: Colors.white),
-                  ),
-                  const SizedBox(height: 24),
-                  FgInput(
-                    label: 'Email',
-                    controller: _emailController,
-                  ),
-                  const SizedBox(height: 32),
-                  FgButton(
-                    onPressed: _isEmailValid
-                        ? () {
-                            ref
-                                .read(authenticationViewModelProvider.notifier)
-                                .signInWithMagicLink(_emailController.text);
-                            context.push(
-                              Routes.otp,
-                              extra: {
-                                'email': _emailController.text,
-                                'isRegister': false,
-                              },
-                            );
-                          }
-                        : null,
-                    text: LocaleKeys.continueText.tr(),
-                    width: double.infinity,
-                  ),
-                  const SizedBox(height: 16),
-                  const HorizontalDivider(),
-                  const SizedBox(height: 16),
-                  const SocialSignIn(),
-                  const SizedBox(height: 32),
-                ],
-              ),
+            AppHeader(
+              title: 'WELCOME BACK',
+              onBack: () => context.pop(),
             ),
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: AppHeader(
-                title: '',
-                onBack: () => context.pop(),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      height: 200,
+                      child: SvgPicture.asset(
+                        Assets.login,
+                        fit: BoxFit.contain,
+                        alignment: Alignment.center,
+                        semanticsLabel: 'Sign in',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      LocaleKeys.signIn.tr(),
+                      style: AppTypography.h1.copyWith(color: Colors.white),
+                    ),
+                    const SizedBox(height: 24),
+                    FgInput(
+                      label: 'Email',
+                      controller: _emailController,
+                    ),
+                    const SizedBox(height: 32),
+                    FgButton(
+                      onPressed: _isEmailValid
+                          ? () {
+                              ref
+                                  .read(
+                                      authenticationViewModelProvider.notifier)
+                                  .signInWithMagicLink(_emailController.text);
+                              context.push(
+                                Routes.otp,
+                                extra: {
+                                  'email': _emailController.text,
+                                  'isRegister': false,
+                                },
+                              );
+                            }
+                          : null,
+                      text: LocaleKeys.continueText.tr(),
+                      width: double.infinity,
+                    ),
+                    const SizedBox(height: 16),
+                    const HorizontalDivider(),
+                    const SizedBox(height: 16),
+                    const SocialSignIn(),
+                    const SizedBox(height: 32),
+                  ],
+                ),
               ),
             ),
           ],
