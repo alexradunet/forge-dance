@@ -65,37 +65,31 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(builder: (context, constraints) {
-      // Determine if we are in a "mini" context based on width.
-      // Adjust threshold as needed. 220 seems like a reasonable cutoff for a full card vs tile.
-      final isMini = constraints.maxWidth < 220;
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 0, end: _isFlipped ? 180 : 0),
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeInOutBack,
+      builder: (context, angle, child) {
+        final isBackVisible = angle >= 90;
 
-      return TweenAnimationBuilder<double>(
-        tween: Tween<double>(begin: 0, end: _isFlipped ? 180 : 0),
-        duration: const Duration(milliseconds: 600),
-        curve: Curves.easeInOutBack,
-        builder: (context, angle, child) {
-          final isBackVisible = angle >= 90;
-
-          return Transform(
-            transform: Matrix4.identity()
-              ..setEntry(3, 2, 0.001) // perspective
-              ..rotateY(angle * pi / 180),
-            alignment: Alignment.center,
-            child: isBackVisible
-                ? Transform(
-                    transform: Matrix4.identity()..rotateY(pi),
-                    alignment: Alignment.center,
-                    child: _buildBack(isMini),
-                  )
-                : _buildFront(isMini),
-          );
-        },
-      );
-    });
+        return Transform(
+          transform: Matrix4.identity()
+            ..setEntry(3, 2, 0.001) // perspective
+            ..rotateY(angle * pi / 180),
+          alignment: Alignment.center,
+          child: isBackVisible
+              ? Transform(
+                  transform: Matrix4.identity()..rotateY(pi),
+                  alignment: Alignment.center,
+                  child: _buildBack(),
+                )
+              : _buildFront(),
+        );
+      },
+    );
   }
 
-  Widget _buildFront(bool isMini) {
+  Widget _buildFront() {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surfaceCard,
@@ -180,7 +174,7 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
                                 widget.subtitle!.toUpperCase(),
                                 style: AppTypography.label.copyWith(
                                   color: AppColors.forgeFire,
-                                  fontSize: isMini ? 8 : 9,
+                                  fontSize: 9,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -190,7 +184,7 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
                             textAlign: TextAlign.center,
                             style: AppTypography.h1.copyWith(
                               color: Colors.white,
-                              fontSize: isMini ? 20 : 56, // Scaled font size
+                              fontSize: 56,
                               height: 0.9,
                               letterSpacing: 1.2,
                               shadows: [
@@ -207,158 +201,151 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
                   ),
 
                   // Play Button Overlay
-                  if (!isMini)
-                    Center(
-                      child: GestureDetector(
-                        onTap: widget.onPlayTap,
-                        child: Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.1),
-                            border: Border.all(
-                                color: Colors.white.withOpacity(0.3)),
-                          ),
-                          child: const Center(
-                            child: Icon(Icons.play_arrow,
-                                color: Colors.white, size: 32),
-                          ),
+                  Center(
+                    child: GestureDetector(
+                      onTap: widget.onPlayTap,
+                      child: Container(
+                        width: 64,
+                        height: 64,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.white.withOpacity(0.1),
+                          border:
+                              Border.all(color: Colors.white.withOpacity(0.3)),
+                        ),
+                        child: const Center(
+                          child: Icon(Icons.play_arrow,
+                              color: Colors.white, size: 32),
                         ),
                       ),
                     ),
+                  ),
 
                   // Top Right: Favorite
-                  if (!isMini)
-                    Positioned(
-                      top: 16,
-                      right: 16,
-                      child: GestureDetector(
-                        onTap: widget.onToggleFavorite,
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.black.withOpacity(0.4),
-                            border: Border.all(
-                                color: Colors.white.withOpacity(0.2)),
-                          ),
-                          child: Icon(
-                            widget.isFavorited
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            color: widget.isFavorited
-                                ? AppColors.forgeFire
-                                : Colors.white,
-                            size: 20,
-                          ),
+                  Positioned(
+                    top: 16,
+                    right: 16,
+                    child: GestureDetector(
+                      onTap: widget.onToggleFavorite,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.black.withOpacity(0.4),
+                          border:
+                              Border.all(color: Colors.white.withOpacity(0.2)),
+                        ),
+                        child: Icon(
+                          widget.isFavorited
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: widget.isFavorited
+                              ? AppColors.forgeFire
+                              : Colors.white,
+                          size: 20,
                         ),
                       ),
                     ),
+                  ),
 
                   // Bottom Right: Flip
-                  if (!isMini)
-                    Positioned(
-                      bottom: 16,
-                      right: 16,
-                      child: GestureDetector(
-                        onTap: _toggleFlip,
-                        child: Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.black.withOpacity(0.4),
-                            border: Border.all(
-                                color: Colors.white.withOpacity(0.2)),
-                          ),
-                          child: const Icon(Icons.replay,
-                              color: Colors.white, size: 20),
+                  Positioned(
+                    bottom: 16,
+                    right: 16,
+                    child: GestureDetector(
+                      onTap: _toggleFlip,
+                      child: Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.black.withOpacity(0.4),
+                          border:
+                              Border.all(color: Colors.white.withOpacity(0.2)),
                         ),
+                        child: const Icon(Icons.replay,
+                            color: Colors.white, size: 20),
                       ),
                     ),
+                  ),
 
                   // Progress Bar
-                  if (!isMini)
-                    Positioned(
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      child: Container(
-                        height: 2,
-                        color: Colors.white.withOpacity(0.1),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: (widget.progress * 100).toInt(),
-                              child: Container(color: AppColors.forgeFire),
-                            ),
-                            Expanded(
-                              flex: ((1 - widget.progress) * 100).toInt(),
-                              child: const SizedBox(),
-                            ),
-                          ],
-                        ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      height: 2,
+                      color: Colors.white.withOpacity(0.1),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: (widget.progress * 100).toInt(),
+                            child: Container(color: AppColors.forgeFire),
+                          ),
+                          Expanded(
+                            flex: ((1 - widget.progress) * 100).toInt(),
+                            child: const SizedBox(),
+                          ),
+                        ],
                       ),
                     ),
+                  ),
 
                   // Progress Handle
-                  if (!isMini)
-                    Positioned(
-                      bottom: 0,
-                      left: (widget.progress * -10)
-                          .toDouble(), // Pseudo-offset alignment
+                  Positioned(
+                    bottom: 0,
+                    left: (widget.progress * -10)
+                        .toDouble(), // Pseudo-offset alignment
+                    child: Container(
+                      padding: EdgeInsets.only(
+                          left: MediaQuery.of(context).size.width *
+                              0.4 *
+                              widget.progress),
                       child: Container(
-                        padding: EdgeInsets.only(
-                            left: MediaQuery.of(context).size.width *
-                                0.4 *
-                                widget.progress),
-                        child: Container(
-                          width: 6,
-                          height: 6,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
+                        width: 6,
+                        height: 6,
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
                         ),
                       ),
                     ),
+                  ),
                 ],
               ),
             ),
 
             // Footer Strip
-            if (!isMini)
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                color: Colors.black.withOpacity(0.6),
-                child: widget.footer ??
-                    Row(
-                      children: [
-                        _buildFooterStat('STYLE', widget.style ?? 'Hip Hop',
-                            Icons.style, Colors.blueAccent),
-                        Container(
-                            width: 1,
-                            height: 24,
-                            color: Colors.white.withOpacity(0.1),
-                            margin: const EdgeInsets.symmetric(horizontal: 16)),
-                        _buildFooterStat(
-                            'DIFFICULTY',
-                            widget.difficulty ?? 'Easy',
-                            Icons.signal_cellular_alt,
-                            Colors.greenAccent),
-                      ],
-                    ),
-              ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              color: Colors.black.withOpacity(0.6),
+              child: widget.footer ??
+                  Row(
+                    children: [
+                      _buildFooterStat('STYLE', widget.style ?? 'Hip Hop',
+                          Icons.style, Colors.blueAccent),
+                      Container(
+                          width: 1,
+                          height: 24,
+                          color: Colors.white.withOpacity(0.1),
+                          margin: const EdgeInsets.symmetric(horizontal: 16)),
+                      _buildFooterStat(
+                          'DIFFICULTY',
+                          widget.difficulty ?? 'Easy',
+                          Icons.signal_cellular_alt,
+                          Colors.greenAccent),
+                    ],
+                  ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildBack(bool isMini) {
+  Widget _buildBack() {
     return Container(
       decoration: BoxDecoration(
         color: AppColors.surfaceCard,
