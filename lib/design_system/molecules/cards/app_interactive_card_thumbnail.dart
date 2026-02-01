@@ -17,12 +17,6 @@ class AppInteractiveCardThumbnail extends StatefulWidget {
   final String? backTitle;
   final String? backSubtitle;
 
-  // We can include the specific rhythm pattern logic here directly or as a widget
-  // Since the user asked to delete RhythmPatternView, I'll inline the logic here purely for the thumbnail
-  // or just make it generic. The original AppMiniInteractiveCard had it hardcoded.
-  // I will make it cleaner: just a standard back content slot or specific fields.
-  // For now, I'll replicate the Mini card look.
-
   const AppInteractiveCardThumbnail({
     super.key,
     required this.title,
