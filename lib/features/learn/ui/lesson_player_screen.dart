@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../design_system/templates/swipeable_card_screen_template.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_typography.dart';
+import '../../../../design_system/tokens/app_spacing.dart';
 
 import '../../../../design_system/organisms/cards/app_interactive_card.dart';
 
@@ -57,31 +58,34 @@ class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
         itemCount: _totalSteps,
         itemBuilder: (context, index) {
           return Center(
-            child: AppInteractiveCard(
-              title: _getStepTitle(index),
-              subtitle: 'STEP ${index + 1}',
-              backgroundImage:
-                  'https://images.unsplash.com/photo-1535525153412-5a42439a210d?q=80&w=2070&auto=format&fit=crop',
-              style: 'Groove',
-              difficulty: 'Beginner',
-              progress: (index + 1) / _totalSteps,
-              backTitle: 'STEP DETAILS',
-              backSubtitle: 'Technique Breakdown',
-              backContent: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Follow the rhythm and stay loose. This fundamental movement is key to your flow.',
-                    style:
-                        AppTypography.bodySmall.copyWith(color: Colors.white70),
-                  ),
-                  const SizedBox(height: 24),
-                  _buildTechniquePoint(
-                      'Focus', 'Keep your knees slightly bent and relaxed.'),
-                  _buildTechniquePoint('Breath', 'Exhale on the downbeat.'),
-                  _buildTechniquePoint(
-                      'Energy', 'Direct your power from the core.'),
-                ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              child: AppInteractiveCard(
+                title: _getStepTitle(index),
+                subtitle: 'STEP ${index + 1}',
+                backgroundImage:
+                    'https://images.unsplash.com/photo-1535525153412-5a42439a210d?q=80&w=2070&auto=format&fit=crop',
+                style: 'Groove',
+                difficulty: 'Beginner',
+                progress: (index + 1) / _totalSteps,
+                backTitle: 'STEP DETAILS',
+                backSubtitle: 'Technique Breakdown',
+                backContent: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Follow the rhythm and stay loose. This fundamental movement is key to your flow.',
+                      style: AppTypography.bodySmall
+                          .copyWith(color: Colors.white70),
+                    ),
+                    const SizedBox(height: 24),
+                    _buildTechniquePoint(
+                        'Focus', 'Keep your knees slightly bent and relaxed.'),
+                    _buildTechniquePoint('Breath', 'Exhale on the downbeat.'),
+                    _buildTechniquePoint(
+                        'Energy', 'Direct your power from the core.'),
+                  ],
+                ),
               ),
             ),
           );

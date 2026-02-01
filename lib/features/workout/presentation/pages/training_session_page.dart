@@ -4,6 +4,7 @@ import '../../../../design_system/organisms/cards/app_interactive_card.dart';
 import '../../../../design_system/templates/swipeable_card_screen_template.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_typography.dart';
+import '../../../../design_system/tokens/app_spacing.dart';
 import '../../../../design_system/atoms/buttons/fg_button.dart';
 
 class TrainingSessionPage extends StatefulWidget {
@@ -109,7 +110,10 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
         itemCount: _totalPageCount,
         itemBuilder: (context, index) {
           return Center(
-            child: _buildCardForIndex(index),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+              child: _buildCardForIndex(index),
+            ),
           );
         },
       ),

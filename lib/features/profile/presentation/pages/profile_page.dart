@@ -20,7 +20,6 @@ import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/atoms/avatars/fg_avatar.dart';
 import '../../ui/widgets/profile_stats.dart';
 import '../../ui/widgets/achievements_carousel.dart';
-import '../../ui/widgets/rewards_grid.dart';
 import '../../ui/widgets/profile_menu.dart';
 import '../../../../design_system/atoms/visuals/fg_background.dart';
 
@@ -44,21 +43,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         icon: Icons.local_fire_department,
         isUnlocked: true),
     Achievement(name: 'Rhythm King', icon: Icons.music_note, isUnlocked: false),
-  ];
-
-  final List<RewardItem> _rewards = const [
-    RewardItem(
-      name: 'Neon Striders',
-      category: 'Rare Footwear',
-      icon: Icons.directions_walk,
-      isNew: true,
-    ),
-    RewardItem(
-      name: 'Forge Hoodie',
-      category: 'Epic Upper',
-      icon: Icons.checkroom,
-      isNew: false,
-    ),
   ];
 
   @override
@@ -121,12 +105,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 // TODO: Navigate to achievements page
               },
             ),
-          ),
-        ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.only(top: 32),
-            child: RewardsGrid(rewards: _rewards),
           ),
         ),
         SliverToBoxAdapter(
