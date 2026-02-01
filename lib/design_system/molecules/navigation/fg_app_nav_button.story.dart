@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
-import 'package:flutter_mvvm_riverpod/design_system/molecules/navigation/app_nav_button.dart';
+import 'package:flutter_mvvm_riverpod/design_system/molecules/navigation/fg_app_nav_button.dart';
 import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
 
 @widgetbook.UseCase(
   name: 'Playground',
-  type: AppNavButton,
+  type: FgNavButton,
   path: 'Design System/Molecules/Navigation',
 )
 Widget buildAppNavButtonPlayground(BuildContext context) {
   return Scaffold(
     backgroundColor: AppColors.bgDeep,
     body: Center(
-      child: AppNavButton(
+      child: FgNavButton(
         icon: context.knobs.list(
           label: 'Icon',
           options: [Icons.home, Icons.search, Icons.menu, Icons.person],
@@ -29,7 +29,7 @@ Widget buildAppNavButtonPlayground(BuildContext context) {
 
 @widgetbook.UseCase(
   name: 'Showcase',
-  type: AppNavButton,
+  type: FgNavButton,
   path: 'Design System/Molecules/Navigation',
 )
 Widget buildAppNavButtonShowcase(BuildContext context) {
@@ -39,14 +39,14 @@ Widget buildAppNavButtonShowcase(BuildContext context) {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          AppNavButton(
+          FgNavButton(
             icon: Icons.home,
             label: 'Active',
             isActive: true,
             onTap: () {},
           ),
           const SizedBox(width: 32),
-          AppNavButton(
+          FgNavButton(
             icon: Icons.search,
             label: 'Inactive',
             isActive: false,

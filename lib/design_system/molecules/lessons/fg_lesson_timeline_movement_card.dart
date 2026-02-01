@@ -5,11 +5,11 @@ import '../../atoms/progress/fg_progress_bar.dart';
 import '../../atoms/badges/fg_badge.dart';
 import '../../atoms/buttons/fg_icon_button.dart';
 
-class LessonTimelineMovementCard extends StatelessWidget {
+class FgLessonTimelineMovementCard extends StatelessWidget {
   final LessonNode node;
   final Function(String)? onNavigate;
 
-  const LessonTimelineMovementCard({
+  const FgLessonTimelineMovementCard({
     super.key,
     required this.node,
     this.onNavigate,

@@ -1,11 +1,11 @@
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter_mvvm_riverpod/design_system/atoms/visuals/fg_tech_pattern_painter.dart';
 
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_border_radius.dart';
 import '../../tokens/app_typography.dart';
-import '../../atoms/visuals/tech_pattern_painter.dart';
 
 class AppInteractiveCard extends StatefulWidget {
   final String title;
@@ -134,7 +134,7 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
                   // Tech Pattern Overlay
                   Positioned.fill(
                     child: CustomPaint(
-                      painter: TechPatternPainter(
+                      painter: FgTechPatternPainter(
                         color: Colors.white,
                         opacity: 0.1,
                         spacing: 16.0,
@@ -367,7 +367,7 @@ class _AppInteractiveCardState extends State<AppInteractiveCard>
           // Tech Grid Pattern
           Positioned.fill(
             child: CustomPaint(
-              painter: TechPatternPainter(
+              painter: FgTechPatternPainter(
                 color: Colors.white,
                 opacity: 0.1,
                 spacing: 20.0,

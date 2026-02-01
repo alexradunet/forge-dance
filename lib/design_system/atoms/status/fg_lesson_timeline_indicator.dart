@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import '../../tokens/app_colors.dart';
 import '../../organisms/lessons/lesson_node_models.dart';
 
-class LessonTimelineIndicator extends StatelessWidget {
+class FgLessonTimelineIndicator extends StatelessWidget {
   final LessonNodeState state;
   final double size;
 
-  const LessonTimelineIndicator({
+  const FgLessonTimelineIndicator({
     super.key,
     required this.state,
     this.size = 40,

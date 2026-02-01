@@ -5,64 +5,40 @@ import '../../../design_system/tokens/app_spacing.dart';
 import '../../../design_system/tokens/app_typography.dart';
 import '../../../features/common/ui/widgets/material_ink_well.dart';
 
-/// Checkbox group molecule - Multi-select with custom styling
-class CheckboxGroupItem {
+/// Radio group molecule - Single-select with custom styling
+class FgRadioGroupItem<T> {
   final String label;
-  final bool value;
-  final String? id;
+  final T value;
 
-  CheckboxGroupItem({
+  FgRadioGroupItem({
     required this.label,
     required this.value,
-    this.id,
   });
 }
 
-class CheckboxGroup extends StatefulWidget {
-  final List<CheckboxGroupItem> items;
-  final ValueChanged<List<String>>? onChanged;
+class RadioGroup<T> extends StatelessWidget {
+  final List<FgRadioGroupItem<T>> items;
+  final T? selectedValue;
+  final ValueChanged<T>? onChanged;
 
-  const CheckboxGroup({
+  const RadioGroup({
     super.key,
     required this.items,
+    this.selectedValue,
     this.onChanged,
   });
 
   @override
-  State<CheckboxGroup> createState() => _CheckboxGroupState();
-}
-
-class _CheckboxGroupState extends State<CheckboxGroup> {
-  late List<CheckboxGroupItem> _items;
-
-  @override
-  void initState() {
-    super.initState();
-    _items = List.from(widget.items);
-  }
-
-  void _toggleItem(int index) {
-    setState(() {
-      _items[index] = CheckboxGroupItem(
-        label: _items[index].label,
-        value: !_items[index].value,
-        id: _items[index].id,
-      );
-    });
-    widget.onChanged?.call(
-      _items.where((item) => item.value).map((item) => item.id ?? item.label).toList(),
-    );
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Column(
-      children: List.generate(_items.length, (index) {
-        final item = _items[index];
+      children: List.generate(items.length, (index) {
+        final item = items[index];
+        final isSelected = item.value == selectedValue;
+
         return Padding(
           padding: const EdgeInsets.only(bottom: AppSpacing.md),
           child: MaterialInkWell(
-            onTap: () => _toggleItem(index),
+            onTap: () => onChanged?.call(item.value),
             radius: 12,
             child: Container(
               padding: const EdgeInsets.all(AppSpacing.lg),
@@ -70,7 +46,7 @@ class _CheckboxGroupState extends State<CheckboxGroup> {
                 color: AppColors.gray800,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: item.value
+                  color: isSelected
                       ? AppColors.forgeFire.withOpacity(0.3)
                       : AppColors.gray700,
                   width: 1,
@@ -79,23 +55,27 @@ class _CheckboxGroupState extends State<CheckboxGroup> {
               child: Row(
                 children: [
                   Container(
-                    width: 24,
-                    height: 24,
+                    width: 20,
+                    height: 20,
                     decoration: BoxDecoration(
-                      color: item.value ? AppColors.forgeFire : Colors.transparent,
-                      borderRadius: BorderRadius.circular(6),
+                      shape: BoxShape.circle,
                       border: Border.all(
-                        color: item.value
+                        color: isSelected
                             ? AppColors.forgeFire
                             : AppColors.gray400,
                         width: 2,
                       ),
                     ),
-                    child: item.value
-                        ? const Icon(
-                            Icons.check,
-                            size: 16,
-                            color: AppColors.crystalWhite,
+                    child: isSelected
+                        ? Center(
+                            child: Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: AppColors.forgeFire,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
                           )
                         : null,
                   ),
@@ -104,10 +84,9 @@ class _CheckboxGroupState extends State<CheckboxGroup> {
                     child: Text(
                       item.label,
                       style: AppTheme.body.copyWith(
-                        fontWeight: item.value
-                            ? FontWeight.w600
-                            : FontWeight.w500,
-                        color: item.value
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.w500,
+                        color: isSelected
                             ? AppColors.crystalWhite
                             : AppColors.gray400,
                       ),

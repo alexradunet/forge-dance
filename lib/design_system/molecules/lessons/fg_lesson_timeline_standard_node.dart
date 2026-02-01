@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import '../../tokens/app_colors.dart';
 import '../../organisms/lessons/lesson_node_models.dart';
-import '../../atoms/status/lesson_timeline_indicator.dart';
+import '../../atoms/status/fg_lesson_timeline_indicator.dart';
 
-class LessonTimelineStandardNode extends StatelessWidget {
+class FgLessonTimelineStandardNode extends StatelessWidget {
   final LessonNode node;
   final bool isTextLeft;
 
-  const LessonTimelineStandardNode({
+  const FgLessonTimelineStandardNode({
     super.key,
     required this.node,
     this.isTextLeft = true,
@@ -24,7 +24,7 @@ class LessonTimelineStandardNode extends StatelessWidget {
         alignment: Alignment.center,
         children: [
           // Center Icon
-          LessonTimelineIndicator(state: node.state),
+          FgLessonTimelineIndicator(state: node.state),
 
           // Text Content
           Align(

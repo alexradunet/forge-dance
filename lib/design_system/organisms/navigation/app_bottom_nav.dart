@@ -2,7 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 import '../../tokens/app_colors.dart';
-import '../../molecules/navigation/app_nav_button.dart';
+import '../../molecules/navigation/fg_app_nav_button.dart';
 
 class AppBottomNav extends StatelessWidget {
   final int currentIndex;
@@ -54,7 +54,7 @@ class AppBottomNav extends StatelessWidget {
   }
 
   Widget _buildBatItem(int index, IconData icon, String label) {
-    return AppNavButton(
+    return FgNavButton(
       icon: icon,
       label: label,
       isActive: currentIndex == index,

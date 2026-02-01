@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../atoms/visuals/lesson_timeline_track.dart';
-import '../../molecules/lessons/lesson_timeline_standard_node.dart';
-import '../../molecules/lessons/lesson_timeline_movement_card.dart';
-import '../../molecules/lessons/lesson_timeline_boss_node.dart';
+import '../../atoms/visuals/fg_lesson_timeline_track.dart';
+import '../../molecules/lessons/fg_lesson_timeline_standard_node.dart';
+import '../../molecules/lessons/fg_lesson_timeline_movement_card.dart';
+import '../../molecules/lessons/fg_lesson_timeline_boss_node.dart';
 import 'lesson_node_models.dart';
 
 export 'lesson_node_models.dart';
@@ -24,7 +24,7 @@ class LessonPathTimeline extends StatelessWidget {
         // Central Gradient Line
         const Positioned.fill(
           child: Center(
-            child: LessonTimelineTrack(),
+            child: FgLessonTimelineTrack(),
           ),
         ),
 
@@ -39,9 +39,9 @@ class LessonPathTimeline extends StatelessWidget {
   Widget _buildNode(BuildContext context, LessonNode node) {
     switch (node.type) {
       case LessonNodeType.boss:
-        return LessonTimelineBossNode(node: node);
+        return FgLessonTimelineBossNode(node: node);
       case LessonNodeType.movement:
-        return LessonTimelineMovementCard(
+        return FgLessonTimelineMovementCard(
           node: node,
           onNavigate: onNavigate,
         );
@@ -49,7 +49,7 @@ class LessonPathTimeline extends StatelessWidget {
       case LessonNodeType.drill:
       case LessonNodeType.experiment:
         final isTextLeft = node.type == LessonNodeType.theory;
-        return LessonTimelineStandardNode(
+        return FgLessonTimelineStandardNode(
           node: node,
           isTextLeft: isTextLeft,
         );

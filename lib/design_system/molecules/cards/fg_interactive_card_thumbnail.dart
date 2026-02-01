@@ -1,12 +1,12 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:flutter_mvvm_riverpod/design_system/atoms/visuals/fg_tech_pattern_painter.dart';
 
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_border_radius.dart';
 import '../../tokens/app_typography.dart';
-import '../../atoms/visuals/tech_pattern_painter.dart';
 
-class AppInteractiveCardThumbnail extends StatefulWidget {
+class FgInteractiveCardThumbnail extends StatefulWidget {
   final String title;
   final String? subtitle;
   final String backgroundImage;
@@ -17,7 +17,7 @@ class AppInteractiveCardThumbnail extends StatefulWidget {
   final String? backTitle;
   final String? backSubtitle;
 
-  const AppInteractiveCardThumbnail({
+  const FgInteractiveCardThumbnail({
     super.key,
     required this.title,
     required this.backgroundImage,
@@ -29,12 +29,11 @@ class AppInteractiveCardThumbnail extends StatefulWidget {
   });
 
   @override
-  State<AppInteractiveCardThumbnail> createState() =>
-      _AppInteractiveCardThumbnailState();
+  State<FgInteractiveCardThumbnail> createState() =>
+      _FgInteractiveCardThumbnailState();
 }
 
-class _AppInteractiveCardThumbnailState
-    extends State<AppInteractiveCardThumbnail>
+class _FgInteractiveCardThumbnailState extends State<FgInteractiveCardThumbnail>
     with SingleTickerProviderStateMixin {
   bool _isFlipped = false;
 
@@ -106,7 +105,7 @@ class _AppInteractiveCardThumbnailState
                   // Pattern
                   Positioned.fill(
                     child: CustomPaint(
-                      painter: TechPatternPainter(
+                      painter: FgTechPatternPainter(
                         color: Colors.white,
                         opacity: 0.1,
                         spacing: 16.0,
@@ -225,7 +224,7 @@ class _AppInteractiveCardThumbnailState
           children: [
             Positioned.fill(
               child: CustomPaint(
-                painter: TechPatternPainter(
+                painter: FgTechPatternPainter(
                   color: Colors.white,
                   opacity: 0.1,
                   spacing: 20.0,

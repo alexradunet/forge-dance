@@ -4,13 +4,13 @@ import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
 import '../../atoms/icons/fg_icon.dart';
 
-class AppNavButton extends StatelessWidget {
+class FgNavButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool isActive;
   final VoidCallback onTap;
 
-  const AppNavButton({
+  const FgNavButton({
     super.key,
     required this.icon,
     required this.label,

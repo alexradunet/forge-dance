@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class TechPatternPainter extends CustomPainter {
+class FgTechPatternPainter extends CustomPainter {
   final Color color;
   final double opacity;
   final double spacing;
   final bool isGrid;
 
-  TechPatternPainter({
+  const FgTechPatternPainter({
     required this.color,
     this.opacity = 0.2,
     this.spacing = 16.0,
@@ -38,7 +38,7 @@ class TechPatternPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant TechPatternPainter oldDelegate) {
+  bool shouldRepaint(covariant FgTechPatternPainter oldDelegate) {
     return oldDelegate.color != color ||
         oldDelegate.opacity != opacity ||
         oldDelegate.spacing != spacing ||

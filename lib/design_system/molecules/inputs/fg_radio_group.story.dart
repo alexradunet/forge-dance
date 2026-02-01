@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
-import 'package:flutter_mvvm_riverpod/design_system/molecules/inputs/radio_group.dart'
+import 'package:flutter_mvvm_riverpod/design_system/molecules/inputs/fg_radio_group.dart'
     as atom;
 import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
 
@@ -11,9 +11,9 @@ import 'package:flutter_mvvm_riverpod/design_system/tokens/app_colors.dart';
 )
 Widget buildRadioGroupPlayground(BuildContext context) {
   final items = [
-    atom.RadioGroupItem(label: 'Option 1', value: '1'),
-    atom.RadioGroupItem(label: 'Option 2', value: '2'),
-    atom.RadioGroupItem(label: 'Option 3', value: '3'),
+    atom.FgRadioGroupItem(label: 'Option 1', value: '1'),
+    atom.FgRadioGroupItem(label: 'Option 2', value: '2'),
+    atom.FgRadioGroupItem(label: 'Option 3', value: '3'),
   ];
   String? selected = '1';
 
@@ -43,13 +43,13 @@ Widget buildRadioGroupPlayground(BuildContext context) {
 )
 Widget buildRadioGroupShowcase(BuildContext context) {
   final items1 = [
-    atom.RadioGroupItem(label: 'Daily', value: 'daily'),
-    atom.RadioGroupItem(label: 'Weekly', value: 'weekly'),
+    atom.FgRadioGroupItem(label: 'Daily', value: 'daily'),
+    atom.FgRadioGroupItem(label: 'Weekly', value: 'weekly'),
   ];
   final items2 = [
-    atom.RadioGroupItem(label: 'Small', value: 's'),
-    atom.RadioGroupItem(label: 'Medium', value: 'm'),
-    atom.RadioGroupItem(label: 'Large', value: 'l'),
+    atom.FgRadioGroupItem(label: 'Small', value: 's'),
+    atom.FgRadioGroupItem(label: 'Medium', value: 'm'),
+    atom.FgRadioGroupItem(label: 'Large', value: 'l'),
   ];
 
   return Scaffold(

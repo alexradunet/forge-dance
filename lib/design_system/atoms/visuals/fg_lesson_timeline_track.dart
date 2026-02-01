@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../tokens/app_colors.dart';
 
-class LessonTimelineTrack extends StatelessWidget {
+class FgLessonTimelineTrack extends StatelessWidget {
   final double width;
   final Gradient? gradient;
 
-  const LessonTimelineTrack({
+  const FgLessonTimelineTrack({
     super.key,
     this.width = 2,
     this.gradient,

@@ -66,8 +66,8 @@ export 'atoms/icons/fg_icon.dart';
 export 'molecules/cards/fg_content_card.dart';
 
 // Inputs
-export 'molecules/inputs/checkbox_group.dart';
-export 'molecules/inputs/radio_group.dart';
+export 'molecules/inputs/fg_checkbox_group.dart';
+export 'molecules/inputs/fg_radio_group.dart';
 
 // Feedback
 export 'molecules/feedback/fg_empty.dart';

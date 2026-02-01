@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import '../../tokens/app_colors.dart';
 import '../../organisms/lessons/lesson_node_models.dart';
 
-class LessonTimelineBossNode extends StatelessWidget {
+class FgLessonTimelineBossNode extends StatelessWidget {
   final LessonNode node;
 
-  const LessonTimelineBossNode({
+  const FgLessonTimelineBossNode({
     super.key,
     required this.node,
   });
