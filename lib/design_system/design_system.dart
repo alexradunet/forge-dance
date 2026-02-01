@@ -64,24 +64,12 @@ export 'atoms/icons/fg_icon.dart';
 
 // Cards
 export 'molecules/cards/fg_content_card.dart';
-export 'molecules/cards/square_tile.dart';
-
-// Layout
-export 'molecules/layout/fg_carousel.dart';
-
-// Controls
-export 'molecules/controls/segmented_control.dart';
-export 'molecules/controls/stepper_control.dart';
-
-// Learning
-export 'molecules/learning/app_lesson_node.dart';
 
 // Inputs
 export 'molecules/inputs/checkbox_group.dart';
 export 'molecules/inputs/radio_group.dart';
 
 // Feedback
-export 'molecules/feedback/toast_notification.dart';
 export 'molecules/feedback/fg_empty.dart';
 
 // ───────────────────────────────────────────────────────────
