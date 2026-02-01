@@ -31,10 +31,8 @@ class AppAtomicCard extends StatelessWidget {
       title: title,
       backgroundImage: imageUrl,
       level: level,
-      tags: [category],
-      onTap: onTap,
       backContent: _buildBackContent(),
-      child: _buildFooter(),
+      backFooter: _buildFooter(),
     );
   }
 

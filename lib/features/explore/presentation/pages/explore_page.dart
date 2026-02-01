@@ -5,6 +5,8 @@ import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/atoms/icons/fg_icon.dart';
 import '../../../../design_system/atoms/visuals/fg_background.dart';
 
+import '../../../../design_system/organisms/modals/app_filter_sheet.dart';
+
 class ExplorePage extends StatefulWidget {
   final Function(String)? onNavigate;
 
@@ -17,6 +19,46 @@ class ExplorePage extends StatefulWidget {
 class _ExplorePageState extends State<ExplorePage> {
   final TextEditingController _searchController = TextEditingController();
 
+  final Map<String, String> _selectedFilters = {
+    'Difficulty': 'All',
+    'Style': 'All',
+    'Type': 'All',
+  };
+
+  void _showFilterSheet() {
+    AppFilterSheet.show(
+      context: context,
+      sections: {
+        'Difficulty': ['All', 'Beginner', 'Intermediate', 'Advanced'],
+        'Style': [
+          'All',
+          'Hip Hop',
+          'Breaking',
+          'Contemporary',
+          'Freestyle',
+          'General'
+        ],
+        'Type': ['All', 'Drill', 'Dance Step', 'Concept'],
+      },
+      selectedFilters: _selectedFilters,
+      onFilterSelected: (section, value) {
+        setState(() {
+          _selectedFilters[section] = value;
+        });
+      },
+      onReset: () {
+        setState(() {
+          _selectedFilters.updateAll((key, value) => 'All');
+        });
+        Navigator.pop(context);
+      },
+      onApply: () {
+        // Apply logic here
+        Navigator.pop(context);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,9 +70,6 @@ class _ExplorePageState extends State<ExplorePage> {
               child: AppHeader(
                 title: "Explore",
                 subtitle: "Discover",
-                onBack: widget.onNavigate != null
-                    ? () => widget.onNavigate!('home')
-                    : null,
               ),
             ),
             SliverPadding(
@@ -172,9 +211,7 @@ class _ExplorePageState extends State<ExplorePage> {
             ),
           ),
           GestureDetector(
-            onTap: () {
-              // Show filter modal
-            },
+            onTap: _showFilterSheet,
             child: Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(

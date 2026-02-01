@@ -6,8 +6,7 @@ import '../../../explore/presentation/pages/explore_page.dart';
 import '../../../library/presentation/pages/collection_page.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../workout/presentation/pages/training_session_page.dart';
-import '../../../../design_system/templates/learning_path_page_template.dart';
-import '../../../../design_system/molecules/learning/app_lesson_node.dart';
+import '../../../learn/ui/module_view_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -60,46 +59,12 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     if (_subPage == 'lesson-path') {
-      return LearningPathPageTemplate(
-        title: 'BREAKING 101',
-        subtitle: 'Fundamentals • Module 1',
+      return ModuleViewScreen(
         onBack: () {
           setState(() {
             _subPage = null;
           });
         },
-        children: const [
-          AppLessonNode(
-            title: "History of Bounce",
-            type: AppLessonNodeType.theory,
-            status: AppLessonNodeStatus.completed,
-            duration: "15 min",
-          ),
-          AppLessonNode(
-            title: "Groove Basics",
-            type: AppLessonNodeType.movement,
-            status: AppLessonNodeStatus.active,
-            duration: "25 min",
-          ),
-          AppLessonNode(
-            title: "Timing Drill",
-            type: AppLessonNodeType.drill,
-            status: AppLessonNodeStatus.locked,
-            duration: "20 min",
-          ),
-          AppLessonNode(
-            title: "Flow Lab",
-            type: AppLessonNodeType.experiment,
-            status: AppLessonNodeStatus.locked,
-            duration: "30 min",
-          ),
-          AppLessonNode(
-            title: "The Forge Finale",
-            type: AppLessonNodeType.drill,
-            status: AppLessonNodeStatus.locked,
-            duration: "Boss",
-          ),
-        ],
       );
     }
 

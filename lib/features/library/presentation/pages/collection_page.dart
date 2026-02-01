@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../../design_system/tokens/app_colors.dart';
-import '../../../../design_system/tokens/app_spacing.dart';
-import '../../../../design_system/tokens/app_typography.dart';
-import '../../../common/ui/widgets/primary_button.dart';
 
 import '../../../../design_system/atoms/visuals/fg_background.dart';
 
 import '../../../../design_system/organisms/navigation/app_header.dart';
+import '../../../../design_system/molecules/cards/app_mini_interactive_card.dart';
+import '../../../../design_system/molecules/cards/app_mini_workout_card.dart';
+import '../../../../design_system/atoms/icons/fg_icon.dart';
+import '../../../../design_system/organisms/modals/app_filter_sheet.dart';
 
 class CollectionPage extends ConsumerStatefulWidget {
   const CollectionPage({super.key});
@@ -19,15 +19,46 @@ class CollectionPage extends ConsumerStatefulWidget {
 }
 
 class _CollectionPageState extends ConsumerState<CollectionPage> {
-  String _selectedFilter = 'All Styles';
+  final TextEditingController _searchController = TextEditingController();
+  final Map<String, String> _selectedFilters = {
+    'Difficulty': 'All',
+    'Style': 'All',
+    'Type': 'All',
+  };
 
-  final List<String> _filters = [
-    'All Styles',
-    'Hip Hop',
-    'Popping',
-    'Break',
-    'House',
-  ];
+  void _showFilterSheet() {
+    AppFilterSheet.show(
+      context: context,
+      sections: {
+        'Difficulty': ['All', 'Beginner', 'Intermediate', 'Advanced'],
+        'Style': [
+          'All',
+          'Hip Hop',
+          'Breaking',
+          'Contemporary',
+          'Freestyle',
+          'General'
+        ],
+        'Type': ['All', 'Drill', 'Dance Step', 'Concept'],
+      },
+      selectedFilters: _selectedFilters,
+      onFilterSelected: (section, value) {
+        setState(() {
+          _selectedFilters[section] = value;
+        });
+      },
+      onReset: () {
+        setState(() {
+          _selectedFilters.updateAll((key, value) => 'All');
+        });
+        Navigator.pop(context);
+      },
+      onApply: () {
+        // Apply logic here
+        Navigator.pop(context);
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,69 +72,12 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
               child: AppHeader(
                 title: 'COLLECTION',
                 subtitle: 'Your Library',
-                rightSlot: IconButton(
-                  onPressed: () {},
-                  icon: const Icon(
-                    Icons.search,
-                    color: AppColors.textMain,
-                  ),
-                ),
               ),
             ),
-
-            // Filter Chips
-            SliverToBoxAdapter(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: _filters.map((filter) {
-                      final isSelected = filter == _selectedFilter;
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 12),
-                        child: GestureDetector(
-                          onTap: () {
-                            setState(() {
-                              _selectedFilter = filter;
-                            });
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 20,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: isSelected
-                                  ? AppColors.forgeFire
-                                  : AppColors.surfaceDark.withOpacity(0.5),
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: isSelected
-                                    ? AppColors.forgeFire
-                                    : Colors.white.withOpacity(0.05),
-                              ),
-                            ),
-                            child: Text(
-                              filter,
-                              style: AppTypography.label.copyWith(
-                                color: isSelected
-                                    ? Colors.white
-                                    : AppColors.textMuted,
-                                fontWeight: isSelected
-                                    ? FontWeight.bold
-                                    : FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              sliver: SliverToBoxAdapter(
+                child: _buildSearchBar(),
               ),
             ),
 
@@ -123,6 +97,54 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
       ),
     );
   }
+
+  Widget _buildSearchBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceDark,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.white.withOpacity(0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const FgIcon(icon: Icons.search, color: AppColors.textMuted),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextField(
+              controller: _searchController,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+              decoration: const InputDecoration(
+                hintText: "Search in your library...",
+                hintStyle: TextStyle(color: AppColors.textDark, fontSize: 14),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 16),
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: _showFilterSheet,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const FgIcon(
+                  icon: Icons.tune, color: AppColors.textMuted, size: 20),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _CollectionContent extends StatelessWidget {
@@ -133,86 +155,78 @@ class _CollectionContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        // Mini Interactive Cards Grid
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          childAspectRatio: 0.7,
           children: [
-            Text(
-              'RESOURCES',
-              style: AppTypography.label.copyWith(
-                color: AppColors.textMuted,
-                letterSpacing: 1.5,
-              ),
+            const AppMiniInteractiveCard(
+              title: 'BASIC BOUNCE',
+              level: 'BEGINNER',
+              backgroundImage:
+                  'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=2000',
             ),
-            Text(
-              'VIEW ALL',
-              style: AppTypography.label.copyWith(
-                color: AppColors.forgeFire,
-                fontSize: 10,
-              ),
+            const AppMiniInteractiveCard(
+              title: 'RHYTHM GAME',
+              level: 'INTERMEDIATE',
+              backgroundImage:
+                  'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=2000',
             ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        // Placeholder for cards - using existing design tokens
-        const Row(
-          children: [
-            Expanded(child: _MockCard(title: 'Movements', count: '124')),
-            SizedBox(width: 16),
-            Expanded(child: _MockCard(title: 'Techniques', count: '48')),
-          ],
-        ),
-        const SizedBox(height: 16),
-        const Row(
-          children: [
-            Expanded(child: _MockCard(title: 'Stretches', count: '32')),
-            SizedBox(width: 16),
-            Expanded(child: _MockCard(title: 'Warmups', count: '15')),
+            AppMiniWorkoutCard(
+              title: 'HIIT BLAST',
+              duration: '20 MIN',
+              intensity: 'HIGH',
+              onTap: () {},
+            ),
+            AppMiniWorkoutCard(
+              title: 'MORNING FLOW',
+              duration: '15 MIN',
+              intensity: 'LOW',
+              onTap: () {},
+            ),
+            const AppMiniInteractiveCard(
+              title: 'POPPING BASICS',
+              level: 'BEGINNER',
+              backgroundImage:
+                  'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=2000',
+            ),
+            const AppMiniInteractiveCard(
+              title: 'HOUSE GROOVES',
+              level: 'INTERMEDIATE',
+              backgroundImage:
+                  'https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&q=80&w=2000',
+            ),
+            AppMiniWorkoutCard(
+              title: 'CORE STRENGTH',
+              duration: '25 MIN',
+              intensity: 'MEDIUM',
+              onTap: () {},
+            ),
+            AppMiniWorkoutCard(
+              title: 'FLEXIBILITY',
+              duration: '30 MIN',
+              intensity: 'LOW',
+              onTap: () {},
+            ),
+            const AppMiniInteractiveCard(
+              title: 'BREAKING FOOTWORK',
+              level: 'ADVANCED',
+              backgroundImage:
+                  'https://images.unsplash.com/photo-1535525153412-5a42439a210d?auto=format&fit=crop&q=80&w=2000',
+            ),
+            AppMiniWorkoutCard(
+              title: 'ENDURANCE',
+              duration: '45 MIN',
+              intensity: 'HIGH',
+              onTap: () {},
+            ),
           ],
         ),
       ],
-    );
-  }
-}
-
-class _MockCard extends StatelessWidget {
-  final String title;
-  final String count;
-
-  const _MockCard({required this.title, required this.count});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceDark.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.bgDeep,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.fitness_center,
-                color: AppColors.forgeFire, size: 20),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: AppTypography.h5.copyWith(color: Colors.white),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '$count Items',
-            style: AppTypography.caption.copyWith(color: AppColors.textMuted),
-          ),
-        ],
-      ),
     );
   }
 }
