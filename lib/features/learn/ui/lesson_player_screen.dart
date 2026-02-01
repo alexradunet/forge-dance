@@ -4,7 +4,7 @@ import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_typography.dart';
 import '../../../../design_system/tokens/app_spacing.dart';
 
-import '../../../../design_system/organisms/cards/app_interactive_card.dart';
+import '../../../../design_system/organisms/cards/fg_interactive_card.dart';
 
 class LessonPlayerScreen extends StatefulWidget {
   final VoidCallback? onBack;
@@ -60,7 +60,7 @@ class _LessonPlayerScreenState extends State<LessonPlayerScreen> {
           return Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-              child: AppInteractiveCard(
+              child: FgInteractiveCard(
                 title: _getStepTitle(index),
                 subtitle: 'STEP ${index + 1}',
                 backgroundImage:

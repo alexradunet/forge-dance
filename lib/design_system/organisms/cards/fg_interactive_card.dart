@@ -7,7 +7,7 @@ import '../../tokens/app_colors.dart';
 import '../../tokens/app_border_radius.dart';
 import '../../tokens/app_typography.dart';
 
-class AppInteractiveCard extends StatefulWidget {
+class FgInteractiveCard extends StatefulWidget {
   final String title;
   final String? subtitle;
   final String backgroundImage;
@@ -28,7 +28,7 @@ class AppInteractiveCard extends StatefulWidget {
   final Widget? footer;
   final bool initialFlipped;
 
-  const AppInteractiveCard({
+  const FgInteractiveCard({
     super.key,
     required this.title,
     required this.backgroundImage,
@@ -52,10 +52,10 @@ class AppInteractiveCard extends StatefulWidget {
   });
 
   @override
-  State<AppInteractiveCard> createState() => _AppInteractiveCardState();
+  State<FgInteractiveCard> createState() => _FgInteractiveCardState();
 }
 
-class _AppInteractiveCardState extends State<AppInteractiveCard>
+class _FgInteractiveCardState extends State<FgInteractiveCard>
     with SingleTickerProviderStateMixin {
   late bool _isFlipped;
 

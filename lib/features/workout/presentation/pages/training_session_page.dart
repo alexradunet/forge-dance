@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../design_system/organisms/cards/app_interactive_card.dart';
+import '../../../../design_system/organisms/cards/fg_interactive_card.dart';
 import '../../../../design_system/templates/swipeable_card_screen_template.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_typography.dart';
@@ -123,7 +123,7 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
   Widget _buildCardForIndex(int index) {
     if (index == 0) {
       // INTRO CARD
-      return AppInteractiveCard(
+      return FgInteractiveCard(
         title: 'BODY CONTROL',
         subtitle: 'WORKOUT OF THE DAY',
         backgroundImage:
@@ -157,7 +157,7 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
       );
     } else if (index == _totalPageCount - 1) {
       // COMPLETE CARD
-      return AppInteractiveCard(
+      return FgInteractiveCard(
         title: 'SESSION COMPLETE',
         subtitle: 'GREAT WORK!',
         backgroundImage:
@@ -194,7 +194,7 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
     } else {
       // ACTIVE EXERCISE CARD
       final exerciseIndex = index - 1;
-      return AppInteractiveCard(
+      return FgInteractiveCard(
         title: _getExerciseName(exerciseIndex),
         subtitle: 'EXERCISE ${exerciseIndex + 1} OF $_totalExercises',
         backgroundImage:

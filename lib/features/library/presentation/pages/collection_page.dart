@@ -7,7 +7,7 @@ import '../../../../design_system/tokens/app_spacing.dart';
 import '../../../../design_system/atoms/visuals/fg_background.dart';
 
 import '../../../../design_system/organisms/navigation/app_header.dart';
-import '../../../../design_system/organisms/cards/app_interactive_card.dart';
+import '../../../../design_system/organisms/cards/fg_interactive_card.dart';
 
 import '../../../../design_system/molecules/cards/fg_interactive_card_thumbnail.dart';
 import '../../../../design_system/atoms/icons/fg_icon.dart';
@@ -188,7 +188,7 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
               padding: const EdgeInsets.all(24.0),
               child: AspectRatio(
                 aspectRatio: 9 / 16,
-                child: AppInteractiveCard(
+                child: FgInteractiveCard(
                   title: item['title'],
                   subtitle: item['level'] ?? item['duration'],
                   backgroundImage: item['backgroundImage'] ??
