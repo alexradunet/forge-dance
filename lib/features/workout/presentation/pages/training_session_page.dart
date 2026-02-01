@@ -6,8 +6,6 @@ import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_typography.dart';
 import '../../../../design_system/atoms/buttons/fg_button.dart';
 
-enum TrainingSessionState { intro, active, complete }
-
 class TrainingSessionPage extends StatefulWidget {
   final VoidCallback? onClose;
 
@@ -18,34 +16,36 @@ class TrainingSessionPage extends StatefulWidget {
 }
 
 class _TrainingSessionPageState extends State<TrainingSessionPage> {
-  TrainingSessionState _state = TrainingSessionState.intro;
-  int _currentExerciseIndex = 0;
-  final int _totalExercises = 4;
+  late final PageController _pageController;
+  int _currentPage = 0;
+  final int _totalExercises = 4; // Mock data count
   bool _isTimerRunning = false;
   int _timeLeft = 45; // Mock timer
 
-  void _startWorkout() {
-    HapticFeedback.mediumImpact();
-    setState(() {
-      _state = TrainingSessionState.active;
-      _currentExerciseIndex = 0;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
   }
 
-  void _nextExercise() {
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _nextPage() {
     HapticFeedback.lightImpact();
-    if (_currentExerciseIndex < _totalExercises - 1) {
-      setState(() {
-        _currentExerciseIndex++;
-        _timeLeft = 45; // Reset mock timer
-        _isTimerRunning = false;
-      });
-    } else {
-      setState(() {
-        _state = TrainingSessionState.complete;
-      });
+    if (_currentPage < _totalPageCount - 1) {
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
     }
   }
+
+  int get _totalPageCount =>
+      _totalExercises + 2; // Intro + Exercises + Complete
 
   void _toggleTimer() {
     HapticFeedback.selectionClick();
@@ -54,35 +54,71 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
     });
   }
 
+  // Helper to map page index to logical state
+  bool get _isIntro => _currentPage == 0;
+  bool get _isComplete => _currentPage == _totalPageCount - 1;
+  int get _activeExerciseIndex => _currentPage - 1;
+
   @override
   Widget build(BuildContext context) {
     return SwipeableCardScreenTemplate(
       title: 'Daily Practice',
-      subtitle: _state == TrainingSessionState.complete
-          ? 'Session Complete'
-          : 'Body Control • 25 min',
+      subtitle: _isComplete ? 'Session Complete' : 'Body Control • 25 min',
       onBack: widget.onClose ?? () => Navigator.of(context).pop(),
+      // Progress calculation:
+      // Intro: -1 (Hidden/Empty)
+      // Active: 0 to _totalExercises - 1
+      // Complete: _totalExercises (Full)
       progressSteps: _totalExercises,
-      currentStep: _state == TrainingSessionState.intro
+      currentStep: _isIntro
           ? -1
-          : (_state == TrainingSessionState.complete
-              ? _totalExercises
-              : _currentExerciseIndex),
-      onStepClick: null,
-      actionZone: null, // Controls now inside cards
-      children: _buildCentralCard(),
+          : (_isComplete ? _totalExercises : _activeExerciseIndex),
+      onStepClick: (index) {
+        // Allow jumping to intro (index -1 logic handled below if needed, but UI index is 0-based)
+        // Here index corresponds to the progressSteps.
+        // progressSteps = _totalExercises.
+        // visual steps: 0, 1, 2, 3...
+        // logical pages: 0=Intro, 1=Ex1, 2=Ex2...
+        // So clicking step 0 (Ex1) should go to page 1.
+
+        // Wait, progressSteps logic in `TrainingSessionPage` is:
+        // progressSteps: _totalExercises
+        // currentStep: ...
+
+        // If I click step `i`, I want to go to Exercise `i+1` (since intro is page 0).
+        // Let's verify mapping:
+        // Step 0 -> Page 1 (Exercise 1)
+        // Step 1 -> Page 2 (Exercise 2)
+
+        _pageController.animateToPage(
+          index + 1, // Skip intro page
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      },
+      actionZone: null,
+      children: PageView.builder(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _currentPage = index;
+            _timeLeft = 45; // Reset timer on page change
+            _isTimerRunning = false;
+          });
+        },
+        itemCount: _totalPageCount,
+        itemBuilder: (context, index) {
+          return Center(
+            child: _buildCardForIndex(index),
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildCentralCard() {
-    return SizedBox(
-      height: double.infinity,
-      child: _buildCardContent(),
-    );
-  }
-
-  Widget _buildCardContent() {
-    if (_state == TrainingSessionState.intro) {
+  Widget _buildCardForIndex(int index) {
+    if (index == 0) {
+      // INTRO CARD
       return AppInteractiveCard(
         title: 'BODY CONTROL',
         subtitle: 'WORKOUT OF THE DAY',
@@ -111,11 +147,12 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
           child: FgButton(
             text: 'START SESSION',
             variant: FgButtonVariant.primary,
-            onPressed: _startWorkout,
+            onPressed: _nextPage,
           ),
         ),
       );
-    } else if (_state == TrainingSessionState.complete) {
+    } else if (index == _totalPageCount - 1) {
+      // COMPLETE CARD
       return AppInteractiveCard(
         title: 'SESSION COMPLETE',
         subtitle: 'GREAT WORK!',
@@ -126,7 +163,6 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
         progress: 1.0,
         backTitle: 'STATS SUMMARY',
         backSubtitle: 'Daily Progress',
-        // COMPLETE STATE
         backContent: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -152,20 +188,20 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
         ),
       );
     } else {
-      // Active State - Exercise Card
+      // ACTIVE EXERCISE CARD
+      final exerciseIndex = index - 1;
       return AppInteractiveCard(
-        title: _getExerciseName(_currentExerciseIndex),
-        subtitle: 'EXERCISE ${_currentExerciseIndex + 1} OF $_totalExercises',
+        title: _getExerciseName(exerciseIndex),
+        subtitle: 'EXERCISE ${exerciseIndex + 1} OF $_totalExercises',
         backgroundImage:
             'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=2000',
         style: 'Drill',
         difficulty: 'Active',
-        progress: (_currentExerciseIndex + 1) / _totalExercises,
+        progress: (exerciseIndex + 1) / _totalExercises,
         onPlayTap: _toggleTimer,
         isPlaying: _isTimerRunning,
         backTitle: 'INSTRUCTIONS',
         backSubtitle: 'Proper Form',
-        // ACTIVE STATE
         backContent: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -182,12 +218,10 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
             const SizedBox(height: 8),
             Text('3. Follow through with intentionality',
                 style: AppTypography.bodySmall.copyWith(color: Colors.white)),
-            // Removed Spacer/TimeLeft from back content as it's now in footer
           ],
         ),
         footer: Row(
           children: [
-            // Timer Toggle
             Expanded(
               flex: 2,
               child: GestureDetector(
@@ -230,7 +264,6 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
               ),
             ),
             const SizedBox(width: 16),
-            // Info / Step
             Expanded(
               flex: 1,
               child: Column(
@@ -240,16 +273,15 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
                   Text('STEP',
                       style: AppTypography.label
                           .copyWith(fontSize: 10, color: Colors.white54)),
-                  Text('${_currentExerciseIndex + 1} / $_totalExercises',
+                  Text('${exerciseIndex + 1} / $_totalExercises',
                       style: AppTypography.h5
                           .copyWith(fontSize: 16, color: Colors.white)),
                 ],
               ),
             ),
             const SizedBox(width: 16),
-            // Next Button
             GestureDetector(
-                onTap: _nextExercise,
+                onTap: _nextPage,
                 child: Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
