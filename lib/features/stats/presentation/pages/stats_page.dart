@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../profile/ui/widgets/profile_stats.dart';
+import '../../../../design_system/atoms/visuals/fg_background.dart';
 
 class StatsPage extends StatelessWidget {
   const StatsPage({super.key});
@@ -8,57 +9,9 @@ class StatsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgDeep,
-      body: Stack(
-        children: [
-          _buildBackgroundGradients(),
-          _buildMainContent(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBackgroundGradients() {
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: Stack(
-          children: [
-            Positioned(
-              top: -150,
-              right: -80,
-              child: Container(
-                width: 400,
-                height: 400,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      AppColors.forgeFire.withOpacity(0.1),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: 100,
-              left: -80,
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      AppColors.electricBlue.withOpacity(0.05),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+      backgroundColor: Colors.transparent, // Background handled by FgBackground
+      body: FgBackground(
+        child: _buildMainContent(context),
       ),
     );
   }

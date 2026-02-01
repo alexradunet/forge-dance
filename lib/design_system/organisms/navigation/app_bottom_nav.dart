@@ -43,7 +43,7 @@ class AppBottomNav extends StatelessWidget {
                 _buildBatItem(0, Icons.favorite_outline, 'Collection'),
                 _buildBatItem(1, Icons.school_outlined, 'Learn'),
                 _buildBatItem(2, Icons.home_outlined, 'Home'),
-                _buildBatItem(3, Icons.fitness_center_outlined, 'Workout'),
+                _buildBatItem(3, Icons.bar_chart_rounded, 'Progress'),
                 _buildBatItem(4, Icons.person_outline, 'Profile'),
               ],
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../tokens/app_colors.dart';
 import '../organisms/navigation/app_header.dart';
+import '../atoms/visuals/fg_background.dart';
 
 class LearningPathPageTemplate extends StatelessWidget {
   final String title;
@@ -20,49 +21,38 @@ class LearningPathPageTemplate extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.bgDeep,
-      body: Stack(
-        children: [
-          _buildGridBackground(),
-          CustomScrollView(
-            slivers: [
-              SliverToBoxAdapter(
-                child: AppHeader(
-                  title: title,
-                  subtitle: subtitle,
-                  onBack: onBack,
+      body: FgBackground(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: AppHeader(
+                title: title,
+                subtitle: subtitle,
+                onBack: onBack,
+              ),
+            ),
+            // Replaced FgProgressBar with just spacing if needed, or nothing
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              sliver: SliverToBoxAdapter(
+                child: Stack(
+                  alignment: Alignment.topCenter,
+                  children: [
+                    _buildPathLine(children.length),
+                    Column(
+                      children: children
+                          .map((child) => _buildNodeWrapper(child: child))
+                          .toList(),
+                    ),
+                  ],
                 ),
               ),
-              // Replaced FgProgressBar with just spacing if needed, or nothing
-              const SliverToBoxAdapter(child: SizedBox(height: 24)),
-
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(vertical: 40),
-                sliver: SliverToBoxAdapter(
-                  child: Stack(
-                    alignment: Alignment.topCenter,
-                    children: [
-                      _buildPathLine(children.length),
-                      Column(
-                        children: children
-                            .map((child) => _buildNodeWrapper(child: child))
-                            .toList(),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SliverToBoxAdapter(child: SizedBox(height: 100)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGridBackground() {
-    return Positioned.fill(
-      child: CustomPaint(
-        painter: _GridPainter(color: Colors.white.withOpacity(0.02)),
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+          ],
+        ),
       ),
     );
   }
@@ -95,28 +85,4 @@ class LearningPathPageTemplate extends StatelessWidget {
       child: child,
     );
   }
-}
-
-class _GridPainter extends CustomPainter {
-  final Color color;
-  _GridPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 1;
-
-    const step = 32.0;
-
-    for (double i = 0; i < size.width; i += step) {
-      canvas.drawLine(Offset(i, 0), Offset(i, size.height), paint);
-    }
-    for (double i = 0; i < size.height; i += step) {
-      canvas.drawLine(Offset(0, i), Offset(size.width, i), paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

@@ -28,10 +28,21 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
         24,
         MediaQuery.of(context).padding.top + 12,
         24,
-        12,
+        20, // Slightly more padding at bottom
       ),
       decoration: BoxDecoration(
-        color: isTransparent ? Colors.transparent : AppColors.bgDeep,
+        color: isTransparent ? null : AppColors.bgDeep,
+        gradient: isTransparent
+            ? LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.bgDeep,
+                  AppColors.bgDeep.withOpacity(0.95),
+                  Colors.transparent,
+                ],
+              )
+            : null,
         border: isTransparent
             ? null
             : Border(bottom: BorderSide(color: Colors.white.withOpacity(0.05))),
@@ -47,8 +58,9 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
               children: [
                 if (onBack != null) ...[
                   IconButton(
-                    icon: const Icon(Icons.arrow_back_ios,
-                        color: Colors.white, size: 20),
+                    icon: const Icon(Icons.arrow_back, // Standard arrow
+                        color: Colors.white,
+                        size: 24),
                     onPressed: onBack,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -64,25 +76,35 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (subtitle != null)
-                Text(
-                  subtitle!.toUpperCase(),
-                  style: AppTypography.label.copyWith(
-                    color: AppColors.textMuted,
-                    fontSize: 10,
-                    letterSpacing: 1.5,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
               Text(
                 title.toUpperCase(),
                 style: AppTypography.h2.copyWith(
                   color: AppColors.textMain,
                   fontSize: 24, // Slightly smaller to fit center
                   letterSpacing: 2,
+                  shadows: [
+                    Shadow(
+                      color: Colors.black.withOpacity(0.5),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 textAlign: TextAlign.center,
               ),
+              if (subtitle != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    subtitle!.toUpperCase(),
+                    style: AppTypography.label.copyWith(
+                      color: AppColors.forgeFire,
+                      fontSize: 10,
+                      letterSpacing: 2,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
             ],
           ),
 

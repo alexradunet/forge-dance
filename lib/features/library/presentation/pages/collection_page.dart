@@ -7,6 +7,8 @@ import '../../../../design_system/tokens/app_spacing.dart';
 import '../../../../design_system/tokens/app_typography.dart';
 import '../../../common/ui/widgets/primary_button.dart';
 
+import '../../../../design_system/atoms/visuals/fg_background.dart';
+
 class CollectionPage extends ConsumerStatefulWidget {
   const CollectionPage({super.key});
 
@@ -28,110 +30,112 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgDeep,
-      body: CustomScrollView(
-        slivers: [
-          // Header
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(
-                24,
-                MediaQuery.paddingOf(context).top + 12,
-                24,
-                8,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'COLLECTION',
-                    style: TextStyle(
-                      fontFamily: 'Bebas Neue',
-                      fontSize: 42,
-                      color: Colors.white,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: const Icon(
-                      Icons.search,
-                      color: AppColors.textMain,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-
-          // Filter Chips
-          SliverToBoxAdapter(
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 24,
-                vertical: 16,
-              ),
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
+      backgroundColor: Colors.transparent, // Background handled by FgBackground
+      body: FgBackground(
+        child: CustomScrollView(
+          slivers: [
+            // Header
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  24,
+                  MediaQuery.paddingOf(context).top + 12,
+                  24,
+                  8,
+                ),
                 child: Row(
-                  children: _filters.map((filter) {
-                    final isSelected = filter == _selectedFilter;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 12),
-                      child: GestureDetector(
-                        onTap: () {
-                          setState(() {
-                            _selectedFilter = filter;
-                          });
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isSelected
-                                ? AppColors.forgeFire
-                                : AppColors.surfaceDark.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: isSelected
-                                  ? AppColors.forgeFire
-                                  : Colors.white.withOpacity(0.05),
-                            ),
-                          ),
-                          child: Text(
-                            filter,
-                            style: AppTypography.label.copyWith(
-                              color: isSelected
-                                  ? Colors.white
-                                  : AppColors.textMuted,
-                              fontWeight: isSelected
-                                  ? FontWeight.bold
-                                  : FontWeight.w500,
-                            ),
-                          ),
-                        ),
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'COLLECTION',
+                      style: TextStyle(
+                        fontFamily: 'Bebas Neue',
+                        fontSize: 42,
+                        color: Colors.white,
+                        letterSpacing: 2,
                       ),
-                    );
-                  }).toList(),
+                    ),
+                    IconButton(
+                      onPressed: () {},
+                      icon: const Icon(
+                        Icons.search,
+                        color: AppColors.textMain,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
-          ),
 
-          // Content
-          const SliverPadding(
-            padding: EdgeInsets.symmetric(horizontal: 24),
-            sliver: SliverToBoxAdapter(
-              child: _CollectionContent(),
+            // Filter Chips
+            SliverToBoxAdapter(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: _filters.map((filter) {
+                      final isSelected = filter == _selectedFilter;
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 12),
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedFilter = filter;
+                            });
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? AppColors.forgeFire
+                                  : AppColors.surfaceDark.withOpacity(0.5),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isSelected
+                                    ? AppColors.forgeFire
+                                    : Colors.white.withOpacity(0.05),
+                              ),
+                            ),
+                            child: Text(
+                              filter,
+                              style: AppTypography.label.copyWith(
+                                color: isSelected
+                                    ? Colors.white
+                                    : AppColors.textMuted,
+                                fontWeight: isSelected
+                                    ? FontWeight.bold
+                                    : FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ),
             ),
-          ),
 
-          const SliverToBoxAdapter(
-            child: SizedBox(height: 120),
-          ),
-        ],
+            // Content
+            const SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: 24),
+              sliver: SliverToBoxAdapter(
+                child: _CollectionContent(),
+              ),
+            ),
+
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 120),
+            ),
+          ],
+        ),
       ),
     );
   }

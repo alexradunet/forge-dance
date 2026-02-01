@@ -8,6 +8,8 @@ import '../../../../design_system/organisms/cards/app_session_complete_card.dart
 import '../../../../design_system/design_system.dart';
 import '../../../../design_system/atoms/buttons/fg_button.dart';
 
+import '../../../../design_system/atoms/visuals/fg_background.dart';
+
 enum TrainingSessionState { intro, active, complete }
 
 class TrainingSessionPage extends StatefulWidget {
@@ -39,35 +41,37 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgDeep,
-      body: Stack(
-        children: [
-          Column(
+        backgroundColor:
+            Colors.transparent, // Background handled by FgBackground
+        body: FgBackground(
+          child: Stack(
             children: [
-              AppHeader(
-                title: 'DAILY PRACTICE',
-                subtitle: _state == TrainingSessionState.complete
-                    ? 'Completed'
-                    : 'Today\'s WOD',
+              Column(
+                children: [
+                  AppHeader(
+                    title: 'DAILY PRACTICE',
+                    subtitle: _state == TrainingSessionState.complete
+                        ? 'Completed'
+                        : 'Today\'s WOD',
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 24),
+                      child: _buildMainContent(),
+                    ),
+                  ),
+                  const SizedBox(height: 100), // Space for FAB
+                ],
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24),
-                  child: _buildMainContent(),
-                ),
+              Positioned(
+                bottom: 24,
+                left: 24,
+                right: 24,
+                child: _buildFloatingAction(),
               ),
-              const SizedBox(height: 100), // Space for FAB
             ],
           ),
-          Positioned(
-            bottom: 24,
-            left: 24,
-            right: 24,
-            child: _buildFloatingAction(),
-          ),
-        ],
-      ),
-    );
+        ));
   }
 
   Widget _buildMainContent() {

@@ -8,6 +8,8 @@ import '../../../../design_system/molecules/cards/fg_content_card.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/tokens/app_shadows.dart';
 
+import '../../../../design_system/atoms/visuals/fg_background.dart';
+
 class HomePage extends StatelessWidget {
   final Function(String)? onNavigate;
 
@@ -16,102 +18,105 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.bgDeep,
-      body: CustomScrollView(
-        physics: const BouncingScrollPhysics(),
-        slivers: [
-          // Header
-          SliverToBoxAdapter(
-            child: AppHeader(
-              title: 'ALEX_DANCER',
-              subtitle: 'Welcome Back',
-              rightSlot: _buildNotificationToggle(),
-            ),
-          ),
-
-          // Hero Section
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              child: FgContentCard.hero(
-                title: 'EXPLOSIVE POWER',
-                subtitle:
-                    'Build raw explosive strength and fast-twitch muscle response through dynamic intervals.',
-                tags: const ['TODAY\'S WOD', 'LIVE'],
-                imageUrl:
-                    'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
-                onTap: () => onNavigate?.call('training'),
+      backgroundColor: Colors.transparent, // Background handled by FgBackground
+      body: FgBackground(
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            // Header
+            SliverToBoxAdapter(
+              child: AppHeader(
+                title: 'ALEX_DANCER',
+                subtitle: 'Welcome Back',
+                rightSlot: _buildNotificationToggle(),
               ),
             ),
-          ),
 
-          // Progress Section
-          SliverToBoxAdapter(
-            child: _buildProgressSection(),
-          ),
-
-          // Continue Training
-          SliverToBoxAdapter(
-            child: _buildHorizontalSection(
-              title: 'CONTINUE TRAINING',
-              children: [
-                FgContentCard(
-                  title: 'Hip Opener Flow',
-                  tags: const ['MOBILITY'],
+            // Hero Section
+            SliverToBoxAdapter(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                child: FgContentCard.hero(
+                  title: 'EXPLOSIVE POWER',
+                  subtitle:
+                      'Build raw explosive strength and fast-twitch muscle response through dynamic intervals.',
+                  tags: const ['TODAY\'S WOD', 'LIVE'],
                   imageUrl:
-                      'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=400&auto=format&fit=crop&q=80',
-                  progress: 0.65,
-                  footerLabel: '5/8 Lessons',
-                  onTap: () => onNavigate?.call('lesson-path'),
+                      'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
+                  onTap: () => onNavigate?.call('training'),
                 ),
-                const SizedBox(width: 16),
-                FgContentCard(
-                  title: 'Isolation Drills',
-                  tags: const ['BODY CONTROL'],
-                  imageUrl:
-                      'https://images.unsplash.com/photo-1508700929628-666bc8bd84ea?w=400&auto=format&fit=crop&q=80',
-                  progress: 0.40,
-                  footerLabel: '3/7 Lessons',
-                  onTap: () => onNavigate?.call('lesson-path'),
-                ),
-              ],
+              ),
             ),
-          ),
 
-          // Recommended
-          SliverToBoxAdapter(
-            child: _buildHorizontalSection(
-              title: 'RECOMMENDED FOR YOU',
-              showViewAll: true,
-              children: [
-                FgContentCard(
-                  title: 'Footwork Fundamentals',
-                  tags: const ['TECHNIQUE'],
-                  imageUrl:
-                      'https://images.unsplash.com/photo-1716996642138-e655f2a8dcd5?w=400&auto=format&fit=crop&q=80',
-                  progress: 0,
-                  footerLabel: '0/6 Lessons',
-                  width: 180,
-                  onTap: () => onNavigate?.call('lesson-path'),
-                ),
-                const SizedBox(width: 16),
-                FgContentCard(
-                  title: 'Breaking Basics',
-                  tags: const ['POWER MOVES'],
-                  imageUrl:
-                      'https://images.unsplash.com/photo-1506411393232-79727bc447af?w=400&auto=format&fit=crop&q=80',
-                  progress: 0,
-                  footerLabel: '0/7 Lessons',
-                  width: 180,
-                  onTap: () => onNavigate?.call('lesson-path'),
-                ),
-              ],
+            // Progress Section
+            SliverToBoxAdapter(
+              child: _buildProgressSection(),
             ),
-          ),
 
-          // Bottom Spacing for BottomNav
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
-        ],
+            // Continue Training
+            SliverToBoxAdapter(
+              child: _buildHorizontalSection(
+                title: 'CONTINUE TRAINING',
+                children: [
+                  FgContentCard(
+                    title: 'Hip Opener Flow',
+                    tags: const ['MOBILITY'],
+                    imageUrl:
+                        'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=400&auto=format&fit=crop&q=80',
+                    progress: 0.65,
+                    footerLabel: '5/8 Lessons',
+                    onTap: () => onNavigate?.call('lesson-path'),
+                  ),
+                  const SizedBox(width: 16),
+                  FgContentCard(
+                    title: 'Isolation Drills',
+                    tags: const ['BODY CONTROL'],
+                    imageUrl:
+                        'https://images.unsplash.com/photo-1508700929628-666bc8bd84ea?w=400&auto=format&fit=crop&q=80',
+                    progress: 0.40,
+                    footerLabel: '3/7 Lessons',
+                    onTap: () => onNavigate?.call('lesson-path'),
+                  ),
+                ],
+              ),
+            ),
+
+            // Recommended
+            SliverToBoxAdapter(
+              child: _buildHorizontalSection(
+                title: 'RECOMMENDED FOR YOU',
+                showViewAll: true,
+                children: [
+                  FgContentCard(
+                    title: 'Footwork Fundamentals',
+                    tags: const ['TECHNIQUE'],
+                    imageUrl:
+                        'https://images.unsplash.com/photo-1716996642138-e655f2a8dcd5?w=400&auto=format&fit=crop&q=80',
+                    progress: 0,
+                    footerLabel: '0/6 Lessons',
+                    width: 180,
+                    onTap: () => onNavigate?.call('lesson-path'),
+                  ),
+                  const SizedBox(width: 16),
+                  FgContentCard(
+                    title: 'Breaking Basics',
+                    tags: const ['POWER MOVES'],
+                    imageUrl:
+                        'https://images.unsplash.com/photo-1506411393232-79727bc447af?w=400&auto=format&fit=crop&q=80',
+                    progress: 0,
+                    footerLabel: '0/7 Lessons',
+                    width: 180,
+                    onTap: () => onNavigate?.call('lesson-path'),
+                  ),
+                ],
+              ),
+            ),
+
+            // Bottom Spacing for BottomNav
+            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+          ],
+        ),
       ),
     );
   }

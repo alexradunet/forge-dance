@@ -21,6 +21,7 @@ import '../../ui/widgets/profile_stats.dart';
 import '../../ui/widgets/achievements_carousel.dart';
 import '../../ui/widgets/rewards_grid.dart';
 import '../../ui/widgets/profile_menu.dart';
+import '../../../../design_system/atoms/visuals/fg_background.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -71,57 +72,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ref.watch(profileViewModelProvider.select((it) => it.value?.profile));
 
     return Scaffold(
-      backgroundColor: AppColors.bgDeep,
-      body: Stack(
-        children: [
-          _buildBackgroundGradients(),
-          _buildMainContent(profile),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildBackgroundGradients() {
-    return Positioned.fill(
-      child: IgnorePointer(
-        child: Stack(
-          children: [
-            Positioned(
-              top: -100,
-              right: -150,
-              child: Container(
-                width: 400,
-                height: 400,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      AppColors.forgeFire.withOpacity(0.1),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: -50,
-              left: -100,
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    colors: [
-                      AppColors.electricBlue.withOpacity(0.05),
-                      Colors.transparent,
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+      backgroundColor: Colors.transparent, // Background handled by FgBackground
+      body: FgBackground(
+        child: _buildMainContent(profile),
       ),
     );
   }
@@ -284,6 +237,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               icon: Icons.language,
               label: LocaleKeys.language.tr(),
               onTap: () => context.push(Routes.languages),
+            ),
+            ProfileMenuItem(
+              icon: Icons.diamond_outlined,
+              label: 'Go Premium',
+              textColor: AppColors.legendGold,
+              onTap: () => context.push(Routes.premium),
             ),
           ],
         ),

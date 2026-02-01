@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
 
-import '/design_system/tokens/app_colors.dart';
-import '/design_system/organisms/lessons/lesson_path_timeline.dart';
+import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../design_system/organisms/lessons/lesson_path_timeline.dart';
 
 /// Module View Screen matching dashboard_4 mockup
 class ModuleViewScreen extends StatelessWidget {
   final String moduleTitle;
   final String moduleSubtitle;
   final String progress; // e.g., "4/12"
+  final VoidCallback? onBack;
 
   const ModuleViewScreen({
     super.key,
     this.moduleTitle = 'BREAKING 101',
     this.moduleSubtitle = 'Fundamentals',
     this.progress = '4/12',
+    this.onBack,
   });
 
   @override
@@ -96,7 +98,7 @@ class ModuleViewScreen extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: onBack ?? () => Navigator.of(context).pop(),
             icon: Icon(Icons.arrow_back, color: Colors.white),
             style: IconButton.styleFrom(
               backgroundColor: Colors.white.withOpacity(0.05),

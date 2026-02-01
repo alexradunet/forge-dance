@@ -44,6 +44,7 @@ export 'atoms/inputs/fg_slider.dart';
 export 'atoms/inputs/fg_stepper.dart';
 
 // Visuals
+export 'atoms/visuals/fg_background.dart';
 export 'atoms/visuals/fg_glass_container.dart';
 export 'atoms/visuals/fg_gradient_overlay.dart';
 export 'atoms/visuals/fg_shimmer.dart';
