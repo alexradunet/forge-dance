@@ -11,7 +11,7 @@ import '../../../../design_system/organisms/cards/app_interactive_card.dart';
 
 import '../../../../design_system/molecules/cards/fg_interactive_card_thumbnail.dart';
 import '../../../../design_system/atoms/icons/fg_icon.dart';
-import '../../../../design_system/organisms/modals/app_filter_sheet.dart';
+import '../../../../design_system/organisms/modals/fg_filter_sheet.dart';
 
 class CollectionPage extends ConsumerStatefulWidget {
   const CollectionPage({super.key});
@@ -99,7 +99,7 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
   ];
 
   void _showFilterSheet() {
-    AppFilterSheet.show(
+    FgFilterSheet.show(
       context: context,
       sections: {
         'Difficulty': ['All', 'Beginner', 'Intermediate', 'Advanced'],

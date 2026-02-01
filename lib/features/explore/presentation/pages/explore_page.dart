@@ -5,7 +5,7 @@ import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/atoms/icons/fg_icon.dart';
 import '../../../../design_system/atoms/visuals/fg_background.dart';
 
-import '../../../../design_system/organisms/modals/app_filter_sheet.dart';
+import '../../../../design_system/organisms/modals/fg_filter_sheet.dart';
 
 class ExplorePage extends StatefulWidget {
   final Function(String)? onNavigate;
@@ -26,7 +26,7 @@ class _ExplorePageState extends State<ExplorePage> {
   };
 
   void _showFilterSheet() {
-    AppFilterSheet.show(
+    FgFilterSheet.show(
       context: context,
       sections: {
         'Difficulty': ['All', 'Beginner', 'Intermediate', 'Advanced'],

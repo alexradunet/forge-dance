@@ -4,14 +4,14 @@ import '../../tokens/app_typography.dart';
 
 /// Standard Filter Bottom Sheet matching the web design.
 /// Features sectioned filters (Difficulty, Style, Type) with selectable chips.
-class AppFilterSheet extends StatefulWidget {
+class FgFilterSheet extends StatefulWidget {
   final Map<String, List<String>> sections;
   final Map<String, String> selectedFilters;
   final Function(String section, String value) onFilterSelected;
   final VoidCallback? onReset;
   final VoidCallback? onApply;
 
-  const AppFilterSheet({
+  const FgFilterSheet({
     super.key,
     required this.sections,
     required this.selectedFilters,
@@ -33,7 +33,7 @@ class AppFilterSheet extends StatefulWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => AppFilterSheet(
+      builder: (context) => FgFilterSheet(
         sections: sections,
         selectedFilters: selectedFilters,
         onFilterSelected: onFilterSelected,
@@ -44,10 +44,10 @@ class AppFilterSheet extends StatefulWidget {
   }
 
   @override
-  State<AppFilterSheet> createState() => _AppFilterSheetState();
+  State<FgFilterSheet> createState() => _FgFilterSheetState();
 }
 
-class _AppFilterSheetState extends State<AppFilterSheet> {
+class _FgFilterSheetState extends State<FgFilterSheet> {
   @override
   Widget build(BuildContext context) {
     return Container(
