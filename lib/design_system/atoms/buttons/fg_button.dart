@@ -146,14 +146,12 @@ class FgButton extends StatelessWidget {
       }
       children.add(Text(
         text!,
-        style: AppTypography.bodySmall.copyWith(
+        style: _getTextStyle().copyWith(
           color: color,
-          fontWeight: FontWeight.w600,
-          decoration: variant == FgButtonVariant.ghost &&
-                  text != null &&
-                  _isLinkStyle()
-              ? TextDecoration.underline
-              : null,
+          decoration:
+              variant == FgButtonVariant.ghost && text != null && _isLinkStyle()
+                  ? TextDecoration.underline
+                  : null,
         ),
       ));
     }
@@ -231,6 +229,23 @@ class FgButton extends StatelessWidget {
     }
   }
 
+  TextStyle _getTextStyle() {
+    switch (size) {
+      case FgButtonSize.sm:
+        return AppTypography.bodySmall.copyWith(
+            fontSize: 12, fontWeight: FontWeight.w600); // 12px Semibold
+      case FgButtonSize.md:
+        return AppTypography.bodySmall
+            .copyWith(fontWeight: FontWeight.w600); // 14px Semibold (Default)
+      case FgButtonSize.lg:
+        return AppTypography.body.copyWith(
+            fontWeight: FontWeight.w600); // 16px Semibold (Body is 16)
+      case FgButtonSize.xl:
+        return AppTypography.bodyLarge
+            .copyWith(fontWeight: FontWeight.w600); // 18px Semibold
+    }
+  }
+
   EdgeInsets _getPadding() {
     if (text == null) return EdgeInsets.zero; // Icon only
     switch (size) {
@@ -247,8 +262,7 @@ class FgButton extends StatelessWidget {
 
   BorderRadius _getBorderRadius(double height) {
     if (shape != null) {
-      if (shape == FgButtonShape.pill)
-        return BorderRadius.circular(height / 2);
+      if (shape == FgButtonShape.pill) return BorderRadius.circular(height / 2);
       if (shape == FgButtonShape.rounded)
         return BorderRadius.circular(12); // Default rounded
       // Circle is handled in decoration
