@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_mvvm_riverpod/design_system/molecules/cards/fg_interactive_card.dart';
 import '../../../../design_system/templates/swipeable_card_screen_template.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_typography.dart';
 import '../../../../design_system/tokens/app_spacing.dart';
-
-import '../../../../design_system/organisms/cards/fg_interactive_card.dart';
 
 class LessonPlayerScreen extends StatefulWidget {
   final VoidCallback? onBack;
