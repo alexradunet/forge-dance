@@ -7,6 +7,7 @@ import '../../../../design_system/atoms/icons/fg_icon.dart';
 import '../../../../design_system/molecules/cards/fg_content_card.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/tokens/app_shadows.dart';
+import '../../../../design_system/atoms/buttons/fg_button.dart';
 
 import '../../../../design_system/atoms/visuals/fg_background.dart';
 
@@ -45,6 +46,12 @@ class HomePage extends StatelessWidget {
                   imageUrl:
                       'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
                   onTap: () => onNavigate?.call('training'),
+                  action: FgButton(
+                    text: 'START TRAINING',
+                    variant: FgButtonVariant.primary,
+                    size: FgButtonSize.lg,
+                    onPressed: () => onNavigate?.call('training'),
+                  ),
                 ),
               ),
             ),

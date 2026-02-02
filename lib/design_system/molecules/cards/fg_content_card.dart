@@ -26,6 +26,7 @@ class FgContentCard extends StatelessWidget {
   final FgContentCardVariant variant;
   final double? width;
   final double? height;
+  final Widget? action;
 
   const FgContentCard({
     super.key,
@@ -41,6 +42,7 @@ class FgContentCard extends StatelessWidget {
     this.variant = FgContentCardVariant.standard,
     this.width,
     this.height,
+    this.action,
   });
 
   const FgContentCard.compact({
@@ -56,6 +58,7 @@ class FgContentCard extends StatelessWidget {
     this.onTap,
     this.width,
     this.height,
+    this.action,
   }) : variant = FgContentCardVariant.compact;
 
   const FgContentCard.hero({
@@ -66,6 +69,7 @@ class FgContentCard extends StatelessWidget {
     this.tags,
     this.onTap,
     this.height,
+    this.action,
   })  : variant = FgContentCardVariant.hero,
         rating = null,
         duration = null,
@@ -311,7 +315,7 @@ class FgContentCard extends StatelessWidget {
                       letterSpacing: 1.0,
                     ),
                   ),
-                  if (subtitle != null) ...[
+                  if (subtitle != null && action == null) ...[
                     const SizedBox(height: 8),
                     Text(
                       subtitle!,
@@ -323,6 +327,21 @@ class FgContentCard extends StatelessWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
+                  ],
+                  if (subtitle != null && action != null) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      subtitle!,
+                      style: AppTypography.body.copyWith(
+                        color: AppColors.textMuted,
+                        height: 1.4,
+                        fontSize: 16,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 16),
+                    action!,
                   ],
                 ],
               ),

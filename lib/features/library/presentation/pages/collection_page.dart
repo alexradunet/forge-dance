@@ -7,7 +7,7 @@ import '../../../../design_system/tokens/app_spacing.dart';
 import '../../../../design_system/atoms/visuals/fg_background.dart';
 
 import '../../../../design_system/organisms/navigation/app_header.dart';
-import '../../../../design_system/organisms/cards/fg_interactive_card.dart';
+import '../../../../design_system/molecules/cards/fg_interactive_card.dart';
 
 import '../../../../design_system/molecules/cards/fg_interactive_card_thumbnail.dart';
 import '../../../../design_system/atoms/icons/fg_icon.dart';

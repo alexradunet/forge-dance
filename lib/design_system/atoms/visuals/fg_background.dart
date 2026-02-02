@@ -9,7 +9,7 @@ class FgBackground extends StatelessWidget {
   const FgBackground({
     super.key,
     this.child,
-    this.showGrid = true,
+    this.showGrid = false,
     this.showGradients = true,
   });
 
@@ -40,34 +40,36 @@ class FgBackground extends StatelessWidget {
       child: IgnorePointer(
         child: Stack(
           children: [
+            // Top Right - Forge Fire (Red/Orange)
             Positioned(
-              top: -100,
-              right: -150,
+              top: -300,
+              right: -350,
               child: Container(
-                width: 400,
-                height: 400,
+                width: 800,
+                height: 800,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AppColors.forgeFire.withOpacity(0.1),
+                      AppColors.forgeFire.withOpacity(0.5),
                       Colors.transparent,
                     ],
                   ),
                 ),
               ),
             ),
+            // Bottom Left - Electric Blue
             Positioned(
-              bottom: 100,
-              left: -100,
+              bottom: -50,
+              left: -250,
               child: Container(
-                width: 300,
-                height: 300,
+                width: 600,
+                height: 600,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AppColors.electricBlue.withOpacity(0.05),
+                      AppColors.electricBlue.withOpacity(0.4),
                       Colors.transparent,
                     ],
                   ),

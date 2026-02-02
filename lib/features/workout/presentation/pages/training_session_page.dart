@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../../design_system/organisms/cards/fg_interactive_card.dart';
+import '../../../../design_system/molecules/cards/fg_interactive_card.dart';
 import '../../../../design_system/templates/swipeable_card_screen_template.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_typography.dart';
@@ -149,7 +149,7 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
         footer: SizedBox(
           width: double.infinity,
           child: FgButton(
-            text: 'START SESSION',
+            text: 'START TRAINING',
             variant: FgButtonVariant.primary,
             onPressed: _nextPage,
           ),
