@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../design_system/molecules/cards/fg_interactive_card.dart';
@@ -21,7 +22,9 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
   int _currentPage = 0;
   final int _totalExercises = 4; // Mock data count
   bool _isTimerRunning = false;
-  int _timeLeft = 45; // Mock timer
+  int _timeLeft = 45; // seconds
+  Timer? _timer;
+  final Set<int> _skippedExercises = {};
 
   @override
   void initState() {
@@ -31,11 +34,53 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
 
   @override
   void dispose() {
+    _timer?.cancel();
     _pageController.dispose();
     super.dispose();
   }
 
+  void _startTimer() {
+    _timer?.cancel();
+    _isTimerRunning = true;
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_timeLeft > 0) {
+        setState(() {
+          _timeLeft--;
+        });
+      } else {
+        _stopTimer();
+        setState(() {
+          // Timer finished, auto-unlock happens via state check
+        });
+      }
+    });
+  }
+
+  void _stopTimer() {
+    _timer?.cancel();
+    setState(() {
+      _isTimerRunning = false;
+    });
+  }
+
+  void _previousPage() {
+    HapticFeedback.lightImpact();
+    if (_currentPage > 0) {
+      _pageController.previousPage(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    }
+  }
+
   void _nextPage() {
+    if (_isLocked) {
+      _showLockedFeedback();
+      return;
+    }
+    Element? element = context as Element?;
+    if (element == null || !element.mounted) return;
+
     HapticFeedback.lightImpact();
     if (_currentPage < _totalPageCount - 1) {
       _pageController.nextPage(
@@ -50,9 +95,27 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
 
   void _toggleTimer() {
     HapticFeedback.selectionClick();
-    setState(() {
-      _isTimerRunning = !_isTimerRunning;
-    });
+    if (_isTimerRunning) {
+      _stopTimer();
+    } else {
+      _startTimer();
+    }
+  }
+
+  void _skipCurrentExercise() {
+    final exerciseIndex = _activeExerciseIndex;
+    if (exerciseIndex >= 0) {
+      _skippedExercises.add(exerciseIndex);
+      setState(() {}); // Trigger rebuild to unlock
+
+      // Optional: Auto-advance after skip?
+      // _nextPage();
+      // User asked "acknowledge the skip", implies unlocking is enough,
+      // but typically "Skip" means "Next". I'll start with just Unlock + Visual Feedback.
+      // Actually, "acknowledge the skip" to me means "Unlock".
+      // Let's make it Unlock AND Advance.
+      _nextPage();
+    }
   }
 
   // Helper to map page index to logical state
@@ -60,12 +123,24 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
   bool get _isComplete => _currentPage == _totalPageCount - 1;
   int get _activeExerciseIndex => _currentPage - 1;
 
+  bool get _isLocked =>
+      !_isIntro &&
+      !_isComplete &&
+      _timeLeft > 0 &&
+      !_skippedExercises.contains(_activeExerciseIndex);
+
   @override
   Widget build(BuildContext context) {
     return SwipeableCardScreenTemplate(
       title: 'Daily Practice',
       subtitle: _isComplete ? 'Session Complete' : 'Body Control • 25 min',
       onBack: widget.onClose ?? () => Navigator.of(context).pop(),
+      headerLeft: _isLocked
+          ? IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: _previousPage,
+            )
+          : null,
       // Progress calculation:
       // Intro: -1 (Hidden/Empty)
       // Active: 0 to _totalExercises - 1
@@ -75,21 +150,10 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
           ? -1
           : (_isComplete ? _totalExercises : _activeExerciseIndex),
       onStepClick: (index) {
-        // Allow jumping to intro (index -1 logic handled below if needed, but UI index is 0-based)
-        // Here index corresponds to the progressSteps.
-        // progressSteps = _totalExercises.
-        // visual steps: 0, 1, 2, 3...
-        // logical pages: 0=Intro, 1=Ex1, 2=Ex2...
-        // So clicking step 0 (Ex1) should go to page 1.
-
-        // Wait, progressSteps logic in `TrainingSessionPage` is:
-        // progressSteps: _totalExercises
-        // currentStep: ...
-
-        // If I click step `i`, I want to go to Exercise `i+1` (since intro is page 0).
-        // Let's verify mapping:
-        // Step 0 -> Page 1 (Exercise 1)
-        // Step 1 -> Page 2 (Exercise 2)
+        if (_isLocked && index > _activeExerciseIndex) {
+          _showLockedFeedback();
+          return;
+        }
 
         _pageController.animateToPage(
           index + 1, // Skip intro page
@@ -98,24 +162,72 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
         );
       },
       actionZone: null,
-      children: PageView.builder(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _currentPage = index;
-            _timeLeft = 45; // Reset timer on page change
-            _isTimerRunning = false;
-          });
+      children: GestureDetector(
+        onHorizontalDragEnd: (details) {
+          if (!_isLocked) return;
+
+          // Velocity < 0 is Swipe Left (Next)
+          if (details.primaryVelocity! < 0) {
+            _showLockedFeedback();
+          }
+          // Velocity > 0 is Swipe Right (Back)
+          else if (details.primaryVelocity! > 0) {
+            _previousPage();
+          }
         },
-        itemCount: _totalPageCount,
-        itemBuilder: (context, index) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-              child: _buildCardForIndex(index),
-            ),
-          );
-        },
+        child: PageView.builder(
+          physics: _isLocked
+              ? const NeverScrollableScrollPhysics()
+              : const BouncingScrollPhysics(),
+          controller: _pageController,
+          onPageChanged: (index) {
+            setState(() {
+              _currentPage = index;
+              if (!_skippedExercises.contains(index - 1)) {
+                _timeLeft = 45;
+              } else {
+                _timeLeft = 45;
+              }
+              _stopTimer();
+            });
+          },
+          itemCount: _totalPageCount,
+          itemBuilder: (context, index) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+                child: _buildCardForIndex(index),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  void _showLockedFeedback() {
+    HapticFeedback.heavyImpact();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Row(
+          children: [
+            const Icon(Icons.lock, color: AppColors.forgeFire),
+            const SizedBox(width: 12),
+            const Expanded(child: Text('Complete the timer to continue!')),
+            TextButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                _skipCurrentExercise();
+              },
+              child: const Text('SKIP',
+                  style: TextStyle(color: AppColors.forgeFire)),
+            )
+          ],
+        ),
+        backgroundColor: Colors.grey[900],
+        duration: const Duration(seconds: 3),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
@@ -256,7 +368,7 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
                       ),
                       const SizedBox(width: 8),
                       Text(
-                        '$_timeLeft s',
+                        '${_timeLeft}s',
                         style: AppTypography.h4.copyWith(
                           color: Colors.white,
                           fontSize: 20,
