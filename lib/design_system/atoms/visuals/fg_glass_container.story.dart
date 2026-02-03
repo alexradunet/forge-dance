@@ -106,6 +106,21 @@ Widget buildFgGlassContainerShowcase(BuildContext context) {
                   ],
                 ),
               ),
+              const SizedBox(height: 32),
+              const Text('With Shadow', style: TextStyle(color: Colors.white)),
+              const SizedBox(height: 16),
+              FgGlassContainer(
+                padding: const EdgeInsets.all(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.forgeFire.withOpacity(0.5),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+                child: const Text('Glowing Glass',
+                    style: TextStyle(color: Colors.white)),
+              ),
             ],
           ),
         ),

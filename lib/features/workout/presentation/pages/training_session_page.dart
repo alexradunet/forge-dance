@@ -314,101 +314,31 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
         style: 'Drill',
         difficulty: 'Active',
         progress: (exerciseIndex + 1) / _totalExercises,
-        onPlayTap: _toggleTimer,
-        isPlaying: _isTimerRunning,
-        backTitle: 'INSTRUCTIONS',
-        backSubtitle: 'Proper Form',
-        backContent: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Focus on controlled movements and steady breathing.',
-              style: TextStyle(color: Colors.white70, height: 1.5),
+        centerOverlay: GestureDetector(
+          onTap: _toggleTimer,
+          child: Container(
+            width: 80,
+            height: 80,
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.4),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: _isTimerRunning ? AppColors.forgeFire : Colors.white,
+                width: 2,
+              ),
             ),
-            const SizedBox(height: 24),
-            Text('1. Start in a neutral position',
-                style: AppTypography.bodySmall.copyWith(color: Colors.white)),
-            const SizedBox(height: 8),
-            Text('2. Engage your core',
-                style: AppTypography.bodySmall.copyWith(color: Colors.white)),
-            const SizedBox(height: 8),
-            Text('3. Follow through with intentionality',
-                style: AppTypography.bodySmall.copyWith(color: Colors.white)),
-          ],
-        ),
-        footer: Row(
-          children: [
-            Expanded(
-              flex: 2,
-              child: GestureDetector(
-                onTap: _toggleTimer,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: _isTimerRunning
-                        ? AppColors.forgeFire.withOpacity(0.2)
-                        : Colors.white.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: _isTimerRunning
-                          ? AppColors.forgeFire
-                          : Colors.white.withOpacity(0.2),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        _isTimerRunning ? Icons.pause : Icons.play_arrow,
-                        color: _isTimerRunning
-                            ? AppColors.forgeFire
-                            : Colors.white,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        '${_timeLeft}s',
-                        style: AppTypography.h4.copyWith(
-                          color: Colors.white,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
+            child: Center(
+              child: Text(
+                '${_timeLeft}s',
+                style: AppTypography.h3.copyWith(
+                  color: Colors.white,
+                  fontSize: 24,
                 ),
               ),
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              flex: 1,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text('STEP',
-                      style: AppTypography.label
-                          .copyWith(fontSize: 10, color: Colors.white54)),
-                  Text('${exerciseIndex + 1} / $_totalExercises',
-                      style: AppTypography.h5
-                          .copyWith(fontSize: 16, color: Colors.white)),
-                ],
-              ),
-            ),
-            const SizedBox(width: 16),
-            GestureDetector(
-                onTap: _nextPage,
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.skip_next,
-                      color: Colors.white, size: 20),
-                )),
-          ],
+          ),
         ),
+        footer: null,
       );
     }
   }

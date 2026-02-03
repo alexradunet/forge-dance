@@ -17,6 +17,7 @@ class FgGlassContainer extends StatelessWidget {
   final Color? color;
   final double? width;
   final double? height;
+  final List<BoxShadow>? boxShadow;
 
   const FgGlassContainer({
     super.key,
@@ -30,6 +31,7 @@ class FgGlassContainer extends StatelessWidget {
     this.color,
     this.width,
     this.height,
+    this.boxShadow,
   });
 
   @override
@@ -49,6 +51,7 @@ class FgGlassContainer extends StatelessWidget {
               color: borderColor ?? Colors.white.withOpacity(0.1),
               width: borderWidth,
             ),
+            boxShadow: boxShadow,
           ),
           child: child,
         ),

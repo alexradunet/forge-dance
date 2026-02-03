@@ -6,6 +6,9 @@ import 'package:flutter_mvvm_riverpod/design_system/atoms/visuals/fg_tech_patter
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_border_radius.dart';
 import '../../tokens/app_typography.dart';
+import '../../atoms/visuals/fg_gradient_overlay.dart';
+import '../../atoms/visuals/fg_icon_label.dart';
+import '../../atoms/buttons/fg_icon_button.dart';
 
 class FgInteractiveCard extends StatefulWidget {
   final String title;
@@ -27,6 +30,7 @@ class FgInteractiveCard extends StatefulWidget {
   final VoidCallback? onToggleFavorite;
   final Widget? footer;
   final bool initialFlipped;
+  final Widget? centerOverlay;
 
   const FgInteractiveCard({
     super.key,
@@ -49,6 +53,7 @@ class FgInteractiveCard extends StatefulWidget {
     this.onToggleFavorite,
     this.footer,
     this.initialFlipped = false,
+    this.centerOverlay,
   });
 
   @override
@@ -144,18 +149,13 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
 
                   // Overlay Gradient
                   Positioned.fill(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [
-                            Colors.black.withOpacity(0.4),
-                            Colors.transparent,
-                            Colors.black.withOpacity(0.8),
-                          ],
-                        ),
-                      ),
+                    child: FgGradientOverlay(
+                      colors: [
+                        Colors.black.withOpacity(0.4),
+                        Colors.transparent,
+                        Colors.black.withOpacity(0.8),
+                      ],
+                      stops: const [0.0, 0.4, 1.0],
                     ),
                   ),
 
@@ -208,52 +208,32 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
                     ),
                   ),
 
-                  // Play Button Overlay
+                  // Center Content (Play Button or Custom Overlay)
                   Center(
-                    child: GestureDetector(
-                      onTap: widget.onPlayTap,
-                      child: Container(
-                        width: 64,
-                        height: 64,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.1),
-                          border:
-                              Border.all(color: Colors.white.withOpacity(0.3)),
+                    child: widget.centerOverlay ??
+                        FgIconButton(
+                          icon: Icons.play_arrow,
+                          onPressed: widget.onPlayTap,
+                          variant: FgIconButtonVariant.glass,
+                          size: FgIconButtonSize.xl,
+                          color: Colors.white,
                         ),
-                        child: const Center(
-                          child: Icon(Icons.play_arrow,
-                              color: Colors.white, size: 32),
-                        ),
-                      ),
-                    ),
                   ),
 
                   // Top Right: Favorite
                   Positioned(
                     top: 16,
                     right: 16,
-                    child: GestureDetector(
-                      onTap: widget.onToggleFavorite,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.black.withOpacity(0.4),
-                          border:
-                              Border.all(color: Colors.white.withOpacity(0.2)),
-                        ),
-                        child: Icon(
-                          widget.isFavorited
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          color: widget.isFavorited
-                              ? AppColors.forgeFire
-                              : Colors.white,
-                          size: 20,
-                        ),
-                      ),
+                    child: FgIconButton(
+                      icon: widget.isFavorited
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      onPressed: widget.onToggleFavorite,
+                      variant: FgIconButtonVariant.glass,
+                      size: FgIconButtonSize.md,
+                      color: widget.isFavorited
+                          ? AppColors.forgeFire
+                          : Colors.white,
                     ),
                   ),
 
@@ -261,20 +241,12 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
                   Positioned(
                     bottom: 16,
                     right: 16,
-                    child: GestureDetector(
-                      onTap: _toggleFlip,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.black.withOpacity(0.4),
-                          border:
-                              Border.all(color: Colors.white.withOpacity(0.2)),
-                        ),
-                        child: const Icon(Icons.replay,
-                            color: Colors.white, size: 20),
-                      ),
+                    child: FgIconButton(
+                      icon: Icons.replay,
+                      onPressed: _toggleFlip,
+                      variant: FgIconButtonVariant.glass,
+                      size: FgIconButtonSize.md,
+                      color: Colors.white,
                     ),
                   ),
 
@@ -401,27 +373,16 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
                               color: AppColors.forgeFire, fontSize: 8),
                         ),
                       ),
-                    GestureDetector(
-                      onTap: widget.onToggleFavorite,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.1),
-                          border:
-                              Border.all(color: Colors.white.withOpacity(0.2)),
-                        ),
-                        child: Icon(
-                          widget.isFavorited
-                              ? Icons.favorite
-                              : Icons.favorite_border,
-                          color: widget.isFavorited
-                              ? AppColors.forgeFire
-                              : Colors.white,
-                          size: 20,
-                        ),
-                      ),
+                    FgIconButton(
+                      icon: widget.isFavorited
+                          ? Icons.favorite
+                          : Icons.favorite_border,
+                      onPressed: widget.onToggleFavorite,
+                      variant: FgIconButtonVariant.glass,
+                      size: FgIconButtonSize.md,
+                      color: widget.isFavorited
+                          ? AppColors.forgeFire
+                          : Colors.white,
                     ),
                   ],
                 ),
@@ -452,20 +413,12 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
                 padding: const EdgeInsets.only(right: 16, bottom: 8),
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: GestureDetector(
-                    onTap: _toggleFlip,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white.withOpacity(0.1),
-                        border:
-                            Border.all(color: Colors.white.withOpacity(0.2)),
-                      ),
-                      child: const Icon(Icons.replay,
-                          color: Colors.white, size: 20),
-                    ),
+                  child: FgIconButton(
+                    icon: Icons.replay,
+                    onPressed: _toggleFlip,
+                    variant: FgIconButtonVariant.glass,
+                    size: FgIconButtonSize.md,
+                    color: Colors.white,
                   ),
                 ),
               ),
@@ -500,30 +453,11 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
   Widget _buildFooterStat(
       String label, String value, IconData icon, Color accentColor) {
     return Expanded(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 10, color: accentColor.withOpacity(0.6)),
-              const SizedBox(width: 4),
-              Text(
-                label,
-                style: AppTypography.label.copyWith(
-                    color: AppColors.textDark,
-                    fontSize: 8,
-                    fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          const SizedBox(height: 2),
-          Text(
-            value,
-            style: AppTypography.bodySmall
-                .copyWith(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-        ],
+      child: FgIconLabel(
+        label: label,
+        value: value,
+        icon: icon,
+        iconColor: accentColor,
       ),
     );
   }

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_shadows.dart';
@@ -75,33 +76,45 @@ class FgIconButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Widget buttonContent = AnimatedContainer(
+      duration: const Duration(milliseconds: 200),
+      width: _dimesnion,
+      height: _dimesnion,
+      decoration: _decoration,
+      child: isLoading
+          ? const Center(
+              child: SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation(Colors.white),
+                ),
+              ),
+            )
+          : Icon(
+              icon,
+              size: _iconSize,
+              color: _iconColor,
+            ),
+    );
+
+    if (variant == FgIconButtonVariant.glass) {
+      buttonContent = ClipRRect(
+        borderRadius: BorderRadius.circular(_dimesnion / 2),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          child: buttonContent,
+        ),
+      );
+    }
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: isEnabled && !isLoading ? onPressed : null,
         borderRadius: BorderRadius.circular(_dimesnion / 2),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          width: _dimesnion,
-          height: _dimesnion,
-          decoration: _decoration,
-          child: isLoading
-              ? const Center(
-                  child: SizedBox(
-                    width: 16,
-                    height: 16,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation(Colors.white),
-                    ),
-                  ),
-                )
-              : Icon(
-                  icon,
-                  size: _iconSize,
-                  color: _iconColor,
-                ),
-        ),
+        child: buttonContent,
       ),
     );
   }

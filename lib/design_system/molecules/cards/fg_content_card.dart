@@ -4,6 +4,7 @@ import '../../tokens/app_typography.dart';
 import '../../tokens/app_border_radius.dart';
 
 import '../../atoms/visuals/fg_image.dart';
+import '../../atoms/visuals/fg_gradient_overlay.dart';
 import '../../atoms/progress/fg_progress_bar.dart';
 import '../../atoms/badges/fg_badge.dart';
 
@@ -126,19 +127,13 @@ class FgContentCard extends StatelessWidget {
 
             // Gradient Overlay
             Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      AppColors.bgDeep.withOpacity(0.4),
-                      AppColors.bgDeep,
-                    ],
-                    stops: const [0.0, 0.4, 1.0],
-                  ),
-                ),
+              child: FgGradientOverlay(
+                colors: [
+                  Colors.transparent,
+                  AppColors.bgDeep.withOpacity(0.4),
+                  AppColors.bgDeep,
+                ],
+                stops: const [0.0, 0.4, 1.0],
               ),
             ),
 
@@ -270,19 +265,13 @@ class FgContentCard extends StatelessWidget {
                 ),
               ),
             Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.transparent,
-                      AppColors.bgDeep.withOpacity(0.4),
-                      AppColors.bgDeep,
-                    ],
-                    stops: const [0.0, 0.4, 1.0],
-                  ),
-                ),
+              child: FgGradientOverlay(
+                colors: [
+                  Colors.transparent,
+                  AppColors.bgDeep.withOpacity(0.4),
+                  AppColors.bgDeep,
+                ],
+                stops: const [0.0, 0.4, 1.0],
               ),
             ),
             Positioned(
