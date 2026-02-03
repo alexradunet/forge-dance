@@ -263,15 +263,18 @@ class FgButton extends StatelessWidget {
   BorderRadius _getBorderRadius(double height) {
     if (shape != null) {
       if (shape == FgButtonShape.pill) return BorderRadius.circular(height / 2);
-      if (shape == FgButtonShape.rounded)
+      if (shape == FgButtonShape.rounded) {
         return BorderRadius.circular(12); // Default rounded
+      }
       // Circle is handled in decoration
     }
     // Defaults
-    if (variant == FgButtonVariant.primary)
+    if (variant == FgButtonVariant.primary) {
       return BorderRadius.circular(24); // Matches PrimaryButton
-    if (variant == FgButtonVariant.secondary)
+    }
+    if (variant == FgButtonVariant.secondary) {
       return BorderRadius.circular(12); // Matches SecondaryButton
+    }
     return BorderRadius.circular(12);
   }
 
