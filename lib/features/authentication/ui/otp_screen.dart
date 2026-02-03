@@ -7,7 +7,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:pinput/pinput.dart';
 
 import '../../../constants/assets.dart';
-import '../../../extensions/build_context_extension.dart';
 import '../../../features/authentication/ui/view_model/authentication_view_model.dart';
 import 'package:go_router/go_router.dart';
 import '../../../design_system/tokens/app_colors.dart';
