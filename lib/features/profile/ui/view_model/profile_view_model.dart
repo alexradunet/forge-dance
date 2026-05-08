@@ -9,7 +9,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../../constants/constants.dart';
 import '../../../../extensions/build_context_extension.dart';
 import '../../../../extensions/string_extension.dart';
-import '../../../authentication/ui/view_model/authentication_view_model.dart';
 import '../../model/profile.dart';
 import '../../repository/profile_repository.dart';
 import '../../ui/state/profile_state.dart';
@@ -28,24 +27,31 @@ class ProfileViewModel extends _$ProfileViewModel {
   }
 
   Future<void> updateProfile({
+    String? id,
     String? email,
     String? name,
     String? avatar,
+    int? diamond,
   }) async {
+    final previousProfile = state.value?.profile;
     state = const AsyncValue.loading();
     try {
+      final currentProfile = previousProfile ?? await _repository.get();
       final newAvatarPath = await saveImage(avatar);
-      final currentProfile = state.value?.profile;
 
       final updatedProfile = currentProfile?.copyWith(
+            id: id ?? currentProfile.id,
             email: email ?? currentProfile.email,
             name: name ?? currentProfile.name,
             avatar: newAvatarPath ?? currentProfile.avatar,
+            diamond: diamond ?? currentProfile.diamond,
           ) ??
           Profile(
+            id: id,
             email: email,
             name: name,
             avatar: newAvatarPath,
+            diamond: diamond,
           );
       debugPrint(
           '${Constants.tag} [ProfileViewModel.updateProfile] $updatedProfile');
@@ -67,14 +73,8 @@ class ProfileViewModel extends _$ProfileViewModel {
     }
   }
 
-  Future<void> signOut() async {
-    state = const AsyncValue.loading();
-    try {
-      await ref.read(authenticationViewModelProvider.notifier).signOut();
-      state = AsyncData(ProfileState(profile: null));
-    } catch (error) {
-      state = AsyncError(error, StackTrace.current);
-    }
+  void clearProfile() {
+    state = AsyncData(ProfileState(profile: null));
   }
 
   Future<String?> selectImage(BuildContext context) async {

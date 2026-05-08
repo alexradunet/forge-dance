@@ -7,6 +7,7 @@ import '../../../design_system/tokens/app_colors.dart';
 import '../../../design_system/tokens/app_spacing.dart';
 import '../../../design_system/tokens/app_typography.dart';
 import '../../../design_system/atoms/visuals/fg_background.dart';
+import '../../authentication/ui/view_model/authentication_view_model.dart';
 
 /// Forge.dance Splash Screen
 /// Minimalist design with logo, tagline, and progress indicator
@@ -144,9 +145,22 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   }
 
   Future<void> _checkLoginStatus() async {
-    // Simply wait for animation and go to main
     await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
-    context.pushReplacement(Routes.main);
+
+    final authState = await ref.read(authenticationViewModelProvider.future);
+    if (!mounted) return;
+
+    if (authState.authSession != null || authState.isLoggedIn) {
+      context.pushReplacement(Routes.main);
+      return;
+    }
+
+    if (authState.hasExistingAccount) {
+      context.pushReplacement(Routes.login);
+      return;
+    }
+
+    context.pushReplacement(Routes.register);
   }
 }

@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '/constants/constants.dart';
+import '../../../features/firebase/repository/firebase_providers.dart';
 import '../model/auth_session.dart';
 
 part 'authentication_repository.g.dart';
@@ -13,8 +13,8 @@ part 'authentication_repository.g.dart';
 @riverpod
 AuthenticationRepository authenticationRepository(Ref ref) {
   return AuthenticationRepository(
-    auth: Firebase.apps.isEmpty ? null : firebase_auth.FirebaseAuth.instance,
-    firestore: Firebase.apps.isEmpty ? null : FirebaseFirestore.instance,
+    auth: ref.watch(firebaseAuthProvider),
+    firestore: ref.watch(firebaseFirestoreProvider),
   );
 }
 
@@ -127,11 +127,11 @@ class AuthenticationRepository {
 
     final data = <String, dynamic>{
       'id': user.uid,
-      'email': user.email,
-      'name': user.displayName,
-      'avatar': user.photoURL,
       'updatedAt': FieldValue.serverTimestamp(),
     };
+    if (user.email != null) data['email'] = user.email;
+    if (user.displayName != null) data['name'] = user.displayName;
+    if (user.photoURL != null) data['avatar'] = user.photoURL;
 
     if (snapshot.exists) {
       await doc.set(data, SetOptions(merge: true));

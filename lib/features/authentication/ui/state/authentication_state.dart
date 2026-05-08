@@ -9,6 +9,9 @@ part 'authentication_state.g.dart';
 abstract class AuthenticationState with _$AuthenticationState {
   const factory AuthenticationState({
     AuthSession? authSession,
+    @Default(false) bool isLoggedIn,
+    @Default(false) bool hasExistingAccount,
+    @Default(false) bool isFirebaseConfigured,
     @Default(false) bool isRegisterSuccessfully,
     @Default(false) bool isSignInSuccessfully,
   }) = _AuthenticationState;

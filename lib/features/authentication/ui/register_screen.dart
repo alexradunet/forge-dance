@@ -14,6 +14,7 @@ import '../../../design_system/tokens/app_typography.dart';
 import '../../../extensions/build_context_extension.dart';
 import '../../../features/authentication/ui/view_model/authentication_view_model.dart';
 import '../../../features/authentication/ui/widgets/sign_in_agreement.dart';
+import '../../../features/session/application/session_coordinator.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../../routing/routes.dart';
 import '../../../utils/global_loading.dart';
@@ -125,7 +126,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     FgButton(
                       onPressed: _isFormValid
                           ? () => ref
-                              .read(authenticationViewModelProvider.notifier)
+                              .read(sessionCoordinatorProvider)
                               .registerWithEmailAndPassword(
                                 email: _emailController.text,
                                 password: _passwordController.text,

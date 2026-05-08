@@ -13,6 +13,7 @@ import '../../../../features/common/ui/widgets/common_dialog.dart';
 import '../../../../features/profile/model/profile.dart';
 import '../../../../features/profile/ui/view_model/profile_view_model.dart';
 import '../../../../features/profile/ui/widgets/profile_menu.dart';
+import '../../../../features/session/application/session_coordinator.dart';
 import '../../../../generated/locale_keys.g.dart';
 import '../../../../routing/routes.dart';
 import '../../../../utils/global_loading.dart';
@@ -175,17 +176,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         primaryButtonAction: () async {
           try {
             Global.showLoading(context);
-            await ref.read(profileViewModelProvider.notifier).signOut();
+            await ref.read(sessionCoordinatorProvider).signOut();
+            if (context.mounted) {
+              context.pushReplacement(Routes.register);
+            }
           } catch (error) {
             if (context.mounted) {
               context
                   .showErrorSnackBar(LocaleKeys.unexpectedErrorOccurred.tr());
             }
           } finally {
-            if (context.mounted) {
-              Global.hideLoading();
-              context.pushReplacement(Routes.register);
-            }
+            Global.hideLoading();
           }
         },
       ),
@@ -204,17 +205,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         primaryButtonAction: () async {
           try {
             Global.showLoading(context);
-            await ref.read(profileViewModelProvider.notifier).signOut();
+            await ref.read(sessionCoordinatorProvider).signOut();
+            if (context.mounted) {
+              context.pushReplacement(Routes.register);
+            }
           } catch (error) {
             if (context.mounted) {
               context
                   .showErrorSnackBar(LocaleKeys.unexpectedErrorOccurred.tr());
             }
           } finally {
-            if (context.mounted) {
-              Global.hideLoading();
-              context.pushReplacement(Routes.register);
-            }
+            Global.hideLoading();
           }
         },
       ),

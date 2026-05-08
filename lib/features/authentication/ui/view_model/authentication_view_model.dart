@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../constants/constants.dart';
-import '../../../../features/profile/ui/view_model/profile_view_model.dart';
 import '../../../../generated/locale_keys.g.dart';
 import '../../model/auth_session.dart';
 import '../../repository/authentication_repository.dart';
@@ -19,7 +18,14 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
   FutureOr<AuthenticationState> build() async {
     _repository = ref.read(authenticationRepositoryProvider);
     final currentSession = await _repository.currentSession();
-    return AuthenticationState(authSession: currentSession);
+    final isLoggedIn = currentSession != null ||
+        (!_repository.isFirebaseConfigured && await _repository.isLogin());
+    return AuthenticationState(
+      authSession: currentSession,
+      isLoggedIn: isLoggedIn,
+      hasExistingAccount: await _repository.isExistAccount(),
+      isFirebaseConfigured: _repository.isFirebaseConfigured,
+    );
   }
 
   Future<void> registerWithEmailAndPassword({
@@ -55,8 +61,9 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
     final result = await AsyncValue.guard(_repository.signOut);
 
     if (result is AsyncError) {
-      state = AsyncError(result.error.toString(), StackTrace.current);
-      return;
+      final stackTrace = result.stackTrace;
+      state = AsyncError(result.error, stackTrace);
+      Error.throwWithStackTrace(result.error, stackTrace);
     }
 
     state = const AsyncData(AuthenticationState());
@@ -84,24 +91,17 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
       return;
     }
 
-    await updateProfile(authSession.user);
     await _repository.setIsLogin(true);
 
     state = AsyncData(
       AuthenticationState(
         authSession: authSession,
+        isLoggedIn: true,
+        hasExistingAccount: true,
+        isFirebaseConfigured: _repository.isFirebaseConfigured,
         isRegisterSuccessfully: isRegister,
         isSignInSuccessfully: true,
       ),
     );
-  }
-
-  Future<void> updateProfile(AuthUser user) async {
-    final metaData = user.metadata;
-    await ref.read(profileViewModelProvider.notifier).updateProfile(
-          email: user.email,
-          name: metaData?['full_name'] as String?,
-          avatar: metaData?['avatar_url'] as String?,
-        );
   }
 }

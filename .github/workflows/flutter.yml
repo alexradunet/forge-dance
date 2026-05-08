@@ -31,8 +31,14 @@ jobs:
       - name: Generate code
         run: flutter pub run build_runner build --delete-conflicting-outputs
 
+      - name: Custom lint
+        run: flutter pub run custom_lint
+
       - name: Analyze
         run: flutter analyze
 
       - name: Test
         run: flutter test
+
+      - name: Build web release
+        run: flutter build web --release --no-pub
