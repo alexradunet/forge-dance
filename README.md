@@ -6,6 +6,11 @@ Forge Dance is a Flutter app built with Riverpod, Firebase, and a feature-first 
 
 Firebase is the selected MVP backend for fastest path to market.
 
+Firebase project:
+
+- Display name: `forge-dance`
+- Project ID: `forge-dance-1bcc7`
+
 Current stack:
 
 - Firebase Auth for email/password accounts
@@ -15,16 +20,22 @@ Firebase SDK usage should stay behind repositories/data sources. Widgets should 
 
 ## Firebase setup
 
-Install and run FlutterFire CLI before using Firebase services in a real environment:
+FlutterFire has generated app configuration for Android, iOS, macOS, web, and Windows.
+
+Enable these services in Firebase Console before using auth/profile persistence:
+
+1. **Authentication > Sign-in method > Email/Password**
+2. **Firestore Database** in production mode or test mode, then deploy `firestore.rules`
+
+Useful Firebase commands:
 
 ```bash
-dart pub global activate flutterfire_cli
-flutterfire configure
+firebase login
+flutterfire configure --project=forge-dance-1bcc7
+firebase deploy --only firestore:rules
 ```
 
-Then enable **Authentication > Sign-in method > Email/Password** in Firebase Console.
-
-Until real Firebase options are generated, the checked-in `lib/firebase_options.dart` skips Firebase initialization so CI and local desktop development can still run.
+Linux desktop is kept as a local development target; Firebase initialization is skipped there because FlutterFire did not generate Linux options.
 
 ## Commands
 

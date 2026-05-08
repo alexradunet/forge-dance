@@ -1,0 +1,29 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "forge-dance-1bcc7",
+          "appId": "1:125200254439:android:7716c685b2698e11b46942",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "forge-dance-1bcc7",
+          "configurations": {
+            "android": "1:125200254439:android:7716c685b2698e11b46942",
+            "ios": "1:125200254439:ios:6fb628be883a2608b46942",
+            "macos": "1:125200254439:ios:6fb628be883a2608b46942",
+            "web": "1:125200254439:web:01b3303894b624e5b46942",
+            "windows": "1:125200254439:web:9547622fe0cd3fdab46942"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  }
+}

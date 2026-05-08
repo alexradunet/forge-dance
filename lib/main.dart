@@ -38,16 +38,13 @@ void main() async {
 }
 
 Future<void> _initializeFirebase() async {
-  final options = DefaultFirebaseOptions.currentPlatform;
-
-  if (options == null) {
-    debugPrint(
-      'Firebase is not configured. Run `flutterfire configure` before using Firebase services.',
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
     );
-    return;
+  } on UnsupportedError catch (error) {
+    debugPrint('Firebase is not supported on this platform: $error');
   }
-
-  await Firebase.initializeApp(options: options);
 }
 
 class MainApp extends ConsumerWidget {
