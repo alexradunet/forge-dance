@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.henry" "\0"
-            VALUE "FileDescription", "forge_dance" "\0"
+            VALUE "CompanyName", "Forge Dance" "\0"
+            VALUE "FileDescription", "Forge Dance" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "forge_dance" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.henry. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Forge Dance. All rights reserved." "\0"
             VALUE "OriginalFilename", "forge_dance.exe" "\0"
-            VALUE "ProductName", "forge_dance" "\0"
+            VALUE "ProductName", "Forge Dance" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

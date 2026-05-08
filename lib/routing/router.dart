@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../features/authentication/ui/otp_screen.dart';
 import '../features/authentication/ui/sign_in_screen.dart';
 import '../features/authentication/ui/register_screen.dart';
 import '../features/main/presentation/pages/main_screen.dart';
@@ -87,17 +86,6 @@ final GoRouter router = GoRouter(
       path: Routes.login,
       pageBuilder: (context, state) => state.slidePage(const SignInScreen()),
     ),
-    GoRoute(
-        path: Routes.otp,
-        pageBuilder: (context, state) {
-          final map = state.extra as Map?;
-          return state.slidePage(
-            OtpScreen(
-              email: map?['email'],
-              isRegister: map?['isRegister'],
-            ),
-          );
-        }),
     GoRoute(
       path: Routes.onboarding,
       pageBuilder: (context, state) =>

@@ -40,10 +40,7 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "dance.forge.app"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdk = 28
         targetSdk = 35
         versionCode = flutterVersionCode.toInteger()
@@ -61,9 +58,7 @@ android {
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            //debuggable false
+            // TODO: Configure release signing before publishing.
             signingConfig = signingConfigs.debug
             minifyEnabled true
             shrinkResources true

@@ -18,36 +18,36 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
   @override
   FutureOr<AuthenticationState> build() async {
     _repository = ref.read(authenticationRepositoryProvider);
-    return const AuthenticationState();
+    final currentSession = await _repository.currentSession();
+    return AuthenticationState(authSession: currentSession);
   }
 
-  Future<void> signInWithMagicLink(String email) async {
-    state = const AsyncValue.loading();
-    final result =
-        await AsyncValue.guard(() => _repository.signInWithMagicLink(email));
-
-    if (result is AsyncError) {
-      state = AsyncError(result.error.toString(), StackTrace.current);
-      return;
-    }
-
-    state = const AsyncData(AuthenticationState());
-  }
-
-  Future<void> verifyOtp({
+  Future<void> registerWithEmailAndPassword({
     required String email,
-    required String token,
-    required bool isRegister,
+    required String password,
   }) async {
     state = const AsyncValue.loading();
     final result = await AsyncValue.guard(
-      () => _repository.verifyOtp(
+      () => _repository.registerWithEmailAndPassword(
         email: email,
-        token: token,
-        isRegister: isRegister,
+        password: password,
       ),
     );
-    handleResult(result);
+    await _handleResult(result, isRegister: true);
+  }
+
+  Future<void> signInWithEmailAndPassword({
+    required String email,
+    required String password,
+  }) async {
+    state = const AsyncValue.loading();
+    final result = await AsyncValue.guard(
+      () => _repository.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      ),
+    );
+    await _handleResult(result, isRegister: false);
   }
 
   Future<void> signOut() async {
@@ -62,33 +62,35 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
     state = const AsyncData(AuthenticationState());
   }
 
-  void handleResult(AsyncValue<AuthSession> result) async {
+  Future<void> _handleResult(
+    AsyncValue<AuthSession> result, {
+    required bool isRegister,
+  }) async {
     debugPrint(
-        '${Constants.tag} [AuthenticationViewModel.handleResult] result: $result');
+      '${Constants.tag} [AuthenticationViewModel._handleResult] result: $result',
+    );
+
     if (result is AsyncError) {
       state = AsyncError(result.error.toString(), StackTrace.current);
       return;
     }
 
     final authSession = result.value;
-    debugPrint(
-        '${Constants.tag} [AuthenticationViewModel.handleResult] user: ${authSession?.user.toJson()}');
     if (authSession == null) {
-      state = AsyncError(LocaleKeys.unexpectedErrorOccurred.tr(), StackTrace.current);
+      state = AsyncError(
+        LocaleKeys.unexpectedErrorOccurred.tr(),
+        StackTrace.current,
+      );
       return;
     }
 
-    final isExistAccount = await _repository.isExistAccount();
-    if (!isExistAccount) {
-      await _repository.setIsExistAccount(true);
-    }
-    updateProfile(authSession.user);
+    await updateProfile(authSession.user);
     await _repository.setIsLogin(true);
 
     state = AsyncData(
       AuthenticationState(
         authSession: authSession,
-        isRegisterSuccessfully: !isExistAccount,
+        isRegisterSuccessfully: isRegister,
         isSignInSuccessfully: true,
       ),
     );
@@ -96,10 +98,10 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
 
   Future<void> updateProfile(AuthUser user) async {
     final metaData = user.metadata;
-    ref.read(profileViewModelProvider.notifier).updateProfile(
-      email: user.email,
-      name: metaData?['full_name'] as String?,
-      avatar: metaData?['avatar_url'] as String?,
-    );
+    await ref.read(profileViewModelProvider.notifier).updateProfile(
+          email: user.email,
+          name: metaData?['full_name'] as String?,
+          avatar: metaData?['avatar_url'] as String?,
+        );
   }
 }

@@ -5,16 +5,17 @@ import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../constants/assets.dart';
-import '../../../features/authentication/ui/view_model/authentication_view_model.dart';
 import '../../../design_system/atoms/buttons/fg_button.dart';
 import '../../../design_system/atoms/inputs/fg_input.dart';
+import '../../../design_system/atoms/visuals/fg_background.dart';
 import '../../../design_system/organisms/navigation/app_header.dart';
+import '../../../design_system/tokens/app_typography.dart';
+import '../../../extensions/build_context_extension.dart';
+import '../../../features/authentication/ui/view_model/authentication_view_model.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../../routing/routes.dart';
-import '../../../design_system/tokens/app_typography.dart';
+import '../../../utils/global_loading.dart';
 import '../../../utils/validator.dart';
-
-import '../../../design_system/atoms/visuals/fg_background.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
@@ -25,30 +26,52 @@ class SignInScreen extends ConsumerStatefulWidget {
 
 class _SignInScreenState extends ConsumerState<SignInScreen> {
   late final TextEditingController _emailController;
-  bool _isEmailValid = false;
+  late final TextEditingController _passwordController;
+  bool _isFormValid = false;
 
   @override
   void initState() {
     super.initState();
-    _emailController = TextEditingController();
-    _emailController.addListener(_validateEmail);
+    _emailController = TextEditingController()..addListener(_validateForm);
+    _passwordController = TextEditingController()..addListener(_validateForm);
   }
 
   @override
   void dispose() {
-    _emailController.removeListener(_validateEmail);
+    _emailController.removeListener(_validateForm);
+    _passwordController.removeListener(_validateForm);
     _emailController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
-  void _validateEmail() {
+  void _validateForm() {
     setState(() {
-      _isEmailValid = isValidEmail(_emailController.text);
+      _isFormValid = isValidEmail(_emailController.text) &&
+          _passwordController.text.trim().length >= 6;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    ref.listen(authenticationViewModelProvider, (previous, next) {
+      if (next.isLoading != previous?.isLoading) {
+        if (next.isLoading) {
+          Global.showLoading(context);
+        } else {
+          Global.hideLoading();
+        }
+      }
+
+      if (next is AsyncError) {
+        context.showErrorSnackBar(next.error.toString());
+      }
+
+      if (next is AsyncData && next.value?.isSignInSuccessfully == true) {
+        context.pushReplacement(Routes.main);
+      }
+    });
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: FgBackground(
@@ -83,25 +106,42 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       label: 'Email',
                       controller: _emailController,
                     ),
+                    const SizedBox(height: 16),
+                    FgInput.password(
+                      controller: _passwordController,
+                    ),
                     const SizedBox(height: 32),
                     FgButton(
-                      onPressed: _isEmailValid
-                          ? () {
-                              ref
-                                  .read(
-                                      authenticationViewModelProvider.notifier)
-                                  .signInWithMagicLink(_emailController.text);
-                              context.push(
-                                Routes.otp,
-                                extra: {
-                                  'email': _emailController.text,
-                                  'isRegister': false,
-                                },
-                              );
-                            }
+                      onPressed: _isFormValid
+                          ? () => ref
+                              .read(authenticationViewModelProvider.notifier)
+                              .signInWithEmailAndPassword(
+                                email: _emailController.text,
+                                password: _passwordController.text,
+                              )
                           : null,
-                      text: LocaleKeys.continueText.tr(),
+                      text: LocaleKeys.signIn.tr(),
                       width: double.infinity,
+                    ),
+                    const SizedBox(height: 24),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          LocaleKeys.doNotHaveAccount.tr(),
+                          style: AppTheme.bodySmall,
+                        ),
+                        const SizedBox(width: 4),
+                        TextButton(
+                          onPressed: () => context.push(Routes.register),
+                          child: Text(
+                            'register'.tr(),
+                            style: AppTheme.bodySmall.copyWith(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                     const SizedBox(height: 32),
                   ],

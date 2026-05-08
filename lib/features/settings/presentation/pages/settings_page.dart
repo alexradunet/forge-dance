@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -126,9 +124,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ProfileMenuItem(
               icon: Icons.star_outline,
               label: LocaleKeys.rateUs.tr(),
-              onTap: () => context.tryLaunchUrl(
-                Platform.isIOS ? Constants.appStore : Constants.playStore,
-              ),
+              onTap: () => context.tryLaunchUrl(Constants.rateUs),
             ),
           ],
         ),

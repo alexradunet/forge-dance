@@ -4,9 +4,13 @@ Rules for AI agents and contributors working on Forge Dance.
 
 ## Backend
 
-- Do not add any preselected backend-as-a-service dependencies, initialization, generated config, docs, or examples.
-- Keep repositories backend-neutral. If a server is needed later, hide it behind repository/data-source interfaces.
-- Current auth/profile flows are local-only placeholders until offline-first/PocketBase/owned-server architecture is chosen.
+- Firebase is the selected backend for the MVP because speed to market is the priority.
+- Keep Firebase usage behind repositories/data sources. Do not call `FirebaseAuth`, `FirebaseFirestore`, or other Firebase SDKs directly from widgets.
+- Current Firebase MVP stack:
+  - Firebase Auth for accounts
+  - Cloud Firestore for user/profile data
+- Do not add another backend-as-a-service dependency unless the project explicitly changes direction.
+- Before using Firebase services in a real environment, run `flutterfire configure` and enable Email/Password sign-in in Firebase Console.
 
 ## Feature structure
 

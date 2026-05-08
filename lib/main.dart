@@ -1,4 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'extensions/build_context_extension.dart';
 import 'features/common/ui/providers/app_theme_mode_provider.dart';
+import 'firebase_options.dart';
 import 'features/common/ui/widgets/offline_container.dart';
 import 'routing/router.dart';
 import 'utils/provider_observer.dart';
@@ -14,6 +16,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await EasyLocalization.ensureInitialized();
+  await _initializeFirebase();
 
   LicenseRegistry.addLicense(() async* {
     final license = await rootBundle.loadString('google_fonts/OFL.txt');
@@ -22,7 +25,7 @@ void main() async {
 
   runApp(
     ProviderScope(
-      observers: [AppObserver()],
+      observers: kDebugMode ? [AppObserver()] : const [],
       child: EasyLocalization(
         supportedLocales: const [Locale('en'), Locale('vi')],
         path: 'assets/translations',
@@ -32,6 +35,19 @@ void main() async {
       ),
     ),
   );
+}
+
+Future<void> _initializeFirebase() async {
+  final options = DefaultFirebaseOptions.currentPlatform;
+
+  if (options == null) {
+    debugPrint(
+      'Firebase is not configured. Run `flutterfire configure` before using Firebase services.',
+    );
+    return;
+  }
+
+  await Firebase.initializeApp(options: options);
 }
 
 class MainApp extends ConsumerWidget {

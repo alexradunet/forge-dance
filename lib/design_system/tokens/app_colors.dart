@@ -25,7 +25,7 @@ class AppColors {
   static const electricBlueDark = Color(0xFF0099CC);
   static const electricBlueLight = Color(0xFF33CCFF);
 
-  /// 👑 LEGEND GOLD - Achievements, premium features
+  /// 👑 LEGEND GOLD - Achievements and rare rewards
   /// #FFD700
   static const legendGold = Color(0xFFFFD700);
 

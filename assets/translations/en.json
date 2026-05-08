@@ -52,5 +52,6 @@
   "logOutMessage": "Are you sure you want to log out?",
   "deleteAccount": "Delete account",
   "deleteAccountTitle": "Delete account confirmation",
-  "deleteAccountMessage": "Are you sure you want to delete account?"
+  "deleteAccountMessage": "Are you sure you want to delete account?",
+  "doNotHaveAccount": "New here?"
 }

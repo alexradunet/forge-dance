@@ -1,7 +1,6 @@
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:easy_localization/easy_localization.dart';
 
-import '../features/common/remote/api_client.dart';
 import '../generated/locale_keys.g.dart';
 
 class Utils {
@@ -13,16 +12,12 @@ class Utils {
   }
 
   static String getErrorMessage(Object? error) {
-    if (error is TimeoutException) return error.message;
-    if (error is NoInternetException) return error.message;
-    if (error is RequestCancelledException) return error.message;
-    if (error is BadRequestException) return error.message;
-    if (error is UnauthorizedException) return error.message;
-    if (error is ForbiddenException) return error.message;
-    if (error is NotFoundException) return error.message;
-    if (error is ServerException) return error.message;
-    if (error is UnknownException) return error.message;
-    return LocaleKeys.unexpectedErrorOccurred.tr();
+    if (error == null) return LocaleKeys.unexpectedErrorOccurred.tr();
+
+    final message = error.toString().replaceFirst('Exception: ', '').trim();
+    if (message.isEmpty) return LocaleKeys.unexpectedErrorOccurred.tr();
+
+    return message;
   }
 
   static DateTime today() {

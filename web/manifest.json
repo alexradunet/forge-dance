@@ -1,11 +1,11 @@
 {
-    "name": "forge_dance",
-    "short_name": "forge_dance",
+    "name": "Forge Dance",
+    "short_name": "Forge Dance",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A base Flutter project with MVVM architecture and Riverpod state management.",
+    "background_color": "#0B0B0F",
+    "theme_color": "#FF5A1F",
+    "description": "Forge Dance Flutter app.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
