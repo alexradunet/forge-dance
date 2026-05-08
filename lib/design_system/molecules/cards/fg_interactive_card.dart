@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:flutter_mvvm_riverpod/design_system/atoms/visuals/fg_tech_pattern_painter.dart';
+import 'package:forge_dance/design_system/atoms/visuals/fg_tech_pattern_painter.dart';
 
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_border_radius.dart';

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../constants/constants.dart';
 import '../../../../extensions/build_context_extension.dart';
@@ -108,12 +107,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               label: LocaleKeys.language.tr(),
               onTap: () => context.push(Routes.languages),
             ),
-            ProfileMenuItem(
-              icon: Icons.diamond_outlined,
-              label: 'Go Premium',
-              textColor: AppColors.legendGold,
-              onTap: () => context.push(Routes.premium),
-            ),
           ],
         ),
         const SizedBox(height: 24),
@@ -187,10 +180,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           try {
             Global.showLoading(context);
             await ref.read(profileViewModelProvider.notifier).signOut();
-          } on AuthException catch (error) {
-            if (context.mounted) {
-              context.showErrorSnackBar(error.message);
-            }
           } catch (error) {
             if (context.mounted) {
               context
@@ -220,10 +209,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           try {
             Global.showLoading(context);
             await ref.read(profileViewModelProvider.notifier).signOut();
-          } on AuthException catch (error) {
-            if (context.mounted) {
-              context.showErrorSnackBar(error.message);
-            }
           } catch (error) {
             if (context.mounted) {
               context

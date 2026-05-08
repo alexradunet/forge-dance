@@ -6,8 +6,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../constants/assets.dart';
 import '../../../features/authentication/ui/view_model/authentication_view_model.dart';
-import '../../../features/authentication/ui/widgets/horizontal_divider.dart';
-import '../../../features/authentication/ui/widgets/social_sign_in.dart';
 import '../../../design_system/atoms/buttons/fg_button.dart';
 import '../../../design_system/atoms/inputs/fg_input.dart';
 import '../../../design_system/organisms/navigation/app_header.dart';
@@ -105,10 +103,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                       text: LocaleKeys.continueText.tr(),
                       width: double.infinity,
                     ),
-                    const SizedBox(height: 16),
-                    const HorizontalDivider(),
-                    const SizedBox(height: 16),
-                    const SocialSignIn(),
                     const SizedBox(height: 32),
                   ],
                 ),

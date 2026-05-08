@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_mvvm_riverpod/design_system/atoms/progress/fg_progress_bar.dart';
+import 'package:forge_dance/design_system/atoms/progress/fg_progress_bar.dart';
 
 import '../../../design_system/tokens/app_colors.dart';
 import '../../../design_system/tokens/app_spacing.dart';
@@ -58,6 +58,31 @@ class ProgressSection extends StatelessWidget {
                 child: Padding(
                   padding: EdgeInsets.only(
                     right: index < stats.length - 1 ? AppSpacing.md : 0,
+                  ),
+                  child: Container(
+                    padding: AppSpacing.card,
+                    decoration: BoxDecoration(
+                      color: AppColors.gray800,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          stat.value + (stat.unit ?? ''),
+                          style: AppTheme.h5.copyWith(
+                            color: AppColors.crystalWhite,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          stat.label,
+                          style: AppTheme.bodySmall.copyWith(
+                            color: AppColors.gray400,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );

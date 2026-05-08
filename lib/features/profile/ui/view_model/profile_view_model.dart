@@ -8,7 +8,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../../constants/constants.dart';
 import '../../../../extensions/build_context_extension.dart';
-import '../../../../extensions/profile_extension.dart';
 import '../../../../extensions/string_extension.dart';
 import '../../../authentication/ui/view_model/authentication_view_model.dart';
 import '../../model/profile.dart';
@@ -76,15 +75,6 @@ class ProfileViewModel extends _$ProfileViewModel {
     } catch (error) {
       state = AsyncError(error, StackTrace.current);
     }
-  }
-
-  Future<bool> isShowPremium() async {
-    if (state.value?.profile?.isPremium == true) return false;
-    return _repository.isShowPremium();
-  }
-
-  Future<void> setIsShowPremium() async {
-    await _repository.setIsShowPremium();
   }
 
   Future<String?> selectImage(BuildContext context) async {

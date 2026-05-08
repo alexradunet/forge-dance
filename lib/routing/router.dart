@@ -7,7 +7,6 @@ import '../features/authentication/ui/register_screen.dart';
 import '../features/main/presentation/pages/main_screen.dart';
 import '../features/onboarding/ui/onboarding_screen.dart';
 import '../features/onboarding/ui/splash_screen.dart';
-import '../features/premium/ui/premium_screen.dart';
 import '../features/profile/model/profile.dart';
 import '../features/profile/ui/account_info_screen.dart';
 import '../features/profile/ui/appearances_screen.dart';
@@ -123,13 +122,6 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: Routes.languages,
       pageBuilder: (context, state) => state.slidePage(const LanguagesScreen()),
-    ),
-    GoRoute(
-      path: Routes.premium,
-      pageBuilder: (context, state) => state.slidePage(
-        const PremiumScreen(),
-        direction: SlideDirection.up,
-      ),
     ),
     GoRoute(
       path: Routes.settings,

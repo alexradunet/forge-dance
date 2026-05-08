@@ -2,7 +2,6 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../extensions/build_context_extension.dart';
 import '../../../generated/locale_keys.g.dart';
@@ -128,10 +127,6 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
                         );
                     if (context.mounted) {
                       context.pop();
-                    }
-                  } on PostgrestException catch (error) {
-                    if (context.mounted) {
-                      context.showErrorSnackBar(error.message);
                     }
                   } catch (error) {
                     if (context.mounted) {

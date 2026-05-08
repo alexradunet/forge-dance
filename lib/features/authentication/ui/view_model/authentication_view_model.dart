@@ -1,11 +1,11 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../../constants/constants.dart';
 import '../../../../features/profile/ui/view_model/profile_view_model.dart';
 import '../../../../generated/locale_keys.g.dart';
+import '../../model/auth_session.dart';
 import '../../repository/authentication_repository.dart';
 import '../../ui/state/authentication_state.dart';
 
@@ -50,18 +50,6 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
     handleResult(result);
   }
 
-  Future<void> signInWithGoogle() async {
-    state = const AsyncValue.loading();
-    final result = await AsyncValue.guard(_repository.signInWithGoogle);
-    handleResult(result);
-  }
-
-  Future<void> signInWithApple() async {
-    state = const AsyncValue.loading();
-    final result = await AsyncValue.guard(_repository.signInWithApple);
-    handleResult(result);
-  }
-
   Future<void> signOut() async {
     state = const AsyncValue.loading();
     final result = await AsyncValue.guard(_repository.signOut);
@@ -74,7 +62,7 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
     state = const AsyncData(AuthenticationState());
   }
 
-  void handleResult(AsyncValue result) async {
+  void handleResult(AsyncValue<AuthSession> result) async {
     debugPrint(
         '${Constants.tag} [AuthenticationViewModel.handleResult] result: $result');
     if (result is AsyncError) {
@@ -82,46 +70,36 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
       return;
     }
 
-    final AuthResponse? authResponse = result.value;
+    final authSession = result.value;
     debugPrint(
-        '${Constants.tag} [AuthenticationViewModel.handleResult] authResponse: ${authResponse?.user?.toJson()}');
-    if (authResponse == null) {
+        '${Constants.tag} [AuthenticationViewModel.handleResult] user: ${authSession?.user.toJson()}');
+    if (authSession == null) {
       state = AsyncError(LocaleKeys.unexpectedErrorOccurred.tr(), StackTrace.current);
       return;
     }
 
-    // TODO: fake data, remove this when connect to real auth
     final isExistAccount = await _repository.isExistAccount();
     if (!isExistAccount) {
-      _repository.setIsExistAccount(true);
+      await _repository.setIsExistAccount(true);
     }
-    if (authResponse.user != null) {
-      updateProfile(authResponse.user!);
-    }
-    _repository.setIsLogin(true);
-    // END TODO
+    updateProfile(authSession.user);
+    await _repository.setIsLogin(true);
 
     state = AsyncData(
       AuthenticationState(
-        authResponse: authResponse,
+        authSession: authSession,
         isRegisterSuccessfully: !isExistAccount,
         isSignInSuccessfully: true,
       ),
     );
   }
 
-  Future<void> updateProfile(User user) async {
-    String? name;
-    String? avatar;
-    final metaData = user.userMetadata;
-    if (metaData != null) {
-      name = metaData['full_name'];
-      avatar = metaData['avatar_url'];
-    }
+  Future<void> updateProfile(AuthUser user) async {
+    final metaData = user.metadata;
     ref.read(profileViewModelProvider.notifier).updateProfile(
       email: user.email,
-      name: name,
-      avatar: avatar,
+      name: metaData?['full_name'] as String?,
+      avatar: metaData?['avatar_url'] as String?,
     );
   }
 }
