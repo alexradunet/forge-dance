@@ -1,5 +1,10 @@
 rules_version = '2';
 
+// Owner-only data model. Every collection must have an explicit match block —
+// anything not matched below is denied by default.
+//
+// Keep the status whitelist in sync with the LessonStatus enum
+// (lib/features/learn/model/lesson_progress.dart).
 service cloud.firestore {
   match /databases/{database}/documents {
     function signedIn() {
@@ -11,8 +16,20 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow create: if ownsUserDocument(userId);
-      allow read, update, delete: if ownsUserDocument(userId);
+      // The profile document's id field must always mirror the auth uid.
+      allow create, update: if ownsUserDocument(userId)
+        && request.resource.data.id == userId;
+      allow read, delete: if ownsUserDocument(userId);
+
+      // Per-lesson progress: users/{uid}/progress/{lessonId}.
+      // The document id must equal the lessonId field, and status must be a
+      // known enum value.
+      match /progress/{lessonId} {
+        allow create, update: if ownsUserDocument(userId)
+          && request.resource.data.lessonId == lessonId
+          && request.resource.data.status in ['notStarted', 'inProgress', 'completed'];
+        allow read, delete: if ownsUserDocument(userId);
+      }
     }
   }
 }

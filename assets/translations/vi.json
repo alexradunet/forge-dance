@@ -53,5 +53,6 @@
   "deleteAccount": "Xoá tài khoản",
   "deleteAccountTitle": "Xác nhận xoá tài khoản",
   "deleteAccountMessage": "Bạn có chắc chắn muốn xoá tài khoản?",
-  "doNotHaveAccount": "Bạn mới ở đây?"
+  "doNotHaveAccount": "Bạn mới ở đây?",
+  "completeLesson": "Hoàn thành bài học"
 }

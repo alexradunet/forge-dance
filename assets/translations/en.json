@@ -53,5 +53,6 @@
   "deleteAccount": "Delete account",
   "deleteAccountTitle": "Delete account confirmation",
   "deleteAccountMessage": "Are you sure you want to delete account?",
-  "doNotHaveAccount": "New here?"
+  "doNotHaveAccount": "New here?",
+  "completeLesson": "Complete Lesson"
 }

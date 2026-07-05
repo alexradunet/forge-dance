@@ -34,6 +34,24 @@ class ProfileRepository {
 
   bool get isFirebaseConfigured => _auth != null && _firestore != null;
 
+  /// Typed reference to the signed-in user's profile document.
+  ///
+  /// All Firestore reads/writes go through this converter so field names and
+  /// types are checked in exactly one place. Null when Firebase is
+  /// unconfigured or nobody is signed in.
+  DocumentReference<Profile>? _profileRef() {
+    final user = _auth?.currentUser;
+    final firestore = _firestore;
+    if (firestore == null || user == null) return null;
+
+    return firestore.collection('users').doc(user.uid).withConverter<Profile>(
+          fromFirestore: (snapshot, _) =>
+              Profile.fromJson(_normalizeFirestoreJson(snapshot.data()!)),
+          toFirestore: (profile, _) =>
+              _firestorePayload(profile: profile, user: user),
+        );
+  }
+
   Future<Profile?> get() async {
     final localProfile = await _getLocalProfile();
     final firebaseProfile = await _getFromFirestore();
@@ -58,23 +76,18 @@ class ProfileRepository {
   Future<void> update(Profile profile) async {
     await _updateLocalProfile(profile);
 
-    final user = _auth?.currentUser;
-    if (!isFirebaseConfigured || user == null) return;
+    final ref = _profileRef();
+    if (ref == null) return;
 
-    await _firestore!.collection('users').doc(user.uid).set(
-          _firestorePayload(
-            profile: profile,
-            user: user,
-          ),
-          SetOptions(merge: true),
-        );
+    await ref.set(profile, SetOptions(merge: true));
   }
 
   Future<Profile?> _getFromFirestore() async {
     final user = _auth?.currentUser;
-    if (!isFirebaseConfigured || user == null) return null;
+    final ref = _profileRef();
+    if (ref == null || user == null) return null;
 
-    final snapshot = await _firestore!.collection('users').doc(user.uid).get();
+    final snapshot = await ref.get();
     if (!snapshot.exists) {
       return Profile(
         id: user.uid,
@@ -84,10 +97,7 @@ class ProfileRepository {
       );
     }
 
-    final data = snapshot.data();
-    if (data == null) return null;
-
-    return Profile.fromJson(_normalizeFirestoreJson(data));
+    return snapshot.data();
   }
 
   Future<void> _updateLocalProfile(Profile profile) async {
@@ -97,7 +107,10 @@ class ProfileRepository {
 
   Map<String, Object?> _normalizeFirestoreJson(Map<String, dynamic> data) {
     return data.map((key, value) {
-      if (value is Timestamp) return MapEntry(key, value.toDate());
+      // json_serializable expects ISO-8601 strings for DateTime fields.
+      if (value is Timestamp) {
+        return MapEntry(key, value.toDate().toIso8601String());
+      }
       return MapEntry(key, value);
     });
   }

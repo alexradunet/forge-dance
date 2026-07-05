@@ -1,88 +1,107 @@
 import 'package:flutter/material.dart';
-import '../../../../design_system/tokens/app_colors.dart';
-import '../../../../design_system/organisms/lessons/lesson_path_timeline.dart';
-import '../../../../design_system/organisms/navigation/app_header.dart';
-import '../../../../design_system/atoms/visuals/fg_background.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-/// Module View Screen matching dashboard_4 mockup (Lesson Path)
-class ModuleViewScreen extends StatelessWidget {
-  final String moduleTitle;
-  final String moduleSubtitle;
+import '../../../design_system/tokens/app_colors.dart';
+import '../../../design_system/organisms/lessons/lesson_path_timeline.dart';
+import '../../../design_system/organisms/navigation/app_header.dart';
+import '../../../design_system/atoms/progress/fg_spinner.dart';
+import '../../../design_system/atoms/visuals/fg_background.dart';
+import '../../common/ui/widgets/common_error.dart';
+import '../model/lesson.dart';
+import '../model/lesson_progress.dart';
+import '../ui/state/learn_state.dart';
+import '../ui/view_model/learn_view_model.dart';
+
+/// Module View Screen (Lesson Path) — renders the lesson catalog combined
+/// with the signed-in user's Firestore progress.
+class ModuleViewScreen extends ConsumerWidget {
   final VoidCallback? onBack;
   final Function(String)? onLessonNavigate;
 
   const ModuleViewScreen({
     super.key,
-    this.moduleTitle = 'Hip Hop Foundations',
-    this.moduleSubtitle = 'Module 1 • Path',
     this.onBack,
     this.onLessonNavigate,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final learnState = ref.watch(learnViewModelProvider);
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: FgBackground(
-        child: Stack(
-          children: [
-            CustomScrollView(
-              slivers: [
-                // Header
-                SliverToBoxAdapter(
-                  child: _buildHeader(context),
-                ),
-
-                // Spacing
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: 24),
-                ),
-
-                // Lesson path
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: LessonPathTimeline(
-                      nodes: _getMockLessons(),
-                      onNavigate: (tab) {
-                        debugPrint('Navigate to: $tab');
-                        if (tab == 'ignite') {
-                          onLessonNavigate?.call('lesson-player');
-                        }
-                      },
-                    ),
-                  ),
-                ),
-
-                // Bottom Spacing (FAB area)
-                const SliverToBoxAdapter(
-                  child: SizedBox(height: 100),
-                ),
-              ],
-            ),
-
-            // FAB (Location / Map)
-            Positioned(
-              bottom: 24,
-              right: 24,
-              child: FloatingActionButton(
-                onPressed: () {},
-                backgroundColor: AppColors.surfaceCard,
-                child: const Icon(Icons.my_location, color: Colors.white),
-              ),
-            ),
-          ],
+        child: learnState.when(
+          loading: () => const Center(child: FgSpinner()),
+          error: (_, __) => const CommonError(),
+          data: (state) => _buildPath(context, ref, state),
         ),
       ),
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildPath(BuildContext context, WidgetRef ref, LearnState state) {
+    return Stack(
+      children: [
+        CustomScrollView(
+          slivers: [
+            // Header
+            SliverToBoxAdapter(
+              child: _buildHeader(context, state),
+            ),
+
+            // Spacing
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 24),
+            ),
+
+            // Lesson path
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: LessonPathTimeline(
+                  nodes: _buildNodes(state),
+                  onNavigate: (tab) {
+                    if (tab == 'ignite') {
+                      final current = state.currentLesson;
+                      if (current != null) {
+                        ref
+                            .read(learnViewModelProvider.notifier)
+                            .startLesson(current.id);
+                      }
+                      onLessonNavigate?.call('lesson-player');
+                    }
+                  },
+                ),
+              ),
+            ),
+
+            // Bottom Spacing (FAB area)
+            const SliverToBoxAdapter(
+              child: SizedBox(height: 100),
+            ),
+          ],
+        ),
+
+        // FAB (Location / Map)
+        Positioned(
+          bottom: 24,
+          right: 24,
+          child: FloatingActionButton(
+            onPressed: () {},
+            backgroundColor: AppColors.surfaceCard,
+            child: const Icon(Icons.my_location, color: Colors.white),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeader(BuildContext context, LearnState state) {
     return AppHeader(
-      title: moduleTitle,
-      subtitle: moduleSubtitle,
+      title: state.module.title,
+      subtitle: state.module.subtitle,
       onBack: onBack ?? () => Navigator.of(context).pop(),
-      // Use standard AppHeader left slot for back button, and right slot for option
       rightSlot: Container(
         width: 40,
         height: 40,
@@ -100,39 +119,45 @@ class ModuleViewScreen extends StatelessWidget {
     );
   }
 
-  List<LessonNode> _getMockLessons() {
-    return const [
-      LessonNode(
-        title: 'History of Hip Hop',
-        type: LessonNodeType.theory,
-        state: LessonNodeState.completed,
-        duration: '5 min',
-      ),
-      LessonNode(
-        title: 'Groove Basics',
-        type: LessonNodeType.movement,
-        state: LessonNodeState.current,
-        duration: '15 min',
-        progress: 0.0,
-      ),
-      LessonNode(
-        title: 'Bounce & Rock',
-        type: LessonNodeType.drill,
-        state: LessonNodeState.locked,
-        duration: '10 min',
-      ),
-      LessonNode(
-        title: 'Freestyle Session',
-        type: LessonNodeType.experiment,
-        state: LessonNodeState.locked,
-        duration: '20 min',
-      ),
-      LessonNode(
-        title: 'Boss Showcase',
-        type: LessonNodeType.boss,
-        state: LessonNodeState.locked,
-        duration: '',
-      ),
+  List<LessonNode> _buildNodes(LearnState state) {
+    final current = state.currentLesson;
+    return [
+      for (final lesson in state.module.lessons)
+        LessonNode(
+          title: lesson.title,
+          type: _nodeType(lesson.type),
+          state: _nodeState(state, lesson, current),
+          duration: lesson.duration,
+          difficulty: lesson.difficulty,
+          progress: state.progressOf(lesson),
+        ),
     ];
+  }
+
+  LessonNodeType _nodeType(LessonType type) {
+    switch (type) {
+      case LessonType.theory:
+        return LessonNodeType.theory;
+      case LessonType.drill:
+        return LessonNodeType.drill;
+      case LessonType.movement:
+        return LessonNodeType.movement;
+      case LessonType.experiment:
+        return LessonNodeType.experiment;
+      case LessonType.boss:
+        return LessonNodeType.boss;
+    }
+  }
+
+  LessonNodeState _nodeState(
+    LearnState state,
+    Lesson lesson,
+    Lesson? current,
+  ) {
+    if (state.statusOf(lesson) == LessonStatus.completed) {
+      return LessonNodeState.completed;
+    }
+    if (lesson.id == current?.id) return LessonNodeState.current;
+    return LessonNodeState.locked;
   }
 }
