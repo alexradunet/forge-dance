@@ -1,24 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../routing/routes.dart';
 import '../../../design_system/tokens/app_colors.dart';
 import '../../../design_system/tokens/app_spacing.dart';
 import '../../../design_system/tokens/app_typography.dart';
 import '../../../design_system/atoms/visuals/fg_background.dart';
-import '../../authentication/ui/view_model/authentication_view_model.dart';
 
 /// Forge.dance Splash Screen
-/// Minimalist design with logo, tagline, and progress indicator
-class SplashScreen extends ConsumerStatefulWidget {
+/// Pure branding: shown at `/` while auth state resolves. Navigation away
+/// from here is owned entirely by the router redirect (see
+/// `lib/routing/app_redirect.dart`) — this widget must not navigate.
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  ConsumerState<SplashScreen> createState() => _SplashScreenState();
+  State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends ConsumerState<SplashScreen>
+class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _progressController;
 
@@ -29,10 +27,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       duration: const Duration(seconds: 2),
       vsync: this,
     )..forward();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkLoginStatus();
-    });
   }
 
   @override
@@ -144,23 +138,4 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
   }
 
-  Future<void> _checkLoginStatus() async {
-    await Future.delayed(const Duration(seconds: 2));
-    if (!mounted) return;
-
-    final authState = await ref.read(authenticationViewModelProvider.future);
-    if (!mounted) return;
-
-    if (authState.authSession != null || authState.isLoggedIn) {
-      context.pushReplacement(Routes.main);
-      return;
-    }
-
-    if (authState.hasExistingAccount) {
-      context.pushReplacement(Routes.login);
-      return;
-    }
-
-    context.pushReplacement(Routes.register);
-  }
 }

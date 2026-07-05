@@ -17,12 +17,12 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
   @override
   FutureOr<AuthenticationState> build() async {
     _repository = ref.read(authenticationRepositoryProvider);
-    final currentSession = await _repository.currentSession();
-    final isLoggedIn = currentSession != null ||
-        (!_repository.isFirebaseConfigured && await _repository.isLogin());
+    // Watching the auth stream makes this view model rebuild on every
+    // sign-in/sign-out, so it can never drift from Firebase's real state.
+    final authUser = await ref.watch(authStateChangesProvider.future);
     return AuthenticationState(
-      authSession: currentSession,
-      isLoggedIn: isLoggedIn,
+      authSession: authUser == null ? null : AuthSession(user: authUser),
+      isLoggedIn: authUser != null,
       hasExistingAccount: await _repository.isExistAccount(),
       isFirebaseConfigured: _repository.isFirebaseConfigured,
     );
@@ -66,7 +66,10 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
       Error.throwWithStackTrace(result.error, stackTrace);
     }
 
-    state = const AsyncData(AuthenticationState());
+    // Rebuild from the auth stream (now emitting null) instead of
+    // hand-crafting a state — keeps isFirebaseConfigured & co. truthful.
+    ref.invalidateSelf();
+    await future;
   }
 
   Future<void> _handleResult(
@@ -90,8 +93,6 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
       );
       return;
     }
-
-    await _repository.setIsLogin(true);
 
     state = AsyncData(
       AuthenticationState(

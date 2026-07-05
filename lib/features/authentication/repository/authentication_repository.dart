@@ -18,6 +18,17 @@ AuthenticationRepository authenticationRepository(Ref ref) {
   );
 }
 
+/// Single source of truth for "who is signed in".
+///
+/// Emits immediately (with `null`) when Firebase is not configured, so
+/// unconfigured platforms (e.g. Linux) resolve instantly instead of hanging.
+/// The router and view models derive auth state from this stream — never
+/// from SharedPreferences flags.
+@Riverpod(keepAlive: true)
+Stream<AuthUser?> authStateChanges(Ref ref) {
+  return ref.watch(authenticationRepositoryProvider).authStateChanges();
+}
+
 class AuthenticationRepository {
   const AuthenticationRepository({
     required firebase_auth.FirebaseAuth? auth,
@@ -29,6 +40,17 @@ class AuthenticationRepository {
   final FirebaseFirestore? _firestore;
 
   bool get isFirebaseConfigured => _auth != null && _firestore != null;
+
+  /// Maps Firebase's auth state stream to domain [AuthUser] objects.
+  ///
+  /// Returns a single-value `null` stream when Firebase is unavailable.
+  Stream<AuthUser?> authStateChanges() {
+    final auth = _auth;
+    if (auth == null) return Stream<AuthUser?>.value(null);
+    return auth.authStateChanges().map(
+          (user) => user == null ? null : _sessionFromFirebaseUser(user).user,
+        );
+  }
 
   Future<AuthSession> registerWithEmailAndPassword({
     required String email,
@@ -47,7 +69,6 @@ class AuthenticationRepository {
       }
 
       await _ensureUserDocument(user);
-      await setIsLogin(true);
       await setIsExistAccount(true);
       return _sessionFromFirebaseUser(user);
     } on firebase_auth.FirebaseAuthException catch (error) {
@@ -72,7 +93,6 @@ class AuthenticationRepository {
       }
 
       await _ensureUserDocument(user);
-      await setIsLogin(true);
       await setIsExistAccount(true);
       return _sessionFromFirebaseUser(user);
     } on firebase_auth.FirebaseAuthException catch (error) {
@@ -80,27 +100,8 @@ class AuthenticationRepository {
     }
   }
 
-  Future<AuthSession?> currentSession() async {
-    final user = _auth?.currentUser;
-    if (user == null) return null;
-    return _sessionFromFirebaseUser(user);
-  }
-
   Future<void> signOut() async {
     await _auth?.signOut();
-    await setIsLogin(false);
-  }
-
-  Future<bool> isLogin() async {
-    if (_auth?.currentUser != null) return true;
-
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(Constants.isLoginKey) ?? false;
-  }
-
-  Future<void> setIsLogin(bool value) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(Constants.isLoginKey, value);
   }
 
   Future<bool> isExistAccount() async {

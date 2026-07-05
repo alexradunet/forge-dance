@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../features/authentication/ui/sign_in_screen.dart';
 import '../features/authentication/ui/register_screen.dart';
+import '../features/authentication/ui/state/authentication_state.dart';
+import '../features/authentication/ui/view_model/authentication_view_model.dart';
 import '../features/main/presentation/pages/main_screen.dart';
 import '../features/onboarding/ui/onboarding_screen.dart';
 import '../features/onboarding/ui/splash_screen.dart';
@@ -11,7 +15,10 @@ import '../features/profile/ui/account_info_screen.dart';
 import '../features/profile/ui/appearances_screen.dart';
 import '../features/profile/ui/languages_screen.dart';
 import '../features/settings/presentation/pages/settings_page.dart';
+import 'app_redirect.dart';
 import 'routes.dart';
+
+part 'router.g.dart';
 
 enum SlideDirection {
   right,
@@ -71,9 +78,35 @@ class SlideRouteTransition extends CustomTransitionPage<void> {
         );
 }
 
-final GoRouter router = GoRouter(
-  initialLocation: Routes.splash,
-  routes: [
+/// App router. Navigation guarding is reactive: the router listens to the
+/// authentication view model and re-evaluates [computeRedirect] on every
+/// auth change (sign-in, sign-out, token revocation), so no screen ever
+/// navigates imperatively based on auth state.
+@Riverpod(keepAlive: true)
+GoRouter router(Ref ref) {
+  final authState = ValueNotifier<AsyncValue<AuthenticationState>>(
+    const AsyncValue.loading(),
+  );
+  ref
+    ..onDispose(authState.dispose)
+    ..listen(
+      authenticationViewModelProvider,
+      (_, next) => authState.value = next,
+      fireImmediately: true,
+    );
+
+  return GoRouter(
+    initialLocation: Routes.splash,
+    refreshListenable: authState,
+    redirect: (context, state) => computeRedirect(
+      matchedLocation: state.matchedLocation,
+      auth: authState.value,
+    ),
+    routes: _routes,
+  );
+}
+
+final List<GoRoute> _routes = [
     GoRoute(
       path: Routes.splash,
       pageBuilder: (context, state) => state.slidePage(const SplashScreen()),
@@ -118,5 +151,4 @@ final GoRouter router = GoRouter(
         direction: SlideDirection.right,
       ),
     ),
-  ],
-);
+  ];
