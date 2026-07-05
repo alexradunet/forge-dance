@@ -31,17 +31,35 @@ Firebase is **null on Linux** (FlutterFire generated no Linux options; `main.dar
 
 ## Firestore schema & conventions
 
-Current schema — one collection:
+Current schema — all owner-only, validated on write:
 
 ```
-users/{userId}: id, email, name, job, avatar, diamond, createdAt, updatedAt
+users/{userId}:                      id, email, name, job, avatar, diamond, createdAt, updatedAt
+users/{userId}/progress/{lessonId}:  lessonId, status, progress, updatedAt
 ```
 
-Conventions from `AuthenticationRepository` / `ProfileRepository`:
+**Typed references (`withConverter`) are mandatory for new Firestore access.** One converter per collection, defined inside the repository — never pass raw maps around:
 
-- Writes use `SetOptions(merge: true)`; set `updatedAt: FieldValue.serverTimestamp()` on every write and `createdAt` only on first create.
-- Build payloads field-by-field, skipping nulls — don't blindly `toJson()` the whole model.
-- Reads normalize Firestore types before `fromJson`: convert `Timestamp` → `DateTime` (see `_normalizeFirestoreJson`).
+```dart
+CollectionReference<LessonProgress>? _progressRef() {
+  final user = _auth?.currentUser;
+  final firestore = _firestore;
+  if (firestore == null || user == null) return null;
+
+  return firestore
+      .collection('users').doc(user.uid).collection('progress')
+      .withConverter<LessonProgress>(
+        fromFirestore: (snapshot, _) =>
+            LessonProgress.fromJson(_normalizeFirestoreJson(snapshot.data()!)),
+        toFirestore: (progress, _) => _firestorePayload(progress),
+      );
+}
+```
+
+Conventions (reference implementations: `ProgressRepository`, `ProfileRepository`, `AuthenticationRepository`):
+
+- Writes use `SetOptions(merge: true)`; set `updatedAt: FieldValue.serverTimestamp()` inside the `toFirestore` payload, `createdAt` only on first create.
+- Reads normalize Firestore types before `fromJson`: `Timestamp` → **ISO-8601 string** (json_serializable parses strings for `DateTime` fields) — see `_normalizeFirestoreJson`.
 - Map `FirebaseAuthException` codes to human-readable messages and rethrow as a domain exception (`AuthenticationException`) — view models surface `error.toString()`.
 
 ## Local-first persistence
@@ -55,20 +73,34 @@ Conventions from `AuthenticationRepository` / `ProfileRepository`:
 
 ## Security rules (`firestore.rules`)
 
-Current rules allow owner-only access to `users/{userId}` via `request.auth.uid == userId`. When adding a collection:
+Rules are v2, owner-only, and **validate writes** — they don't just gate access. Current invariants: `users/{userId}.id` must equal the auth uid; `progress/{lessonId}.lessonId` must equal the doc id and `status` must be a whitelisted `LessonStatus` name (keep the whitelist in sync with the enum). When adding a collection:
 
-1. Add a `match` block with explicit `allow` conditions — default-deny everything else.
-2. Reuse the `signedIn()` / ownership helper-function style.
-3. Deploy: `firebase deploy --only firestore:rules` (config wired in `firebase.json`).
-4. Composite indexes go in `firestore.indexes.json`.
+1. Add an explicit `match` block (subcollections inherit NOTHING — everything unmatched is default-deny).
+2. Validate `request.resource.data` on create/update: ownership fields match `request.auth.uid`, ids mirror the doc path, enum fields whitelisted. Put validation on `create, update` only — `delete` has no `request.resource`.
+3. Reuse the `signedIn()` / `ownsUserDocument()` helper style.
+4. Deploy: `firebase deploy --only firestore:rules` (config wired in `firebase.json`). Composite indexes go in `firestore.indexes.json`.
+5. Remember: rules are not filters — queries must be shaped so they can only return permitted docs.
 
 Rules are NOT applied automatically — an undeployed rules change is the usual cause of `permission-denied` errors.
 
+## Local development: Firebase Emulator Suite
+
+Never exercise auth/Firestore behavior against production. Instead:
+
+```bash
+firebase emulators:start        # auth :9099, firestore :8080, UI enabled (firebase.json)
+flutter run --dart-define=USE_FIREBASE_EMULATOR=true
+```
+
+The flag is read in `lib/features/firebase/repository/firebase_bootstrap.dart`, which points `FirebaseAuth` and `FirebaseFirestore` at localhost right after `Firebase.initializeApp`. Unit tests do NOT need the emulator — fakes cover the logic layer.
+
 ## Auth/session flows
 
-Cross-feature auth flows go through `SessionCoordinator` (`features/session/application/`): register/sign-in delegates to `AuthenticationViewModel`, then syncs `ProfileViewModel`; sign-out clears the profile. Extend the coordinator for new session-wide behavior — don't chain view models from widgets.
+**Auth state is a stream.** `authStateChangesProvider` (keepAlive, in `authentication_repository.dart`) wraps `FirebaseAuth.authStateChanges()` and is the single source of truth — it emits `null` immediately when Firebase is unconfigured. `AuthenticationViewModel` derives its state by watching it; never store a parallel logged-in flag.
 
-Boot decision (splash): session or `isLogin` flag → `/main`; `isExistAccount` → `/login`; else `/register`.
+Navigation reacts automatically: the router's `refreshListenable` re-runs `computeRedirect` (`lib/routing/app_redirect.dart`) on every emission. Sign-out anywhere lands the user on login with zero imperative navigation.
+
+Cross-feature auth flows go through `SessionCoordinator` (`features/session/application/`): register/sign-in delegates to `AuthenticationViewModel`, then syncs `ProfileViewModel`; sign-out clears the profile. Extend the coordinator for new session-wide behavior — don't chain view models from widgets.
 
 ## Environment setup (for humans/CI running against real Firebase)
 

@@ -5,7 +5,9 @@ description: Write and run tests for Forge Dance — unit tests for view models,
 
 # Testing
 
-Tests live in `test/`. `test/unit_test.dart` is the reference for house style. Run with `flutter test` — **codegen must have run first** (`flutter pub run build_runner build --delete-conflicting-outputs`), since tests import generated providers.
+Tests live in `test/`. References for house style: `test/unit_test.dart` (validators + profile VM), `test/authentication_test.dart` (stream-driven VM + fake auth repo), `test/learn_test.dart` (progress VM + fake repo), `test/app_redirect_test.dart` (pure-function matrix). Run with `flutter test` — **codegen must have run first** (or just run `bash tool/checks.sh`, which does everything in order).
+
+Design rule that keeps testing cheap: put decision logic in pure functions (like `computeRedirect`) or view models — never in widgets — so a plain matrix test covers it without any widget pumping.
 
 ## Fake repositories — the core pattern
 

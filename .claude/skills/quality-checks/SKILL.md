@@ -5,16 +5,13 @@ description: Run the full Forge Dance verification pipeline (code generation, cu
 
 # Quality Checks & Codegen Pipeline
 
-Commits land directly on `main` and CI runs the full pipeline on every push (`.github/workflows/flutter.yml`, Flutter **3.35.5**). Run the same pipeline locally before handing off:
+**One command, one definition of done:**
 
 ```bash
-flutter pub get
-flutter pub run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir assets/translations
-flutter pub run build_runner build --delete-conflicting-outputs
-flutter pub run custom_lint
-flutter analyze
-flutter test
+bash tool/checks.sh
 ```
+
+It runs, fail-fast and in order: `pub get` → localization keygen → `build_runner` → `custom_lint` → `analyze` → `test`. CI (`.github/workflows/flutter.yml`, Flutter **3.35.5**) runs exactly this script on every push to `main` — and commits land directly on `main` — so local green == CI green. Never hand off without it passing.
 
 For risky changes, also confirm the release target CI builds: `flutter build web --release`.
 

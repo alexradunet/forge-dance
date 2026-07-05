@@ -24,6 +24,14 @@ Never commit generated files.
 
 ## Commands
 
+**One command verifies everything** (codegen → custom_lint → analyze → test). Run it before every hand-off; CI runs exactly the same script, so local green == CI green:
+
+```bash
+bash tool/checks.sh
+```
+
+Individual commands when you need just one step:
+
 | Task | Command |
 |---|---|
 | Install deps | `flutter pub get` |
@@ -34,21 +42,11 @@ Never commit generated files.
 | Analyze | `flutter analyze` |
 | Tests | `flutter test` |
 | Run app | `flutter run -d chrome` (or another device) |
+| Run against local emulators | `firebase emulators:start` + `flutter run --dart-define=USE_FIREBASE_EMULATOR=true` |
 | Web release build | `flutter build web --release` |
 | Deploy Firestore rules | `firebase deploy --only firestore:rules` |
 
-### Required checks before handing off
-
-CI (`.github/workflows/flutter.yml`, Flutter 3.35.5) runs on every push to `main` — and commits land directly on `main`, so breakage is immediately visible. Always finish with:
-
-```bash
-flutter pub run build_runner build --delete-conflicting-outputs
-flutter pub run custom_lint
-flutter analyze
-flutter test
-```
-
-`custom_lint` (Riverpod lints) is NOT wired into `flutter analyze` — the plugin isn't registered in `analysis_options.yaml`, so run the CLI explicitly. CI also builds `flutter build web --release`, so keep the web target compiling.
+CI (`.github/workflows/flutter.yml`, Flutter 3.35.5) runs `tool/checks.sh` + a web release build on every push to `main` — and commits land directly on `main`, so breakage is immediately visible. Note: `custom_lint` (Riverpod lints) is NOT part of `flutter analyze` — the checks script runs it explicitly.
 
 ## Architecture
 
@@ -65,12 +63,13 @@ lib/
 ├── design_system/        # Atomic design: tokens → atoms → molecules → organisms → templates
 ├── extensions/           # BuildContextExtension (theme, snackbars), string/date/iterable helpers
 ├── features/
-│   ├── authentication/   # WIRED: Firebase Auth email/password (canonical MVVM example)
+│   ├── authentication/   # WIRED: Firebase Auth + authStateChanges stream (single source of truth)
 │   ├── profile/          # WIRED: Firestore users/{uid} + SharedPreferences cache
-│   ├── firebase/         # Nullable FirebaseAuth/FirebaseFirestore providers
+│   ├── learn/            # WIRED: bundled lesson catalog + Firestore progress (canonical example)
+│   ├── firebase/         # Nullable Firebase providers + bootstrap (emulator wiring)
 │   ├── session/          # SessionCoordinator: cross-feature auth ↔ profile orchestration
 │   ├── common/           # Shared widgets, appThemeModeProvider
-│   └── home | explore | library | learn | workout | wod | stats | settings | main | onboarding/
+│   └── home | explore | library | workout | wod | stats | settings | main | onboarding/
 │                         # PROTOTYPE: hardcoded mock data, no repositories yet
 ├── generated/            # LocaleKeys (generated, gitignored)
 ├── routing/              # go_router: router.dart + routes.dart
@@ -79,23 +78,27 @@ lib/
 
 Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `repository/` (IO + provider), `ui/` or `presentation/` (screens, plus `state/` and `view_model/`), optional `application/` for cross-feature coordinators. Both `ui/` and `presentation/pages/` naming conventions coexist — follow whichever the touched feature already uses.
 
-### The canonical pattern (copy from authentication/profile)
+### The canonical pattern (copy from learn or authentication/profile)
 
-- **Model**: `@freezed abstract class X with _$X` (freezed 3 syntax) + `fromJson`
-- **Repository**: plain class whose constructor takes **nullable** `FirebaseAuth?` / `FirebaseFirestore?`, guarded by `isFirebaseConfigured`; exposed via a `@riverpod` / `@Riverpod(keepAlive: true)` function
+- **Model**: `@freezed abstract class X with _$X` (freezed 3 syntax); add `fromJson` only if it's persisted
+- **Repository**: plain class whose constructor takes **nullable** `FirebaseAuth?` / `FirebaseFirestore?` and degrades gracefully (reads return empty, writes no-op); Firestore access goes through a typed `withConverter` reference; exposed via a `@riverpod` / `@Riverpod(keepAlive: true)` function
 - **ViewModel**: `@riverpod class XViewModel extends _$XViewModel` with `FutureOr<XState> build()`; mutations set `AsyncValue.loading()` then use `AsyncValue.guard(...)`
 - Widgets NEVER call Firebase SDKs directly (hard rule from `AGENTS.md`)
 - Cross-feature flows (e.g. sign-in must sync the profile) go through a coordinator like `SessionCoordinator`, not widget-side chaining
+- The **learn** feature is the end-to-end template: static content catalog (`lesson_catalog.dart`) + typed progress repository + view model + screens rendering `AsyncValue`
 
-### Navigation
+### Auth state & navigation
 
-- Top-level routes: go_router in `lib/routing/` with `SlideRouteTransition`; register path constants in `Routes`
+- **Auth state is a stream**: `authStateChangesProvider` (keepAlive) wraps `FirebaseAuth.authStateChanges()` and is the single source of truth. `AuthenticationViewModel` derives from it; nothing stores its own logged-in flag.
+- **All navigation guarding lives in `lib/routing/app_redirect.dart`** (`computeRedirect`, a pure function with a full test matrix in `test/app_redirect_test.dart`). The router (a Riverpod provider) re-evaluates it on every auth change via `refreshListenable`. Screens must NOT navigate based on auth state.
+- **Local dev mode**: when Firebase is unconfigured (Linux, missing options), the redirect skips auth entirely and enters `/main` as a guest; repositories no-op their writes.
+- Top-level routes: go_router in `lib/routing/` with `SlideRouteTransition`; register path constants in `Routes` and add new routes to `_routes` in `router.dart`
 - `/main` is `MainScreen`: a stateful `IndexedStack` shell (Collection, Explore, Home, Training, Profile tabs) with string-keyed `_subPage` overlays (`'training'`, `'lesson-path'`, `'lesson-player'`) — these are NOT go_router sub-routes
-- Boot flow: `/` splash (~2s) → logged in → `/main`; has existing account → `/login`; otherwise → `/register`
+- Boot flow: `/` splash (branding only) → redirect decides: signed in → `/main`; has account → `/login`; fresh device → `/register`
 
 ### Current state: wired vs prototype
 
-Only **authentication** and **profile** talk to real data. Everything else (home, explore, collection, training session, module view, lesson player, WOD, stats, level progression) renders hardcoded mock data pending backend wiring. To productionize a prototype screen: extract models → create a repository → add state/view model → replace inline data, following the canonical pattern above.
+**Authentication**, **profile**, and **learn** (module view + lesson player, progress in Firestore) talk to real data. Everything else (home, explore, collection, training session, WOD, stats, level progression) renders hardcoded mock data pending backend wiring. To productionize a prototype screen: extract models → create a repository → add state/view model → replace inline data, following the learn feature as the template.
 
 **Dead code — do not extend by accident**: `features/home/ui/home_screen.dart`, `features/home/ui/home_screen_v2.dart`, `features/explore/ui/explore_screen.dart`, and `features/wod/ui/wod_session_screen.dart` are not imported anywhere. The live screens are in `presentation/pages/` and `features/learn/ui/`.
 
@@ -110,10 +113,19 @@ Only **authentication** and **profile** talk to real data. Everything else (home
 ## Firebase notes
 
 - Providers in `features/firebase/repository/firebase_providers.dart` return **null** when `Firebase.apps.isEmpty` (Linux, unconfigured environments). Everything downstream must tolerate null and degrade gracefully — this is why repositories take nullable dependencies, and it's also what makes test fakes trivial.
-- Firestore schema: a single `users/{userId}` collection (`id`, `email`, `name`, `job`, `avatar`, `diamond`, `createdAt`, `updatedAt`) with owner-only access in `firestore.rules`. New collections require rules updates + `firebase deploy --only firestore:rules`.
+- Firestore schema (all owner-only, validated on write in `firestore.rules`):
+  - `users/{userId}` — profile (`id`, `email`, `name`, `job`, `avatar`, `diamond`, `createdAt`, `updatedAt`); `id` must equal the auth uid
+  - `users/{userId}/progress/{lessonId}` — lesson progress (`lessonId`, `status`, `progress`, `updatedAt`); doc id must equal `lessonId`, `status` whitelisted to the `LessonStatus` enum names
+- Rules changes require `firebase deploy --only firestore:rules` — an undeployed rules change is the usual cause of `permission-denied`.
+- Firestore access is typed: create one `withConverter` reference per collection inside the repository (see `ProgressRepository._progressRef`). Normalize `Timestamp` → ISO-8601 string before `fromJson`.
 - Profile persistence is local-first: SharedPreferences cache merged with Firestore; local (non-URL) avatar file paths are intentionally NOT synced to Firestore.
+- **Emulator suite**: `firebase emulators:start` then run the app with `--dart-define=USE_FIREBASE_EMULATOR=true` (wiring in `features/firebase/repository/firebase_bootstrap.dart`; ports in `firebase.json`). Use it whenever exercising auth/Firestore behavior locally — never test against production data.
 - Console prerequisites: Email/Password sign-in enabled and a Firestore database created. Do not add another backend-as-a-service dependency.
 
 ## Testing
 
-`test/unit_test.dart` shows the house style: fake repositories extend the real class with `auth: null, firestore: null`; `ProviderContainer(overrides: [...])` with `addTearDown(container.dispose)`; `await container.read(provider.future)` to settle the initial build before acting on the notifier. Add tests for new view models, repositories, and validators. See `.claude/skills/testing/SKILL.md`.
+House style (`test/unit_test.dart`, `test/authentication_test.dart`, `test/learn_test.dart`): fake repositories extend the real class with `auth: null, firestore: null` (nullable deps make this trivial — no mocking framework); `ProviderContainer(overrides: [...])` with `addTearDown(container.dispose)`; `await container.read(provider.future)` to settle the initial build before acting on the notifier. Pure logic (like `computeRedirect`) gets a plain matrix test. Add tests for every new view model, repository, and validator. See `.claude/skills/testing/SKILL.md`.
+
+## Optimized for AI agents — keep it that way
+
+This repo deliberately favors properties that make agent (and human) development fast: one blessed pattern per concern, `bash tool/checks.sh` as the single definition of done, pure functions for logic that matters (redirect, state derivation), nullable-dependency fakes over mocking frameworks, and docs that state decisions instead of options. The adopt-vs-skip rationale behind these choices lives in the project's best-practices research; don't reintroduce skipped complexity (realtime profile streams, content CMS, abstract repository interfaces, use-case layers) without a real failure mode demanding it.

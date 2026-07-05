@@ -5,7 +5,7 @@ description: Scaffold a new feature or screen in Forge Dance following the featu
 
 # Adding a Feature
 
-Every feature follows the same shape. `features/authentication/` and `features/profile/` are the canonical, fully wired examples — when in doubt, copy them.
+Every feature follows the same shape. `features/learn/` is the canonical end-to-end example (bundled content catalog + typed Firestore progress + view model + screens); `features/authentication/` and `features/profile/` show auth and local-first persistence. When in doubt, copy them.
 
 ## 1. Directory layout
 
@@ -126,19 +126,18 @@ If the flow spans features (e.g. sign-in must also sync the profile), add or ext
 
 Two navigation systems coexist:
 
-- **Top-level route**: add a constant in `lib/routing/routes.dart`, then a `GoRoute` in `lib/routing/router.dart` using the `state.slidePage(...)` extension (optionally with `direction:`). Pass objects via `state.extra` (see `accountInformation`).
+- **Top-level route**: add a constant in `lib/routing/routes.dart`, then a `GoRoute` to the `_routes` list in `lib/routing/router.dart` using the `state.slidePage(...)` extension (optionally with `direction:`). Pass objects via `state.extra` (see `accountInformation`).
 - **Inside the main shell**: tabs and overlays in `/main` are managed by `MainScreen`'s `IndexedStack` + string-keyed `_subPage` values (`'training'`, `'lesson-path'`, `'lesson-player'`), NOT go_router. A new tab-level or overlay screen means editing `lib/features/main/presentation/pages/main_screen.dart`.
+
+**Auth guarding is automatic and centralized.** New top-level routes are guarded by `computeRedirect` in `lib/routing/app_redirect.dart` (signed-out users get bounced to login/register). Screens must never navigate based on auth state — if a route needs different guarding (e.g. reachable signed-out), extend `computeRedirect` and its test matrix in `test/app_redirect_test.dart`.
 
 ## 9. Generate + verify
 
 ```bash
-flutter pub run build_runner build --delete-conflicting-outputs
-flutter pub run custom_lint
-flutter analyze
-flutter test
+bash tool/checks.sh
 ```
 
-Codegen must run before analyze — `*.g.dart` / `*.freezed.dart` are gitignored. Full pipeline and failure fixes: `.claude/skills/quality-checks/SKILL.md`.
+One command runs the whole pipeline (codegen → lints → analyze → test) — same script CI runs. Failure fixes: `.claude/skills/quality-checks/SKILL.md`.
 
 ## 10. Test it
 
