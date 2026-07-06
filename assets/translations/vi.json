@@ -114,5 +114,9 @@
   "skip": "Bỏ qua",
   "exerciseOf": "Bài tập {} / {}",
   "workoutOverview": "Tổng quan bài tập",
-  "statsSummary": "Tóm tắt chỉ số"
+  "statsSummary": "Tóm tắt chỉ số",
+  "gettingStarted": "Bắt đầu",
+  "setUpYourProfile": "Thiết lập hồ sơ của bạn",
+  "yourName": "Tên của bạn",
+  "failedToSaveProfile": "Lưu hồ sơ thất bại"
 }

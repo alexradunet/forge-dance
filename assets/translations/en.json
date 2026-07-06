@@ -114,5 +114,9 @@
   "skip": "Skip",
   "exerciseOf": "Exercise {} of {}",
   "workoutOverview": "Workout Overview",
-  "statsSummary": "Stats Summary"
+  "statsSummary": "Stats Summary",
+  "gettingStarted": "Getting Started",
+  "setUpYourProfile": "Set up your profile",
+  "yourName": "Your Name",
+  "failedToSaveProfile": "Failed to save profile"
 }

@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +7,7 @@ import '../../../extensions/build_context_extension.dart';
 import '../../../features/common/ui/widgets/common_text_form_field.dart';
 import '../../../features/common/ui/widgets/primary_button.dart';
 import '../../../features/profile/ui/view_model/profile_view_model.dart';
+import '../../../generated/locale_keys.g.dart';
 import '../../../routing/routes.dart';
 
 import '../../../design_system/organisms/navigation/app_header.dart';
@@ -51,9 +53,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       body: FgBackground(
         child: Column(
           children: [
-            const AppHeader(
-              title: 'GETTING STARTED',
-              subtitle: 'Set up your profile',
+            AppHeader(
+              title: LocaleKeys.gettingStarted.tr().toUpperCase(),
+              subtitle: LocaleKeys.setUpYourProfile.tr(),
             ),
             Expanded(
               child: Padding(
@@ -77,12 +79,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                     const SizedBox(height: 32),
                     CommonTextFormField(
-                      label: 'Your Name',
+                      label: LocaleKeys.yourName.tr(),
                       controller: _nameController,
                     ),
                     const Spacer(),
                     PrimaryButton(
-                      text: 'Continue',
+                      text: LocaleKeys.continueText.tr(),
                       onPressed: () => _saveNameAndContinue(context),
                       isEnable: _isButtonEnabled,
                     ),
@@ -107,7 +109,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       }
     } catch (error) {
       if (context.mounted) {
-        context.showErrorSnackBar('Failed to save profile');
+        context.showErrorSnackBar(LocaleKeys.failedToSaveProfile.tr());
       }
     }
   }
