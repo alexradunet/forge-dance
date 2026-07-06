@@ -118,5 +118,11 @@
   "gettingStarted": "Bắt đầu",
   "setUpYourProfile": "Thiết lập hồ sơ của bạn",
   "yourName": "Tên của bạn",
-  "failedToSaveProfile": "Lưu hồ sơ thất bại"
+  "failedToSaveProfile": "Lưu hồ sơ thất bại",
+  "stepDetails": "Chi tiết bước",
+  "techniqueBreakdown": "Phân tích kỹ thuật",
+  "focusLabel": "Trọng tâm",
+  "breathLabel": "Hơi thở",
+  "energyLabel": "Năng lượng",
+  "stepN": "Bước {}"
 }

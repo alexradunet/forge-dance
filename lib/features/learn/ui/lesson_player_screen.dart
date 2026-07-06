@@ -12,6 +12,7 @@ import '../../../design_system/tokens/app_spacing.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../common/ui/widgets/common_error.dart';
 import '../model/lesson.dart';
+import '../repository/lesson_catalog.dart';
 import '../ui/view_model/learn_view_model.dart';
 
 /// Plays the user's current lesson step-by-step; the final step offers a
@@ -26,13 +27,6 @@ class LessonPlayerScreen extends ConsumerStatefulWidget {
 }
 
 class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
-  static const List<String> _defaultSteps = [
-    'WARM UP',
-    'TECHNIQUE',
-    'PRACTICE',
-    'FULL RUN',
-  ];
-
   int _currentStep = 0;
   bool _completing = false;
   late final PageController _pageController;
@@ -64,7 +58,7 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
     }
 
     final lesson = state.currentLesson ?? state.activeModule.lessons.last;
-    final steps = lesson.steps.isEmpty ? _defaultSteps : lesson.steps;
+    final steps = stepsFor(lesson);
     final lessonNumber = state.activeModule.lessons.indexOf(lesson) + 1;
     final isLastStep = _currentStep == steps.length - 1;
 
@@ -99,33 +93,40 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
         },
         itemCount: steps.length,
         itemBuilder: (context, index) {
+          final step = steps[index];
           return Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               child: FgInteractiveCard(
-                title: steps[index],
-                subtitle: 'STEP ${index + 1}',
+                title: step.title,
+                subtitle:
+                    LocaleKeys.stepN.tr(args: ['${index + 1}']).toUpperCase(),
                 backgroundImage:
                     'https://images.unsplash.com/photo-1535525153412-5a42439a210d?q=80&w=2070&auto=format&fit=crop',
-                style: 'Groove',
+                style: lesson.type.label,
                 difficulty: lesson.difficulty,
                 progress: (index + 1) / steps.length,
-                backTitle: 'STEP DETAILS',
-                backSubtitle: 'Technique Breakdown',
+                backTitle: LocaleKeys.stepDetails.tr().toUpperCase(),
+                backSubtitle: LocaleKeys.techniqueBreakdown.tr(),
                 backContent: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Follow the rhythm and stay loose. This fundamental movement is key to your flow.',
-                      style: AppTypography.bodySmall
-                          .copyWith(color: Colors.white70),
-                    ),
+                    if (step.description.isNotEmpty)
+                      Text(
+                        step.description,
+                        style: AppTypography.bodySmall
+                            .copyWith(color: Colors.white70),
+                      ),
                     const SizedBox(height: 24),
-                    _buildTechniquePoint(
-                        'Focus', 'Keep your knees slightly bent and relaxed.'),
-                    _buildTechniquePoint('Breath', 'Exhale on the downbeat.'),
-                    _buildTechniquePoint(
-                        'Energy', 'Direct your power from the core.'),
+                    if (step.focus.isNotEmpty)
+                      _buildTechniquePoint(
+                          LocaleKeys.focusLabel.tr(), step.focus),
+                    if (step.breath.isNotEmpty)
+                      _buildTechniquePoint(
+                          LocaleKeys.breathLabel.tr(), step.breath),
+                    if (step.energy.isNotEmpty)
+                      _buildTechniquePoint(
+                          LocaleKeys.energyLabel.tr(), step.energy),
                   ],
                 ),
               ),

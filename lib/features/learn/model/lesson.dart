@@ -26,8 +26,24 @@ extension LessonTypeLabel on LessonType {
   }
 }
 
+/// One step inside a lesson, with its technique breakdown (shown on the
+/// back of the player card). Tips are content vocabulary — English, like
+/// lesson titles.
+@freezed
+abstract class LessonStep with _$LessonStep {
+  const factory LessonStep({
+    required String title,
+    @Default('') String description,
+    @Default('') String focus,
+    @Default('') String breath,
+    @Default('') String energy,
+  }) = _LessonStep;
+}
+
 /// A single lesson inside a module. Lesson *content* ships with the app
 /// (see lesson_catalog.dart); only user progress lives in Firestore.
+/// Lessons with an empty [steps] list fall back to the type-specific
+/// default steps (lesson_catalog.stepsFor).
 @freezed
 abstract class Lesson with _$Lesson {
   const factory Lesson({
@@ -36,7 +52,7 @@ abstract class Lesson with _$Lesson {
     required LessonType type,
     @Default('') String duration,
     @Default('Beginner') String difficulty,
-    @Default(<String>[]) List<String> steps,
+    @Default(<LessonStep>[]) List<LessonStep> steps,
   }) = _Lesson;
 }
 

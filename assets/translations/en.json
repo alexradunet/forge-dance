@@ -118,5 +118,11 @@
   "gettingStarted": "Getting Started",
   "setUpYourProfile": "Set up your profile",
   "yourName": "Your Name",
-  "failedToSaveProfile": "Failed to save profile"
+  "failedToSaveProfile": "Failed to save profile",
+  "stepDetails": "Step Details",
+  "techniqueBreakdown": "Technique Breakdown",
+  "focusLabel": "Focus",
+  "breathLabel": "Breath",
+  "energyLabel": "Energy",
+  "stepN": "Step {}"
 }

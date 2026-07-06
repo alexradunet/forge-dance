@@ -253,6 +253,41 @@ void main() {
     });
   });
 
+  group('lesson step content quality gate', () {
+    test('every lesson resolves to complete, non-empty step content', () {
+      for (final module in allModules) {
+        for (final lesson in module.lessons) {
+          final steps = stepsFor(lesson);
+          expect(steps, isNotEmpty,
+              reason: '${lesson.id} has no effective steps');
+          for (final step in steps) {
+            expect(step.title.trim(), isNotEmpty,
+                reason: '${lesson.id} step title empty');
+            expect(step.description.trim(), isNotEmpty,
+                reason: '${lesson.id}/${step.title} missing description');
+            expect(step.focus.trim(), isNotEmpty,
+                reason: '${lesson.id}/${step.title} missing focus tip');
+            expect(step.breath.trim(), isNotEmpty,
+                reason: '${lesson.id}/${step.title} missing breath tip');
+            expect(step.energy.trim(), isNotEmpty,
+                reason: '${lesson.id}/${step.title} missing energy tip');
+          }
+        }
+      }
+    });
+
+    test('module one is fully hand-authored (no default fallbacks)', () {
+      for (final lesson in hipHopFoundations.lessons) {
+        expect(lesson.steps, isNotEmpty,
+            reason: '${lesson.id} should have authored steps');
+      }
+      expect(
+        hipHopFoundations.lessons[1].steps.first.title,
+        'FIND THE BEAT',
+      );
+    });
+  });
+
   group('ProgressRepository (unconfigured Firebase)', () {
     test('reads empty and writes no-op instead of throwing', () async {
       const repository = ProgressRepository(auth: null, firestore: null);
