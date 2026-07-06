@@ -40,12 +40,22 @@ Rules for AI agents and contributors working on Forge Dance.
 - No ad-hoc colors, text styles, spacing systems, or one-off design primitives in feature code.
 - If a design primitive is missing, add it to the design system first.
 
+## Generated code
+
+`*.g.dart`, `*.freezed.dart`, and `lib/generated/locale_keys.g.dart` are gitignored. After cloning — or after editing models, providers, states, or translations — regenerate or the analyzer reports missing-part errors. Never commit generated files.
+
+## Local development
+
+- Use **Flutter 3.35.5** (matches CI in `.github/workflows/flutter.yml`). Pin the SDK to that tag; do not run `flutter upgrade` on this repo without a deliberate version bump.
+- **Linux desktop** runs locally but skips Firebase initialization (no FlutterFire Linux config).
+- For auth/Firestore locally: `firebase emulators:start`, then `flutter run --dart-define=USE_FIREBASE_EMULATOR=true`.
+
 ## Required checks
 
-Run before handing off:
+Run before handing off. CI runs the same script, so local green == CI green:
 
 ```bash
-flutter pub run build_runner build --delete-conflicting-outputs
-flutter analyze
-flutter test
+bash tool/checks.sh
 ```
+
+That runs `flutter pub get`, localization codegen, `build_runner`, `custom_lint`, `flutter analyze`, and `flutter test`. Note: `custom_lint` (Riverpod lints) is not part of `flutter analyze`.
