@@ -38,6 +38,16 @@ service cloud.firestore {
           && request.resource.data.status in ['notStarted', 'inProgress', 'completed'];
         allow read, delete: if ownsUserDocument(userId);
       }
+
+      // Completed workout sessions: users/{uid}/sessions/{date}_{workoutId}.
+      // The deterministic doc id caps XP at one award per workout per day.
+      match /sessions/{sessionId} {
+        allow create, update: if ownsUserDocument(userId)
+          && request.resource.data.workoutId is string
+          && request.resource.data.date is string
+          && sessionId == request.resource.data.date + '_' + request.resource.data.workoutId;
+        allow read, delete: if ownsUserDocument(userId);
+      }
     }
   }
 }

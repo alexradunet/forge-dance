@@ -1,30 +1,46 @@
 import 'dart:async';
+
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../../design_system/atoms/progress/fg_spinner.dart';
 import '../../../../design_system/molecules/cards/fg_interactive_card.dart';
 import '../../../../design_system/templates/swipeable_card_screen_template.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_typography.dart';
 import '../../../../design_system/tokens/app_spacing.dart';
 import '../../../../design_system/atoms/buttons/fg_button.dart';
+import '../../../../generated/locale_keys.g.dart';
+import '../../../common/ui/widgets/common_error.dart';
+import '../../../stats/ui/view_model/user_stats_provider.dart';
+import '../../model/workout.dart';
+import '../../ui/state/workout_state.dart';
+import '../../ui/view_model/workout_view_model.dart';
 
-class TrainingSessionPage extends StatefulWidget {
+/// The daily training session (WOD): intro card → timed exercise cards with
+/// the lock/skip mechanic → completion card. Completing the final page
+/// persists the session and awards XP exactly once per day.
+class TrainingSessionPage extends ConsumerStatefulWidget {
   final VoidCallback? onClose;
 
   const TrainingSessionPage({super.key, this.onClose});
 
   @override
-  State<TrainingSessionPage> createState() => _TrainingSessionPageState();
+  ConsumerState<TrainingSessionPage> createState() =>
+      _TrainingSessionPageState();
 }
 
-class _TrainingSessionPageState extends State<TrainingSessionPage> {
+class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
   late final PageController _pageController;
   int _currentPage = 0;
-  final int _totalExercises = 4; // Mock data count
   bool _isTimerRunning = false;
-  int _timeLeft = 45; // seconds
+  int _timeLeft = 45; // seconds; set per exercise on page change
   Timer? _timer;
   final Set<int> _skippedExercises = {};
+  bool _completionHandled = false;
+  bool _xpAwarded = false;
 
   @override
   void initState() {
@@ -73,16 +89,13 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
     }
   }
 
-  void _nextPage() {
-    if (_isLocked) {
+  void _nextPage(Workout wod) {
+    if (_isLocked(wod)) {
       _showLockedFeedback();
       return;
     }
-    Element? element = context as Element?;
-    if (element == null || !element.mounted) return;
-
     HapticFeedback.lightImpact();
-    if (_currentPage < _totalPageCount - 1) {
+    if (_currentPage < _totalPageCount(wod) - 1) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeInOut,
@@ -90,8 +103,8 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
     }
   }
 
-  int get _totalPageCount =>
-      _totalExercises + 2; // Intro + Exercises + Complete
+  int _totalPageCount(Workout wod) =>
+      wod.exercises.length + 2; // Intro + Exercises + Complete
 
   void _toggleTimer() {
     HapticFeedback.selectionClick();
@@ -102,55 +115,72 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
     }
   }
 
-  void _skipCurrentExercise() {
+  void _skipCurrentExercise(Workout wod) {
     final exerciseIndex = _activeExerciseIndex;
     if (exerciseIndex >= 0) {
       _skippedExercises.add(exerciseIndex);
       setState(() {}); // Trigger rebuild to unlock
-
-      // Optional: Auto-advance after skip?
-      // _nextPage();
-      // User asked "acknowledge the skip", implies unlocking is enough,
-      // but typically "Skip" means "Next". I'll start with just Unlock + Visual Feedback.
-      // Actually, "acknowledge the skip" to me means "Unlock".
-      // Let's make it Unlock AND Advance.
-      _nextPage();
+      _nextPage(wod);
     }
   }
 
-  // Helper to map page index to logical state
+  // Helpers to map page index to logical state
   bool get _isIntro => _currentPage == 0;
-  bool get _isComplete => _currentPage == _totalPageCount - 1;
+  bool _isComplete(Workout wod) => _currentPage == _totalPageCount(wod) - 1;
   int get _activeExerciseIndex => _currentPage - 1;
 
-  bool get _isLocked =>
+  bool _isLocked(Workout wod) =>
       !_isIntro &&
-      !_isComplete &&
+      !_isComplete(wod) &&
       _timeLeft > 0 &&
       !_skippedExercises.contains(_activeExerciseIndex);
 
+  Future<void> _handleCompletion() async {
+    if (_completionHandled) return;
+    _completionHandled = true;
+
+    final awarded =
+        await ref.read(workoutViewModelProvider.notifier).completeWod();
+    if (!mounted) return;
+    setState(() => _xpAwarded = awarded);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final workoutState = ref.watch(workoutViewModelProvider);
+    final state = workoutState.valueOrNull;
+
+    if (state == null) {
+      return Scaffold(
+        backgroundColor: AppColors.bgDeep,
+        body: workoutState.hasError
+            ? const CommonError()
+            : const Center(child: FgSpinner()),
+      );
+    }
+
+    final wod = state.wod;
+    final isComplete = _isComplete(wod);
+    final isLocked = _isLocked(wod);
+
     return SwipeableCardScreenTemplate(
-      title: 'Daily Practice',
-      subtitle: _isComplete ? 'Session Complete' : 'Body Control • 25 min',
+      title: LocaleKeys.dailyPractice.tr(),
+      subtitle: isComplete
+          ? LocaleKeys.sessionComplete.tr()
+          : '${wod.title} • ${wod.estimatedMinutes} min',
       onBack: widget.onClose ?? () => Navigator.of(context).pop(),
-      headerLeft: _isLocked
+      headerLeft: isLocked
           ? IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: _previousPage,
             )
           : null,
-      // Progress calculation:
-      // Intro: -1 (Hidden/Empty)
-      // Active: 0 to _totalExercises - 1
-      // Complete: _totalExercises (Full)
-      progressSteps: _totalExercises,
+      progressSteps: wod.exercises.length,
       currentStep: _isIntro
           ? -1
-          : (_isComplete ? _totalExercises : _activeExerciseIndex),
+          : (isComplete ? wod.exercises.length : _activeExerciseIndex),
       onStepClick: (index) {
-        if (_isLocked && index > _activeExerciseIndex) {
+        if (isLocked && index > _activeExerciseIndex) {
           _showLockedFeedback();
           return;
         }
@@ -164,7 +194,7 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
       actionZone: null,
       children: GestureDetector(
         onHorizontalDragEnd: (details) {
-          if (!_isLocked) return;
+          if (!isLocked) return;
 
           // Velocity < 0 is Swipe Left (Next)
           if (details.primaryVelocity! < 0) {
@@ -176,27 +206,30 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
           }
         },
         child: PageView.builder(
-          physics: _isLocked
+          physics: isLocked
               ? const NeverScrollableScrollPhysics()
               : const BouncingScrollPhysics(),
           controller: _pageController,
           onPageChanged: (index) {
             setState(() {
               _currentPage = index;
-              if (!_skippedExercises.contains(index - 1)) {
-                _timeLeft = 45;
-              } else {
-                _timeLeft = 45;
+              final exerciseIndex = index - 1;
+              if (exerciseIndex >= 0 &&
+                  exerciseIndex < wod.exercises.length) {
+                _timeLeft = wod.exercises[exerciseIndex].seconds;
               }
               _stopTimer();
             });
+            if (index == _totalPageCount(wod) - 1) {
+              _handleCompletion();
+            }
           },
-          itemCount: _totalPageCount,
+          itemCount: _totalPageCount(wod),
           itemBuilder: (context, index) {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-                child: _buildCardForIndex(index),
+                child: _buildCardForIndex(index, state),
               ),
             );
           },
@@ -206,6 +239,9 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
   }
 
   void _showLockedFeedback() {
+    final wod = ref.read(workoutViewModelProvider).valueOrNull?.wod;
+    if (wod == null) return;
+
     HapticFeedback.heavyImpact();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -213,14 +249,14 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
           children: [
             const Icon(Icons.lock, color: AppColors.forgeFire),
             const SizedBox(width: 12),
-            const Expanded(child: Text('Complete the timer to continue!')),
+            Expanded(child: Text(LocaleKeys.completeTimerToContinue.tr())),
             TextButton(
               onPressed: () {
                 ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                _skipCurrentExercise();
+                _skipCurrentExercise(wod);
               },
-              child: const Text('SKIP',
-                  style: TextStyle(color: AppColors.forgeFire)),
+              child: Text(LocaleKeys.skip.tr().toUpperCase(),
+                  style: const TextStyle(color: AppColors.forgeFire)),
             )
           ],
         ),
@@ -232,115 +268,152 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
     );
   }
 
-  Widget _buildCardForIndex(int index) {
+  Widget _buildCardForIndex(int index, WorkoutState state) {
+    final wod = state.wod;
+
     if (index == 0) {
-      // INTRO CARD
-      return FgInteractiveCard(
-        title: 'BODY CONTROL',
-        subtitle: 'WORKOUT OF THE DAY',
-        backgroundImage:
-            'https://images.unsplash.com/photo-1599058945522-28d584b6f0ff?q=80&w=2069&auto=format&fit=crop',
-        style: 'Modern',
-        difficulty: 'Intermediate',
-        progress: 0,
-        backTitle: 'WORKOUT OVERVIEW',
-        backSubtitle: 'Technique Goals',
-        backContent: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      return _buildIntroCard(wod);
+    }
+    if (index == _totalPageCount(wod) - 1) {
+      return _buildCompleteCard(wod);
+    }
+    return _buildExerciseCard(wod, index - 1);
+  }
+
+  Widget _buildIntroCard(Workout wod) {
+    return FgInteractiveCard(
+      title: wod.title.toUpperCase(),
+      subtitle: LocaleKeys.wodTag.tr().toUpperCase(),
+      backgroundImage: wod.imageUrl,
+      style: wod.style,
+      difficulty: wod.difficulty,
+      progress: 0,
+      backTitle: LocaleKeys.workoutOverview.tr().toUpperCase(),
+      backSubtitle: wod.style,
+      backContent: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            wod.description,
+            style: const TextStyle(color: Colors.white70, height: 1.5),
+          ),
+          const SizedBox(height: 24),
+          _buildInfoRow(
+            Icons.fitness_center,
+            LocaleKeys.exercisesCount
+                .tr(args: ['${wod.exercises.length}']).toUpperCase(),
+          ),
+          _buildInfoRow(
+            Icons.timer,
+            LocaleKeys.minutesCount
+                .tr(args: ['${wod.estimatedMinutes}']).toUpperCase(),
+          ),
+          _buildInfoRow(
+            Icons.bolt,
+            LocaleKeys.xpReward.tr(args: ['${wod.xp}']).toUpperCase(),
+          ),
+        ],
+      ),
+      footer: SizedBox(
+        width: double.infinity,
+        child: FgButton(
+          text: LocaleKeys.startTraining.tr(),
+          variant: FgButtonVariant.primary,
+          onPressed: () => _nextPage(wod),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCompleteCard(Workout wod) {
+    final streak =
+        ref.watch(userStatsProvider).valueOrNull?.streakCount ?? 0;
+
+    return FgInteractiveCard(
+      title: LocaleKeys.sessionComplete.tr().toUpperCase(),
+      subtitle: LocaleKeys.greatWork.tr().toUpperCase(),
+      backgroundImage:
+          'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=2000',
+      style: wod.style,
+      difficulty: 'Complete',
+      progress: 1.0,
+      backTitle: LocaleKeys.statsSummary.tr().toUpperCase(),
+      backSubtitle: LocaleKeys.dailyPractice.tr(),
+      backContent: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Master your movement with this fundamental sequence designed to improve awareness and stability.',
-              style: TextStyle(color: Colors.white70, height: 1.5),
+            const Icon(Icons.check_circle_outline,
+                size: 60, color: AppColors.forgeFire),
+            const SizedBox(height: 16),
+            Text(
+              _xpAwarded
+                  ? LocaleKeys.youEarnedXp.tr(args: ['${wod.xp}'])
+                  : LocaleKeys.alreadyCompletedToday.tr(),
+              textAlign: TextAlign.center,
+              style: AppTypography.h3.copyWith(color: Colors.white),
             ),
-            const SizedBox(height: 24),
-            _buildInfoRow(Icons.fitness_center, '5 EXERCISES'),
-            _buildInfoRow(Icons.timer, '25 MINUTES'),
-            _buildInfoRow(Icons.bolt, '350 CALORIES'),
+            const SizedBox(height: 8),
+            if (streak > 0)
+              Text(
+                LocaleKeys.dayStreakKeepUp.tr(args: ['$streak']),
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: Colors.white60),
+              ),
           ],
         ),
-        footer: SizedBox(
-          width: double.infinity,
-          child: FgButton(
-            text: 'START TRAINING',
-            variant: FgButtonVariant.primary,
-            onPressed: _nextPage,
-          ),
+      ),
+      footer: SizedBox(
+        width: double.infinity,
+        child: FgButton(
+          text: LocaleKeys.finish.tr(),
+          variant: FgButtonVariant.primary,
+          onPressed: widget.onClose ?? () => Navigator.of(context).pop(),
         ),
-      );
-    } else if (index == _totalPageCount - 1) {
-      // COMPLETE CARD
-      return FgInteractiveCard(
-        title: 'SESSION COMPLETE',
-        subtitle: 'GREAT WORK!',
-        backgroundImage:
-            'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=2000',
-        style: 'Training',
-        difficulty: 'Complete',
-        progress: 1.0,
-        backTitle: 'STATS SUMMARY',
-        backSubtitle: 'Daily Progress',
-        backContent: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.check_circle_outline,
-                  size: 60, color: AppColors.forgeFire),
-              const SizedBox(height: 16),
-              Text('You earned 500 XP!',
-                  style: AppTypography.h3.copyWith(color: Colors.white)),
-              const SizedBox(height: 8),
-              const Text('Keep it up for a 3-day streak!',
-                  style: TextStyle(color: Colors.white60)),
-            ],
-          ),
-        ),
-        footer: SizedBox(
-          width: double.infinity,
-          child: FgButton(
-            text: 'FINISH',
-            variant: FgButtonVariant.primary,
-            onPressed: widget.onClose ?? () => Navigator.of(context).pop(),
-          ),
-        ),
-      );
-    } else {
-      // ACTIVE EXERCISE CARD
-      final exerciseIndex = index - 1;
-      return FgInteractiveCard(
-        title: _getExerciseName(exerciseIndex),
-        subtitle: 'EXERCISE ${exerciseIndex + 1} OF $_totalExercises',
-        backgroundImage:
-            'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=2000',
-        style: 'Drill',
-        difficulty: 'Active',
-        progress: (exerciseIndex + 1) / _totalExercises,
-        centerOverlay: GestureDetector(
-          onTap: _toggleTimer,
-          child: Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.4),
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: _isTimerRunning ? AppColors.forgeFire : Colors.white,
-                width: 2,
-              ),
+      ),
+    );
+  }
+
+  Widget _buildExerciseCard(Workout wod, int exerciseIndex) {
+    final exercise = wod.exercises[exerciseIndex];
+
+    return FgInteractiveCard(
+      title: exercise.name,
+      subtitle: LocaleKeys.exerciseOf.tr(args: [
+        '${exerciseIndex + 1}',
+        '${wod.exercises.length}',
+      ]).toUpperCase(),
+      backgroundImage:
+          'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=2000',
+      style: wod.style,
+      difficulty: 'Active',
+      progress: (exerciseIndex + 1) / wod.exercises.length,
+      centerOverlay: GestureDetector(
+        onTap: _toggleTimer,
+        child: Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: Colors.black.withOpacity(0.4),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: _isTimerRunning ? AppColors.forgeFire : Colors.white,
+              width: 2,
             ),
-            child: Center(
-              child: Text(
-                '${_timeLeft}s',
-                style: AppTypography.h3.copyWith(
-                  color: Colors.white,
-                  fontSize: 24,
-                ),
+          ),
+          child: Center(
+            child: Text(
+              '${_timeLeft}s',
+              style: AppTypography.h3.copyWith(
+                color: Colors.white,
+                fontSize: 24,
               ),
             ),
           ),
         ),
-        footer: null,
-      );
-    }
+      ),
+      footer: null,
+    );
   }
 
   Widget _buildInfoRow(IconData icon, String text) {
@@ -356,16 +429,5 @@ class _TrainingSessionPageState extends State<TrainingSessionPage> {
         ],
       ),
     );
-  }
-
-  String _getExerciseName(int index) {
-    const names = [
-      'Top Rock Basic',
-      'Indian Step',
-      '6-Step Drill',
-      'Baby Freeze Hold'
-    ];
-    if (index >= 0 && index < names.length) return names[index];
-    return 'Freestyle';
   }
 }

@@ -97,5 +97,22 @@
   "beltNameLabel": "Đai {}",
   "levelBeltSubtitle": "Cấp {} • Đai {}",
   "dayN": "Ngày {}",
-  "daysValue": "{} ngày"
+  "daysValue": "{} ngày",
+  "dailyPractice": "Luyện tập hằng ngày",
+  "sessionComplete": "Hoàn thành buổi tập",
+  "wodTag": "Bài tập trong ngày",
+  "startTraining": "Bắt đầu luyện tập",
+  "finish": "Hoàn tất",
+  "greatWork": "Làm tốt lắm!",
+  "youEarnedXp": "Bạn đã nhận {} XP!",
+  "alreadyCompletedToday": "Hôm nay đã hoàn thành — XP chỉ được nhận một lần mỗi ngày.",
+  "dayStreakKeepUp": "Chuỗi {} ngày — cố gắng phát huy!",
+  "exercisesCount": "{} bài tập",
+  "minutesCount": "{} phút",
+  "xpReward": "+{} XP",
+  "completeTimerToContinue": "Hoàn thành bộ đếm giờ để tiếp tục!",
+  "skip": "Bỏ qua",
+  "exerciseOf": "Bài tập {} / {}",
+  "workoutOverview": "Tổng quan bài tập",
+  "statsSummary": "Tóm tắt chỉ số"
 }

@@ -70,11 +70,11 @@ lib/
 │   ├── explore/          # WIRED: catalog by category, live search, real progress
 │   ├── library/          # WIRED: collection = lessons the user started/completed
 │   ├── stats/            # WIRED: XP/belts/streak — pure rules + coordinator + userStatsProvider
+│   ├── workout/          # WIRED: daily WOD rotation + session tracking (XP once/workout/day)
 │   ├── firebase/         # Nullable Firebase providers + bootstrap (emulator wiring)
 │   ├── session/          # SessionCoordinator: cross-feature auth ↔ profile orchestration
 │   ├── common/           # Shared widgets, appThemeModeProvider
-│   └── workout | wod | settings | main | onboarding/
-│                         # PROTOTYPE: hardcoded mock data, no repositories yet
+│   └── wod | settings | main | onboarding/   # shell & flow screens (features/wod is dead code)
 ├── generated/            # LocaleKeys (generated, gitignored)
 ├── routing/              # go_router: router.dart + routes.dart
 └── utils/                # validators, provider observer, global loading
@@ -102,9 +102,9 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 
 ### Current state: wired vs prototype
 
-**Authentication**, **profile**, **learn** (module view + lesson player), **home**, **explore**, **collection/library**, and **stats** (stats page, level progression, belt grid, home progress card) all run on real data: the 10-module content catalog ships in code (`lesson_catalog.dart`, lesson ids globally unique and stable) and every progress surface derives from `users/{uid}/progress` via `LearnState`. Still prototype (hardcoded mock data): training session/workout, WOD. The explore/collection filter sheets are cosmetic until modules carry difficulty metadata. To productionize a prototype screen: extract models → create a repository → add state/view model → replace inline data, following the learn feature as the template.
+**Every feature now runs on real data** — authentication, profile, learn (module view + lesson player), home, explore, collection/library, stats (stats page, level progression, belt grid, home progress card), and workout/training (daily WOD with session tracking). Content ships in code (`lesson_catalog.dart` — 10 modules with globally unique, stable lesson ids; `workout_catalog.dart` — 7 workouts with a deterministic day-of-year WOD rotation); all user state derives from `users/{uid}/progress` and `users/{uid}/sessions`. The explore/collection filter sheets are cosmetic until modules carry difficulty metadata. Pattern for any new feature: extract models → create a repository → add state/view model → replace inline data, following the learn feature as the template.
 
-**Gamification rules** live in `features/stats/model/stats_rules.dart` as pure functions (XP per lesson type, belt thresholds, streak date logic) with a full test matrix. XP is always derived from lesson progress — the `xp` field on the user doc is a denormalized mirror written by `StatsCoordinator` after each training event, never a source of truth. Belt thresholds are calibrated so completing the whole catalog equals Black Belt; a test enforces this, so catalog changes require deliberate re-calibration.
+**Gamification rules** live in `features/stats/model/stats_rules.dart` as pure functions (XP per lesson type, workout session pricing, belt thresholds, streak date logic) with a full test matrix. Total XP = lesson XP (from progress) + workout XP (from sessions, priced by the catalog, max one award per workout per day) — the `xp` field on the user doc is a denormalized mirror written by `StatsCoordinator` after each training event (lesson or workout), never a source of truth. Belt thresholds are calibrated so completing the lesson catalog alone equals Black Belt (a test enforces this; workout XP just accelerates the climb) — catalog changes require deliberate re-calibration. Streaks advance from any training activity.
 
 **Dead code — do not extend by accident**: `features/home/ui/home_screen.dart`, `features/home/ui/home_screen_v2.dart`, `features/explore/ui/explore_screen.dart`, and `features/wod/ui/wod_session_screen.dart` are not imported anywhere. The live screens are in `presentation/pages/` and `features/learn/ui/`.
 
@@ -122,6 +122,7 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 - Firestore schema (all owner-only, validated on write in `firestore.rules`):
   - `users/{userId}` — profile (`id`, `email`, `name`, `job`, `avatar`, `diamond`, `createdAt`, `updatedAt`) plus gamification stats (`xp`, `streakCount`, `lastActivityDate` yyyy-MM-dd); `id` must equal the auth uid, stats fields type-checked when present
   - `users/{userId}/progress/{lessonId}` — lesson progress (`lessonId`, `status`, `progress`, `updatedAt`); doc id must equal `lessonId`, `status` whitelisted to the `LessonStatus` enum names
+  - `users/{userId}/sessions/{date}_{workoutId}` — completed workout sessions (`workoutId`, `date` yyyy-MM-dd, `completedAt`); the deterministic doc id (enforced by rules) caps XP at one award per workout per day
 - Rules changes require `firebase deploy --only firestore:rules` — an undeployed rules change is the usual cause of `permission-denied`.
 - Firestore access is typed: create one `withConverter` reference per collection inside the repository (see `ProgressRepository._progressRef`). Normalize `Timestamp` → ISO-8601 string before `fromJson`.
 - Profile persistence is local-first: SharedPreferences cache merged with Firestore; local (non-URL) avatar file paths are intentionally NOT synced to Firestore.

@@ -97,5 +97,22 @@
   "beltNameLabel": "{} Belt",
   "levelBeltSubtitle": "Lvl {} • {} Belt",
   "dayN": "Day {}",
-  "daysValue": "{} Days"
+  "daysValue": "{} Days",
+  "dailyPractice": "Daily Practice",
+  "sessionComplete": "Session Complete",
+  "wodTag": "Workout of the Day",
+  "startTraining": "Start Training",
+  "finish": "Finish",
+  "greatWork": "Great work!",
+  "youEarnedXp": "You earned {} XP!",
+  "alreadyCompletedToday": "Already completed today — XP is earned once per day.",
+  "dayStreakKeepUp": "Day {} streak — keep it up!",
+  "exercisesCount": "{} exercises",
+  "minutesCount": "{} minutes",
+  "xpReward": "+{} XP",
+  "completeTimerToContinue": "Complete the timer to continue!",
+  "skip": "Skip",
+  "exerciseOf": "Exercise {} of {}",
+  "workoutOverview": "Workout Overview",
+  "statsSummary": "Stats Summary"
 }

@@ -7,6 +7,7 @@ import 'package:forge_dance/features/learn/ui/view_model/learn_view_model.dart';
 import 'package:forge_dance/features/profile/model/profile.dart';
 import 'package:forge_dance/features/profile/repository/profile_repository.dart';
 import 'package:forge_dance/features/stats/model/stats_rules.dart';
+import 'package:forge_dance/features/workout/repository/session_repository.dart';
 
 class FakeProgressRepository extends ProgressRepository {
   FakeProgressRepository([Map<String, LessonProgress>? seed])
@@ -49,6 +50,11 @@ ProviderContainer containerWith(
       progressRepositoryProvider.overrideWithValue(repository),
       profileRepositoryProvider
           .overrideWithValue(profileRepository ?? FakeProfileRepository()),
+      // The stats coordinator also reads workout sessions; keep it off the
+      // Firebase providers in tests via the nullable-deps real class.
+      sessionRepositoryProvider.overrideWithValue(
+        const SessionRepository(auth: null, firestore: null),
+      ),
     ],
   );
   addTearDown(container.dispose);

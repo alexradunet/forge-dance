@@ -1,5 +1,7 @@
 import '../../learn/model/lesson.dart';
 import '../../learn/model/lesson_progress.dart';
+import '../../workout/model/workout.dart';
+import '../../workout/model/workout_session.dart';
 import 'user_stats.dart';
 
 /// Pure gamification rules — no IO, no Flutter. Everything here is trivially
@@ -32,6 +34,18 @@ int totalXpFrom(List<Module> modules, Map<String, LessonProgress> progress) {
         total += xpForLessonType(lesson.type);
       }
     }
+  }
+  return total;
+}
+
+/// XP earned from completed workout sessions, priced by the catalog (a
+/// session whose workout no longer exists earns nothing). Sessions are
+/// deduplicated at the storage layer (one doc per workout per day).
+int workoutXpFrom(List<Workout> workouts, Iterable<WorkoutSession> sessions) {
+  final byId = {for (final workout in workouts) workout.id: workout};
+  var total = 0;
+  for (final session in sessions) {
+    total += byId[session.workoutId]?.xp ?? 0;
   }
   return total;
 }
@@ -114,15 +128,17 @@ String formatXp(int xp) {
   return '${(xp / 1000).toStringAsFixed(1)}k';
 }
 
-/// Combines derived XP with the persisted streak into the display model.
+/// Combines derived XP (lessons + workout sessions) with the persisted
+/// streak into the display model.
 UserStats buildUserStats({
   required List<Module> modules,
   required Map<String, LessonProgress> progress,
   required int persistedStreak,
   required String? lastActivityDate,
   required DateTime now,
+  int workoutXp = 0,
 }) {
-  final totalXp = totalXpFrom(modules, progress);
+  final totalXp = totalXpFrom(modules, progress) + workoutXp;
   final beltIndex = beltIndexForXp(totalXp);
   final isMax = beltIndex == beltThresholds.length - 1;
   final xpIntoLevel = totalXp - beltThresholds[beltIndex];
