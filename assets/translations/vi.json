@@ -67,5 +67,19 @@
   "replayLessons": "Ôn lại bài học",
   "continueTraining": "Tiếp tục luyện tập",
   "recommendedForYou": "Đề xuất cho bạn",
-  "viewAll": "Xem tất cả"
+  "viewAll": "Xem tất cả",
+  "exploreTitle": "Khám phá",
+  "exploreSubtitle": "Tìm kiếm điều mới",
+  "collectionTitle": "Bộ sưu tập",
+  "collectionSubtitle": "Thư viện của bạn",
+  "categoryFundamentals": "Nền tảng cơ bản",
+  "categoryStreetStyles": "Phong cách đường phố",
+  "categoryChoreography": "Vũ đạo",
+  "searchExploreHint": "Khám phá phong cách, động tác, chương học...",
+  "searchLibraryHint": "Tìm trong thư viện của bạn...",
+  "emptyLibraryTitle": "Chưa sưu tập động tác nào",
+  "emptyLibrarySubtitle": "Bắt đầu một bài học để thêm vào thư viện của bạn.",
+  "statusCompleted": "Đã hoàn thành",
+  "statusInProgress": "Đang học",
+  "noResults": "Không tìm thấy kết quả phù hợp"
 }

@@ -1,18 +1,27 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_spacing.dart';
-
 import '../../../../design_system/atoms/visuals/fg_background.dart';
-
+import '../../../../design_system/atoms/progress/fg_spinner.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/molecules/cards/fg_interactive_card.dart';
-
 import '../../../../design_system/molecules/cards/fg_interactive_card_thumbnail.dart';
+import '../../../../design_system/molecules/feedback/fg_empty.dart';
 import '../../../../design_system/atoms/icons/fg_icon.dart';
 import '../../../../design_system/organisms/modals/fg_filter_sheet.dart';
+import '../../../../generated/locale_keys.g.dart';
+import '../../../common/ui/widgets/common_error.dart';
+import '../../../learn/model/lesson.dart';
+import '../../../learn/model/lesson_progress.dart';
+import '../../../learn/ui/state/learn_state.dart';
+import '../../../learn/ui/view_model/learn_view_model.dart';
 
+/// Collection — the user's library: every lesson they have started or
+/// completed, straight from users/{uid}/progress. Empty until real training
+/// happens; searchable by lesson or module title.
 class CollectionPage extends ConsumerStatefulWidget {
   const CollectionPage({super.key});
 
@@ -23,80 +32,27 @@ class CollectionPage extends ConsumerStatefulWidget {
 class _CollectionPageState extends ConsumerState<CollectionPage> {
   final TextEditingController _searchController = TextEditingController();
   int _crossAxisCount = 2;
+  String _query = '';
+
   final Map<String, String> _selectedFilters = {
     'Difficulty': 'All',
     'Style': 'All',
     'Type': 'All',
   };
 
-  // Mock Data
-  final List<Map<String, dynamic>> _items = [
-    {
-      'type': 'interactive',
-      'title': 'BASIC BOUNCE',
-      'level': 'BEGINNER',
-      'backgroundImage':
-          'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=2000',
-    },
-    {
-      'type': 'interactive',
-      'title': 'RHYTHM GAME',
-      'level': 'INTERMEDIATE',
-      'backgroundImage':
-          'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=2000',
-    },
-    {
-      'type': 'workout',
-      'title': 'HIIT BLAST',
-      'duration': '20 MIN',
-      'intensity': 'HIGH',
-    },
-    {
-      'type': 'workout',
-      'title': 'MORNING FLOW',
-      'duration': '15 MIN',
-      'intensity': 'LOW',
-    },
-    {
-      'type': 'interactive',
-      'title': 'POPPING BASICS',
-      'level': 'BEGINNER',
-      'backgroundImage':
-          'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?auto=format&fit=crop&q=80&w=2000',
-    },
-    {
-      'type': 'interactive',
-      'title': 'HOUSE GROOVES',
-      'level': 'INTERMEDIATE',
-      'backgroundImage':
-          'https://images.unsplash.com/photo-1547153760-18fc86324498?auto=format&fit=crop&q=80&w=2000',
-    },
-    {
-      'type': 'workout',
-      'title': 'CORE STRENGTH',
-      'duration': '25 MIN',
-      'intensity': 'MEDIUM',
-    },
-    {
-      'type': 'workout',
-      'title': 'FLEXIBILITY',
-      'duration': '30 MIN',
-      'intensity': 'LOW',
-    },
-    {
-      'type': 'interactive',
-      'title': 'BREAKING FOOTWORK',
-      'level': 'ADVANCED',
-      'backgroundImage':
-          'https://images.unsplash.com/photo-1535525153412-5a42439a210d?auto=format&fit=crop&q=80&w=2000',
-    },
-    {
-      'type': 'workout',
-      'title': 'ENDURANCE',
-      'duration': '45 MIN',
-      'intensity': 'HIGH',
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() => _query = _searchController.text.trim().toLowerCase());
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   void _showFilterSheet() {
     FgFilterSheet.show(
@@ -126,8 +82,155 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
         Navigator.pop(context);
       },
       onApply: () {
-        // Apply logic here
         Navigator.pop(context);
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final learnState = ref.watch(learnViewModelProvider);
+
+    return Scaffold(
+      backgroundColor: Colors.transparent, // Background handled by FgBackground
+      body: FgBackground(
+        child: learnState.when(
+          loading: () => const Center(child: FgSpinner()),
+          error: (_, __) => const CommonError(),
+          data: (state) => _buildContent(state),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContent(LearnState state) {
+    final collected = state.collectedLessons;
+    final items = collected
+        .where((item) =>
+            _query.isEmpty ||
+            item.lesson.title.toLowerCase().contains(_query) ||
+            item.module.title.toLowerCase().contains(_query))
+        .toList();
+
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        // Header
+        SliverToBoxAdapter(
+          child: AppHeader(
+            title: LocaleKeys.collectionTitle.tr().toUpperCase(),
+            subtitle: LocaleKeys.collectionSubtitle.tr(),
+            rightSlot: _buildColumnToggle(),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.only(
+            left: AppSpacing.xxl,
+            right: AppSpacing.xxl,
+            top: AppSpacing.lg,
+            bottom: AppSpacing.sm,
+          ),
+          sliver: SliverToBoxAdapter(
+            child: _buildSearchBar(),
+          ),
+        ),
+
+        // Content
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          sliver: SliverToBoxAdapter(
+            child: collected.isEmpty
+                ? FgEmpty(
+                    icon: Icons.library_music,
+                    title: LocaleKeys.emptyLibraryTitle.tr(),
+                    description: LocaleKeys.emptyLibrarySubtitle.tr(),
+                  )
+                : items.isEmpty
+                    ? FgEmpty(
+                        icon: Icons.search_off,
+                        title: LocaleKeys.noResults.tr(),
+                        description: LocaleKeys.searchLibraryHint.tr(),
+                      )
+                    : _buildGridView(state, items),
+          ),
+        ),
+
+        const SliverToBoxAdapter(
+          child: SizedBox(height: 120),
+        ),
+      ],
+    );
+  }
+
+  String _statusLabel(LearnState state, Lesson lesson) {
+    return state.statusOf(lesson) == LessonStatus.completed
+        ? LocaleKeys.statusCompleted.tr()
+        : LocaleKeys.statusInProgress.tr();
+  }
+
+  Widget _buildGridView(
+    LearnState state,
+    List<({Module module, Lesson lesson})> items,
+  ) {
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: _crossAxisCount,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
+        childAspectRatio: 0.7,
+      ),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
+        return FgInteractiveCardThumbnail(
+          title: item.lesson.title.toUpperCase(),
+          level: _statusLabel(state, item.lesson).toUpperCase(),
+          backgroundImage: item.module.imageUrl,
+          backTitle: item.module.title.toUpperCase(),
+          backSubtitle: item.lesson.type.label,
+          onTap: (isFlipped) => _showCardPopup(context, state, item, isFlipped),
+        );
+      },
+    );
+  }
+
+  void _showCardPopup(
+    BuildContext context,
+    LearnState state,
+    ({Module module, Lesson lesson}) item,
+    bool isFlipped,
+  ) {
+    showDialog(
+      context: context,
+      barrierColor: Colors.black.withOpacity(0.9),
+      builder: (context) {
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: 500,
+              maxHeight: 800,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: AspectRatio(
+                aspectRatio: 9 / 16,
+                child: FgInteractiveCard(
+                  title: item.lesson.title.toUpperCase(),
+                  subtitle: item.module.title,
+                  backgroundImage: item.module.imageUrl,
+                  level: _statusLabel(state, item.lesson).toUpperCase(),
+                  style: item.module.tag,
+                  difficulty: item.lesson.difficulty,
+                  isFavorited: false,
+                  onTap: () {},
+                  initialFlipped: isFlipped,
+                ),
+              ),
+            ),
+          ),
+        );
       },
     );
   }
@@ -172,115 +275,6 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
     );
   }
 
-  void _showCardPopup(
-      BuildContext context, Map<String, dynamic> item, bool isFlipped) {
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withOpacity(0.9),
-      builder: (context) {
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 500,
-              maxHeight: 800,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: AspectRatio(
-                aspectRatio: 9 / 16,
-                child: FgInteractiveCard(
-                  title: item['title'],
-                  subtitle: item['level'] ?? item['duration'],
-                  backgroundImage: item['backgroundImage'] ??
-                      'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=2000',
-                  level: item['level'],
-                  style: item['type'] == 'workout' ? 'Workout' : 'Interactive',
-                  difficulty: item['level'] ?? item['intensity'],
-                  isFavorited: false,
-                  onTap: () {},
-                  initialFlipped: isFlipped,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent, // Background handled by FgBackground
-      body: FgBackground(
-        child: CustomScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          slivers: [
-            // Header
-            SliverToBoxAdapter(
-              child: AppHeader(
-                title: 'COLLECTION',
-                subtitle: 'Your Library',
-                rightSlot: _buildColumnToggle(),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.only(
-                left: AppSpacing.xxl,
-                right: AppSpacing.xxl,
-                top: AppSpacing.lg,
-                bottom: AppSpacing.sm,
-              ),
-              sliver: SliverToBoxAdapter(
-                child: _buildSearchBar(),
-              ),
-            ),
-
-            // Content
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              sliver: SliverToBoxAdapter(
-                child: _buildGridView(),
-              ),
-            ),
-
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 120),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGridView() {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: _crossAxisCount,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 0.7,
-      ),
-      itemCount: _items.length,
-      itemBuilder: (context, index) {
-        final item = _items[index];
-        if (item['type'] == 'interactive') {
-          return FgInteractiveCardThumbnail(
-            title: item['title'],
-            level: item['level'],
-            backgroundImage: item['backgroundImage'],
-            backTitle: 'PATTERN INFO',
-            backSubtitle: 'Rhythm Structure',
-            onTap: (isFlipped) => _showCardPopup(context, item, isFlipped),
-          );
-        }
-        return null; // Handle non-interactive items if needed or return empty container
-      },
-    );
-  }
-
   Widget _buildSearchBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -304,11 +298,12 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
             child: TextField(
               controller: _searchController,
               style: const TextStyle(color: Colors.white, fontSize: 14),
-              decoration: const InputDecoration(
-                hintText: "Search in your library...",
-                hintStyle: TextStyle(color: AppColors.textDark, fontSize: 14),
+              decoration: InputDecoration(
+                hintText: LocaleKeys.searchLibraryHint.tr(),
+                hintStyle:
+                    const TextStyle(color: AppColors.textDark, fontSize: 14),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 16),
+                contentPadding: const EdgeInsets.symmetric(vertical: 16),
               ),
             ),
           ),

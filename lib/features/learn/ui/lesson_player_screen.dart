@@ -63,9 +63,9 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
       );
     }
 
-    final lesson = state.currentLesson ?? state.module.lessons.last;
+    final lesson = state.currentLesson ?? state.activeModule.lessons.last;
     final steps = lesson.steps.isEmpty ? _defaultSteps : lesson.steps;
-    final lessonNumber = state.module.lessons.indexOf(lesson) + 1;
+    final lessonNumber = state.activeModule.lessons.indexOf(lesson) + 1;
     final isLastStep = _currentStep == steps.length - 1;
 
     return SwipeableCardScreenTemplate(

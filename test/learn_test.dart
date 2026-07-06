@@ -42,7 +42,7 @@ void main() {
 
       final state = await container.read(learnViewModelProvider.future);
 
-      expect(state.module, hipHopFoundations);
+      expect(state.activeModule, hipHopFoundations);
       expect(state.currentLesson, lessons.first);
       for (final lesson in lessons) {
         expect(state.statusOf(lesson), LessonStatus.notStarted);
@@ -109,6 +109,75 @@ void main() {
       expect(state.completedCount, 2);
       expect(state.moduleProgress, closeTo(2 / lessons.length, 0.0001));
       expect(state.currentLesson, lessons[2]);
+    });
+
+    test('selectModule switches the active module, ignoring unknown ids',
+        () async {
+      final container = containerWith(FakeProgressRepository());
+      await container.read(learnViewModelProvider.future);
+      final notifier = container.read(learnViewModelProvider.notifier);
+
+      notifier.selectModule(topRock.id);
+      expect(
+        container.read(learnViewModelProvider).value?.activeModule,
+        topRock,
+      );
+
+      notifier.selectModule('does-not-exist');
+      expect(
+        container.read(learnViewModelProvider).value?.activeModule,
+        topRock,
+      );
+    });
+
+    test('module progress is isolated per module', () async {
+      final container = containerWith(
+        FakeProgressRepository({
+          topRock.lessons.first.id: LessonProgress(
+            lessonId: topRock.lessons.first.id,
+            status: LessonStatus.completed,
+            progress: 1.0,
+          ),
+        }),
+      );
+
+      final state = await container.read(learnViewModelProvider.future);
+
+      expect(state.completedCountIn(topRock), 1);
+      expect(state.completedCountIn(hipHopFoundations), 0);
+      expect(state.currentLessonIn(topRock), topRock.lessons[1]);
+    });
+
+    test('collection, continue, and recommended rails derive from progress',
+        () async {
+      final container = containerWith(
+        FakeProgressRepository({
+          topRock.lessons.first.id: LessonProgress(
+            lessonId: topRock.lessons.first.id,
+            status: LessonStatus.completed,
+            progress: 1.0,
+          ),
+          house.lessons.first.id: LessonProgress(
+            lessonId: house.lessons.first.id,
+            status: LessonStatus.inProgress,
+          ),
+        }),
+      );
+
+      final state = await container.read(learnViewModelProvider.future);
+
+      // Collection: exactly the two touched lessons, paired with modules.
+      expect(state.collectedLessons.length, 2);
+      expect(state.collectedLessons.first.module, topRock);
+      expect(state.collectedLessons.first.lesson, topRock.lessons.first);
+
+      // Continue rail: the started modules (active module is untouched).
+      expect(state.inProgressModules, [topRock, house]);
+
+      // Recommended: untouched modules, excluding the active one.
+      expect(state.recommendedModules.contains(hipHopFoundations), isFalse);
+      expect(state.recommendedModules.contains(topRock), isFalse);
+      expect(state.recommendedModules.length, 3);
     });
 
     test('startLesson marks in-progress but never downgrades completed',

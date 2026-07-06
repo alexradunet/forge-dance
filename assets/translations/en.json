@@ -67,5 +67,19 @@
   "replayLessons": "Replay Lessons",
   "continueTraining": "Continue Training",
   "recommendedForYou": "Recommended for You",
-  "viewAll": "View All"
+  "viewAll": "View All",
+  "exploreTitle": "Explore",
+  "exploreSubtitle": "Discover",
+  "collectionTitle": "Collection",
+  "collectionSubtitle": "Your Library",
+  "categoryFundamentals": "Fundamentals",
+  "categoryStreetStyles": "Street Styles",
+  "categoryChoreography": "Choreography",
+  "searchExploreHint": "Explore styles, moves, modules...",
+  "searchLibraryHint": "Search in your library...",
+  "emptyLibraryTitle": "No moves collected yet",
+  "emptyLibrarySubtitle": "Start a lesson to add it to your library.",
+  "statusCompleted": "Completed",
+  "statusInProgress": "In Progress",
+  "noResults": "Nothing matches your search"
 }

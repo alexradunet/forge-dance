@@ -65,12 +65,14 @@ lib/
 ├── features/
 │   ├── authentication/   # WIRED: Firebase Auth + authStateChanges stream (single source of truth)
 │   ├── profile/          # WIRED: Firestore users/{uid} + SharedPreferences cache
-│   ├── learn/            # WIRED: bundled lesson catalog + Firestore progress (canonical example)
-│   ├── home/             # WIRED: dashboard derived from profile + learn progress (recommended rail still mock)
+│   ├── learn/            # WIRED: 10-module catalog + Firestore progress (canonical example)
+│   ├── home/             # WIRED: dashboard fully derived from profile + learn progress
+│   ├── explore/          # WIRED: catalog by category, live search, real progress
+│   ├── library/          # WIRED: collection = lessons the user started/completed
 │   ├── firebase/         # Nullable Firebase providers + bootstrap (emulator wiring)
 │   ├── session/          # SessionCoordinator: cross-feature auth ↔ profile orchestration
 │   ├── common/           # Shared widgets, appThemeModeProvider
-│   └── explore | library | workout | wod | stats | settings | main | onboarding/
+│   └── workout | wod | stats | settings | main | onboarding/
 │                         # PROTOTYPE: hardcoded mock data, no repositories yet
 ├── generated/            # LocaleKeys (generated, gitignored)
 ├── routing/              # go_router: router.dart + routes.dart
@@ -99,7 +101,7 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 
 ### Current state: wired vs prototype
 
-**Authentication**, **profile**, **learn** (module view + lesson player, progress in Firestore), and **home** (header, daily session hero, progress card, continue-training rail — the recommended rail is still mock) talk to real data. Everything else (explore, collection, training session, WOD, stats, level progression) renders hardcoded mock data pending backend wiring. To productionize a prototype screen: extract models → create a repository → add state/view model → replace inline data, following the learn feature as the template.
+**Authentication**, **profile**, **learn** (module view + lesson player), **home**, **explore**, and **collection/library** all run on real data: the 10-module content catalog ships in code (`lesson_catalog.dart`, lesson ids globally unique and stable) and every progress surface derives from `users/{uid}/progress` via `LearnState` (`activeModule` selection, per-module helpers, `collectedLessons`, `inProgressModules`, `recommendedModules`). Still prototype (hardcoded mock data): training session/workout, WOD, stats, level progression. The explore/collection filter sheets are cosmetic until modules carry difficulty metadata. To productionize a prototype screen: extract models → create a repository → add state/view model → replace inline data, following the learn feature as the template.
 
 **Dead code — do not extend by accident**: `features/home/ui/home_screen.dart`, `features/home/ui/home_screen_v2.dart`, `features/explore/ui/explore_screen.dart`, and `features/wod/ui/wod_session_screen.dart` are not imported anywhere. The live screens are in `presentation/pages/` and `features/learn/ui/`.
 

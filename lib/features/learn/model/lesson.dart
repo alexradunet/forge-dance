@@ -40,6 +40,9 @@ abstract class Lesson with _$Lesson {
   }) = _Lesson;
 }
 
+/// Catalog shelf a module belongs to (drives the explore sections).
+enum ModuleCategory { fundamentals, streetStyles, choreography }
+
 /// An ordered path of lessons.
 @freezed
 abstract class Module with _$Module {
@@ -47,6 +50,9 @@ abstract class Module with _$Module {
     required String id,
     required String title,
     required String subtitle,
+    required ModuleCategory category,
     required List<Lesson> lessons,
+    @Default('') String tag,
+    @Default('') String imageUrl,
   }) = _Module;
 }

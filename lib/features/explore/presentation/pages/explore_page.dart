@@ -1,29 +1,57 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../design_system/tokens/app_typography.dart';
 import '../../../../design_system/molecules/cards/fg_content_card.dart';
+import '../../../../design_system/molecules/feedback/fg_empty.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/atoms/icons/fg_icon.dart';
+import '../../../../design_system/atoms/progress/fg_spinner.dart';
 import '../../../../design_system/atoms/visuals/fg_background.dart';
-
 import '../../../../design_system/organisms/modals/fg_filter_sheet.dart';
+import '../../../../generated/locale_keys.g.dart';
+import '../../../common/ui/widgets/common_error.dart';
+import '../../../learn/model/lesson.dart';
+import '../../../learn/ui/state/learn_state.dart';
+import '../../../learn/ui/view_model/learn_view_model.dart';
 
-class ExplorePage extends StatefulWidget {
+/// Explore — the full module catalog grouped by category, with live title
+/// search and real per-module progress. The filter sheet is cosmetic until
+/// modules carry difficulty metadata.
+class ExplorePage extends ConsumerStatefulWidget {
   final Function(String)? onNavigate;
 
   const ExplorePage({super.key, this.onNavigate});
 
   @override
-  State<ExplorePage> createState() => _ExplorePageState();
+  ConsumerState<ExplorePage> createState() => _ExplorePageState();
 }
 
-class _ExplorePageState extends State<ExplorePage> {
+class _ExplorePageState extends ConsumerState<ExplorePage> {
   final TextEditingController _searchController = TextEditingController();
+  String _query = '';
 
   final Map<String, String> _selectedFilters = {
     'Difficulty': 'All',
     'Style': 'All',
     'Type': 'All',
   };
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() => _query = _searchController.text.trim().toLowerCase());
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   void _showFilterSheet() {
     FgFilterSheet.show(
@@ -53,7 +81,6 @@ class _ExplorePageState extends State<ExplorePage> {
         Navigator.pop(context);
       },
       onApply: () {
-        // Apply logic here
         Navigator.pop(context);
       },
     );
@@ -61,121 +88,130 @@ class _ExplorePageState extends State<ExplorePage> {
 
   @override
   Widget build(BuildContext context) {
+    final learnState = ref.watch(learnViewModelProvider);
+
     return Scaffold(
       backgroundColor: Colors.transparent, // Background handled by FgBackground
       body: FgBackground(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: AppHeader(
-                title: "Explore",
-                subtitle: "Discover",
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              sliver: SliverToBoxAdapter(
-                child: _buildSearchBar(),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: _buildSection(
-                title: "Fundamentals",
-                titleColor: AppColors.forgeFire,
-                children: [
-                  FgContentCard(
-                    title: "Body Control I",
-                    tags: const ["Rhythm"],
-                    imageUrl:
-                        "https://images.unsplash.com/photo-1550525811-e5869dd03032?w=800&q=80",
-                    progress: 0.25,
-                    footerLabel: "2/8 Lessons",
-                    onTap: () => widget.onNavigate?.call('lesson-path'),
-                  ),
-                  const SizedBox(width: 16),
-                  FgContentCard(
-                    title: "Isolations Master",
-                    tags: const ["Tech"],
-                    imageUrl:
-                        "https://images.unsplash.com/photo-1547153760-18fc86324498?w=800&q=80",
-                    progress: 0,
-                    footerLabel: "0/5 Lessons",
-                    onTap: () => widget.onNavigate?.call('lesson-path'),
-                  ),
-                ],
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: _buildSection(
-                title: "Street Styles",
-                titleColor: Colors.blueAccent,
-                children: [
-                  FgContentCard(
-                    title: "Top Rock",
-                    tags: const ["Breaking"],
-                    imageUrl:
-                        "https://images.unsplash.com/photo-1535525153412-5a42439a210d?w=800&q=80",
-                    progress: 0.60,
-                    footerLabel: "3/5 Lessons",
-                    width: 180,
-                    onTap: () => widget.onNavigate?.call('lesson-path'),
-                  ),
-                  const SizedBox(width: 16),
-                  FgContentCard(
-                    title: "Boogaloo",
-                    tags: const ["Popping"],
-                    imageUrl:
-                        "https://images.unsplash.com/photo-1547481887-a26e2cacb2f2?w=800&q=80",
-                    progress: 0,
-                    footerLabel: "0/4 Lessons",
-                    width: 180,
-                    onTap: () => widget.onNavigate?.call('lesson-path'),
-                  ),
-                  const SizedBox(width: 16),
-                  FgContentCard(
-                    title: "House",
-                    tags: const ["House"],
-                    imageUrl:
-                        "https://images.unsplash.com/photo-1504609813442-a8924e83f76e?w=800&q=80",
-                    progress: 0.35,
-                    footerLabel: "2/6 Lessons",
-                    width: 180,
-                    onTap: () => widget.onNavigate?.call('lesson-path'),
-                  ),
-                ],
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: _buildSection(
-                title: "Choreography",
-                titleColor: Colors.purpleAccent,
-                children: [
-                  FgContentCard(
-                    title: "Urban Flow",
-                    tags: const ["New Arrival"],
-                    imageUrl:
-                        "https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800&q=80",
-                    progress: 0,
-                    footerLabel: "0/8 Lessons",
-                    onTap: () => widget.onNavigate?.call('lesson-path'),
-                  ),
-                  const SizedBox(width: 16),
-                  FgContentCard(
-                    title: "Contemporary Fusion",
-                    tags: const ["Advanced"],
-                    imageUrl:
-                        "https://images.unsplash.com/photo-1518834107812-67b0b7c58434?w=800&q=80",
-                    progress: 0.15,
-                    footerLabel: "1/7 Lessons",
-                    onTap: () => widget.onNavigate?.call('lesson-path'),
-                  ),
-                ],
-              ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 100)),
-          ],
+        child: learnState.when(
+          loading: () => const Center(child: FgSpinner()),
+          error: (_, __) => const CommonError(),
+          data: (state) => _buildContent(state),
         ),
       ),
+    );
+  }
+
+  Widget _buildContent(LearnState state) {
+    final sections = [
+      for (final category in ModuleCategory.values)
+        (category: category, modules: _modulesFor(state, category)),
+    ];
+    final nothingMatches =
+        sections.every((section) => section.modules.isEmpty);
+
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: AppHeader(
+            title: LocaleKeys.exploreTitle.tr(),
+            subtitle: LocaleKeys.exploreSubtitle.tr(),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          sliver: SliverToBoxAdapter(
+            child: _buildSearchBar(),
+          ),
+        ),
+        if (nothingMatches)
+          SliverToBoxAdapter(
+            child: FgEmpty(
+              icon: Icons.search_off,
+              title: LocaleKeys.noResults.tr(),
+              description: LocaleKeys.searchExploreHint.tr(),
+            ),
+          )
+        else
+          for (final section in sections)
+            if (section.modules.isNotEmpty)
+              SliverToBoxAdapter(
+                child: _buildSection(
+                  title: _categoryLabel(section.category),
+                  titleColor: _categoryColor(section.category),
+                  children: _moduleCards(state, section),
+                ),
+              ),
+        const SliverToBoxAdapter(child: SizedBox(height: 100)),
+      ],
+    );
+  }
+
+  List<Module> _modulesFor(LearnState state, ModuleCategory category) {
+    return state.modules
+        .where((module) =>
+            module.category == category &&
+            (_query.isEmpty ||
+                module.title.toLowerCase().contains(_query) ||
+                module.tag.toLowerCase().contains(_query)))
+        .toList();
+  }
+
+  String _categoryLabel(ModuleCategory category) {
+    switch (category) {
+      case ModuleCategory.fundamentals:
+        return LocaleKeys.categoryFundamentals.tr();
+      case ModuleCategory.streetStyles:
+        return LocaleKeys.categoryStreetStyles.tr();
+      case ModuleCategory.choreography:
+        return LocaleKeys.categoryChoreography.tr();
+    }
+  }
+
+  Color _categoryColor(ModuleCategory category) {
+    switch (category) {
+      case ModuleCategory.fundamentals:
+        return AppColors.forgeFire;
+      case ModuleCategory.streetStyles:
+        return AppColors.electricBlue;
+      case ModuleCategory.choreography:
+        return AppColors.mysticPurple;
+    }
+  }
+
+  List<Widget> _moduleCards(
+    LearnState state,
+    ({ModuleCategory category, List<Module> modules}) section,
+  ) {
+    // Street styles keep the narrower card format from the original layout.
+    final width =
+        section.category == ModuleCategory.streetStyles ? 180.0 : null;
+
+    return [
+      for (var i = 0; i < section.modules.length; i++) ...[
+        if (i > 0) const SizedBox(width: 16),
+        _moduleCard(state, section.modules[i], width: width),
+      ],
+    ];
+  }
+
+  Widget _moduleCard(LearnState state, Module module, {double? width}) {
+    return FgContentCard(
+      title: module.title,
+      tags: [module.tag],
+      imageUrl: module.imageUrl,
+      progress: state.moduleProgressOf(module),
+      footerLabel: LocaleKeys.lessonsCompletedOf.tr(
+        args: [
+          '${state.completedCountIn(module)}',
+          '${module.lessons.length}',
+        ],
+      ),
+      width: width,
+      onTap: () {
+        ref.read(learnViewModelProvider.notifier).selectModule(module.id);
+        widget.onNavigate?.call('lesson-path');
+      },
     );
   }
 
@@ -202,11 +238,12 @@ class _ExplorePageState extends State<ExplorePage> {
             child: TextField(
               controller: _searchController,
               style: const TextStyle(color: Colors.white, fontSize: 14),
-              decoration: const InputDecoration(
-                hintText: "Explore styles, mentors, moves...",
-                hintStyle: TextStyle(color: AppColors.textDark, fontSize: 14),
+              decoration: InputDecoration(
+                hintText: LocaleKeys.searchExploreHint.tr(),
+                hintStyle:
+                    const TextStyle(color: AppColors.textDark, fontSize: 14),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 16),
+                contentPadding: const EdgeInsets.symmetric(vertical: 16),
               ),
             ),
           ),
@@ -241,11 +278,9 @@ class _ExplorePageState extends State<ExplorePage> {
             children: [
               Text(
                 title.toUpperCase(),
-                style: const TextStyle(
+                style: AppTypography.h3.copyWith(
                   color: Colors.white,
-                  fontFamily: 'Orbitron',
                   fontSize: 18,
-                  fontWeight: FontWeight.bold,
                   letterSpacing: 1.5,
                 ),
               ),

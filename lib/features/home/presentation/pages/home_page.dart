@@ -28,11 +28,6 @@ class HomePage extends ConsumerWidget {
 
   const HomePage({super.key, this.onNavigate});
 
-  static const _heroImageUrl =
-      'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80';
-  static const _moduleImageUrl =
-      'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=400&auto=format&fit=crop&q=80';
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final learnState = ref.watch(learnViewModelProvider);
@@ -78,53 +73,29 @@ class HomePage extends ConsumerWidget {
           child: _buildProgressSection(state),
         ),
 
-        // Continue Training — the real module with real progress
+        // Continue Training — every module the user is partway through
         SliverToBoxAdapter(
           child: _buildHorizontalSection(
             title: LocaleKeys.continueTraining.tr().toUpperCase(),
-            children: [
-              FgContentCard(
-                title: state.module.title,
-                tags: [_moduleTag(state)],
-                imageUrl: _moduleImageUrl,
-                progress: state.moduleProgress,
-                footerLabel: _lessonsCompletedLabel(state),
-                onTap: () => onNavigate?.call('lesson-path'),
-              ),
-            ],
+            children: _interleave([
+              for (final module in state.inProgressModules)
+                _moduleCard(ref, state, module),
+            ]),
           ),
         ),
 
-        // Recommended (mock discovery content pending real catalog data)
-        SliverToBoxAdapter(
-          child: _buildHorizontalSection(
-            title: LocaleKeys.recommendedForYou.tr().toUpperCase(),
-            showViewAll: true,
-            children: [
-              FgContentCard(
-                title: 'Footwork Fundamentals',
-                tags: const ['TECHNIQUE'],
-                imageUrl:
-                    'https://images.unsplash.com/photo-1716996642138-e655f2a8dcd5?w=400&auto=format&fit=crop&q=80',
-                progress: 0,
-                footerLabel: '0/6 Lessons',
-                width: 180,
-                onTap: () => onNavigate?.call('lesson-path'),
-              ),
-              const SizedBox(width: 16),
-              FgContentCard(
-                title: 'Breaking Basics',
-                tags: const ['POWER MOVES'],
-                imageUrl:
-                    'https://images.unsplash.com/photo-1506411393232-79727bc447af?w=400&auto=format&fit=crop&q=80',
-                progress: 0,
-                footerLabel: '0/7 Lessons',
-                width: 180,
-                onTap: () => onNavigate?.call('lesson-path'),
-              ),
-            ],
+        // Recommended — untouched modules from the catalog
+        if (state.recommendedModules.isNotEmpty)
+          SliverToBoxAdapter(
+            child: _buildHorizontalSection(
+              title: LocaleKeys.recommendedForYou.tr().toUpperCase(),
+              showViewAll: true,
+              children: _interleave([
+                for (final module in state.recommendedModules)
+                  _moduleCard(ref, state, module, width: 180),
+              ]),
+            ),
           ),
-        ),
 
         // Bottom Spacing for BottomNav
         const SliverToBoxAdapter(child: SizedBox(height: 100)),
@@ -140,17 +111,46 @@ class HomePage extends ConsumerWidget {
     return source.toUpperCase().replaceAll(RegExp(r'\s+'), '_');
   }
 
-  String _moduleTag(LearnState state) =>
-      state.module.subtitle.split(' • ').first.toUpperCase();
+  String _moduleTag(Module module) =>
+      module.subtitle.split(' • ').first.toUpperCase();
 
-  String _lessonsCompletedLabel(LearnState state) {
+  String _lessonsCompletedLabel(LearnState state, Module module) {
     return LocaleKeys.lessonsCompletedOf.tr(
       args: [
-        '${state.completedCount}',
-        '${state.module.lessons.length}',
+        '${state.completedCountIn(module)}',
+        '${module.lessons.length}',
       ],
     );
   }
+
+  Widget _moduleCard(
+    WidgetRef ref,
+    LearnState state,
+    Module module, {
+    double? width,
+  }) {
+    return FgContentCard(
+      title: module.title,
+      tags: [module.tag.toUpperCase()],
+      imageUrl: module.imageUrl,
+      progress: state.moduleProgressOf(module),
+      footerLabel: _lessonsCompletedLabel(state, module),
+      width: width,
+      onTap: () => _openModule(ref, module),
+    );
+  }
+
+  void _openModule(WidgetRef ref, Module module) {
+    ref.read(learnViewModelProvider.notifier).selectModule(module.id);
+    onNavigate?.call('lesson-path');
+  }
+
+  List<Widget> _interleave(List<Widget> cards) => [
+        for (var i = 0; i < cards.length; i++) ...[
+          if (i > 0) const SizedBox(width: 16),
+          cards[i],
+        ],
+      ];
 
   Widget _buildDailySessionCard(WidgetRef ref, LearnState state) {
     final lesson = state.currentLesson;
@@ -160,8 +160,8 @@ class HomePage extends ConsumerWidget {
       return FgContentCard.hero(
         title: LocaleKeys.moduleComplete.tr().toUpperCase(),
         subtitle: LocaleKeys.moduleCompleteSubtitle.tr(),
-        tags: [state.module.title.toUpperCase()],
-        imageUrl: _heroImageUrl,
+        tags: [state.activeModule.title.toUpperCase()],
+        imageUrl: state.activeModule.imageUrl,
         onTap: () => onNavigate?.call('lesson-path'),
         action: FgButton(
           text: LocaleKeys.replayLessons.tr(),
@@ -173,8 +173,8 @@ class HomePage extends ConsumerWidget {
     }
 
     final subtitle = lesson.duration.isEmpty
-        ? state.module.title
-        : '${state.module.title} • ${lesson.duration}';
+        ? state.activeModule.title
+        : '${state.activeModule.title} • ${lesson.duration}';
 
     return FgContentCard.hero(
       title: lesson.title.toUpperCase(),
@@ -183,7 +183,7 @@ class HomePage extends ConsumerWidget {
         LocaleKeys.todaysSession.tr().toUpperCase(),
         lesson.type.label.toUpperCase(),
       ],
-      imageUrl: _heroImageUrl,
+      imageUrl: state.activeModule.imageUrl,
       onTap: () => _startCurrentLesson(ref, lesson),
       action: FgButton(
         text: LocaleKeys.startLesson.tr(),
@@ -294,10 +294,10 @@ class HomePage extends ConsumerWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(_moduleTag(state),
+                        Text(_moduleTag(state.activeModule),
                             style: AppTypography.body
                                 .copyWith(fontWeight: FontWeight.bold)),
-                        Text(state.module.title.toUpperCase(),
+                        Text(state.activeModule.title.toUpperCase(),
                             style: AppTypography.label.copyWith(
                                 color: AppColors.textMuted, fontSize: 9)),
                       ],
@@ -310,7 +310,9 @@ class HomePage extends ConsumerWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(_lessonsCompletedLabel(state).toUpperCase(),
+                    Text(
+                        _lessonsCompletedLabel(state, state.activeModule)
+                            .toUpperCase(),
                         style: AppTypography.caption
                             .copyWith(color: AppColors.textMuted)),
                     Text(

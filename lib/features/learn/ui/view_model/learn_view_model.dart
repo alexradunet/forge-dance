@@ -15,9 +15,20 @@ class LearnViewModel extends _$LearnViewModel {
   FutureOr<LearnState> build() async {
     _repository = ref.read(progressRepositoryProvider);
     return LearnState(
-      module: hipHopFoundations,
+      modules: allModules,
+      activeModuleId: allModules.first.id,
       progress: await _repository.getAll(),
     );
+  }
+
+  /// Opens a module in the lesson path (session-local selection, not
+  /// persisted — the default after a restart is the first module).
+  void selectModule(String moduleId) {
+    final current = state.valueOrNull;
+    if (current == null || current.activeModuleId == moduleId) return;
+    if (!current.modules.any((module) => module.id == moduleId)) return;
+
+    state = AsyncData(current.copyWith(activeModuleId: moduleId));
   }
 
   /// Marks a lesson as started (no-op if it is already completed).

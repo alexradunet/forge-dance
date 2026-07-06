@@ -99,8 +99,8 @@ class ModuleViewScreen extends ConsumerWidget {
 
   Widget _buildHeader(BuildContext context, LearnState state) {
     return AppHeader(
-      title: state.module.title,
-      subtitle: state.module.subtitle,
+      title: state.activeModule.title,
+      subtitle: state.activeModule.subtitle,
       onBack: onBack ?? () => Navigator.of(context).pop(),
       rightSlot: Container(
         width: 40,
@@ -122,14 +122,14 @@ class ModuleViewScreen extends ConsumerWidget {
   List<LessonNode> _buildNodes(LearnState state) {
     final current = state.currentLesson;
     return [
-      for (final lesson in state.module.lessons)
+      for (final lesson in state.activeModule.lessons)
         LessonNode(
           title: lesson.title,
           type: _nodeType(lesson.type),
           state: _nodeState(state, lesson, current),
           duration: lesson.duration,
           difficulty: lesson.difficulty,
-          progress: state.progressOf(lesson),
+          progress: state.lessonProgressOf(lesson),
         ),
     ];
   }
