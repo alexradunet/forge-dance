@@ -1,131 +1,202 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../constants/constants.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_typography.dart';
 import '../../../../design_system/atoms/progress/fg_progress_bar.dart';
+import '../../../../design_system/atoms/progress/fg_spinner.dart';
 import '../../../../design_system/atoms/icons/fg_icon.dart';
 import '../../../../design_system/molecules/cards/fg_content_card.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/tokens/app_shadows.dart';
 import '../../../../design_system/atoms/buttons/fg_button.dart';
-
 import '../../../../design_system/atoms/visuals/fg_background.dart';
+import '../../../../generated/locale_keys.g.dart';
+import '../../../common/ui/widgets/common_error.dart';
+import '../../../learn/model/lesson.dart';
+import '../../../learn/ui/state/learn_state.dart';
+import '../../../learn/ui/view_model/learn_view_model.dart';
+import '../../../profile/ui/view_model/profile_view_model.dart';
 
-class HomePage extends StatelessWidget {
+/// Home dashboard. Header, daily session hero, progress card, and the
+/// continue-training rail derive from real data (profile + lesson progress).
+/// The recommended rail is still mock discovery content.
+class HomePage extends ConsumerWidget {
   final Function(String)? onNavigate;
 
   const HomePage({super.key, this.onNavigate});
 
+  static const _heroImageUrl =
+      'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80';
+  static const _moduleImageUrl =
+      'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=400&auto=format&fit=crop&q=80';
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final learnState = ref.watch(learnViewModelProvider);
+
     return Scaffold(
       backgroundColor: Colors.transparent, // Background handled by FgBackground
       body: FgBackground(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            // Header
-            SliverToBoxAdapter(
-              child: AppHeader(
-                title: 'ALEX_DANCER',
-                subtitle: 'Welcome Back',
-                rightSlot: _buildNotificationToggle(),
-              ),
-            ),
-
-            // Hero Section
-            SliverToBoxAdapter(
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-                child: FgContentCard.hero(
-                  title: 'EXPLOSIVE POWER',
-                  subtitle:
-                      'Build raw explosive strength and fast-twitch muscle response through dynamic intervals.',
-                  tags: const ['TODAY\'S WOD', 'LIVE'],
-                  imageUrl:
-                      'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
-                  onTap: () => onNavigate?.call('training'),
-                  action: FgButton(
-                    text: 'START TRAINING',
-                    variant: FgButtonVariant.primary,
-                    size: FgButtonSize.lg,
-                    onPressed: () => onNavigate?.call('training'),
-                  ),
-                ),
-              ),
-            ),
-
-            // Progress Section
-            SliverToBoxAdapter(
-              child: _buildProgressSection(),
-            ),
-
-            // Continue Training
-            SliverToBoxAdapter(
-              child: _buildHorizontalSection(
-                title: 'CONTINUE TRAINING',
-                children: [
-                  FgContentCard(
-                    title: 'Hip Opener Flow',
-                    tags: const ['MOBILITY'],
-                    imageUrl:
-                        'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=400&auto=format&fit=crop&q=80',
-                    progress: 0.65,
-                    footerLabel: '5/8 Lessons',
-                    onTap: () => onNavigate?.call('lesson-path'),
-                  ),
-                  const SizedBox(width: 16),
-                  FgContentCard(
-                    title: 'Isolation Drills',
-                    tags: const ['BODY CONTROL'],
-                    imageUrl:
-                        'https://images.unsplash.com/photo-1508700929628-666bc8bd84ea?w=400&auto=format&fit=crop&q=80',
-                    progress: 0.40,
-                    footerLabel: '3/7 Lessons',
-                    onTap: () => onNavigate?.call('lesson-path'),
-                  ),
-                ],
-              ),
-            ),
-
-            // Recommended
-            SliverToBoxAdapter(
-              child: _buildHorizontalSection(
-                title: 'RECOMMENDED FOR YOU',
-                showViewAll: true,
-                children: [
-                  FgContentCard(
-                    title: 'Footwork Fundamentals',
-                    tags: const ['TECHNIQUE'],
-                    imageUrl:
-                        'https://images.unsplash.com/photo-1716996642138-e655f2a8dcd5?w=400&auto=format&fit=crop&q=80',
-                    progress: 0,
-                    footerLabel: '0/6 Lessons',
-                    width: 180,
-                    onTap: () => onNavigate?.call('lesson-path'),
-                  ),
-                  const SizedBox(width: 16),
-                  FgContentCard(
-                    title: 'Breaking Basics',
-                    tags: const ['POWER MOVES'],
-                    imageUrl:
-                        'https://images.unsplash.com/photo-1506411393232-79727bc447af?w=400&auto=format&fit=crop&q=80',
-                    progress: 0,
-                    footerLabel: '0/7 Lessons',
-                    width: 180,
-                    onTap: () => onNavigate?.call('lesson-path'),
-                  ),
-                ],
-              ),
-            ),
-
-            // Bottom Spacing for BottomNav
-            const SliverToBoxAdapter(child: SizedBox(height: 100)),
-          ],
+        child: learnState.when(
+          loading: () => const Center(child: FgSpinner()),
+          error: (_, __) => const CommonError(),
+          data: (state) => _buildContent(context, ref, state),
         ),
       ),
     );
+  }
+
+  Widget _buildContent(BuildContext context, WidgetRef ref, LearnState state) {
+    final profileName =
+        ref.watch(profileViewModelProvider).valueOrNull?.profile?.name;
+
+    return CustomScrollView(
+      physics: const BouncingScrollPhysics(),
+      slivers: [
+        // Header
+        SliverToBoxAdapter(
+          child: AppHeader(
+            title: _dancerHandle(profileName),
+            subtitle: LocaleKeys.welcomeBack.tr(),
+            rightSlot: _buildNotificationToggle(),
+          ),
+        ),
+
+        // Daily session hero — the user's current lesson on the path
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            child: _buildDailySessionCard(ref, state),
+          ),
+        ),
+
+        // Progress Section
+        SliverToBoxAdapter(
+          child: _buildProgressSection(state),
+        ),
+
+        // Continue Training — the real module with real progress
+        SliverToBoxAdapter(
+          child: _buildHorizontalSection(
+            title: LocaleKeys.continueTraining.tr().toUpperCase(),
+            children: [
+              FgContentCard(
+                title: state.module.title,
+                tags: [_moduleTag(state)],
+                imageUrl: _moduleImageUrl,
+                progress: state.moduleProgress,
+                footerLabel: _lessonsCompletedLabel(state),
+                onTap: () => onNavigate?.call('lesson-path'),
+              ),
+            ],
+          ),
+        ),
+
+        // Recommended (mock discovery content pending real catalog data)
+        SliverToBoxAdapter(
+          child: _buildHorizontalSection(
+            title: LocaleKeys.recommendedForYou.tr().toUpperCase(),
+            showViewAll: true,
+            children: [
+              FgContentCard(
+                title: 'Footwork Fundamentals',
+                tags: const ['TECHNIQUE'],
+                imageUrl:
+                    'https://images.unsplash.com/photo-1716996642138-e655f2a8dcd5?w=400&auto=format&fit=crop&q=80',
+                progress: 0,
+                footerLabel: '0/6 Lessons',
+                width: 180,
+                onTap: () => onNavigate?.call('lesson-path'),
+              ),
+              const SizedBox(width: 16),
+              FgContentCard(
+                title: 'Breaking Basics',
+                tags: const ['POWER MOVES'],
+                imageUrl:
+                    'https://images.unsplash.com/photo-1506411393232-79727bc447af?w=400&auto=format&fit=crop&q=80',
+                progress: 0,
+                footerLabel: '0/7 Lessons',
+                width: 180,
+                onTap: () => onNavigate?.call('lesson-path'),
+              ),
+            ],
+          ),
+        ),
+
+        // Bottom Spacing for BottomNav
+        const SliverToBoxAdapter(child: SizedBox(height: 100)),
+      ],
+    );
+  }
+
+  /// FORGE_DANCER-style handle derived from the profile name.
+  String _dancerHandle(String? name) {
+    final source = (name == null || name.trim().isEmpty)
+        ? Constants.defaultName
+        : name.trim();
+    return source.toUpperCase().replaceAll(RegExp(r'\s+'), '_');
+  }
+
+  String _moduleTag(LearnState state) =>
+      state.module.subtitle.split(' • ').first.toUpperCase();
+
+  String _lessonsCompletedLabel(LearnState state) {
+    return LocaleKeys.lessonsCompletedOf.tr(
+      args: [
+        '${state.completedCount}',
+        '${state.module.lessons.length}',
+      ],
+    );
+  }
+
+  Widget _buildDailySessionCard(WidgetRef ref, LearnState state) {
+    final lesson = state.currentLesson;
+
+    if (lesson == null) {
+      // Every lesson completed — celebrate and offer replay.
+      return FgContentCard.hero(
+        title: LocaleKeys.moduleComplete.tr().toUpperCase(),
+        subtitle: LocaleKeys.moduleCompleteSubtitle.tr(),
+        tags: [state.module.title.toUpperCase()],
+        imageUrl: _heroImageUrl,
+        onTap: () => onNavigate?.call('lesson-path'),
+        action: FgButton(
+          text: LocaleKeys.replayLessons.tr(),
+          variant: FgButtonVariant.primary,
+          size: FgButtonSize.lg,
+          onPressed: () => onNavigate?.call('lesson-path'),
+        ),
+      );
+    }
+
+    final subtitle = lesson.duration.isEmpty
+        ? state.module.title
+        : '${state.module.title} • ${lesson.duration}';
+
+    return FgContentCard.hero(
+      title: lesson.title.toUpperCase(),
+      subtitle: subtitle,
+      tags: [
+        LocaleKeys.todaysSession.tr().toUpperCase(),
+        lesson.type.label.toUpperCase(),
+      ],
+      imageUrl: _heroImageUrl,
+      onTap: () => _startCurrentLesson(ref, lesson),
+      action: FgButton(
+        text: LocaleKeys.startLesson.tr(),
+        variant: FgButtonVariant.primary,
+        size: FgButtonSize.lg,
+        onPressed: () => _startCurrentLesson(ref, lesson),
+      ),
+    );
+  }
+
+  void _startCurrentLesson(WidgetRef ref, Lesson lesson) {
+    ref.read(learnViewModelProvider.notifier).startLesson(lesson.id);
+    onNavigate?.call('lesson-player');
   }
 
   Widget _buildNotificationToggle() {
@@ -160,14 +231,17 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildProgressSection() {
+  Widget _buildProgressSection(LearnState state) {
+    final current = state.currentLesson;
+    final percent = (state.moduleProgress * 100).round();
+
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'MY PROGRESS',
+            LocaleKeys.myProgress.tr().toUpperCase(),
             style: AppTypography.h3
                 .copyWith(color: AppColors.textMain, fontSize: 20),
           ),
@@ -206,10 +280,11 @@ class HomePage extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('DAY 12',
+                            Text('$percent%',
                                 style: AppTypography.body
                                     .copyWith(fontWeight: FontWeight.bold)),
-                            Text('CURRENT STREAK',
+                            Text(
+                                LocaleKeys.moduleProgress.tr().toUpperCase(),
                                 style: AppTypography.label.copyWith(
                                     color: AppColors.textMuted, fontSize: 9)),
                           ],
@@ -219,10 +294,10 @@ class HomePage extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text('LEVEL 4',
+                        Text(_moduleTag(state),
                             style: AppTypography.body
                                 .copyWith(fontWeight: FontWeight.bold)),
-                        Text('INTERMEDIATE',
+                        Text(state.module.title.toUpperCase(),
                             style: AppTypography.label.copyWith(
                                 color: AppColors.textMuted, fontSize: 9)),
                       ],
@@ -230,15 +305,19 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 20),
-                const FgProgressBar(value: 0.82, height: 10),
+                FgProgressBar(value: state.moduleProgress, height: 10),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('1,240 XP',
+                    Text(_lessonsCompletedLabel(state).toUpperCase(),
                         style: AppTypography.caption
                             .copyWith(color: AppColors.textMuted)),
-                    Text('NEXT LEVEL: 1,500 XP',
+                    Text(
+                        current == null
+                            ? LocaleKeys.moduleComplete.tr().toUpperCase()
+                            : LocaleKeys.nextUp
+                                .tr(args: [current.title]).toUpperCase(),
                         style: AppTypography.caption
                             .copyWith(color: AppColors.textMuted)),
                   ],
@@ -273,7 +352,7 @@ class HomePage extends StatelessWidget {
                 GestureDetector(
                   onTap: () => onNavigate?.call('explore'),
                   child: Text(
-                    'VIEW ALL',
+                    LocaleKeys.viewAll.tr().toUpperCase(),
                     style: AppTypography.label.copyWith(
                       color: AppColors.forgeFire,
                       fontWeight: FontWeight.bold,

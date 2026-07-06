@@ -29,4 +29,14 @@ abstract class LearnState with _$LearnState {
     }
     return null;
   }
+
+  /// Number of completed lessons in the module.
+  int get completedCount => module.lessons
+      .where((lesson) => statusOf(lesson) == LessonStatus.completed)
+      .length;
+
+  /// Fraction of the module completed, 0.0–1.0.
+  double get moduleProgress => module.lessons.isEmpty
+      ? 0.0
+      : completedCount / module.lessons.length;
 }

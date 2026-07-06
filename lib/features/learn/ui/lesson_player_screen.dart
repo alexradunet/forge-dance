@@ -70,7 +70,7 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
 
     return SwipeableCardScreenTemplate(
       title: lesson.title,
-      subtitle: 'Lesson $lessonNumber • ${_typeLabel(lesson.type)}',
+      subtitle: 'Lesson $lessonNumber • ${lesson.type.label}',
       onBack: widget.onBack ?? () => Navigator.of(context).pop(),
       progressSteps: steps.length,
       currentStep: _currentStep,
@@ -145,21 +145,6 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
     if (!mounted) return;
     setState(() => _completing = false);
     widget.onBack?.call();
-  }
-
-  String _typeLabel(LessonType type) {
-    switch (type) {
-      case LessonType.theory:
-        return 'Theory';
-      case LessonType.drill:
-        return 'Drill';
-      case LessonType.movement:
-        return 'Movement';
-      case LessonType.experiment:
-        return 'Experiment';
-      case LessonType.boss:
-        return 'Boss Battle';
-    }
   }
 
   Widget _buildTechniquePoint(String label, String value) {

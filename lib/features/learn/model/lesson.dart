@@ -7,6 +7,25 @@ part 'lesson.freezed.dart';
 /// between the two.
 enum LessonType { theory, drill, movement, experiment, boss }
 
+/// Display label for a lesson type (content vocabulary, not translated —
+/// lesson content ships in English like the catalog itself).
+extension LessonTypeLabel on LessonType {
+  String get label {
+    switch (this) {
+      case LessonType.theory:
+        return 'Theory';
+      case LessonType.drill:
+        return 'Drill';
+      case LessonType.movement:
+        return 'Movement';
+      case LessonType.experiment:
+        return 'Experiment';
+      case LessonType.boss:
+        return 'Boss Battle';
+    }
+  }
+}
+
 /// A single lesson inside a module. Lesson *content* ships with the app
 /// (see lesson_catalog.dart); only user progress lives in Firestore.
 @freezed

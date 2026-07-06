@@ -54,5 +54,18 @@
   "deleteAccountTitle": "Delete account confirmation",
   "deleteAccountMessage": "Are you sure you want to delete account?",
   "doNotHaveAccount": "New here?",
-  "completeLesson": "Complete Lesson"
+  "completeLesson": "Complete Lesson",
+  "welcomeBack": "Welcome Back",
+  "todaysSession": "Today's Session",
+  "startLesson": "Start Lesson",
+  "myProgress": "My Progress",
+  "moduleProgress": "Module Progress",
+  "lessonsCompletedOf": "{} of {} lessons",
+  "nextUp": "Next: {}",
+  "moduleComplete": "Module Complete",
+  "moduleCompleteSubtitle": "You finished every lesson in this module. Replay any lesson to keep your skills sharp.",
+  "replayLessons": "Replay Lessons",
+  "continueTraining": "Continue Training",
+  "recommendedForYou": "Recommended for You",
+  "viewAll": "View All"
 }

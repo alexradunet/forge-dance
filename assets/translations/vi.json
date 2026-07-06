@@ -54,5 +54,18 @@
   "deleteAccountTitle": "Xác nhận xoá tài khoản",
   "deleteAccountMessage": "Bạn có chắc chắn muốn xoá tài khoản?",
   "doNotHaveAccount": "Bạn mới ở đây?",
-  "completeLesson": "Hoàn thành bài học"
+  "completeLesson": "Hoàn thành bài học",
+  "welcomeBack": "Chào mừng trở lại",
+  "todaysSession": "Buổi tập hôm nay",
+  "startLesson": "Bắt đầu bài học",
+  "myProgress": "Tiến độ của tôi",
+  "moduleProgress": "Tiến độ chương",
+  "lessonsCompletedOf": "{} / {} bài học",
+  "nextUp": "Tiếp theo: {}",
+  "moduleComplete": "Hoàn thành chương",
+  "moduleCompleteSubtitle": "Bạn đã hoàn thành mọi bài học trong chương này. Hãy ôn lại bài học bất kỳ để giữ vững kỹ năng.",
+  "replayLessons": "Ôn lại bài học",
+  "continueTraining": "Tiếp tục luyện tập",
+  "recommendedForYou": "Đề xuất cho bạn",
+  "viewAll": "Xem tất cả"
 }

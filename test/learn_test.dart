@@ -84,6 +84,33 @@ void main() {
       expect(state.currentLesson, lessons[1]);
     });
 
+    test('completedCount and moduleProgress derive from progress', () async {
+      final container = containerWith(
+        FakeProgressRepository({
+          lessons[0].id: LessonProgress(
+            lessonId: lessons[0].id,
+            status: LessonStatus.completed,
+            progress: 1.0,
+          ),
+          lessons[1].id: LessonProgress(
+            lessonId: lessons[1].id,
+            status: LessonStatus.completed,
+            progress: 1.0,
+          ),
+          lessons[2].id: LessonProgress(
+            lessonId: lessons[2].id,
+            status: LessonStatus.inProgress,
+          ),
+        }),
+      );
+
+      final state = await container.read(learnViewModelProvider.future);
+
+      expect(state.completedCount, 2);
+      expect(state.moduleProgress, closeTo(2 / lessons.length, 0.0001));
+      expect(state.currentLesson, lessons[2]);
+    });
+
     test('startLesson marks in-progress but never downgrades completed',
         () async {
       final repository = FakeProgressRepository();
