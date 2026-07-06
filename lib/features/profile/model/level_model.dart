@@ -1,4 +1,8 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+
+import '../../../generated/locale_keys.g.dart';
+import '../../stats/model/stats_rules.dart';
 
 enum LevelStatus {
   locked,
@@ -16,6 +20,9 @@ class LevelRequirement {
   });
 }
 
+/// A belt on the mastery ladder. Statuses and progress are derived from the
+/// user's real XP (see features/stats/model/stats_rules.dart) — there is no
+/// mock level data anymore.
 class DanceLevel {
   final int id;
   final String name;
@@ -23,102 +30,72 @@ class DanceLevel {
   final LevelStatus status;
   final List<LevelRequirement> requirements;
 
+  /// 0.0–1.0 progress towards the NEXT belt (1.0 once passed).
+  final double progress;
+
+  /// Cumulative XP needed to reach this belt.
+  final int xpThreshold;
+
   const DanceLevel({
     required this.id,
     required this.name,
     required this.color,
     required this.status,
     required this.requirements,
+    this.progress = 0.0,
+    this.xpThreshold = 0,
   });
 
   bool get isLocked => status == LevelStatus.locked;
   bool get isCurrent => status == LevelStatus.current;
   bool get isCompleted => status == LevelStatus.completed;
 
-  // Static definition of all levels
-  static List<DanceLevel> getAllLevels() {
+  static const List<Color> _beltColors = [
+    Colors.white,
+    Color(0xFFFFEB3B), // Yellow
+    Color(0xFFFF9800), // Orange
+    Color(0xFF2196F3), // Blue
+    Color(0xFF9C27B0), // Violet
+    Color(0xFFF44336), // Red
+    Color(0xFF795548), // Brown
+    Color(0xFF000000), // Black
+  ];
+
+  /// Builds the full belt ladder for a user with [totalXp].
+  static List<DanceLevel> buildAll({required int totalXp}) {
+    final currentIndex = beltIndexForXp(totalXp);
+
     return [
-      const DanceLevel(
-        id: 1,
-        name: 'White',
-        color: Colors.white,
-        status: LevelStatus.completed,
-        requirements: [
-          LevelRequirement(description: 'Complete Intro Course', isMet: true),
-          LevelRequirement(description: 'Learn Basic bounce', isMet: true),
-        ],
-      ),
-      const DanceLevel(
-        id: 2,
-        name: 'Yellow',
-        color: Color(0xFFFFEB3B), // Yellow
-        status: LevelStatus.completed,
-        requirements: [
-          LevelRequirement(description: 'Master 3 Toprocks', isMet: true),
-          LevelRequirement(description: 'Attend 5 Sessions', isMet: true),
-        ],
-      ),
-      const DanceLevel(
-        id: 3,
-        name: 'Orange',
-        color: Color(0xFFFF9800), // Orange
-        status: LevelStatus.completed,
-        requirements: [
-          LevelRequirement(description: 'Learn 6-Step', isMet: true),
-          LevelRequirement(description: 'Practice 10 hours', isMet: true),
-        ],
-      ),
-      const DanceLevel(
-        id: 4,
-        name: 'Blue',
-        color: Color(0xFF2196F3), // Blue
-        status: LevelStatus.current,
-        requirements: [
-          LevelRequirement(description: 'Master Windmill', isMet: false),
-          LevelRequirement(description: 'Win a Battle', isMet: false),
-          LevelRequirement(description: 'Create a Set', isMet: true),
-        ],
-      ),
-      const DanceLevel(
-        id: 5,
-        name: 'Violet',
-        color: Color(0xFF9C27B0), // Violet
-        status: LevelStatus.locked,
-        requirements: [
-          LevelRequirement(description: 'Master Headspin', isMet: false),
-          LevelRequirement(description: 'Judge a Battle', isMet: false),
-        ],
-      ),
-      const DanceLevel(
-        id: 6,
-        name: 'Red',
-        color: Color(0xFFF44336), // Red
-        status: LevelStatus.locked,
-        requirements: [
-          LevelRequirement(description: 'Master Airflare', isMet: false),
-          LevelRequirement(description: 'Win National Battle', isMet: false),
-        ],
-      ),
-      const DanceLevel(
-        id: 7,
-        name: 'Brown',
-        color: Color(0xFF795548), // Brown
-        status: LevelStatus.locked,
-        requirements: [
-          LevelRequirement(description: 'Teach 50 Students', isMet: false),
-          LevelRequirement(description: 'Community Contribution', isMet: false),
-        ],
-      ),
-      const DanceLevel(
-        id: 8,
-        name: 'Black',
-        color: Color(0xFF000000), // Black
-        status: LevelStatus.locked,
-        requirements: [
-          LevelRequirement(description: 'Legendary Status', isMet: false),
-          LevelRequirement(description: 'Hall of Fame', isMet: false),
-        ],
-      ),
+      for (var i = 0; i < beltNames.length; i++)
+        DanceLevel(
+          id: i + 1,
+          name: beltNames[i],
+          color: _beltColors[i],
+          status: i < currentIndex
+              ? LevelStatus.completed
+              : i == currentIndex
+                  ? LevelStatus.current
+                  : LevelStatus.locked,
+          progress: _progressTowardsNext(totalXp, i, currentIndex),
+          xpThreshold: beltThresholds[i],
+          requirements: [
+            LevelRequirement(
+              description: LocaleKeys.reachXpRequirement
+                  .tr(args: ['${beltThresholds[i]}']),
+              isMet: totalXp >= beltThresholds[i],
+            ),
+          ],
+        ),
     ];
+  }
+
+  static double _progressTowardsNext(int totalXp, int index, int currentIndex) {
+    if (index < currentIndex) return 1.0;
+    if (index > currentIndex) return 0.0;
+    if (index == beltThresholds.length - 1) return 1.0; // max belt
+
+    final span = beltThresholds[index + 1] - beltThresholds[index];
+    if (span <= 0) return 1.0;
+    return (totalXp - beltThresholds[index]) / span;
   }
 }

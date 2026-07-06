@@ -1,9 +1,14 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../constants/constants.dart';
 import '../../../../routing/routes.dart';
 import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../generated/locale_keys.g.dart';
+import '../../../stats/model/user_stats.dart';
+import '../../../stats/ui/view_model/user_stats_provider.dart';
 import '../../model/profile.dart';
 import '../../ui/view_model/profile_view_model.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
@@ -11,7 +16,7 @@ import '../../../../design_system/atoms/avatars/fg_avatar.dart';
 import '../../../../design_system/atoms/visuals/fg_background.dart';
 import '../../ui/widgets/level_grid.dart';
 import '../../model/level_model.dart';
-import '../pages/level_progression_page.dart'; // Added import
+import '../pages/level_progression_page.dart';
 
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
@@ -21,23 +26,17 @@ class ProfilePage extends ConsumerStatefulWidget {
 }
 
 class _ProfilePageState extends ConsumerState<ProfilePage> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  void _openLevelProgression(BuildContext context, {int? levelId}) {
-    // Find index of levelId or default to current user level
-    // For now, defaulting to first 'current' level or 0
-    final levels = DanceLevel.getAllLevels();
-    int initialIndex = 0;
-
+  void _openLevelProgression(
+    BuildContext context,
+    List<DanceLevel> levels, {
+    int? levelId,
+  }) {
+    int initialIndex;
     if (levelId != null) {
       initialIndex = levels.indexWhere((l) => l.id == levelId);
     } else {
       initialIndex = levels.indexWhere((l) => l.isCurrent);
     }
-
     if (initialIndex == -1) initialIndex = 0;
 
     showModalBottomSheet(
@@ -54,22 +53,27 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget build(BuildContext context) {
     final profile =
         ref.watch(profileViewModelProvider.select((it) => it.value?.profile));
+    final stats = ref.watch(userStatsProvider).valueOrNull ?? const UserStats();
 
     return Scaffold(
       backgroundColor: Colors.transparent, // Background handled by FgBackground
       body: FgBackground(
-        child: _buildMainContent(profile),
+        child: _buildMainContent(profile, stats),
       ),
     );
   }
 
-  Widget _buildMainContent(Profile? profile) {
+  Widget _buildMainContent(Profile? profile, UserStats stats) {
+    final levels = DanceLevel.buildAll(totalXp: stats.totalXp);
+    final levelSubtitle = LocaleKeys.levelBeltSubtitle
+        .tr(args: ['${stats.level}', stats.beltName]);
+
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
           child: AppHeader(
-            title: 'PROFILE',
-            subtitle: 'Pro Dancer • Lvl 42',
+            title: LocaleKeys.profileTitle.tr().toUpperCase(),
+            subtitle: levelSubtitle,
             rightSlot: IconButton(
               onPressed: () => context.push(Routes.settings),
               icon: const Icon(
@@ -81,17 +85,17 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ),
         SliverToBoxAdapter(
-          child: _buildProfileInfo(profile),
+          child: _buildProfileInfo(profile, stats, levelSubtitle),
         ),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
             child: GestureDetector(
-              onTap: () => _openLevelProgression(context),
+              onTap: () => _openLevelProgression(context, levels),
               child: Row(
                 children: [
                   Text(
-                    'SKILL MASTERY',
+                    LocaleKeys.skillMastery.tr().toUpperCase(),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -118,28 +122,32 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         SliverToBoxAdapter(
           child: LevelGrid(
-            levels: DanceLevel.getAllLevels(),
+            levels: levels,
             onLevelTap: (level) =>
-                _openLevelProgression(context, levelId: level.id),
+                _openLevelProgression(context, levels, levelId: level.id),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildProfileInfo(Profile? profile) {
+  Widget _buildProfileInfo(
+    Profile? profile,
+    UserStats stats,
+    String levelSubtitle,
+  ) {
     return Column(
       children: [
         const SizedBox(height: 24),
         FgAvatar(
           imageUrl: profile?.avatar,
-          level: 42,
+          level: stats.level,
           size: 128,
           borderColor: AppColors.legendGold,
         ),
         const SizedBox(height: 20),
         Text(
-          profile?.name ?? 'Alex "Pulse" Chen',
+          profile?.name ?? Constants.defaultName,
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -149,7 +157,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Lvl 42 • Pro Dancer',
+          levelSubtitle,
           style: TextStyle(
             fontSize: 12,
             fontFamily: 'JetBrains Mono',

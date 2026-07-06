@@ -1,8 +1,12 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../constants/constants.dart';
+import '../../../../routing/routes.dart';
+import '../../../stats/model/user_stats.dart';
+import '../../../stats/ui/view_model/user_stats_provider.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../design_system/tokens/app_typography.dart';
 import '../../../../design_system/atoms/progress/fg_progress_bar.dart';
@@ -47,6 +51,7 @@ class HomePage extends ConsumerWidget {
   Widget _buildContent(BuildContext context, WidgetRef ref, LearnState state) {
     final profileName =
         ref.watch(profileViewModelProvider).valueOrNull?.profile?.name;
+    final stats = ref.watch(userStatsProvider).valueOrNull ?? const UserStats();
 
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
@@ -68,9 +73,9 @@ class HomePage extends ConsumerWidget {
           ),
         ),
 
-        // Progress Section
+        // Progress Section (streak / level / XP — taps through to stats)
         SliverToBoxAdapter(
-          child: _buildProgressSection(state),
+          child: _buildProgressSection(context, stats),
         ),
 
         // Continue Training — every module the user is partway through
@@ -110,9 +115,6 @@ class HomePage extends ConsumerWidget {
         : name.trim();
     return source.toUpperCase().replaceAll(RegExp(r'\s+'), '_');
   }
-
-  String _moduleTag(Module module) =>
-      module.subtitle.split(' • ').first.toUpperCase();
 
   String _lessonsCompletedLabel(LearnState state, Module module) {
     return LocaleKeys.lessonsCompletedOf.tr(
@@ -231,10 +233,7 @@ class HomePage extends ConsumerWidget {
     );
   }
 
-  Widget _buildProgressSection(LearnState state) {
-    final current = state.currentLesson;
-    final percent = (state.moduleProgress * 100).round();
-
+  Widget _buildProgressSection(BuildContext context, UserStats stats) {
     return Padding(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -246,85 +245,98 @@ class HomePage extends ConsumerWidget {
                 .copyWith(color: AppColors.textMain, fontSize: 20),
           ),
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceCard,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withOpacity(0.05)),
-              boxShadow: [AppShadows.shadowCard],
-            ),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 40,
-                          height: 40,
-                          decoration: BoxDecoration(
-                            color: AppColors.surfaceDark,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                                color: Colors.white.withOpacity(0.05)),
+          GestureDetector(
+            onTap: () => context.push(Routes.stats),
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.surfaceCard,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: Colors.white.withOpacity(0.05)),
+                boxShadow: [AppShadows.shadowCard],
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            width: 40,
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: AppColors.surfaceDark,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                  color: Colors.white.withOpacity(0.05)),
+                            ),
+                            child: const FgIcon(
+                              icon: Icons.local_fire_department,
+                              color: AppColors.forgeFire,
+                              size: 20,
+                            ),
                           ),
-                          child: const FgIcon(
-                            icon: Icons.local_fire_department,
-                            color: AppColors.forgeFire,
-                            size: 20,
+                          const SizedBox(width: 12),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                  LocaleKeys.dayN
+                                      .tr(args: ['${stats.streakCount}'])
+                                      .toUpperCase(),
+                                  style: AppTypography.body
+                                      .copyWith(fontWeight: FontWeight.bold)),
+                              Text(LocaleKeys.currentStreak.tr().toUpperCase(),
+                                  style: AppTypography.label.copyWith(
+                                      color: AppColors.textMuted, fontSize: 9)),
+                            ],
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('$percent%',
-                                style: AppTypography.body
-                                    .copyWith(fontWeight: FontWeight.bold)),
-                            Text(
-                                LocaleKeys.moduleProgress.tr().toUpperCase(),
-                                style: AppTypography.label.copyWith(
-                                    color: AppColors.textMuted, fontSize: 9)),
-                          ],
-                        ),
-                      ],
-                    ),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(_moduleTag(state.activeModule),
-                            style: AppTypography.body
-                                .copyWith(fontWeight: FontWeight.bold)),
-                        Text(state.activeModule.title.toUpperCase(),
-                            style: AppTypography.label.copyWith(
-                                color: AppColors.textMuted, fontSize: 9)),
-                      ],
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                FgProgressBar(value: state.moduleProgress, height: 10),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                        _lessonsCompletedLabel(state, state.activeModule)
-                            .toUpperCase(),
-                        style: AppTypography.caption
-                            .copyWith(color: AppColors.textMuted)),
-                    Text(
-                        current == null
-                            ? LocaleKeys.moduleComplete.tr().toUpperCase()
-                            : LocaleKeys.nextUp
-                                .tr(args: [current.title]).toUpperCase(),
-                        style: AppTypography.caption
-                            .copyWith(color: AppColors.textMuted)),
-                  ],
-                ),
-              ],
+                        ],
+                      ),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Text(
+                              LocaleKeys.levelLabel
+                                  .tr(args: ['${stats.level}'])
+                                  .toUpperCase(),
+                              style: AppTypography.body
+                                  .copyWith(fontWeight: FontWeight.bold)),
+                          Text(
+                              LocaleKeys.beltNameLabel
+                                  .tr(args: [stats.beltName])
+                                  .toUpperCase(),
+                              style: AppTypography.label.copyWith(
+                                  color: AppColors.textMuted, fontSize: 9)),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  FgProgressBar(value: stats.levelProgress, height: 10),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                          LocaleKeys.xpValue
+                              .tr(args: ['${stats.totalXp}'])
+                              .toUpperCase(),
+                          style: AppTypography.caption
+                              .copyWith(color: AppColors.textMuted)),
+                      Text(
+                          stats.nextLevelXp == null
+                              ? LocaleKeys.maxLevelReached.tr().toUpperCase()
+                              : LocaleKeys.nextLevelXp
+                                  .tr(args: ['${stats.nextLevelXp}'])
+                                  .toUpperCase(),
+                          style: AppTypography.caption
+                              .copyWith(color: AppColors.textMuted)),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ],

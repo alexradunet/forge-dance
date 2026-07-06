@@ -15,10 +15,18 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == userId;
     }
 
+    // Gamification stats are optional fields but must be sane when present.
+    function validStats(data) {
+      return (!('xp' in data) || (data.xp is int && data.xp >= 0))
+        && (!('streakCount' in data) || (data.streakCount is int && data.streakCount >= 0))
+        && (!('lastActivityDate' in data) || data.lastActivityDate is string);
+    }
+
     match /users/{userId} {
       // The profile document's id field must always mirror the auth uid.
       allow create, update: if ownsUserDocument(userId)
-        && request.resource.data.id == userId;
+        && request.resource.data.id == userId
+        && validStats(request.resource.data);
       allow read, delete: if ownsUserDocument(userId);
 
       // Per-lesson progress: users/{uid}/progress/{lessonId}.

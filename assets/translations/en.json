@@ -81,5 +81,21 @@
   "emptyLibrarySubtitle": "Start a lesson to add it to your library.",
   "statusCompleted": "Completed",
   "statusInProgress": "In Progress",
-  "noResults": "Nothing matches your search"
+  "noResults": "Nothing matches your search",
+  "currentStreak": "Current Streak",
+  "totalXpLabel": "Total XP",
+  "statsSubtitle": "Performance Metrics",
+  "levelLabel": "Level {}",
+  "nextLevelXp": "Next level: {} XP",
+  "maxLevelReached": "Max level reached",
+  "xpValue": "{} XP",
+  "reachXpRequirement": "Reach {} XP",
+  "profileTitle": "Profile",
+  "skillMastery": "Skill Mastery",
+  "levelProgression": "Level Progression",
+  "lockedLabel": "Locked",
+  "beltNameLabel": "{} Belt",
+  "levelBeltSubtitle": "Lvl {} • {} Belt",
+  "dayN": "Day {}",
+  "daysValue": "{} Days"
 }

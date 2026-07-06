@@ -1,81 +1,102 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../../design_system/tokens/app_colors.dart';
-import '../../../profile/ui/widgets/profile_stats.dart';
+import '../../../../design_system/atoms/progress/fg_spinner.dart';
 import '../../../../design_system/atoms/visuals/fg_background.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
+import '../../../../generated/locale_keys.g.dart';
+import '../../../common/ui/widgets/common_error.dart';
+import '../../../profile/ui/widgets/profile_stats.dart';
+import '../../model/stats_rules.dart';
+import '../../model/user_stats.dart';
+import '../../ui/view_model/user_stats_provider.dart';
 
-class StatsPage extends StatelessWidget {
+/// Performance metrics: real streak and XP derived from lesson progress and
+/// the persisted profile stats.
+class StatsPage extends ConsumerWidget {
   const StatsPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stats = ref.watch(userStatsProvider);
+
     return Scaffold(
       backgroundColor: Colors.transparent, // Background handled by FgBackground
       body: FgBackground(
-        child: _buildMainContent(context),
+        child: stats.when(
+          loading: () => const Center(child: FgSpinner()),
+          error: (_, __) => const CommonError(),
+          data: (stats) => _buildMainContent(context, stats),
+        ),
       ),
     );
   }
 
-  Widget _buildNotificationIcon() {
-    return Stack(
-      children: [
-        IconButton(
-          onPressed: () {},
-          icon: const Icon(
-            Icons.notifications_outlined,
-            color: Colors.white,
-          ),
-        ),
-        Positioned(
-          top: 12,
-          right: 12,
-          child: Container(
-            width: 8,
-            height: 8,
-            decoration: BoxDecoration(
-              color: AppColors.forgeFire,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: AppColors.bgDeep,
-                width: 2,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildMainContent(BuildContext context) {
+  Widget _buildMainContent(BuildContext context, UserStats stats) {
     return CustomScrollView(slivers: [
       SliverToBoxAdapter(
         child: AppHeader(
-          title: 'MY PROGRESS',
-          subtitle: 'Performance Metrics',
-          rightSlot: _buildNotificationIcon(),
+          title: LocaleKeys.myProgress.tr().toUpperCase(),
+          subtitle: LocaleKeys.statsSubtitle.tr(),
+          onBack: () => Navigator.of(context).pop(),
         ),
       ),
-      const SliverToBoxAdapter(
+      SliverToBoxAdapter(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Row(
             children: [
               Expanded(
                 child: ProfileStatCard(
-                  label: 'Current Streak',
-                  value: '14 Days',
+                  label: LocaleKeys.currentStreak.tr(),
+                  value: LocaleKeys.daysValue
+                      .tr(args: ['${stats.streakCount}']),
                   icon: Icons.local_fire_department,
                   iconColor: AppColors.forgeFire,
                 ),
               ),
-              SizedBox(width: 16),
+              const SizedBox(width: 16),
               Expanded(
                 child: ProfileStatCard(
-                  label: 'Total XP',
-                  value: '2.4k',
+                  label: LocaleKeys.totalXpLabel.tr(),
+                  value: formatXp(stats.totalXp),
                   icon: Icons.bolt,
                   iconColor: AppColors.electricBlue,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      SliverToBoxAdapter(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Row(
+            children: [
+              Expanded(
+                child: ProfileStatCard(
+                  label: LocaleKeys.levelLabel.tr(args: ['${stats.level}']),
+                  value: LocaleKeys.beltNameLabel.tr(args: [stats.beltName]),
+                  icon: Icons.military_tech,
+                  iconColor: AppColors.legendGold,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: ProfileStatCard(
+                  label: stats.nextLevelXp == null
+                      ? LocaleKeys.maxLevelReached.tr()
+                      : LocaleKeys.nextLevelXp
+                          .tr(args: ['${stats.nextLevelXp}']),
+                  value: stats.nextLevelXp == null
+                      ? formatXp(stats.totalXp)
+                      : LocaleKeys.xpValue.tr(
+                          args: ['${stats.nextLevelXp! - stats.totalXp}'],
+                        ),
+                  icon: Icons.trending_up,
+                  iconColor: AppColors.mysticPurple,
                 ),
               ),
             ],

@@ -81,5 +81,21 @@
   "emptyLibrarySubtitle": "Bắt đầu một bài học để thêm vào thư viện của bạn.",
   "statusCompleted": "Đã hoàn thành",
   "statusInProgress": "Đang học",
-  "noResults": "Không tìm thấy kết quả phù hợp"
+  "noResults": "Không tìm thấy kết quả phù hợp",
+  "currentStreak": "Chuỗi ngày tập",
+  "totalXpLabel": "Tổng XP",
+  "statsSubtitle": "Chỉ số luyện tập",
+  "levelLabel": "Cấp {}",
+  "nextLevelXp": "Cấp tiếp theo: {} XP",
+  "maxLevelReached": "Đã đạt cấp tối đa",
+  "xpValue": "{} XP",
+  "reachXpRequirement": "Đạt {} XP",
+  "profileTitle": "Hồ sơ",
+  "skillMastery": "Trình độ kỹ năng",
+  "levelProgression": "Lộ trình cấp bậc",
+  "lockedLabel": "Đã khóa",
+  "beltNameLabel": "Đai {}",
+  "levelBeltSubtitle": "Cấp {} • Đai {}",
+  "dayN": "Ngày {}",
+  "daysValue": "{} ngày"
 }

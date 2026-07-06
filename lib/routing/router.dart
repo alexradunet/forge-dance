@@ -15,6 +15,7 @@ import '../features/profile/ui/account_info_screen.dart';
 import '../features/profile/ui/appearances_screen.dart';
 import '../features/profile/ui/languages_screen.dart';
 import '../features/settings/presentation/pages/settings_page.dart';
+import '../features/stats/presentation/pages/stats_page.dart';
 import 'app_redirect.dart';
 import 'routes.dart';
 
@@ -150,5 +151,9 @@ final List<GoRoute> _routes = [
         const SettingsPage(),
         direction: SlideDirection.right,
       ),
+    ),
+    GoRoute(
+      path: Routes.stats,
+      pageBuilder: (context, state) => state.slidePage(const StatsPage()),
     ),
   ];

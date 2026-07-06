@@ -32,6 +32,9 @@ class ProfileViewModel extends _$ProfileViewModel {
     String? name,
     String? avatar,
     int? diamond,
+    int? xp,
+    int? streakCount,
+    String? lastActivityDate,
   }) async {
     final previousProfile = state.value?.profile;
     state = const AsyncValue.loading();
@@ -45,6 +48,10 @@ class ProfileViewModel extends _$ProfileViewModel {
             name: name ?? currentProfile.name,
             avatar: newAvatarPath ?? currentProfile.avatar,
             diamond: diamond ?? currentProfile.diamond,
+            xp: xp ?? currentProfile.xp,
+            streakCount: streakCount ?? currentProfile.streakCount,
+            lastActivityDate:
+                lastActivityDate ?? currentProfile.lastActivityDate,
           ) ??
           Profile(
             id: id,
@@ -52,6 +59,9 @@ class ProfileViewModel extends _$ProfileViewModel {
             name: name,
             avatar: newAvatarPath,
             diamond: diamond,
+            xp: xp,
+            streakCount: streakCount,
+            lastActivityDate: lastActivityDate,
           );
       debugPrint(
           '${Constants.tag} [ProfileViewModel.updateProfile] $updatedProfile');

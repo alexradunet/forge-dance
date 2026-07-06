@@ -164,6 +164,13 @@ class ProfileRepository {
     if (profile.name != null) payload['name'] = profile.name;
     if (profile.job != null) payload['job'] = profile.job;
     if (profile.diamond != null) payload['diamond'] = profile.diamond;
+    if (profile.xp != null) payload['xp'] = profile.xp;
+    if (profile.streakCount != null) {
+      payload['streakCount'] = profile.streakCount;
+    }
+    if (profile.lastActivityDate != null) {
+      payload['lastActivityDate'] = profile.lastActivityDate;
+    }
 
     final avatar = profile.avatar;
     if (avatar != null && avatar.isUrl) {

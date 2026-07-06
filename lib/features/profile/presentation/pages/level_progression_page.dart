@@ -1,12 +1,21 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:forge_dance/design_system/molecules/cards/fg_interactive_card.dart';
+
+import '../../../../design_system/atoms/progress/fg_spinner.dart';
 import '../../../../design_system/templates/swipeable_card_screen_template.dart';
 import '../../../../design_system/tokens/app_typography.dart';
 import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../generated/locale_keys.g.dart';
+import '../../../common/ui/widgets/common_error.dart';
+import '../../../stats/ui/view_model/user_stats_provider.dart';
 import '../../model/level_model.dart';
 
-class LevelProgressionPage extends StatefulWidget {
+/// Belt ladder viewer — statuses, progress, and XP requirements all derive
+/// from the user's real stats.
+class LevelProgressionPage extends ConsumerWidget {
   final int initialLevelIndex;
   final VoidCallback? onClose;
 
@@ -17,19 +26,51 @@ class LevelProgressionPage extends StatefulWidget {
   });
 
   @override
-  State<LevelProgressionPage> createState() => _LevelProgressionPageState();
+  Widget build(BuildContext context, WidgetRef ref) {
+    final stats = ref.watch(userStatsProvider);
+
+    return stats.when(
+      loading: () => const Scaffold(
+        backgroundColor: AppColors.bgDeep,
+        body: Center(child: FgSpinner()),
+      ),
+      error: (_, __) => const Scaffold(
+        backgroundColor: AppColors.bgDeep,
+        body: CommonError(),
+      ),
+      data: (stats) => _LevelPager(
+        levels: DanceLevel.buildAll(totalXp: stats.totalXp),
+        initialIndex: initialLevelIndex,
+        onClose: onClose,
+      ),
+    );
+  }
 }
 
-class _LevelProgressionPageState extends State<LevelProgressionPage> {
+class _LevelPager extends StatefulWidget {
+  final List<DanceLevel> levels;
+  final int initialIndex;
+  final VoidCallback? onClose;
+
+  const _LevelPager({
+    required this.levels,
+    required this.initialIndex,
+    this.onClose,
+  });
+
+  @override
+  State<_LevelPager> createState() => _LevelPagerState();
+}
+
+class _LevelPagerState extends State<_LevelPager> {
   late final PageController _pageController;
   late int _currentIndex;
-  final List<DanceLevel> _levels = DanceLevel.getAllLevels();
 
   @override
   void initState() {
     super.initState();
-    _currentIndex = widget.initialLevelIndex;
-    _pageController = PageController(initialPage: widget.initialLevelIndex);
+    _currentIndex = widget.initialIndex.clamp(0, widget.levels.length - 1);
+    _pageController = PageController(initialPage: _currentIndex);
   }
 
   @override
@@ -49,12 +90,12 @@ class _LevelProgressionPageState extends State<LevelProgressionPage> {
   @override
   Widget build(BuildContext context) {
     return SwipeableCardScreenTemplate(
-      title: 'SKILL MASTERY',
-      subtitle: 'LEVEL PROGRESSION',
+      title: LocaleKeys.skillMastery.tr().toUpperCase(),
+      subtitle: LocaleKeys.levelProgression.tr().toUpperCase(),
       onBack: widget.onClose ?? () => Navigator.of(context).pop(),
-      progressSteps: _levels.length,
+      progressSteps: widget.levels.length,
       currentStep: _currentIndex,
-      customStepColors: _levels.map((l) => l.color).toList(),
+      customStepColors: widget.levels.map((l) => l.color).toList(),
       onStepClick: _onStepClick,
       children: PageView.builder(
         controller: _pageController,
@@ -64,12 +105,12 @@ class _LevelProgressionPageState extends State<LevelProgressionPage> {
           });
           HapticFeedback.selectionClick();
         },
-        itemCount: _levels.length,
+        itemCount: widget.levels.length,
         itemBuilder: (context, index) {
           return Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: _buildLevelCard(_levels[index]),
+              child: _buildLevelCard(widget.levels[index]),
             ),
           );
         },
@@ -81,19 +122,15 @@ class _LevelProgressionPageState extends State<LevelProgressionPage> {
     final bool isLocked = level.isLocked;
 
     return FgInteractiveCard(
-      title: isLocked ? 'LOCKED' : level.name,
+      title: isLocked ? LocaleKeys.lockedLabel.tr().toUpperCase() : level.name,
       subtitle: level.status.name,
       backgroundImage:
           'https://images.unsplash.com/photo-1547153760-18fc86324498?q=80&w=1000&auto=format&fit=crop',
       level: 'LVL ${level.id}',
       style: isLocked ? '???' : 'MASTERY',
       difficulty: isLocked ? '???' : 'UNLOCKED',
-      progress: level.isCompleted ? 1.0 : (level.isCurrent ? 0.3 : 0.0),
-      // Locked State Visuals
+      progress: level.progress,
       isFavorited: false,
-
-      // If locked, maybe show less info on back?
-      // User said "for those locked show them as locked".
       backTitle: isLocked ? 'LOCKED LEVEL' : 'REQUIREMENTS',
       backSubtitle: 'LEVEL ${level.id}',
       backContent: isLocked
@@ -105,7 +142,8 @@ class _LevelProgressionPageState extends State<LevelProgressionPage> {
                       size: 64, color: AppColors.textMuted),
                   const SizedBox(height: 16),
                   Text(
-                    'Complete previous levels to unlock.',
+                    LocaleKeys.reachXpRequirement
+                        .tr(args: ['${level.xpThreshold}']),
                     textAlign: TextAlign.center,
                     style:
                         AppTypography.body.copyWith(color: AppColors.textMuted),

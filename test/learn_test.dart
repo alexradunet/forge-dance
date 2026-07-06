@@ -4,6 +4,9 @@ import 'package:forge_dance/features/learn/model/lesson_progress.dart';
 import 'package:forge_dance/features/learn/repository/lesson_catalog.dart';
 import 'package:forge_dance/features/learn/repository/progress_repository.dart';
 import 'package:forge_dance/features/learn/ui/view_model/learn_view_model.dart';
+import 'package:forge_dance/features/profile/model/profile.dart';
+import 'package:forge_dance/features/profile/repository/profile_repository.dart';
+import 'package:forge_dance/features/stats/model/stats_rules.dart';
 
 class FakeProgressRepository extends ProgressRepository {
   FakeProgressRepository([Map<String, LessonProgress>? seed])
@@ -21,10 +24,31 @@ class FakeProgressRepository extends ProgressRepository {
   }
 }
 
-ProviderContainer containerWith(FakeProgressRepository repository) {
+/// In-memory profile store so the stats coordinator (triggered by lesson
+/// progress events) never touches SharedPreferences/Firestore in tests.
+class FakeProfileRepository extends ProfileRepository {
+  FakeProfileRepository() : super(auth: null, firestore: null);
+
+  Profile? saved;
+
+  @override
+  Future<Profile?> get() async => saved;
+
+  @override
+  Future<void> update(Profile profile) async {
+    saved = profile;
+  }
+}
+
+ProviderContainer containerWith(
+  FakeProgressRepository repository, {
+  FakeProfileRepository? profileRepository,
+}) {
   final container = ProviderContainer(
     overrides: [
       progressRepositoryProvider.overrideWithValue(repository),
+      profileRepositoryProvider
+          .overrideWithValue(profileRepository ?? FakeProfileRepository()),
     ],
   );
   addTearDown(container.dispose);
@@ -178,6 +202,27 @@ void main() {
       expect(state.recommendedModules.contains(hipHopFoundations), isFalse);
       expect(state.recommendedModules.contains(topRock), isFalse);
       expect(state.recommendedModules.length, 3);
+    });
+
+    test('completing a lesson records XP and streak on the profile',
+        () async {
+      final profileRepository = FakeProfileRepository();
+      final container = containerWith(
+        FakeProgressRepository(),
+        profileRepository: profileRepository,
+      );
+      await container.read(learnViewModelProvider.future);
+
+      // First lesson of the first module is theory → 20 XP.
+      await container
+          .read(learnViewModelProvider.notifier)
+          .completeLesson(lessons.first.id);
+
+      final saved = profileRepository.saved;
+      expect(saved, isNotNull);
+      expect(saved!.xp, 20);
+      expect(saved.streakCount, 1);
+      expect(saved.lastActivityDate, dateKey(DateTime.now()));
     });
 
     test('startLesson marks in-progress but never downgrades completed',

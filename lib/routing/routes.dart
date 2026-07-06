@@ -10,4 +10,5 @@ class Routes {
   static const appearances = '/appearances';
   static const languages = '/languages';
   static const settings = '/settings';
+  static const stats = '/stats';
 }

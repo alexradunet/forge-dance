@@ -1,5 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../../constants/constants.dart';
+import '../../../stats/application/stats_coordinator.dart';
 import '../../model/lesson_progress.dart';
 import '../../repository/lesson_catalog.dart';
 import '../../repository/progress_repository.dart';
@@ -75,5 +78,13 @@ class LearnViewModel extends _$LearnViewModel {
         progress: {...previous.progress, update.lessonId: update},
       ),
     );
+
+    // Best-effort stats sync (XP + streak onto the user doc). A stats
+    // failure must never fail the training flow itself.
+    try {
+      await ref.read(statsCoordinatorProvider).recordTrainingActivity();
+    } catch (error) {
+      debugPrint('${Constants.tag} [LearnViewModel] stats sync failed: $error');
+    }
   }
 }

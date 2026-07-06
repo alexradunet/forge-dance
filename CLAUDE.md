@@ -69,10 +69,11 @@ lib/
 │   ├── home/             # WIRED: dashboard fully derived from profile + learn progress
 │   ├── explore/          # WIRED: catalog by category, live search, real progress
 │   ├── library/          # WIRED: collection = lessons the user started/completed
+│   ├── stats/            # WIRED: XP/belts/streak — pure rules + coordinator + userStatsProvider
 │   ├── firebase/         # Nullable Firebase providers + bootstrap (emulator wiring)
 │   ├── session/          # SessionCoordinator: cross-feature auth ↔ profile orchestration
 │   ├── common/           # Shared widgets, appThemeModeProvider
-│   └── workout | wod | stats | settings | main | onboarding/
+│   └── workout | wod | settings | main | onboarding/
 │                         # PROTOTYPE: hardcoded mock data, no repositories yet
 ├── generated/            # LocaleKeys (generated, gitignored)
 ├── routing/              # go_router: router.dart + routes.dart
@@ -101,7 +102,9 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 
 ### Current state: wired vs prototype
 
-**Authentication**, **profile**, **learn** (module view + lesson player), **home**, **explore**, and **collection/library** all run on real data: the 10-module content catalog ships in code (`lesson_catalog.dart`, lesson ids globally unique and stable) and every progress surface derives from `users/{uid}/progress` via `LearnState` (`activeModule` selection, per-module helpers, `collectedLessons`, `inProgressModules`, `recommendedModules`). Still prototype (hardcoded mock data): training session/workout, WOD, stats, level progression. The explore/collection filter sheets are cosmetic until modules carry difficulty metadata. To productionize a prototype screen: extract models → create a repository → add state/view model → replace inline data, following the learn feature as the template.
+**Authentication**, **profile**, **learn** (module view + lesson player), **home**, **explore**, **collection/library**, and **stats** (stats page, level progression, belt grid, home progress card) all run on real data: the 10-module content catalog ships in code (`lesson_catalog.dart`, lesson ids globally unique and stable) and every progress surface derives from `users/{uid}/progress` via `LearnState`. Still prototype (hardcoded mock data): training session/workout, WOD. The explore/collection filter sheets are cosmetic until modules carry difficulty metadata. To productionize a prototype screen: extract models → create a repository → add state/view model → replace inline data, following the learn feature as the template.
+
+**Gamification rules** live in `features/stats/model/stats_rules.dart` as pure functions (XP per lesson type, belt thresholds, streak date logic) with a full test matrix. XP is always derived from lesson progress — the `xp` field on the user doc is a denormalized mirror written by `StatsCoordinator` after each training event, never a source of truth. Belt thresholds are calibrated so completing the whole catalog equals Black Belt; a test enforces this, so catalog changes require deliberate re-calibration.
 
 **Dead code — do not extend by accident**: `features/home/ui/home_screen.dart`, `features/home/ui/home_screen_v2.dart`, `features/explore/ui/explore_screen.dart`, and `features/wod/ui/wod_session_screen.dart` are not imported anywhere. The live screens are in `presentation/pages/` and `features/learn/ui/`.
 
@@ -117,7 +120,7 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 
 - Providers in `features/firebase/repository/firebase_providers.dart` return **null** when `Firebase.apps.isEmpty` (Linux, unconfigured environments). Everything downstream must tolerate null and degrade gracefully — this is why repositories take nullable dependencies, and it's also what makes test fakes trivial.
 - Firestore schema (all owner-only, validated on write in `firestore.rules`):
-  - `users/{userId}` — profile (`id`, `email`, `name`, `job`, `avatar`, `diamond`, `createdAt`, `updatedAt`); `id` must equal the auth uid
+  - `users/{userId}` — profile (`id`, `email`, `name`, `job`, `avatar`, `diamond`, `createdAt`, `updatedAt`) plus gamification stats (`xp`, `streakCount`, `lastActivityDate` yyyy-MM-dd); `id` must equal the auth uid, stats fields type-checked when present
   - `users/{userId}/progress/{lessonId}` — lesson progress (`lessonId`, `status`, `progress`, `updatedAt`); doc id must equal `lessonId`, `status` whitelisted to the `LessonStatus` enum names
 - Rules changes require `firebase deploy --only firestore:rules` — an undeployed rules change is the usual cause of `permission-denied`.
 - Firestore access is typed: create one `withConverter` reference per collection inside the repository (see `ProgressRepository._progressRef`). Normalize `Timestamp` → ISO-8601 string before `fromJson`.
