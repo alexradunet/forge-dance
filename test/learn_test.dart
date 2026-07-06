@@ -276,14 +276,21 @@ void main() {
       }
     });
 
-    test('module one is fully hand-authored (no default fallbacks)', () {
-      for (final lesson in hipHopFoundations.lessons) {
-        expect(lesson.steps, isNotEmpty,
-            reason: '${lesson.id} should have authored steps');
+    test('modules one and two are fully hand-authored (no default fallbacks)',
+        () {
+      for (final module in [hipHopFoundations, bodyControl1]) {
+        for (final lesson in module.lessons) {
+          expect(lesson.steps, isNotEmpty,
+              reason: '${lesson.id} should have authored steps');
+        }
       }
       expect(
         hipHopFoundations.lessons[1].steps.first.title,
         'FIND THE BEAT',
+      );
+      expect(
+        bodyControl1.lessons.first.steps.first.title,
+        'FIND YOUR CENTER',
       );
     });
   });
