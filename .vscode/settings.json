@@ -1,0 +1,48 @@
+{
+  "dart.flutterSdkPath": ".fvm/versions/3.35.5",
+  "dart.mcpServer": true,
+  "search.exclude": {
+    "**/.fvm": true,
+    "**/*.g.dart": true,
+    "**/*.freezed.dart": true,
+    "lib/generated/**": true,
+    "build/**": true,
+    ".dart_tool/**": true
+  },
+  "files.watcherExclude": {
+    "**/.fvm": true,
+    "**/*.g.dart": true,
+    "**/*.freezed.dart": true,
+    "build/**": true,
+    ".dart_tool/**": true
+  },
+  "dart.lineLength": 80,
+  "dart.previewFlutterUiGuides": true,
+  "dart.previewFlutterUiGuidesCustomTracking": true,
+  "dart.openDevTools": "flutter",
+  "dart.runPubGetOnPubspecChanges": true,
+  "dart.buildRunnerAdditionalArgs": [
+    "--delete-conflicting-outputs"
+  ],
+  "dart.flutterHotReloadOnSave": "manual",
+  "editor.formatOnSave": true,
+  "editor.rulers": [
+    80
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "explicit"
+  },
+  "[dart]": {
+    "editor.formatOnSave": true,
+    "editor.selectionHighlight": false,
+    "editor.suggestSelection": "first",
+    "editor.tabCompletion": "onlySnippets",
+    "editor.wordBasedSuggestions": "off"
+  },
+  "[yaml]": {
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "editor.autoIndent": "advanced"
+  }
+}

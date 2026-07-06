@@ -18,7 +18,8 @@
 migrate_working_dir/
 
 # Editor/AI agent local state
-.cursor/
+.cursor/*
+!.cursor/mcp.json
 .cursorrules
 
 # IntelliJ related
@@ -31,6 +32,9 @@ migrate_working_dir/
 # VS Code which you may wish to be included in version control, so this line
 # is commented out by default.
 #.vscode/
+
+# FVM (version pin lives in .fvmrc; SDK symlink is local)
+.fvm/
 
 # Flutter/Dart/Pub related
 **/doc/api/

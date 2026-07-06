@@ -1,0 +1,71 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Chrome (Debug)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "deviceId": "chrome"
+    },
+    {
+      "name": "Chrome (Firebase Emulator)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "deviceId": "chrome",
+      "toolArgs": ["--dart-define=USE_FIREBASE_EMULATOR=true"]
+    },
+    {
+      "name": "Chrome (Firebase Emulator + Start Emulators)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "deviceId": "chrome",
+      "toolArgs": ["--dart-define=USE_FIREBASE_EMULATOR=true"],
+      "preLaunchTask": "forge: firebase emulators"
+    },
+    {
+      "name": "Linux Desktop (Debug)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "deviceId": "linux"
+    },
+    {
+      "name": "Android (Debug)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "deviceId": "android"
+    },
+    {
+      "name": "Chrome (Profile)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "deviceId": "chrome",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "Chrome (Release)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "deviceId": "chrome",
+      "flutterMode": "release"
+    },
+    {
+      "name": "All Tests",
+      "type": "dart",
+      "request": "launch",
+      "program": "test/"
+    },
+    {
+      "name": "Current Test File",
+      "type": "dart",
+      "request": "launch",
+      "program": "${file}"
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    "dart-code.dart-code",
+    "dart-code.flutter",
+    "usernamehw.errorlens",
+    "redhat.vscode-yaml",
+    "gruntfuggly.todo-tree",
+    "toba.vsfire"
+  ],
+  "unwantedRecommendations": [
+    "ms-vscode.cpptools",
+    "ms-vscode.cmake-tools"
+  ]
+}

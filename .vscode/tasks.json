@@ -1,0 +1,124 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "forge: checks (CI pipeline)",
+      "type": "shell",
+      "command": "bash tool/checks.sh",
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "forge: codegen",
+      "dependsOn": ["forge: localization", "forge: build_runner"],
+      "dependsOrder": "sequence",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "forge: localization",
+      "type": "shell",
+      "command": "fvm flutter pub run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir assets/translations",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "forge: build_runner",
+      "type": "shell",
+      "command": "fvm flutter pub run build_runner build --delete-conflicting-outputs",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "forge: build_runner watch",
+      "type": "shell",
+      "command": "fvm flutter pub run build_runner watch --delete-conflicting-outputs",
+      "isBackground": true,
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": {
+        "owner": "dart",
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "Synchronizing|Watching for file changes"
+        }
+      }
+    },
+    {
+      "label": "forge: custom_lint",
+      "type": "shell",
+      "command": "fvm flutter pub run custom_lint",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "forge: analyze",
+      "type": "shell",
+      "command": "fvm flutter analyze",
+      "group": "test",
+      "problemMatcher": ["$dart-analyze"]
+    },
+    {
+      "label": "forge: test",
+      "type": "shell",
+      "command": "fvm flutter test",
+      "group": "test",
+      "problemMatcher": []
+    },
+    {
+      "label": "forge: build web (release)",
+      "type": "shell",
+      "command": "fvm flutter build web --release",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "forge: firebase emulators",
+      "type": "shell",
+      "command": "firebase emulators:start --only auth,firestore",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": {
+        "owner": "firebase",
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".",
+          "endsPattern": "All emulators ready"
+        }
+      }
+    },
+    {
+      "label": "forge: deploy firestore rules",
+      "type": "shell",
+      "command": "firebase deploy --only firestore:rules",
+      "problemMatcher": []
+    },
+    {
+      "label": "forge: pub get",
+      "type": "shell",
+      "command": "fvm flutter pub get",
+      "problemMatcher": []
+    }
+  ]
+}

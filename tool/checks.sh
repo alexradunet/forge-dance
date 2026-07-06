@@ -6,23 +6,29 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+if command -v fvm >/dev/null 2>&1; then
+  FLUTTER=(fvm flutter)
+else
+  FLUTTER=(flutter)
+fi
+
 echo "==> flutter pub get"
-flutter pub get
+"${FLUTTER[@]}" pub get
 
 echo "==> generate localization keys"
-flutter pub run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir assets/translations
+"${FLUTTER[@]}" pub run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir assets/translations
 
 echo "==> generate riverpod/freezed/json code"
-flutter pub run build_runner build --delete-conflicting-outputs
+"${FLUTTER[@]}" pub run build_runner build --delete-conflicting-outputs
 
 echo "==> riverpod lints (custom_lint)"
-flutter pub run custom_lint
+"${FLUTTER[@]}" pub run custom_lint
 
 echo "==> flutter analyze"
-flutter analyze
+"${FLUTTER[@]}" analyze
 
 echo "==> flutter test"
-flutter test
+"${FLUTTER[@]}" test
 
 echo ""
 echo "ALL CHECKS PASSED"
