@@ -4,7 +4,7 @@ Guidance for Claude Code when working in this repository. `AGENTS.md` contains t
 
 ## What this app is
 
-Forge Dance is a gamified dance-training app ("THE STAGE IS YOURS") built with Flutter. Users sign in, follow structured lesson paths (modules → lessons → movements, with boss nodes), run training/WOD sessions with BPM control, and track levels, diamonds, and achievements. Visual identity is dark and game-like: forge fire orange `#FF4500`, electric blue, Bebas Neue display type.
+Forge Dance is a gamified dance-training app ("THE STAGE IS YOURS") built with Flutter. Users sign in, follow structured lesson paths (modules → lessons → movements, with boss nodes), run daily training/WOD sessions, and track levels, diamonds, and achievements. Visual identity is dark and game-like: forge fire orange `#FF4500`, electric blue, Bebas Neue display type.
 
 - Package name: `forge_dance` (imports: `package:forge_dance/...`)
 - Platforms: Android, iOS, macOS, web, Windows (Firebase configured); Linux runs but skips Firebase entirely
@@ -24,7 +24,7 @@ Never commit generated files.
 
 ## Commands
 
-**One command verifies everything** (codegen → custom_lint → analyze → test). Run it before every hand-off; CI runs exactly the same script, so local green == CI green:
+**One command verifies everything** (codegen → custom_lint → analyze → test). Run it before every hand-off; CI mirrors the same steps, so local green should match CI before the release-build step:
 
 ```bash
 bash tool/checks.sh
@@ -46,7 +46,7 @@ Individual commands when you need just one step:
 | Web release build | `flutter build web --release` |
 | Deploy Firestore rules | `firebase deploy --only firestore:rules` |
 
-CI (`.github/workflows/flutter.yml`, Flutter 3.35.5) runs `tool/checks.sh` + a web release build on every push to `main` — and commits land directly on `main`, so breakage is immediately visible. Note: `custom_lint` (Riverpod lints) is NOT part of `flutter analyze` — the checks script runs it explicitly.
+CI (`.github/workflows/flutter.yml`, Flutter 3.35.5) runs the same dependency, codegen, custom_lint, analyze, and test sequence as `tool/checks.sh`, then adds a web release build on every push/PR to `main`. Note: `custom_lint` (Riverpod lints) is NOT part of `flutter analyze` — the checks script runs it explicitly.
 
 ## Architecture
 
@@ -96,13 +96,15 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 - **Auth state is a stream**: `authStateChangesProvider` (keepAlive) wraps `FirebaseAuth.authStateChanges()` and is the single source of truth. `AuthenticationViewModel` derives from it; nothing stores its own logged-in flag.
 - **All navigation guarding lives in `lib/routing/app_redirect.dart`** (`computeRedirect`, a pure function with a full test matrix in `test/app_redirect_test.dart`). The router (a Riverpod provider) re-evaluates it on every auth change via `refreshListenable`. Screens must NOT navigate based on auth state.
 - **Local dev mode**: when Firebase is unconfigured (Linux, missing options), the redirect skips auth entirely and enters `/main` as a guest; repositories no-op their writes.
-- Top-level routes: go_router in `lib/routing/` with `SlideRouteTransition`; register path constants in `Routes` and add new routes to `_routes` in `router.dart`
+- Top-level routes: go_router in `lib/routing/` with `SlideRouteTransition`; register path constants in `Routes` and add new routes to `_routes` in `router.dart` (for example `/stats`)
 - `/main` is `MainScreen`: a stateful `IndexedStack` shell (Collection, Explore, Home, Training, Profile tabs) with string-keyed `_subPage` overlays (`'training'`, `'lesson-path'`, `'lesson-player'`) — these are NOT go_router sub-routes
 - Boot flow: `/` splash (branding only) → redirect decides: signed in → `/main`; has account → `/login`; fresh device → `/register`
 
 ### Current state: wired vs prototype
 
 **Every feature now runs on real data** — authentication, profile, learn (module view + lesson player), home, explore, collection/library, stats (stats page, level progression, belt grid, home progress card), and workout/training (daily WOD with session tracking). Content ships in code (`lesson_catalog.dart` — 10 modules with globally unique, stable lesson ids; `workout_catalog.dart` — 7 workouts with a deterministic day-of-year WOD rotation); all user state derives from `users/{uid}/progress` and `users/{uid}/sessions`. The explore/collection filter sheets are cosmetic until modules carry difficulty metadata. Pattern for any new feature: extract models → create a repository → add state/view model → replace inline data, following the learn feature as the template.
+
+**Lesson/workout content authoring** lives in code. `Lesson` supports optional `steps`; `stepsFor(lesson)` returns hand-authored steps when present and type-specific defaults otherwise. Modules 1-2 (`hipHopFoundations`, `bodyControl1`) are the reference fully-authored modules; modules 3-10 currently rely on defaults until authored. Authoring constraints enforced by tests: lesson ids are stable/global (legacy hip-hop ids must not change because progress docs reference them), every module ends with a boss lesson, every effective step has title/description/focus/breath/energy, and catalog XP changes may require `beltThresholds` recalibration. Workouts rotate through `wodFor(DateTime)` by day-of-year with no backend dependency; workout XP should stay modest relative to lesson XP so belts remain lesson-driven.
 
 **Gamification rules** live in `features/stats/model/stats_rules.dart` as pure functions (XP per lesson type, workout session pricing, belt thresholds, streak date logic) with a full test matrix. Total XP = lesson XP (from progress) + workout XP (from sessions, priced by the catalog, max one award per workout per day) — the `xp` field on the user doc is a denormalized mirror written by `StatsCoordinator` after each training event (lesson or workout), never a source of truth. Belt thresholds are calibrated so completing the lesson catalog alone equals Black Belt (a test enforces this; workout XP just accelerates the climb) — catalog changes require deliberate re-calibration. Streaks advance from any training activity.
 
@@ -112,7 +114,7 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 
 - **Design system only**: colors/typography/spacing/radii/shadows come from `lib/design_system/tokens/` — no ad-hoc values in feature code. If a primitive is missing, add it to the design system first. Components use the `Fg` prefix (design-system code only). Note: `AppTheme` is a legacy typedef alias of `AppTypography`; both appear in code.
 - **Riverpod**: codegen only (`@riverpod` / `@Riverpod(keepAlive: true)`) — no manual `Provider(...)`. Repositories are keepAlive; view models default to autoDispose unless state must outlive the screen (e.g. `ProfileViewModel` is keepAlive).
-- **i18n**: user-facing strings use `LocaleKeys.x.tr()` (easy_localization); add keys to BOTH `assets/translations/en.json` and `vi.json`, then regenerate. Prototype screens still contain hardcoded strings — leave those until each screen is productionized, but newly wired features must be localized.
+- **i18n**: user-facing UI strings use `LocaleKeys.x.tr()` (easy_localization); add keys to BOTH `assets/translations/en.json` and `vi.json`, then regenerate. Catalog content (lesson/workout titles, step tips, exercise names) is English content vocabulary by design. Remaining hardcoded UI strings are localized when touched; newly wired features must use `LocaleKeys` from the start.
 - **Theming**: use `context.isDarkMode` and the semantic colors on `BuildContextExtension` (`primaryBackgroundColor`, `primaryTextColor`, …); theme mode is persisted via `appThemeModeProvider`.
 - **Naming**: clear domain names; no starter-template or sample-person names (per `AGENTS.md`).
 
@@ -131,7 +133,7 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 
 ## Testing
 
-House style (`test/unit_test.dart`, `test/authentication_test.dart`, `test/learn_test.dart`): fake repositories extend the real class with `auth: null, firestore: null` (nullable deps make this trivial — no mocking framework); `ProviderContainer(overrides: [...])` with `addTearDown(container.dispose)`; `await container.read(provider.future)` to settle the initial build before acting on the notifier. Pure logic (like `computeRedirect`) gets a plain matrix test. Add tests for every new view model, repository, and validator. See `.claude/skills/testing/SKILL.md`.
+House style (`test/unit_test.dart`, `test/authentication_test.dart`, `test/learn_test.dart`, `test/stats_test.dart`, `test/workout_test.dart`): fake repositories extend the real class with `auth: null, firestore: null` (nullable deps make this trivial — no mocking framework); `ProviderContainer(overrides: [...])` with `addTearDown(container.dispose)`; `await container.read(provider.future)` to settle the initial build before acting on the notifier. Pure logic (like `computeRedirect`, stats rules, and WOD rotation) gets a plain matrix test. Add tests for every new view model, repository, validator, and content/gamification invariant you change. See `.claude/skills/testing/SKILL.md`.
 
 ## Optimized for AI agents — keep it that way
 
