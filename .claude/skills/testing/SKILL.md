@@ -5,7 +5,16 @@ description: Write and run tests for Forge Dance — unit tests for view models,
 
 # Testing
 
-Tests live in `test/`. References for house style: `test/unit_test.dart` (validators + profile VM), `test/authentication_test.dart` (stream-driven VM + fake auth repo), `test/learn_test.dart` (progress VM + fake repo), `test/app_redirect_test.dart` (pure-function matrix). Run with `flutter test` — **codegen must have run first** (or just run `bash tool/checks.sh`, which does everything in order).
+Tests live in `test/`. References for house style:
+
+- `test/unit_test.dart` — validators + profile view model
+- `test/authentication_test.dart` — stream-driven auth view model + fake auth repo
+- `test/learn_test.dart` — progress view model, fake repository, lesson-step content quality gate
+- `test/app_redirect_test.dart` — pure-function redirect matrix
+- `test/stats_test.dart` — XP pricing, belt calibration, streak transitions
+- `test/workout_test.dart` — WOD rotation, session dedupe, workout/stat coordination
+
+Run with `flutter test` — **codegen must have run first** (or just run `bash tool/checks.sh`, which does everything in order).
 
 Design rule that keeps testing cheap: put decision logic in pure functions (like `computeRedirect`) or view models — never in widgets — so a plain matrix test covers it without any widget pumping.
 
@@ -76,6 +85,9 @@ Wrap in `ProviderScope(overrides: [...])` + `MaterialApp`. Screens using `Locale
 - Every new view model: initial `build()` state, each mutation's happy path, one error path.
 - Repository logic that doesn't need Firebase (merging, normalization, payload building) — instantiate with `auth: null, firestore: null` where the method allows it.
 - New validators/extensions/utils: direct unit tests.
+- Catalog changes: keep quality gates green. Lesson edits must still produce
+  non-empty effective steps via `stepsFor()`, and catalog XP changes may require
+  deliberate `beltThresholds` recalibration.
 - Firestore-touching code paths are NOT integration-tested (no emulator setup in this repo) — isolate them behind repository methods so everything around them stays testable.
 
 ## Before handing off

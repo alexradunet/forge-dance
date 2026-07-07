@@ -2,7 +2,7 @@
 # Single source of truth for "is this change done?"
 #
 # Run before every commit:   bash tool/checks.sh
-# CI runs exactly this script, so local green == CI green.
+# CI mirrors these steps and adds a web release build.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 

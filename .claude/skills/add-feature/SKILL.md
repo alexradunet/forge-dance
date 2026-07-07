@@ -1,6 +1,6 @@
 ---
 name: add-feature
-description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, or state class, and when productionizing a prototype screen (home, explore, collection, learn, workout, wod, stats) so it runs on real data instead of hardcoded mocks.
+description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, state class, route, or cross-feature coordinator.
 ---
 
 # Adding a Feature
@@ -120,7 +120,12 @@ Use `@Riverpod(keepAlive: true)` on the class only when state must outlive the s
 
 ## 7. Cross-feature orchestration
 
-If the flow spans features (e.g. sign-in must also sync the profile), add or extend a coordinator in `features/<flow>/application/` like `SessionCoordinator` — a `keepAlive` provider-exposed class that reads other view models via `Ref`. Never chain view models from widget callbacks.
+If the flow spans features, add or extend a coordinator in `features/<flow>/application/` — a `keepAlive` provider-exposed class that reads other view models via `Ref`. Never chain view models from widget callbacks.
+
+Canonical examples:
+
+- `SessionCoordinator` (`features/session/application/`) orchestrates auth and profile sync for sign-in, register, and sign-out flows.
+- `StatsCoordinator` (`features/stats/application/`) runs after successful lesson/workout writes, derives XP from learn progress plus workout sessions, advances streaks, and persists the denormalized stats fields through `ProfileViewModel`. It is best-effort: training flows must not fail solely because stat sync fails.
 
 ## 8. Routing
 
@@ -137,12 +142,26 @@ Two navigation systems coexist:
 bash tool/checks.sh
 ```
 
-One command runs the whole pipeline (codegen → lints → analyze → test) — same script CI runs. Failure fixes: `.claude/skills/quality-checks/SKILL.md`.
+One command runs the whole pipeline (codegen → lints → analyze → test); GitHub Actions mirrors these steps and adds a web release build. Failure fixes: `.claude/skills/quality-checks/SKILL.md`.
 
 ## 10. Test it
 
 Add a view-model test with a fake repository (`.claude/skills/testing/SKILL.md`).
 
-## Productionizing a prototype screen
+## Current app surface
 
-Home, explore, collection, training, module view, lesson player, WOD, stats, and level progression currently render hardcoded mock data. To wire one up: extract the inline data classes into `model/` (freezed), create the repository + provider, add `state/` + `view_model/`, then swap the widget's local constants for the view model. Beware dead code: `home_screen.dart`, `home_screen_v2.dart`, `explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned — the live screens are in `presentation/pages/` and `learn/ui/`.
+The primary app surfaces are already wired to real data: authentication,
+profile, learn/module view, lesson player, home, explore, collection,
+workout/training, stats, level progression, and belt grid. For new feature
+work, copy those patterns instead of treating the screens as mocks.
+
+Known gaps and constraints:
+
+- Explore/collection filter sheets are cosmetic until modules carry difficulty
+  metadata; do not add filtering behavior without extending the catalog model.
+- Lesson modules 1 and 2 are hand-authored; modules 3-10 currently resolve
+  lesson steps through `stepsFor()` defaults until their content is authored.
+- `features/home/ui/home_screen.dart`, `features/home/ui/home_screen_v2.dart`,
+  `features/explore/ui/explore_screen.dart`, and
+  `features/wod/ui/wod_session_screen.dart` are dead code. The live screens are
+  in `presentation/pages/` and `features/learn/ui/`.

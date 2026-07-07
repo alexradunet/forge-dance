@@ -60,7 +60,8 @@ Rules for AI agents and contributors working on Forge Dance.
 
 ## Required checks
 
-Run before handing off. CI runs the same script, so local green == CI green:
+Run before handing off. CI mirrors these checks on Flutter 3.35.5 and then adds
+a web release build:
 
 ```bash
 bash tool/checks.sh

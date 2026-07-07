@@ -1,6 +1,6 @@
 ---
 name: quality-checks
-description: Run the full Forge Dance verification pipeline (code generation, custom_lint, analyze, test, web build) and fix common failures like missing part files, stale generated code, or freezed/riverpod codegen errors. Use before committing or handing off, after pulling changes, or when builds fail with unresolved generated symbols.
+description: Run the Forge Dance verification pipeline (code generation, custom_lint, analyze, test, and optional web build) and fix common failures like missing part files, stale generated code, or freezed/riverpod codegen errors. Use before committing or handing off, after pulling changes, or when builds fail with unresolved generated symbols.
 ---
 
 # Quality Checks & Codegen Pipeline
@@ -11,7 +11,7 @@ description: Run the full Forge Dance verification pipeline (code generation, cu
 bash tool/checks.sh
 ```
 
-It runs, fail-fast and in order: `pub get` → localization keygen → `build_runner` → `custom_lint` → `analyze` → `test`. CI (`.github/workflows/flutter.yml`, Flutter **3.35.5**) runs exactly this script on every push to `main` — and commits land directly on `main` — so local green == CI green. Never hand off without it passing.
+It runs, fail-fast and in order: `pub get` → localization keygen → `build_runner` → `custom_lint` → `analyze` → `test`. CI (`.github/workflows/flutter.yml`, Flutter **3.35.5**) mirrors these steps on every push/PR to `main`, then adds a web release build. Never hand off without the script passing.
 
 For risky changes, also confirm the release target CI builds: `flutter build web --release`.
 
