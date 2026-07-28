@@ -34,8 +34,11 @@ Firebase is **null on Linux** (FlutterFire generated no Linux options; `main.dar
 Current schema — all owner-only, validated on write:
 
 ```
-users/{userId}:                      id, email, name, job, avatar, diamond, createdAt, updatedAt
+users/{userId}:                      id, email, name, job, avatar, diamond,
+                                     xp, streakCount, lastActivityDate,
+                                     createdAt, updatedAt
 users/{userId}/progress/{lessonId}:  lessonId, status, progress, updatedAt
+users/{userId}/sessions/{date}_{workoutId}: workoutId, date, completedAt
 ```
 
 **Typed references (`withConverter`) are mandatory for new Firestore access.** One converter per collection, defined inside the repository — never pass raw maps around:
@@ -73,7 +76,7 @@ Conventions (reference implementations: `ProgressRepository`, `ProfileRepository
 
 ## Security rules (`firestore.rules`)
 
-Rules are v2, owner-only, and **validate writes** — they don't just gate access. Current invariants: `users/{userId}.id` must equal the auth uid; `progress/{lessonId}.lessonId` must equal the doc id and `status` must be a whitelisted `LessonStatus` name (keep the whitelist in sync with the enum). When adding a collection:
+Rules are v2, owner-only, and **validate writes** — they don't just gate access. Current invariants: `users/{userId}.id` must equal the auth uid; optional stats fields (`xp`, `streakCount`, `lastActivityDate`) must be sane when present; `progress/{lessonId}.lessonId` must equal the doc id and `status` must be a whitelisted `LessonStatus` name (keep the whitelist in sync with the enum); `sessions/{date}_{workoutId}` must store matching `date` and `workoutId` fields so the deterministic doc id caps workout XP at once per workout per day. When adding a collection:
 
 1. Add an explicit `match` block (subcollections inherit NOTHING — everything unmatched is default-deny).
 2. Validate `request.resource.data` on create/update: ownership fields match `request.auth.uid`, ids mirror the doc path, enum fields whitelisted. Put validation on `create, update` only — `delete` has no `request.resource`.
