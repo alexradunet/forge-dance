@@ -1,6 +1,6 @@
 ---
 name: add-feature
-description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, or state class, and when productionizing a prototype screen (home, explore, collection, learn, workout, wod, stats) so it runs on real data instead of hardcoded mocks.
+description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, or state class, or when replacing local widget state with a repository-backed workflow.
 ---
 
 # Adding a Feature
@@ -145,4 +145,15 @@ Add a view-model test with a fake repository (`.claude/skills/testing/SKILL.md`)
 
 ## Productionizing a prototype screen
 
-Home, explore, collection, training, module view, lesson player, WOD, stats, and level progression currently render hardcoded mock data. To wire one up: extract the inline data classes into `model/` (freezed), create the repository + provider, add `state/` + `view_model/`, then swap the widget's local constants for the view model. Beware dead code: `home_screen.dart`, `home_screen_v2.dart`, `explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned — the live screens are in `presentation/pages/` and `learn/ui/`.
+The primary product surfaces are already wired to real repositories/view models:
+home, explore, collection/library, learn, workout/training, stats, and level
+progression. If you find a remaining prototype or add a new screen, wire it by
+extracting inline data into `model/` (freezed when the data is immutable or
+persisted), creating the repository + provider, adding `state/` + `view_model/`,
+and replacing widget-local constants with view-model state.
+
+Before editing an old-looking screen, verify it is imported by the live flow.
+Known dead code that should not be extended: `features/home/ui/home_screen.dart`,
+`features/home/ui/home_screen_v2.dart`, `features/explore/ui/explore_screen.dart`,
+and `features/wod/ui/wod_session_screen.dart`. The live screens are in
+`presentation/pages/` and `features/learn/ui/`.

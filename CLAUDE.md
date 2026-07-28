@@ -48,6 +48,8 @@ Individual commands when you need just one step:
 
 CI (`.github/workflows/flutter.yml`, Flutter 3.35.5) runs `tool/checks.sh` + a web release build on every push to `main` — and commits land directly on `main`, so breakage is immediately visible. Note: `custom_lint` (Riverpod lints) is NOT part of `flutter analyze` — the checks script runs it explicitly.
 
+Local toolchain setup is FVM-first (`.fvmrc` pins Flutter 3.35.5). `.cursor/mcp.json` and `.vscode/settings.json` both expect `.fvm/flutter_sdk`, so run `fvm use` after cloning before relying on editor MCP/Dart tooling.
+
 ## Architecture
 
 Feature-first + MVVM + Riverpod codegen. Data flow:
@@ -104,6 +106,8 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 
 **Every feature now runs on real data** — authentication, profile, learn (module view + lesson player), home, explore, collection/library, stats (stats page, level progression, belt grid, home progress card), and workout/training (daily WOD with session tracking). Content ships in code (`lesson_catalog.dart` — 10 modules with globally unique, stable lesson ids; `workout_catalog.dart` — 7 workouts with a deterministic day-of-year WOD rotation); all user state derives from `users/{uid}/progress` and `users/{uid}/sessions`. The explore/collection filter sheets are cosmetic until modules carry difficulty metadata. Pattern for any new feature: extract models → create a repository → add state/view model → replace inline data, following the learn feature as the template.
 
+**Lesson content authoring** lives in `features/learn/repository/lesson_catalog.dart`. A `Lesson` can carry hand-authored `LessonStep`s (`title`, `description`, `focus`, `breath`, `energy`); if its `steps` list is empty, `stepsFor(lesson)` falls back to type-specific defaults in the catalog. Lesson ids are persisted as progress document ids, so never rename shipped lesson ids without a migration. Lesson titles, step copy, type labels, and belt names are catalog/content vocabulary in English by design; UI chrome around them uses localization keys.
+
 **Gamification rules** live in `features/stats/model/stats_rules.dart` as pure functions (XP per lesson type, workout session pricing, belt thresholds, streak date logic) with a full test matrix. Total XP = lesson XP (from progress) + workout XP (from sessions, priced by the catalog, max one award per workout per day) — the `xp` field on the user doc is a denormalized mirror written by `StatsCoordinator` after each training event (lesson or workout), never a source of truth. Belt thresholds are calibrated so completing the lesson catalog alone equals Black Belt (a test enforces this; workout XP just accelerates the climb) — catalog changes require deliberate re-calibration. Streaks advance from any training activity.
 
 **Dead code — do not extend by accident**: `features/home/ui/home_screen.dart`, `features/home/ui/home_screen_v2.dart`, `features/explore/ui/explore_screen.dart`, and `features/wod/ui/wod_session_screen.dart` are not imported anywhere. The live screens are in `presentation/pages/` and `features/learn/ui/`.
@@ -112,7 +116,7 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 
 - **Design system only**: colors/typography/spacing/radii/shadows come from `lib/design_system/tokens/` — no ad-hoc values in feature code. If a primitive is missing, add it to the design system first. Components use the `Fg` prefix (design-system code only). Note: `AppTheme` is a legacy typedef alias of `AppTypography`; both appear in code.
 - **Riverpod**: codegen only (`@riverpod` / `@Riverpod(keepAlive: true)`) — no manual `Provider(...)`. Repositories are keepAlive; view models default to autoDispose unless state must outlive the screen (e.g. `ProfileViewModel` is keepAlive).
-- **i18n**: user-facing strings use `LocaleKeys.x.tr()` (easy_localization); add keys to BOTH `assets/translations/en.json` and `vi.json`, then regenerate. Prototype screens still contain hardcoded strings — leave those until each screen is productionized, but newly wired features must be localized.
+- **i18n**: user-facing UI chrome uses `LocaleKeys.x.tr()` (easy_localization); add keys to BOTH `assets/translations/en.json` and `vi.json`, then regenerate. Catalog/content vocabulary (lesson titles/steps, workout names, belt names) intentionally ships in English code constants unless the product explicitly decides to localize content.
 - **Theming**: use `context.isDarkMode` and the semantic colors on `BuildContextExtension` (`primaryBackgroundColor`, `primaryTextColor`, …); theme mode is persisted via `appThemeModeProvider`.
 - **Naming**: clear domain names; no starter-template or sample-person names (per `AGENTS.md`).
 
@@ -131,7 +135,7 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 
 ## Testing
 
-House style (`test/unit_test.dart`, `test/authentication_test.dart`, `test/learn_test.dart`): fake repositories extend the real class with `auth: null, firestore: null` (nullable deps make this trivial — no mocking framework); `ProviderContainer(overrides: [...])` with `addTearDown(container.dispose)`; `await container.read(provider.future)` to settle the initial build before acting on the notifier. Pure logic (like `computeRedirect`) gets a plain matrix test. Add tests for every new view model, repository, and validator. See `.claude/skills/testing/SKILL.md`.
+House style (`test/unit_test.dart`, `test/authentication_test.dart`, `test/learn_test.dart`, `test/stats_test.dart`, `test/workout_test.dart`): fake repositories extend the real class with `auth: null, firestore: null` (nullable deps make this trivial — no mocking framework); `ProviderContainer(overrides: [...])` with `addTearDown(container.dispose)`; `await container.read(provider.future)` to settle the initial build before acting on the notifier. Pure logic (like `computeRedirect`, `stats_rules.dart`, and `wodFor`) gets a plain matrix test. Add tests for every new view model, repository, and validator. See `.claude/skills/testing/SKILL.md`.
 
 ## Optimized for AI agents — keep it that way
 
