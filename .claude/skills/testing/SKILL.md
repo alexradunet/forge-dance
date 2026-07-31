@@ -5,7 +5,22 @@ description: Write and run tests for Forge Dance — unit tests for view models,
 
 # Testing
 
-Tests live in `test/`. References for house style: `test/unit_test.dart` (validators + profile VM), `test/authentication_test.dart` (stream-driven VM + fake auth repo), `test/learn_test.dart` (progress VM + fake repo), `test/app_redirect_test.dart` (pure-function matrix). Run with `flutter test` — **codegen must have run first** (or just run `bash tool/checks.sh`, which does everything in order).
+Tests live in `test/`. References for house style:
+
+- `test/unit_test.dart` — validators + profile view model.
+- `test/authentication_test.dart` — stream-driven auth view model + fake auth
+  repository.
+- `test/learn_test.dart` — catalog invariants, progress repository no-op mode,
+  learn view model, derived collection/continue/recommended rails, and lesson
+  step availability.
+- `test/workout_test.dart` — deterministic daily WOD rotation, session
+  idempotency, workout XP, workout view model, and best-effort stats sync.
+- `test/stats_test.dart` — pure XP, belt threshold, streak, and display-stat
+  rules.
+- `test/app_redirect_test.dart` — pure routing redirect matrix.
+
+Run with `flutter test` — **codegen must have run first** (or just run
+`bash tool/checks.sh`, which does everything in order).
 
 Design rule that keeps testing cheap: put decision logic in pure functions (like `computeRedirect`) or view models — never in widgets — so a plain matrix test covers it without any widget pumping.
 
@@ -75,6 +90,12 @@ Wrap in `ProviderScope(overrides: [...])` + `MaterialApp`. Screens using `Locale
 
 - Every new view model: initial `build()` state, each mutation's happy path, one error path.
 - Repository logic that doesn't need Firebase (merging, normalization, payload building) — instantiate with `auth: null, firestore: null` where the method allows it.
+- Catalog/content invariants when shipped content changes. Examples:
+  - Lesson IDs stay unique and every lesson resolves to non-empty `stepsFor`
+    content.
+  - Workout IDs stay unique and every workout has exercises plus positive XP.
+  - Completing the full lesson catalog still equals the final belt threshold, or
+    `beltThresholds` is deliberately recalibrated.
 - New validators/extensions/utils: direct unit tests.
 - Firestore-touching code paths are NOT integration-tested (no emulator setup in this repo) — isolate them behind repository methods so everything around them stays testable.
 

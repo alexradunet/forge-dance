@@ -1,6 +1,6 @@
 ---
 name: add-feature
-description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, or state class, and when productionizing a prototype screen (home, explore, collection, learn, workout, wod, stats) so it runs on real data instead of hardcoded mocks.
+description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, or state class, and when extending wired feature flows such as learn, explore, collection, workout, stats, and profile.
 ---
 
 # Adding a Feature
@@ -141,8 +141,44 @@ One command runs the whole pipeline (codegen → lints → analyze → test) —
 
 ## 10. Test it
 
-Add a view-model test with a fake repository (`.claude/skills/testing/SKILL.md`).
+Add a focused test with fake repositories (`.claude/skills/testing/SKILL.md`).
+For examples beyond the basic profile/auth flow, see:
+
+- `test/learn_test.dart` for catalog + progress derivation.
+- `test/workout_test.dart` for daily WOD rotation, idempotent completion, and
+  stats sync.
+- `test/stats_test.dart` for XP, belt thresholds, and streak rules.
 
 ## Productionizing a prototype screen
 
-Home, explore, collection, training, module view, lesson player, WOD, stats, and level progression currently render hardcoded mock data. To wire one up: extract the inline data classes into `model/` (freezed), create the repository + provider, add `state/` + `view_model/`, then swap the widget's local constants for the view model. Beware dead code: `home_screen.dart`, `home_screen_v2.dart`, `explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned — the live screens are in `presentation/pages/` and `learn/ui/`.
+The main user-facing flows are already wired to app data: authentication,
+profile, learn/module view/lesson player, home, explore, collection/library,
+stats/level progression, and workout/training. When extending one of them, use
+the existing model -> repository -> state -> view-model path instead of
+reintroducing inline mock data.
+
+Beware dead code: `features/home/ui/home_screen.dart`,
+`features/home/ui/home_screen_v2.dart`, `features/explore/ui/explore_screen.dart`,
+and `features/wod/ui/wod_session_screen.dart` are orphaned. The live screens are
+in `presentation/pages/` and `features/learn/ui/`.
+
+## Extending shipped content
+
+Lesson and workout content ship in code. Only user state is persisted.
+
+- Lessons live in `lib/features/learn/repository/lesson_catalog.dart`.
+  `allModules` is display order, the first module is the new-user default, and
+  lesson IDs must stay stable because progress docs use them as document IDs.
+- A `Lesson` may define hand-authored `steps`; otherwise
+  `stepsFor(lesson)` supplies type-specific defaults. Each `LessonStep` has
+  `title`, `description`, `focus`, `breath`, and `energy`, shown by
+  `LessonPlayerScreen`.
+- Every module ends with a boss lesson. Module subtitles follow catalog order
+  (`Module 1 • Path`, `Module 2 • Path`, ...).
+- Workouts live in `lib/features/workout/repository/workout_catalog.dart`.
+  `wodFor(date)` rotates by day-of-year, so every user gets the same daily WOD
+  without backend scheduling.
+
+After catalog changes, run the relevant tests. `test/learn_test.dart` verifies
+step availability and catalog invariants; `test/stats_test.dart` enforces that
+completing the full lesson catalog reaches the final belt threshold.
