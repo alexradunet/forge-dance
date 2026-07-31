@@ -131,7 +131,7 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 
 ## Testing
 
-House style (`test/unit_test.dart`, `test/authentication_test.dart`, `test/learn_test.dart`): fake repositories extend the real class with `auth: null, firestore: null` (nullable deps make this trivial — no mocking framework); `ProviderContainer(overrides: [...])` with `addTearDown(container.dispose)`; `await container.read(provider.future)` to settle the initial build before acting on the notifier. Pure logic (like `computeRedirect`) gets a plain matrix test. Add tests for every new view model, repository, and validator. See `.claude/skills/testing/SKILL.md`.
+House style (`test/unit_test.dart`, `test/authentication_test.dart`, `test/learn_test.dart`, `test/workout_test.dart`, `test/stats_test.dart`): fake repositories extend the real class with `auth: null, firestore: null` (nullable deps make this trivial — no mocking framework); `ProviderContainer(overrides: [...])` with `addTearDown(container.dispose)`; `await container.read(provider.future)` to settle the initial build before acting on the notifier. Pure logic (like `computeRedirect` and `stats_rules.dart`) gets a plain matrix test. Add tests for every new view model, repository, and validator. See `.claude/skills/testing/SKILL.md`.
 
 ## Optimized for AI agents — keep it that way
 

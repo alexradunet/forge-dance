@@ -8,7 +8,7 @@ Rules for AI agents and contributors working on Forge Dance.
 - Keep Firebase usage behind repositories/data sources. Do not call `FirebaseAuth`, `FirebaseFirestore`, or other Firebase SDKs directly from widgets.
 - Current Firebase MVP stack:
   - Firebase Auth for accounts
-  - Cloud Firestore for user/profile data
+  - Cloud Firestore for profiles, lesson progress, and workout sessions
 - Do not add another backend-as-a-service dependency unless the project explicitly changes direction.
 - Before using Firebase services in a real environment, run `flutterfire configure` and enable Email/Password sign-in in Firebase Console.
 
