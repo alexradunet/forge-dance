@@ -1,6 +1,6 @@
 ---
 name: add-feature
-description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, or state class, and when productionizing a prototype screen (home, explore, collection, learn, workout, wod, stats) so it runs on real data instead of hardcoded mocks.
+description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, or state class, and when replacing remaining mock/prototype code with real catalog, repository, view-model, or persisted state flows.
 ---
 
 # Adding a Feature
@@ -143,6 +143,6 @@ One command runs the whole pipeline (codegen → lints → analyze → test) —
 
 Add a view-model test with a fake repository (`.claude/skills/testing/SKILL.md`).
 
-## Productionizing a prototype screen
+## Productionizing prototype or stale UI code
 
-Home, explore, collection, training, module view, lesson player, WOD, stats, and level progression currently render hardcoded mock data. To wire one up: extract the inline data classes into `model/` (freezed), create the repository + provider, add `state/` + `view_model/`, then swap the widget's local constants for the view model. Beware dead code: `home_screen.dart`, `home_screen_v2.dart`, `explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned — the live screens are in `presentation/pages/` and `learn/ui/`.
+The main app flows are now wired to real catalog/progress/session data: home, explore, collection, module view, lesson player, training/WOD, stats, and level progression. If you find remaining mock UI in a touched feature, replace it outright with the standard pattern: extract domain models into `model/` (freezed), create the repository + provider, add `state/` + `view_model/`, and make the widget render the view model. Beware dead code: `home_screen.dart`, `home_screen_v2.dart`, `explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned — the live screens are in `presentation/pages/` and `learn/ui/`.
