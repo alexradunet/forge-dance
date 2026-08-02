@@ -38,9 +38,22 @@ Provide a real Vietnamese translation — never silently copy the English string
 
 ## Current state & migration policy
 
-- Wired features (authentication, profile, common widgets, validators) use `LocaleKeys` properly.
-- Prototype screens (home, explore, collection, training, learn, WOD, stats) contain hardcoded English strings — this is accepted **until** a screen is productionized. When wiring a prototype screen to real data, migrate its strings to `LocaleKeys` as part of the work.
-- New wired features MUST use `LocaleKeys` from the start.
+- Productionized UI surfaces use `LocaleKeys` for primary chrome:
+  authentication, profile, onboarding, settings/common widgets, validators,
+  learn, workout/training, stats, home, explore, and collection.
+- Newly wired UI MUST use `LocaleKeys` from the start. When replacing remaining
+  prototype UI, migrate its user-facing chrome to translation keys as part of
+  the same change.
+- Some explore/collection filter and layout labels are still hardcoded because
+  those filters are cosmetic until modules carry difficulty metadata. Localize
+  them when making the filters real.
+- Do not spend effort localizing dead screens called out in `CLAUDE.md` /
+  `.claude/skills/add-feature/SKILL.md`; replace or delete them when their
+  feature is touched.
+- Catalog/content vocabulary stays English by design: lesson titles and
+  `LessonStep` text in `lesson_catalog.dart`, workout titles/exercises in
+  `workout_catalog.dart`, and belt names in `stats_rules.dart` are not
+  `LocaleKeys` targets.
 
 ## Gotchas
 
