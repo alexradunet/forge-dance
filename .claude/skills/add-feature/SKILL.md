@@ -1,6 +1,6 @@
 ---
 name: add-feature
-description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, or state class, and when productionizing a prototype screen (home, explore, collection, learn, workout, wod, stats) so it runs on real data instead of hardcoded mocks.
+description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, state class, or when replacing remaining prototype/dead UI with real data.
 ---
 
 # Adding a Feature
@@ -143,6 +143,41 @@ One command runs the whole pipeline (codegen → lints → analyze → test) —
 
 Add a view-model test with a fake repository (`.claude/skills/testing/SKILL.md`).
 
-## Productionizing a prototype screen
+## Productionizing remaining prototype UI
 
-Home, explore, collection, training, module view, lesson player, WOD, stats, and level progression currently render hardcoded mock data. To wire one up: extract the inline data classes into `model/` (freezed), create the repository + provider, add `state/` + `view_model/`, then swap the widget's local constants for the view model. Beware dead code: `home_screen.dart`, `home_screen_v2.dart`, `explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned — the live screens are in `presentation/pages/` and `learn/ui/`.
+The core app surfaces are now wired to real data: auth/profile, learn,
+home, explore, collection, stats, and workout/training. When replacing a
+remaining prototype or adding a new data-backed screen, use the current live
+features as templates instead of reviving orphaned widgets:
+
+- Learn: static content catalog + typed progress repository
+  (`features/learn/repository/lesson_catalog.dart`,
+  `progress_repository.dart`).
+- Workout: static workout catalog + completed sessions repository
+  (`features/workout/repository/workout_catalog.dart`,
+  `session_repository.dart`).
+- Stats: pure XP/streak rules + cross-feature coordinator
+  (`features/stats/model/stats_rules.dart`,
+  `features/stats/application/stats_coordinator.dart`).
+
+The known dead screens are `features/home/ui/home_screen.dart`,
+`features/home/ui/home_screen_v2.dart`, `features/explore/ui/explore_screen.dart`,
+and `features/wod/ui/wod_session_screen.dart`. Do not extend them by accident;
+the live screens are under `presentation/pages/` and `features/learn/ui/`.
+
+## Lesson content authoring
+
+Lesson content ships in `features/learn/repository/lesson_catalog.dart`; only
+user progress is stored in Firestore. When adding or changing catalog content:
+
+- Keep lesson ids stable and globally unique. Existing ids must not change
+  because `users/{uid}/progress/{lessonId}` references them.
+- Every module ends with a boss lesson, and module subtitles follow catalog
+  order (`Module N • Path`).
+- Hand-authored lesson steps use `LessonStep(title, description, focus, breath,
+  energy)`. `stepsFor(lesson)` returns those custom steps when present and
+  falls back to type-specific defaults otherwise.
+- Catalog text is English content vocabulary, not `LocaleKeys` UI chrome.
+- Catalog XP is coupled to belt thresholds. If lesson types or catalog size
+  change, rerun `test/stats_test.dart` and recalibrate
+  `beltThresholds` in `features/stats/model/stats_rules.dart` when needed.
