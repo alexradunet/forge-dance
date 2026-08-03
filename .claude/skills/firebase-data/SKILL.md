@@ -34,8 +34,11 @@ Firebase is **null on Linux** (FlutterFire generated no Linux options; `main.dar
 Current schema — all owner-only, validated on write:
 
 ```
-users/{userId}:                      id, email, name, job, avatar, diamond, createdAt, updatedAt
+users/{userId}:                      id, email, name, job, avatar, diamond,
+                                     createdAt, updatedAt, xp, streakCount,
+                                     lastActivityDate
 users/{userId}/progress/{lessonId}:  lessonId, status, progress, updatedAt
+users/{userId}/sessions/{date}_{workoutId}: workoutId, date, completedAt
 ```
 
 **Typed references (`withConverter`) are mandatory for new Firestore access.** One converter per collection, defined inside the repository — never pass raw maps around:
@@ -56,11 +59,12 @@ CollectionReference<LessonProgress>? _progressRef() {
 }
 ```
 
-Conventions (reference implementations: `ProgressRepository`, `ProfileRepository`, `AuthenticationRepository`):
+Conventions (reference implementations: `ProgressRepository`, `SessionRepository`, `ProfileRepository`, `AuthenticationRepository`):
 
 - Writes use `SetOptions(merge: true)`; set `updatedAt: FieldValue.serverTimestamp()` inside the `toFirestore` payload, `createdAt` only on first create.
 - Reads normalize Firestore types before `fromJson`: `Timestamp` → **ISO-8601 string** (json_serializable parses strings for `DateTime` fields) — see `_normalizeFirestoreJson`.
 - Map `FirebaseAuthException` codes to human-readable messages and rethrow as a domain exception (`AuthenticationException`) — view models surface `error.toString()`.
+- Lesson progress document ids must equal `lessonId`; workout session document ids must equal `{date}_{workoutId}` so WOD XP is capped at once per workout per day.
 
 ## Local-first persistence
 
@@ -73,7 +77,16 @@ Conventions (reference implementations: `ProgressRepository`, `ProfileRepository
 
 ## Security rules (`firestore.rules`)
 
-Rules are v2, owner-only, and **validate writes** — they don't just gate access. Current invariants: `users/{userId}.id` must equal the auth uid; `progress/{lessonId}.lessonId` must equal the doc id and `status` must be a whitelisted `LessonStatus` name (keep the whitelist in sync with the enum). When adding a collection:
+Rules are v2, owner-only, and **validate writes** — they don't just gate access.
+
+Current invariants:
+
+- `users/{userId}.id` must equal the auth uid.
+- Optional user stats fields are type-checked: `xp >= 0`, `streakCount >= 0`, `lastActivityDate` is a string (`yyyy-MM-dd` from `stats_rules.dateKey`).
+- `progress/{lessonId}.lessonId` must equal the doc id and `status` must be a whitelisted `LessonStatus` name. Keep this whitelist in sync with `lib/features/learn/model/lesson_progress.dart`.
+- `sessions/{date}_{workoutId}` must contain string `workoutId` and `date`, and the doc id must equal `date + '_' + workoutId`.
+
+When adding a collection:
 
 1. Add an explicit `match` block (subcollections inherit NOTHING — everything unmatched is default-deny).
 2. Validate `request.resource.data` on create/update: ownership fields match `request.auth.uid`, ids mirror the doc path, enum fields whitelisted. Put validation on `create, update` only — `delete` has no `request.resource`.
@@ -101,6 +114,18 @@ The flag is read in `lib/features/firebase/repository/firebase_bootstrap.dart`, 
 Navigation reacts automatically: the router's `refreshListenable` re-runs `computeRedirect` (`lib/routing/app_redirect.dart`) on every emission. Sign-out anywhere lands the user on login with zero imperative navigation.
 
 Cross-feature auth flows go through `SessionCoordinator` (`features/session/application/`): register/sign-in delegates to `AuthenticationViewModel`, then syncs `ProfileViewModel`; sign-out clears the profile. Extend the coordinator for new session-wide behavior — don't chain view models from widgets.
+
+## Training progress and gamification sync
+
+Training state spans three Firestore surfaces but keeps one source of truth per concept:
+
+- Static content catalogs live in code (`lesson_catalog.dart`, `workout_catalog.dart`); do not persist content copies per user.
+- Lesson progress is stored under `users/{uid}/progress/{lessonId}` by `ProgressRepository`.
+- Workout completions are stored under `users/{uid}/sessions/{date}_{workoutId}` by `SessionRepository`; repeated completion of the same WOD on the same day overwrites the same document and does not award XP again.
+- XP is derived in `features/stats/model/stats_rules.dart` from completed lessons plus completed workout sessions. The `users/{uid}.xp` field is only a denormalized mirror written by `StatsCoordinator` after lesson or workout activity.
+- Streak state is mirrored on the profile as `streakCount` and `lastActivityDate` using local `yyyy-MM-dd` keys from `dateKey`.
+
+If lesson IDs, workout IDs, XP values, or belt thresholds change, update tests in `test/learn_test.dart`, `test/workout_test.dart`, and `test/stats_test.dart` so persisted progress compatibility and Black Belt calibration remain deliberate.
 
 ## Environment setup (for humans/CI running against real Firebase)
 
