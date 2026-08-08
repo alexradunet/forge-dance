@@ -34,8 +34,11 @@ Firebase is **null on Linux** (FlutterFire generated no Linux options; `main.dar
 Current schema — all owner-only, validated on write:
 
 ```
-users/{userId}:                      id, email, name, job, avatar, diamond, createdAt, updatedAt
+users/{userId}:                      id, email, name, job, avatar, diamond, createdAt, updatedAt,
+                                     xp, streakCount, lastActivityDate
 users/{userId}/progress/{lessonId}:  lessonId, status, progress, updatedAt
+users/{userId}/sessions/{date}_{workoutId}:
+                                     workoutId, date, completedAt
 ```
 
 **Typed references (`withConverter`) are mandatory for new Firestore access.** One converter per collection, defined inside the repository — never pass raw maps around:
@@ -61,6 +64,16 @@ Conventions (reference implementations: `ProgressRepository`, `ProfileRepository
 - Writes use `SetOptions(merge: true)`; set `updatedAt: FieldValue.serverTimestamp()` inside the `toFirestore` payload, `createdAt` only on first create.
 - Reads normalize Firestore types before `fromJson`: `Timestamp` → **ISO-8601 string** (json_serializable parses strings for `DateTime` fields) — see `_normalizeFirestoreJson`.
 - Map `FirebaseAuthException` codes to human-readable messages and rethrow as a domain exception (`AuthenticationException`) — view models surface `error.toString()`.
+- Workout sessions use deterministic document ids (`WorkoutSession.docKey == '${date}_$workoutId'`) so completing the same workout on the same date overwrites the existing document instead of awarding XP twice.
+
+## Gamification writes
+
+Stats are derived, not entered by users:
+
+- Lesson XP comes from completed lessons in `users/{uid}/progress`.
+- Workout XP comes from completed sessions in `users/{uid}/sessions`, priced by `workout_catalog.dart`; a session whose workout id no longer exists earns nothing.
+- `StatsCoordinator.recordTrainingActivity()` runs after successful lesson/workout writes, derives total XP and streak via `features/stats/model/stats_rules.dart`, then persists `xp`, `streakCount`, and `lastActivityDate` onto the profile document through `ProfileViewModel`.
+- The profile `xp` field is a denormalized mirror for quick display. The source of truth remains progress + sessions.
 
 ## Local-first persistence
 
@@ -73,7 +86,7 @@ Conventions (reference implementations: `ProgressRepository`, `ProfileRepository
 
 ## Security rules (`firestore.rules`)
 
-Rules are v2, owner-only, and **validate writes** — they don't just gate access. Current invariants: `users/{userId}.id` must equal the auth uid; `progress/{lessonId}.lessonId` must equal the doc id and `status` must be a whitelisted `LessonStatus` name (keep the whitelist in sync with the enum). When adding a collection:
+Rules are v2, owner-only, and **validate writes** — they don't just gate access. Current invariants: `users/{userId}.id` must equal the auth uid; profile stats are optional but must be sane (`xp >= 0`, `streakCount >= 0`, `lastActivityDate` string); `progress/{lessonId}.lessonId` must equal the doc id and `status` must be a whitelisted `LessonStatus` name (keep the whitelist in sync with the enum); `sessions/{sessionId}` must use `{date}_{workoutId}` as the doc id. When adding a collection:
 
 1. Add an explicit `match` block (subcollections inherit NOTHING — everything unmatched is default-deny).
 2. Validate `request.resource.data` on create/update: ownership fields match `request.auth.uid`, ids mirror the doc path, enum fields whitelisted. Put validation on `create, update` only — `delete` has no `request.resource`.

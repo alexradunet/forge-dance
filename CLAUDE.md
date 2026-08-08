@@ -91,6 +91,10 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 - Cross-feature flows (e.g. sign-in must sync the profile) go through a coordinator like `SessionCoordinator`, not widget-side chaining
 - The **learn** feature is the end-to-end template: static content catalog (`lesson_catalog.dart`) + typed progress repository + view model + screens rendering `AsyncValue`
 
+### Lesson catalog authoring
+
+Lesson content ships in code, not Firestore. Author modules in `lib/features/learn/repository/lesson_catalog.dart` and keep lesson ids globally unique and stable because `users/{uid}/progress/{lessonId}` documents reference them. Each `LessonStep` has `title`, `description`, `focus`, `breath`, and `energy`; the lesson player renders those fields as the technique breakdown on the back of each card. If a lesson omits `steps`, `stepsFor(lesson)` falls back to type-specific defaults in the catalog, but hand-authored modules should provide complete steps and `test/learn_test.dart` enforces non-empty effective step content. Lesson titles, lesson steps, belt names, and workout catalog copy are content vocabulary and intentionally ship in English; UI chrome around them still uses `LocaleKeys`.
+
 ### Auth state & navigation
 
 - **Auth state is a stream**: `authStateChangesProvider` (keepAlive) wraps `FirebaseAuth.authStateChanges()` and is the single source of truth. `AuthenticationViewModel` derives from it; nothing stores its own logged-in flag.
@@ -102,7 +106,7 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 
 ### Current state: wired vs prototype
 
-**Every feature now runs on real data** — authentication, profile, learn (module view + lesson player), home, explore, collection/library, stats (stats page, level progression, belt grid, home progress card), and workout/training (daily WOD with session tracking). Content ships in code (`lesson_catalog.dart` — 10 modules with globally unique, stable lesson ids; `workout_catalog.dart` — 7 workouts with a deterministic day-of-year WOD rotation); all user state derives from `users/{uid}/progress` and `users/{uid}/sessions`. The explore/collection filter sheets are cosmetic until modules carry difficulty metadata. Pattern for any new feature: extract models → create a repository → add state/view model → replace inline data, following the learn feature as the template.
+**Every feature now runs on real data** — authentication, profile, learn (module view + lesson player), home, explore, collection/library, stats (stats page, level progression, belt grid, home progress card), and workout/training (daily WOD with session tracking). Content ships in code (`lesson_catalog.dart` — 10 modules with globally unique, stable lesson ids and step-level technique breakdowns; `workout_catalog.dart` — 7 workouts with a deterministic day-of-year WOD rotation); all user state derives from `users/{uid}/progress` and `users/{uid}/sessions`. The explore/collection filter sheets are cosmetic until modules carry difficulty metadata. Pattern for any new feature: extract models → create a repository → add state/view model → replace inline data, following the learn feature as the template.
 
 **Gamification rules** live in `features/stats/model/stats_rules.dart` as pure functions (XP per lesson type, workout session pricing, belt thresholds, streak date logic) with a full test matrix. Total XP = lesson XP (from progress) + workout XP (from sessions, priced by the catalog, max one award per workout per day) — the `xp` field on the user doc is a denormalized mirror written by `StatsCoordinator` after each training event (lesson or workout), never a source of truth. Belt thresholds are calibrated so completing the lesson catalog alone equals Black Belt (a test enforces this; workout XP just accelerates the climb) — catalog changes require deliberate re-calibration. Streaks advance from any training activity.
 
@@ -112,7 +116,7 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 
 - **Design system only**: colors/typography/spacing/radii/shadows come from `lib/design_system/tokens/` — no ad-hoc values in feature code. If a primitive is missing, add it to the design system first. Components use the `Fg` prefix (design-system code only). Note: `AppTheme` is a legacy typedef alias of `AppTypography`; both appear in code.
 - **Riverpod**: codegen only (`@riverpod` / `@Riverpod(keepAlive: true)`) — no manual `Provider(...)`. Repositories are keepAlive; view models default to autoDispose unless state must outlive the screen (e.g. `ProfileViewModel` is keepAlive).
-- **i18n**: user-facing strings use `LocaleKeys.x.tr()` (easy_localization); add keys to BOTH `assets/translations/en.json` and `vi.json`, then regenerate. Prototype screens still contain hardcoded strings — leave those until each screen is productionized, but newly wired features must be localized.
+- **i18n**: user-facing app chrome uses `LocaleKeys.x.tr()` (easy_localization); add keys to BOTH `assets/translations/en.json` and `vi.json`, then regenerate. Bundled lesson/workout catalog copy, lesson type labels, and belt names intentionally ship in English for now; localize the UI labels around that content.
 - **Theming**: use `context.isDarkMode` and the semantic colors on `BuildContextExtension` (`primaryBackgroundColor`, `primaryTextColor`, …); theme mode is persisted via `appThemeModeProvider`.
 - **Naming**: clear domain names; no starter-template or sample-person names (per `AGENTS.md`).
 

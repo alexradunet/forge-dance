@@ -1,6 +1,6 @@
 ---
 name: add-feature
-description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, or state class, and when productionizing a prototype screen (home, explore, collection, learn, workout, wod, stats) so it runs on real data instead of hardcoded mocks.
+description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, or state class, and when wiring new real-data behavior into an existing feature.
 ---
 
 # Adding a Feature
@@ -143,6 +143,25 @@ One command runs the whole pipeline (codegen → lints → analyze → test) —
 
 Add a view-model test with a fake repository (`.claude/skills/testing/SKILL.md`).
 
-## Productionizing a prototype screen
+## Current wired features and remaining gaps
 
-Home, explore, collection, training, module view, lesson player, WOD, stats, and level progression currently render hardcoded mock data. To wire one up: extract the inline data classes into `model/` (freezed), create the repository + provider, add `state/` + `view_model/`, then swap the widget's local constants for the view model. Beware dead code: `home_screen.dart`, `home_screen_v2.dart`, `explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned — the live screens are in `presentation/pages/` and `learn/ui/`.
+Authentication, profile, learn/module view, lesson player, home, explore,
+collection/library, stats, level progression, and workout/training now render
+from real repositories or bundled catalogs. Do not treat those screens as
+hardcoded prototypes.
+
+When adding new behavior to an already-wired feature, extend the existing
+model/repository/state/view-model chain instead of reintroducing widget-local
+data. The live catalog-backed examples are:
+
+- `features/learn/`: bundled lesson catalog + Firestore progress.
+- `features/workout/`: bundled workout catalog + Firestore session completions.
+- `features/stats/`: pure XP/streak/belt rules + `StatsCoordinator`.
+
+Known remaining product gaps are narrower: explore/collection filter sheets are
+mostly cosmetic until modules carry difficulty metadata, and lesson/workout
+catalog content is intentionally bundled in code for now.
+
+Beware dead code: `home_screen.dart`, `home_screen_v2.dart`,
+`explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned —
+the live screens are in `presentation/pages/` and `learn/ui/`.

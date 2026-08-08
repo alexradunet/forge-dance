@@ -38,9 +38,16 @@ Provide a real Vietnamese translation — never silently copy the English string
 
 ## Current state & migration policy
 
-- Wired features (authentication, profile, common widgets, validators) use `LocaleKeys` properly.
-- Prototype screens (home, explore, collection, training, learn, WOD, stats) contain hardcoded English strings — this is accepted **until** a screen is productionized. When wiring a prototype screen to real data, migrate its strings to `LocaleKeys` as part of the work.
-- New wired features MUST use `LocaleKeys` from the start.
+- New app chrome in wired features MUST use `LocaleKeys` from the start.
+- Authentication, onboarding, profile, common widgets, validators, workout
+  session chrome, and stats chrome use generated localization keys.
+- Home, explore, collection/library, learn, stats, and workout/training are no
+  longer hardcoded mock prototypes. When changing those screens, keep UI chrome
+  localized instead of adding new plain string literals.
+- Bundled content vocabulary intentionally remains English for now: lesson
+  titles, lesson step copy, lesson type labels, workout catalog copy, and belt
+  names ship with the app catalog instead of translation JSON. Localize the UI
+  labels around that content, not the catalog content itself.
 
 ## Gotchas
 
