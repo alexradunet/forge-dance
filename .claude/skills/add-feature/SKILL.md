@@ -1,6 +1,6 @@
 ---
 name: add-feature
-description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, or state class, and when productionizing a prototype screen (home, explore, collection, learn, workout, wod, stats) so it runs on real data instead of hardcoded mocks.
+description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, or state class, and when extending wired features such as learn, workout, stats, home, explore, collection, or profile.
 ---
 
 # Adding a Feature
@@ -143,6 +143,14 @@ One command runs the whole pipeline (codegen → lints → analyze → test) —
 
 Add a view-model test with a fake repository (`.claude/skills/testing/SKILL.md`).
 
-## Productionizing a prototype screen
+## Extending wired features
 
-Home, explore, collection, training, module view, lesson player, WOD, stats, and level progression currently render hardcoded mock data. To wire one up: extract the inline data classes into `model/` (freezed), create the repository + provider, add `state/` + `view_model/`, then swap the widget's local constants for the view model. Beware dead code: `home_screen.dart`, `home_screen_v2.dart`, `explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned — the live screens are in `presentation/pages/` and `learn/ui/`.
+Home, explore, collection/library, learn, workout/training, stats, and level progression are already wired to real catalogs, repositories, and view models. When extending them:
+
+- Keep static product content in the existing catalogs (`lesson_catalog.dart`, `workout_catalog.dart`) unless there is a real need for backend-managed content.
+- Preserve stable lesson and workout ids; persisted progress/session docs reference them.
+- Add Firestore fields or collections only through repositories, typed `withConverter` references, rules updates, and focused tests.
+- Route cross-feature training side effects through `StatsCoordinator` instead of chaining view models from widgets.
+- Lesson player content uses `LessonStep` entries in `lesson_catalog.dart`; lessons with no custom steps fall back to type-specific defaults via `stepsFor`.
+
+Beware dead code: `home_screen.dart`, `home_screen_v2.dart`, `explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned — the live screens are in `presentation/pages/`, `features/workout/presentation/pages/`, and `features/learn/ui/`.
