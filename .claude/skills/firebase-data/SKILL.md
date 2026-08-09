@@ -34,8 +34,11 @@ Firebase is **null on Linux** (FlutterFire generated no Linux options; `main.dar
 Current schema — all owner-only, validated on write:
 
 ```
-users/{userId}:                      id, email, name, job, avatar, diamond, createdAt, updatedAt
+users/{userId}:                      id, email, name, job, avatar, diamond,
+                                     createdAt, updatedAt, xp, streakCount,
+                                     lastActivityDate
 users/{userId}/progress/{lessonId}:  lessonId, status, progress, updatedAt
+users/{userId}/sessions/{date}_{workoutId}: workoutId, date, completedAt
 ```
 
 **Typed references (`withConverter`) are mandatory for new Firestore access.** One converter per collection, defined inside the repository — never pass raw maps around:
@@ -56,7 +59,7 @@ CollectionReference<LessonProgress>? _progressRef() {
 }
 ```
 
-Conventions (reference implementations: `ProgressRepository`, `ProfileRepository`, `AuthenticationRepository`):
+Conventions (reference implementations: `ProgressRepository`, `SessionRepository`, `ProfileRepository`, `AuthenticationRepository`):
 
 - Writes use `SetOptions(merge: true)`; set `updatedAt: FieldValue.serverTimestamp()` inside the `toFirestore` payload, `createdAt` only on first create.
 - Reads normalize Firestore types before `fromJson`: `Timestamp` → **ISO-8601 string** (json_serializable parses strings for `DateTime` fields) — see `_normalizeFirestoreJson`.
@@ -71,9 +74,17 @@ Conventions (reference implementations: `ProgressRepository`, `ProfileRepository
 - Local file paths (e.g. picked avatar images, saved under app documents by `ProfileViewModel.saveImage`) are **never synced to Firestore** — only URLs are.
 - SharedPreferences keys live in `Constants` (`profileKey`, `isLoginKey`, `isExistAccountKey`, `themeModeKey`). Add new keys there, never inline.
 
+## Gamification persistence
+
+Lesson progress and workout sessions are the source data for XP. `StatsCoordinator` is the cross-feature orchestrator: after `LearnViewModel` or `WorkoutViewModel` writes training progress, it derives total XP from lesson progress plus workout sessions, advances the streak with `stats_rules.dart`, and writes the denormalized `xp`, `streakCount`, and `lastActivityDate` fields through `ProfileViewModel`.
+
+- Do not read the profile `xp` field as the source of truth for stats displays; use `userStatsProvider` / `stats_rules.dart`.
+- Workout sessions live at `users/{uid}/sessions/{date}_{workoutId}`. The deterministic doc id caps awards at one XP grant per workout per day.
+- Stats sync is best-effort and must not fail the lesson or workout completion flow.
+
 ## Security rules (`firestore.rules`)
 
-Rules are v2, owner-only, and **validate writes** — they don't just gate access. Current invariants: `users/{userId}.id` must equal the auth uid; `progress/{lessonId}.lessonId` must equal the doc id and `status` must be a whitelisted `LessonStatus` name (keep the whitelist in sync with the enum). When adding a collection:
+Rules are v2, owner-only, and **validate writes** — they don't just gate access. Current invariants: `users/{userId}.id` must equal the auth uid; optional stats fields must be sane (`xp`/`streakCount` non-negative ints, `lastActivityDate` string); `progress/{lessonId}.lessonId` must equal the doc id and `status` must be a whitelisted `LessonStatus` name (keep the whitelist in sync with the enum); `sessions/{sessionId}` must equal `date + '_' + workoutId`. When adding a collection:
 
 1. Add an explicit `match` block (subcollections inherit NOTHING — everything unmatched is default-deny).
 2. Validate `request.resource.data` on create/update: ownership fields match `request.auth.uid`, ids mirror the doc path, enum fields whitelisted. Put validation on `create, update` only — `delete` has no `request.resource`.
@@ -100,7 +111,7 @@ The flag is read in `lib/features/firebase/repository/firebase_bootstrap.dart`, 
 
 Navigation reacts automatically: the router's `refreshListenable` re-runs `computeRedirect` (`lib/routing/app_redirect.dart`) on every emission. Sign-out anywhere lands the user on login with zero imperative navigation.
 
-Cross-feature auth flows go through `SessionCoordinator` (`features/session/application/`): register/sign-in delegates to `AuthenticationViewModel`, then syncs `ProfileViewModel`; sign-out clears the profile. Extend the coordinator for new session-wide behavior — don't chain view models from widgets.
+Cross-feature auth flows go through `SessionCoordinator` (`features/session/application/`): register/sign-in delegates to `AuthenticationViewModel`, then syncs `ProfileViewModel`; sign-out clears the profile. Cross-feature gamification flows go through `StatsCoordinator` (`features/stats/application/`). Extend the relevant coordinator for new session-wide or training-wide behavior — don't chain view models from widgets.
 
 ## Environment setup (for humans/CI running against real Firebase)
 
