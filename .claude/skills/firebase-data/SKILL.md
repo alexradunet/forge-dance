@@ -34,8 +34,12 @@ Firebase is **null on Linux** (FlutterFire generated no Linux options; `main.dar
 Current schema — all owner-only, validated on write:
 
 ```
-users/{userId}:                      id, email, name, job, avatar, diamond, createdAt, updatedAt
+users/{userId}:                      id, email, name, job, avatar, diamond,
+                                     xp, streakCount, lastActivityDate,
+                                     createdAt, updatedAt
 users/{userId}/progress/{lessonId}:  lessonId, status, progress, updatedAt
+users/{userId}/sessions/{date}_{workoutId}:
+                                     workoutId, date, completedAt
 ```
 
 **Typed references (`withConverter`) are mandatory for new Firestore access.** One converter per collection, defined inside the repository — never pass raw maps around:
@@ -56,9 +60,10 @@ CollectionReference<LessonProgress>? _progressRef() {
 }
 ```
 
-Conventions (reference implementations: `ProgressRepository`, `ProfileRepository`, `AuthenticationRepository`):
+Conventions (reference implementations: `ProgressRepository`, `SessionRepository`, `ProfileRepository`, `AuthenticationRepository`):
 
 - Writes use `SetOptions(merge: true)`; set `updatedAt: FieldValue.serverTimestamp()` inside the `toFirestore` payload, `createdAt` only on first create.
+- Session writes set `completedAt: FieldValue.serverTimestamp()` and use the deterministic `WorkoutSession.docKey` (`date_workoutId`) so repeats overwrite instead of double-counting XP.
 - Reads normalize Firestore types before `fromJson`: `Timestamp` → **ISO-8601 string** (json_serializable parses strings for `DateTime` fields) — see `_normalizeFirestoreJson`.
 - Map `FirebaseAuthException` codes to human-readable messages and rethrow as a domain exception (`AuthenticationException`) — view models surface `error.toString()`.
 
@@ -73,7 +78,14 @@ Conventions (reference implementations: `ProgressRepository`, `ProfileRepository
 
 ## Security rules (`firestore.rules`)
 
-Rules are v2, owner-only, and **validate writes** — they don't just gate access. Current invariants: `users/{userId}.id` must equal the auth uid; `progress/{lessonId}.lessonId` must equal the doc id and `status` must be a whitelisted `LessonStatus` name (keep the whitelist in sync with the enum). When adding a collection:
+Rules are v2, owner-only, and **validate writes** — they don't just gate access. Current invariants:
+
+- `users/{userId}.id` must equal the auth uid.
+- Optional user-doc stats (`xp`, `streakCount`, `lastActivityDate`) must be sane when present; `xp` and `streakCount` are denormalized mirrors written by `StatsCoordinator`, not the source of truth.
+- `progress/{lessonId}.lessonId` must equal the doc id and `status` must be a whitelisted `LessonStatus` name (keep the whitelist in sync with the enum).
+- `sessions/{date}_{workoutId}` must carry string `workoutId` and `date`, and the doc id must equal `date + '_' + workoutId` to cap workout XP at one award per workout per day.
+
+When adding a collection:
 
 1. Add an explicit `match` block (subcollections inherit NOTHING — everything unmatched is default-deny).
 2. Validate `request.resource.data` on create/update: ownership fields match `request.auth.uid`, ids mirror the doc path, enum fields whitelisted. Put validation on `create, update` only — `delete` has no `request.resource`.

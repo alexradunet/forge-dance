@@ -18,7 +18,7 @@ Supported locales: `en` (fallback) and `vi`, configured in `main.dart` (`useOnly
 2. Regenerate `LocaleKeys` (output: `lib/generated/locale_keys.g.dart`, gitignored):
 
    ```bash
-   flutter pub run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir assets/translations
+   fvm flutter pub run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir assets/translations
    ```
 
 3. Use it:
@@ -38,9 +38,10 @@ Provide a real Vietnamese translation — never silently copy the English string
 
 ## Current state & migration policy
 
-- Wired features (authentication, profile, common widgets, validators) use `LocaleKeys` properly.
-- Prototype screens (home, explore, collection, training, learn, WOD, stats) contain hardcoded English strings — this is accepted **until** a screen is productionized. When wiring a prototype screen to real data, migrate its strings to `LocaleKeys` as part of the work.
-- New wired features MUST use `LocaleKeys` from the start.
+- Wired UI flows (authentication, onboarding, profile/settings, home, explore, collection, learn player, workout/training, stats, common widgets, validators) use `LocaleKeys` for user-facing interface text.
+- Catalog/content vocabulary intentionally ships in English in code: lesson titles, lesson steps/tips, lesson type labels, workout titles, workout exercises, belt names, and similar authored training content. Do not invent translation keys for catalog content unless the product explicitly decides to localize content, not just UI chrome.
+- Old prototype/dead screens may still contain hardcoded strings. Do not polish them in place; update the live screen or replace the prototype using `.claude/skills/add-feature/SKILL.md`.
+- New wired UI MUST use `LocaleKeys` from the start.
 
 ## Gotchas
 
