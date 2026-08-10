@@ -5,9 +5,9 @@ description: Write and run tests for Forge Dance — unit tests for view models,
 
 # Testing
 
-Tests live in `test/`. References for house style: `test/unit_test.dart` (validators + profile VM), `test/authentication_test.dart` (stream-driven VM + fake auth repo), `test/learn_test.dart` (progress VM + fake repo), `test/app_redirect_test.dart` (pure-function matrix). Run with `flutter test` — **codegen must have run first** (or just run `bash tool/checks.sh`, which does everything in order).
+Tests live in `test/`. References for house style: `test/unit_test.dart` (validators + profile VM), `test/authentication_test.dart` (stream-driven VM + fake auth repo), `test/learn_test.dart` (progress VM + fake repo), `test/app_redirect_test.dart` (pure-function matrix), `test/stats_test.dart` (pure XP/belt/streak rules), and `test/workout_test.dart` (catalog rotation + workout VM with fake repositories). Run with `flutter test` — **codegen must have run first** (or just run `bash tool/checks.sh`, which does everything in order).
 
-Design rule that keeps testing cheap: put decision logic in pure functions (like `computeRedirect`) or view models — never in widgets — so a plain matrix test covers it without any widget pumping.
+Design rule that keeps testing cheap: put decision logic in pure functions (like `computeRedirect`, `nextStreak`, `workoutXpFrom`, and `wodFor`) or view models — never in widgets — so a plain matrix test covers it without any widget pumping.
 
 ## Fake repositories — the core pattern
 
@@ -75,6 +75,7 @@ Wrap in `ProviderScope(overrides: [...])` + `MaterialApp`. Screens using `Locale
 
 - Every new view model: initial `build()` state, each mutation's happy path, one error path.
 - Repository logic that doesn't need Firebase (merging, normalization, payload building) — instantiate with `auth: null, firestore: null` where the method allows it.
+- Catalog/rules changes: assert stable IDs, deterministic rotations, XP pricing, and calibration invariants (for example, catalog completion still reaches the Black Belt threshold).
 - New validators/extensions/utils: direct unit tests.
 - Firestore-touching code paths are NOT integration-tested (no emulator setup in this repo) — isolate them behind repository methods so everything around them stays testable.
 

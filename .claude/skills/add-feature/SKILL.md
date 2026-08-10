@@ -1,6 +1,6 @@
 ---
 name: add-feature
-description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, or state class, and when productionizing a prototype screen (home, explore, collection, learn, workout, wod, stats) so it runs on real data instead of hardcoded mocks.
+description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, state class, or when replacing remaining prototype/dead code with the live data-backed patterns.
 ---
 
 # Adding a Feature
@@ -120,7 +120,7 @@ Use `@Riverpod(keepAlive: true)` on the class only when state must outlive the s
 
 ## 7. Cross-feature orchestration
 
-If the flow spans features (e.g. sign-in must also sync the profile), add or extend a coordinator in `features/<flow>/application/` like `SessionCoordinator` — a `keepAlive` provider-exposed class that reads other view models via `Ref`. Never chain view models from widget callbacks.
+If the flow spans features, add or extend a coordinator in `features/<flow>/application/`: `SessionCoordinator` handles auth ↔ profile orchestration, and `StatsCoordinator` derives XP/streaks after lesson or workout activity. Coordinators are `keepAlive` provider-exposed classes that read other view models via `Ref`. Never chain view models from widget callbacks.
 
 ## 8. Routing
 
@@ -143,6 +143,13 @@ One command runs the whole pipeline (codegen → lints → analyze → test) —
 
 Add a view-model test with a fake repository (`.claude/skills/testing/SKILL.md`).
 
-## Productionizing a prototype screen
+## Replacing prototype or dead code
 
-Home, explore, collection, training, module view, lesson player, WOD, stats, and level progression currently render hardcoded mock data. To wire one up: extract the inline data classes into `model/` (freezed), create the repository + provider, add `state/` + `view_model/`, then swap the widget's local constants for the view model. Beware dead code: `home_screen.dart`, `home_screen_v2.dart`, `explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned — the live screens are in `presentation/pages/` and `learn/ui/`.
+The live home, explore, collection, learn, workout/training, stats, and profile flows are data-backed. Do not extend old prototype files by accident:
+
+- `lib/features/home/ui/home_screen.dart`
+- `lib/features/home/ui/home_screen_v2.dart`
+- `lib/features/explore/ui/explore_screen.dart`
+- `lib/features/wod/ui/wod_session_screen.dart`
+
+Live screens are in `presentation/pages/` for home/explore/library/workout/stats/profile and in `features/learn/ui/` for module and lesson-player screens. If a remaining prototype needs to ship, replace it outright with the feature pattern above: extract models, add a repository/provider if data crosses an IO boundary, add `state/` + `view_model/`, route through coordinators for cross-feature side effects, and render the view model from the screen.

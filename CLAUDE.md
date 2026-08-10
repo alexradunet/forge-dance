@@ -88,7 +88,7 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 - **Repository**: plain class whose constructor takes **nullable** `FirebaseAuth?` / `FirebaseFirestore?` and degrades gracefully (reads return empty, writes no-op); Firestore access goes through a typed `withConverter` reference; exposed via a `@riverpod` / `@Riverpod(keepAlive: true)` function
 - **ViewModel**: `@riverpod class XViewModel extends _$XViewModel` with `FutureOr<XState> build()`; mutations set `AsyncValue.loading()` then use `AsyncValue.guard(...)`
 - Widgets NEVER call Firebase SDKs directly (hard rule from `AGENTS.md`)
-- Cross-feature flows (e.g. sign-in must sync the profile) go through a coordinator like `SessionCoordinator`, not widget-side chaining
+- Cross-feature flows go through coordinators (e.g. `SessionCoordinator` for auth ↔ profile sync, `StatsCoordinator` for XP/streak sync after training), not widget-side chaining
 - The **learn** feature is the end-to-end template: static content catalog (`lesson_catalog.dart`) + typed progress repository + view model + screens rendering `AsyncValue`
 
 ### Auth state & navigation
@@ -98,11 +98,11 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 - **Local dev mode**: when Firebase is unconfigured (Linux, missing options), the redirect skips auth entirely and enters `/main` as a guest; repositories no-op their writes.
 - Top-level routes: go_router in `lib/routing/` with `SlideRouteTransition`; register path constants in `Routes` and add new routes to `_routes` in `router.dart`
 - `/main` is `MainScreen`: a stateful `IndexedStack` shell (Collection, Explore, Home, Training, Profile tabs) with string-keyed `_subPage` overlays (`'training'`, `'lesson-path'`, `'lesson-player'`) — these are NOT go_router sub-routes
-- Boot flow: `/` splash (branding only) → redirect decides: signed in → `/main`; has account → `/login`; fresh device → `/register`
+- Boot flow: `/` splash (branding only) → redirect decides: signed in → `/main`; has account → `/login`; fresh device → `/register`; a signed-in user who reaches `/register` is sent to `/onboarding`
 
 ### Current state: wired vs prototype
 
-**Every feature now runs on real data** — authentication, profile, learn (module view + lesson player), home, explore, collection/library, stats (stats page, level progression, belt grid, home progress card), and workout/training (daily WOD with session tracking). Content ships in code (`lesson_catalog.dart` — 10 modules with globally unique, stable lesson ids; `workout_catalog.dart` — 7 workouts with a deterministic day-of-year WOD rotation); all user state derives from `users/{uid}/progress` and `users/{uid}/sessions`. The explore/collection filter sheets are cosmetic until modules carry difficulty metadata. Pattern for any new feature: extract models → create a repository → add state/view model → replace inline data, following the learn feature as the template.
+**Every feature now runs on real data** — authentication, profile, learn (module view + lesson player), home, explore, collection/library, stats (stats page, level progression, belt grid, home progress card), and workout/training (daily WOD with session tracking). Content ships in code (`lesson_catalog.dart` — 10 modules with globally unique, stable lesson ids and per-lesson `LessonStep` breakdowns; `stepsFor()` supplies type-based defaults only when a lesson has no authored steps; `workout_catalog.dart` — 7 workouts with a deterministic day-of-year WOD rotation); all user state derives from `users/{uid}/progress` and `users/{uid}/sessions`. The explore/collection filter sheets are cosmetic until modules carry difficulty metadata. Pattern for any new feature: extract models → create a repository → add state/view model → replace inline data, following the learn feature as the template.
 
 **Gamification rules** live in `features/stats/model/stats_rules.dart` as pure functions (XP per lesson type, workout session pricing, belt thresholds, streak date logic) with a full test matrix. Total XP = lesson XP (from progress) + workout XP (from sessions, priced by the catalog, max one award per workout per day) — the `xp` field on the user doc is a denormalized mirror written by `StatsCoordinator` after each training event (lesson or workout), never a source of truth. Belt thresholds are calibrated so completing the lesson catalog alone equals Black Belt (a test enforces this; workout XP just accelerates the climb) — catalog changes require deliberate re-calibration. Streaks advance from any training activity.
 
@@ -112,7 +112,7 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 
 - **Design system only**: colors/typography/spacing/radii/shadows come from `lib/design_system/tokens/` — no ad-hoc values in feature code. If a primitive is missing, add it to the design system first. Components use the `Fg` prefix (design-system code only). Note: `AppTheme` is a legacy typedef alias of `AppTypography`; both appear in code.
 - **Riverpod**: codegen only (`@riverpod` / `@Riverpod(keepAlive: true)`) — no manual `Provider(...)`. Repositories are keepAlive; view models default to autoDispose unless state must outlive the screen (e.g. `ProfileViewModel` is keepAlive).
-- **i18n**: user-facing strings use `LocaleKeys.x.tr()` (easy_localization); add keys to BOTH `assets/translations/en.json` and `vi.json`, then regenerate. Prototype screens still contain hardcoded strings — leave those until each screen is productionized, but newly wired features must be localized.
+- **i18n**: user-facing UI strings use `LocaleKeys.x.tr()` (easy_localization); add keys to BOTH `assets/translations/en.json` and `vi.json`, then regenerate. Authored training content (lesson titles/steps, workout names/exercises, belt names) currently ships in English in code; localize UI chrome, not catalog content, unless the product explicitly chooses content localization.
 - **Theming**: use `context.isDarkMode` and the semantic colors on `BuildContextExtension` (`primaryBackgroundColor`, `primaryTextColor`, …); theme mode is persisted via `appThemeModeProvider`.
 - **Naming**: clear domain names; no starter-template or sample-person names (per `AGENTS.md`).
 
