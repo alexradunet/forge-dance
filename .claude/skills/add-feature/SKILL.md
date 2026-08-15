@@ -143,6 +143,26 @@ One command runs the whole pipeline (codegen → lints → analyze → test) —
 
 Add a view-model test with a fake repository (`.claude/skills/testing/SKILL.md`).
 
-## Productionizing a prototype screen
+## Productionizing or extending existing screens
 
-Home, explore, collection, training, module view, lesson player, WOD, stats, and level progression currently render hardcoded mock data. To wire one up: extract the inline data classes into `model/` (freezed), create the repository + provider, add `state/` + `view_model/`, then swap the widget's local constants for the view model. Beware dead code: `home_screen.dart`, `home_screen_v2.dart`, `explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned — the live screens are in `presentation/pages/` and `learn/ui/`.
+The main product surfaces are already wired to real data: authentication,
+profile, learn/module path, lesson player, home, explore, collection/library,
+workout/training, stats, and level progression. When extending one, follow the
+existing view model and repository boundaries instead of reintroducing local
+mock state.
+
+Current live data sources:
+
+- Learn/module path/lesson player: static catalog in
+  `learn/repository/lesson_catalog.dart` plus Firestore progress.
+- Home/explore/collection: `LearnState` derivations and profile/stats providers.
+- Workout/training: static workout catalog plus Firestore session completions.
+- Stats/level progression: pure `stats_rules.dart` derived from lesson progress,
+  workout sessions, and profile streak fields.
+
+If you do find an unwired prototype, productionize it by extracting inline data
+into `model/`, adding the repository + provider, adding `state/` +
+`view_model/`, then replacing widget-local constants with view-model state.
+Beware dead code: `home_screen.dart`, `home_screen_v2.dart`,
+`explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned —
+the live screens are in `presentation/pages/` and `learn/ui/`.
