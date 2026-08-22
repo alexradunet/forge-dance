@@ -143,6 +143,24 @@ One command runs the whole pipeline (codegen → lints → analyze → test) —
 
 Add a view-model test with a fake repository (`.claude/skills/testing/SKILL.md`).
 
-## Productionizing a prototype screen
+## Productionizing or extending a feature
 
-Home, explore, collection, training, module view, lesson player, WOD, stats, and level progression currently render hardcoded mock data. To wire one up: extract the inline data classes into `model/` (freezed), create the repository + provider, add `state/` + `view_model/`, then swap the widget's local constants for the view model. Beware dead code: `home_screen.dart`, `home_screen_v2.dart`, `explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned — the live screens are in `presentation/pages/` and `learn/ui/`.
+The main app features are now wired to real state: auth/profile, learn,
+home, explore, collection, stats, and workout/WOD. When extending one of them,
+follow the existing feature's shape instead of reintroducing inline mock data:
+update the domain model when needed, keep IO behind a repository/provider, expose
+screen state through a view model, and add focused tests for the changed behavior.
+
+Current references:
+
+- Learn content ships in `lesson_catalog.dart`; only user progress is persisted
+  at `users/{uid}/progress/{lessonId}`.
+- Workout content ships in `workout_catalog.dart`; completed WOD sessions are
+  persisted at `users/{uid}/sessions/{date}_{workoutId}` and award XP at most
+  once per workout per day.
+- Gamification totals are derived in `stats_rules.dart` and mirrored to the
+  profile by `StatsCoordinator`.
+
+Beware dead code: `home_screen.dart`, `home_screen_v2.dart`,
+`explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned —
+the live screens are in `presentation/pages/` and `learn/ui/`.
