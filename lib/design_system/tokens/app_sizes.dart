@@ -113,14 +113,4 @@ class AppSizes {
 
   static const double badgeHeight = 20.0;
   static const double badgeDotSize = 8.0;
-
-  // ═══════════════════════════════════════════════════════════
-  // SAFE AREAS (from HTML mockups)
-  // ═══════════════════════════════════════════════════════════
-
-  /// Top safe area (status bar)
-  static const double safeAreaTop = 44.0;
-
-  /// Bottom safe area (home indicator)
-  static const double safeAreaBottom = 34.0;
 }

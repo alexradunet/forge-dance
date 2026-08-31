@@ -21,6 +21,7 @@ abstract final class AppThemes {
   static ThemeData _build(Brightness brightness, {bool highContrast = false}) {
     final scheme = _colorScheme(brightness, highContrast: highContrast);
     final forgeColors = _forgeColors(brightness, highContrast: highContrast);
+    final forgeEmphasis = _forgeEmphasis(scheme, highContrast: highContrast);
     final textTheme = AppTypography.textTheme.apply(
       bodyColor: scheme.onSurface,
       displayColor: scheme.onSurface,
@@ -42,7 +43,7 @@ abstract final class AppThemes {
       focusColor: forgeColors.focusRing.withValues(alpha: 0.18),
       hoverColor: scheme.primary.withValues(alpha: 0.08),
       highlightColor: scheme.primary.withValues(alpha: 0.12),
-      extensions: [forgeColors],
+      extensions: [forgeColors, forgeEmphasis],
       appBarTheme: AppBarTheme(
         backgroundColor: scheme.surface,
         foregroundColor: scheme.onSurface,
@@ -357,6 +358,48 @@ abstract final class AppThemes {
       reward: AppColors.legendGold,
       onReward: AppColors.gray950,
       focusRing: highContrast ? AppColors.electricBlue : AppColors.forgeFire,
+    );
+  }
+
+  static ForgeEmphasis _forgeEmphasis(
+    ColorScheme scheme, {
+    required bool highContrast,
+  }) {
+    return ForgeEmphasis(
+      raised: highContrast
+          ? const []
+          : [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.18),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
+            ],
+      floating: highContrast
+          ? const []
+          : [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.28),
+                blurRadius: 28,
+                offset: const Offset(0, 12),
+              ),
+            ],
+      primaryAction: highContrast
+          ? const []
+          : [
+              BoxShadow(
+                color: scheme.primary.withValues(alpha: 0.28),
+                blurRadius: 15,
+                offset: const Offset(0, 4),
+              ),
+            ],
+      glassFill: highContrast
+          ? scheme.surfaceContainerHigh
+          : scheme.surfaceContainer.withValues(alpha: 0.82),
+      glassBorder: highContrast
+          ? scheme.outline
+          : scheme.outlineVariant.withValues(alpha: 0.7),
+      glassBlurSigma: highContrast ? 0 : 10,
     );
   }
 }

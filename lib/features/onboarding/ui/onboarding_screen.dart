@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../extensions/build_context_extension.dart';
 import '../../../features/common/ui/widgets/common_text_form_field.dart';
-import '../../../features/common/ui/widgets/primary_button.dart';
+import '../../../design_system/atoms/buttons/fg_button.dart';
 import '../../../features/profile/ui/view_model/profile_view_model.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../../routing/routes.dart';
@@ -83,10 +83,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       controller: _nameController,
                     ),
                     const Spacer(),
-                    PrimaryButton(
+                    FgButton(
                       text: LocaleKeys.continueText.tr(),
-                      onPressed: () => _saveNameAndContinue(context),
-                      isEnable: _isButtonEnabled,
+                      expand: true,
+                      onPressed: _isButtonEnabled
+                          ? () => _saveNameAndContinue(context)
+                          : null,
                     ),
                     const SizedBox(height: 16),
                   ],
@@ -101,9 +103,9 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Future<void> _saveNameAndContinue(BuildContext context) async {
     try {
-      await ref.read(profileViewModelProvider.notifier).editProfile(
-            name: _nameController.text.trim(),
-          );
+      await ref
+          .read(profileViewModelProvider.notifier)
+          .editProfile(name: _nameController.text.trim());
       if (context.mounted) {
         context.pushReplacement(Routes.main);
       }

@@ -11,8 +11,7 @@ import '../../../utils/global_loading.dart';
 import '../../../design_system/organisms/navigation/app_header.dart';
 import '../../../design_system/atoms/visuals/fg_background.dart';
 import '../../common/ui/widgets/common_text_form_field.dart';
-import '../../common/ui/widgets/primary_button.dart';
-import '../../common/ui/widgets/secondary_button.dart';
+import '../../../design_system/atoms/buttons/fg_button.dart';
 import '../model/profile.dart';
 import '../repository/device_avatar_repository.dart';
 import 'view_model/profile_view_model.dart';
@@ -21,10 +20,7 @@ import 'widgets/avatar.dart';
 class AccountInfoScreen extends ConsumerStatefulWidget {
   final Profile originalProfile;
 
-  const AccountInfoScreen({
-    super.key,
-    required this.originalProfile,
-  });
+  const AccountInfoScreen({super.key, required this.originalProfile});
 
   @override
   ConsumerState createState() => _AccountInfoScreenState();
@@ -88,8 +84,10 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
             ),
             Expanded(
               child: ListView(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 32, horizontal: 24),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 32,
+                  horizontal: 24,
+                ),
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -98,8 +96,11 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
                       const SizedBox(width: 16),
                       SizedBox(
                         width: 120,
-                        child: SecondaryButton(
+                        child: FgButton(
                           text: LocaleKeys.selectAvatar.tr(),
+                          variant: FgButtonVariant.secondary,
+                          size: FgButtonSize.sm,
+                          expand: true,
                           onPressed: _selectImage,
                         ),
                       ),
@@ -121,35 +122,33 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(
-                left: 24,
-                right: 24,
-                bottom: 32,
-              ),
-              child: PrimaryButton(
+              padding: const EdgeInsets.only(left: 24, right: 24, bottom: 32),
+              child: FgButton(
                 text: LocaleKeys.confirm.tr(),
-                isEnable: avatar != widget.originalProfile.avatar ||
-                    name != widget.originalProfile.name,
-                onPressed: () async {
-                  try {
-                    Global.showLoading(context);
-                    await ref
-                        .read(profileViewModelProvider.notifier)
-                        .editProfile(
-                          name: name,
-                        );
-                    if (context.mounted) {
-                      context.pop();
-                    }
-                  } catch (error) {
-                    if (context.mounted) {
-                      context.showErrorSnackBar(
-                          LocaleKeys.unexpectedErrorOccurred.tr());
-                    }
-                  } finally {
-                    Global.hideLoading();
-                  }
-                },
+                expand: true,
+                onPressed:
+                    avatar != widget.originalProfile.avatar ||
+                        name != widget.originalProfile.name
+                    ? () async {
+                        try {
+                          Global.showLoading(context);
+                          await ref
+                              .read(profileViewModelProvider.notifier)
+                              .editProfile(name: name);
+                          if (context.mounted) {
+                            context.pop();
+                          }
+                        } catch (error) {
+                          if (context.mounted) {
+                            context.showErrorSnackBar(
+                              LocaleKeys.unexpectedErrorOccurred.tr(),
+                            );
+                          }
+                        } finally {
+                          Global.hideLoading();
+                        }
+                      }
+                    : null,
               ),
             ),
           ],

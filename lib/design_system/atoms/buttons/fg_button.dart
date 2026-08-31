@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/forge_theme_extensions.dart';
 import '../../tokens/app_border_radius.dart';
-import '../../tokens/app_shadows.dart';
 import '../../tokens/app_sizes.dart';
 import '../../tokens/app_spacing.dart';
 import '../../tokens/app_typography.dart';
@@ -12,10 +12,11 @@ enum FgButtonSize { sm, md, lg, xl }
 
 enum FgButtonShape { rounded, pill, circle }
 
-/// Forge Dance action primitive.
+/// Forge action primitive backed by Material button behavior.
 ///
-/// Visual decisions are expressed through semantic variants and sizes. Raw
-/// color and dimension overrides intentionally live outside this contract.
+/// Visual decisions are expressed through semantic variants and sizes.
+/// Keyboard, focus, hover, pointer, and disabled behavior stay inside the
+/// standard Material button implementation.
 class FgButton extends StatelessWidget {
   const FgButton({
     super.key,
@@ -29,10 +30,16 @@ class FgButton extends StatelessWidget {
     this.isEnabled = true,
     this.expand = false,
     this.semanticLabel,
+    this.focusNode,
+    this.autofocus = false,
   }) : assert(
-          text != null || icon != null,
-          'FgButton requires text or an icon.',
-        );
+         text != null || icon != null,
+         'FgButton requires text or an icon.',
+       ),
+       assert(
+         text != null || semanticLabel != null,
+         'Icon-only FgButton requires a semanticLabel.',
+       );
 
   final String? text;
   final VoidCallback? onPressed;
@@ -44,51 +51,85 @@ class FgButton extends StatelessWidget {
   final bool isEnabled;
   final bool expand;
   final String? semanticLabel;
+  final FocusNode? focusNode;
+  final bool autofocus;
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final motion = context.forgeMotion;
+    final emphasis = theme.forgeEmphasis;
     final isInteractive = isEnabled && onPressed != null && !isLoading;
-    final buttonHeight = _height;
-    final effectiveShape = shape ??
-        (text == null ? FgButtonShape.circle : _defaultShapeFor(variant));
-    final isCircle = effectiveShape == FgButtonShape.circle;
-    final foreground = _foregroundColor(colorScheme, isInteractive);
-    final background = _backgroundColor(colorScheme, isInteractive);
-    final border = _borderColor(colorScheme, isInteractive);
+    final effectiveShape =
+        shape ?? (text == null ? FgButtonShape.circle : _defaultShape);
+    final buttonShape = _shapeFor(effectiveShape);
+    final foreground = _foregroundColor(scheme);
 
-    final button = AnimatedContainer(
-      duration: const Duration(milliseconds: 160),
-      curve: Curves.easeOutCubic,
-      width: expand ? double.infinity : (isCircle ? buttonHeight : null),
-      height: buttonHeight,
-      decoration: BoxDecoration(
-        color: background,
-        shape: isCircle ? BoxShape.circle : BoxShape.rectangle,
-        borderRadius: isCircle ? null : _borderRadius(effectiveShape),
-        border: border == null ? null : Border.all(color: border),
-        boxShadow: isInteractive && variant == FgButtonVariant.primary
-            ? AppShadows.buttonPrimary
-            : null,
-      ),
-      child: Material(
-        color: Colors.transparent,
-        clipBehavior: Clip.antiAlias,
-        shape: isCircle
-            ? const CircleBorder()
-            : RoundedRectangleBorder(
-                borderRadius: _borderRadius(effectiveShape),
-              ),
-        child: InkWell(
-          onTap: isInteractive ? onPressed : null,
-          customBorder: isCircle ? const CircleBorder() : null,
-          borderRadius: isCircle ? null : _borderRadius(effectiveShape),
-          child: Padding(
-            padding: text == null ? EdgeInsets.zero : _padding,
-            child: Center(child: _content(foreground)),
+    final button = FilledButton(
+      focusNode: focusNode,
+      autofocus: autofocus,
+      onPressed: isInteractive ? onPressed : null,
+      style: ButtonStyle(
+        minimumSize: WidgetStatePropertyAll(
+          Size(
+            effectiveShape == FgButtonShape.circle
+                ? _targetHeight
+                : AppSizes.comfortableTouchTarget,
+            _targetHeight,
           ),
         ),
+        fixedSize: effectiveShape == FgButtonShape.circle
+            ? WidgetStatePropertyAll(Size.square(_targetHeight))
+            : null,
+        padding: WidgetStatePropertyAll(
+          text == null ? EdgeInsets.zero : _padding,
+        ),
+        backgroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled) && !isLoading) {
+            return scheme.onSurface.withValues(alpha: 0.12);
+          }
+          return _backgroundColor(scheme);
+        }),
+        foregroundColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.disabled) && !isLoading) {
+            return scheme.onSurface.withValues(alpha: 0.38);
+          }
+          return foreground;
+        }),
+        overlayColor: WidgetStatePropertyAll(
+          foreground.withValues(alpha: 0.10),
+        ),
+        side: WidgetStateProperty.resolveWith((states) {
+          if (variant != FgButtonVariant.secondary) return BorderSide.none;
+          if (states.contains(WidgetState.disabled) && !isLoading) {
+            return BorderSide(color: scheme.onSurface.withValues(alpha: 0.12));
+          }
+          return BorderSide(color: scheme.outline);
+        }),
+        shape: WidgetStatePropertyAll(buttonShape),
+        textStyle: WidgetStatePropertyAll(_textStyle),
+        elevation: const WidgetStatePropertyAll(0),
+        animationDuration: motion.fast,
+        tapTargetSize: MaterialTapTargetSize.padded,
+        visualDensity: VisualDensity.standard,
       ),
+      child: _content(foreground),
+    );
+
+    final decoratedButton = DecoratedBox(
+      decoration: BoxDecoration(
+        shape: effectiveShape == FgButtonShape.circle
+            ? BoxShape.circle
+            : BoxShape.rectangle,
+        borderRadius: effectiveShape == FgButtonShape.circle
+            ? null
+            : _borderRadius(effectiveShape),
+        boxShadow: isInteractive && variant == FgButtonVariant.primary
+            ? emphasis.primaryAction
+            : const [],
+      ),
+      child: button,
     );
 
     return Semantics(
@@ -96,13 +137,11 @@ class FgButton extends StatelessWidget {
       enabled: isInteractive,
       label: semanticLabel ?? text,
       liveRegion: isLoading,
+      onTap: isInteractive ? onPressed : null,
       child: ExcludeSemantics(
-        child: MouseRegion(
-          cursor: isInteractive
-              ? SystemMouseCursors.click
-              : SystemMouseCursors.basic,
-          child: button,
-        ),
+        child: expand
+            ? SizedBox(width: double.infinity, child: decoratedButton)
+            : decoratedButton,
       ),
     );
   }
@@ -111,10 +150,7 @@ class FgButton extends StatelessWidget {
     if (isLoading) {
       return SizedBox.square(
         dimension: _iconSize,
-        child: CircularProgressIndicator(
-          strokeWidth: 2,
-          valueColor: AlwaysStoppedAnimation(color),
-        ),
+        child: CircularProgressIndicator(strokeWidth: 2, color: color),
       );
     }
 
@@ -141,85 +177,71 @@ class FgButton extends StatelessWidget {
     );
   }
 
-  FgButtonShape _defaultShapeFor(FgButtonVariant value) {
-    return value == FgButtonVariant.primary
-        ? FgButtonShape.pill
-        : FgButtonShape.rounded;
-  }
+  FgButtonShape get _defaultShape => variant == FgButtonVariant.primary
+      ? FgButtonShape.pill
+      : FgButtonShape.rounded;
 
-  Color _backgroundColor(ColorScheme colors, bool isInteractive) {
-    if (!isInteractive && !isLoading) {
-      return colors.onSurface.withAlpha(18);
-    }
-
+  Color _backgroundColor(ColorScheme scheme) {
     return switch (variant) {
-      FgButtonVariant.primary => colors.primary,
+      FgButtonVariant.primary => scheme.primary,
       FgButtonVariant.secondary => Colors.transparent,
-      FgButtonVariant.tertiary => colors.surfaceContainerHighest,
+      FgButtonVariant.tertiary => scheme.surfaceContainerHighest,
       FgButtonVariant.ghost => Colors.transparent,
-      FgButtonVariant.destructive => colors.error,
+      FgButtonVariant.destructive => scheme.error,
     };
   }
 
-  Color _foregroundColor(ColorScheme colors, bool isInteractive) {
-    if (!isInteractive && !isLoading) {
-      return colors.onSurface.withAlpha(97);
-    }
-
+  Color _foregroundColor(ColorScheme scheme) {
     return switch (variant) {
-      FgButtonVariant.primary => colors.onPrimary,
-      FgButtonVariant.secondary => colors.secondary,
-      FgButtonVariant.tertiary => colors.onSurface,
-      FgButtonVariant.ghost => colors.primary,
-      FgButtonVariant.destructive => colors.onError,
+      FgButtonVariant.primary => scheme.onPrimary,
+      FgButtonVariant.secondary => scheme.onSurface,
+      FgButtonVariant.tertiary => scheme.onSurface,
+      FgButtonVariant.ghost => scheme.onSurfaceVariant,
+      FgButtonVariant.destructive => scheme.onError,
     };
   }
 
-  Color? _borderColor(ColorScheme colors, bool isInteractive) {
-    if (variant != FgButtonVariant.secondary) return null;
-    return isInteractive ? colors.secondary : colors.onSurface.withAlpha(31);
-  }
-
-  double get _height => switch (size) {
-        FgButtonSize.sm => AppSizes.buttonSm,
-        FgButtonSize.md => AppSizes.buttonMd,
-        FgButtonSize.lg => AppSizes.buttonLg,
-        FgButtonSize.xl => AppSizes.buttonXl,
-      };
+  double get _targetHeight => switch (size) {
+    FgButtonSize.sm ||
+    FgButtonSize.md ||
+    FgButtonSize.lg => AppSizes.comfortableTouchTarget,
+    FgButtonSize.xl => AppSizes.buttonXl,
+  };
 
   double get _iconSize => switch (size) {
-        FgButtonSize.sm => AppSizes.iconSm,
-        FgButtonSize.md => AppSizes.iconMd,
-        FgButtonSize.lg => AppSizes.iconMd,
-        FgButtonSize.xl => AppSizes.iconLg,
-      };
+    FgButtonSize.sm => AppSizes.iconSm,
+    FgButtonSize.md || FgButtonSize.lg => AppSizes.iconMd,
+    FgButtonSize.xl => AppSizes.iconLg,
+  };
 
   TextStyle get _textStyle => switch (size) {
-        FgButtonSize.sm => AppTypography.caption.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        FgButtonSize.md => AppTypography.bodySmall.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        FgButtonSize.lg => AppTypography.body.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        FgButtonSize.xl => AppTypography.bodyLarge.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-      };
+    FgButtonSize.sm => AppTypography.caption.copyWith(
+      fontWeight: FontWeight.w700,
+    ),
+    FgButtonSize.md => AppTypography.bodySmall.copyWith(
+      fontWeight: FontWeight.w700,
+    ),
+    FgButtonSize.lg => AppTypography.body.copyWith(fontWeight: FontWeight.w700),
+    FgButtonSize.xl => AppTypography.bodyLarge.copyWith(
+      fontWeight: FontWeight.w700,
+    ),
+  };
 
   EdgeInsets get _padding => switch (size) {
-        FgButtonSize.sm => const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md,
-          ),
-        FgButtonSize.md || FgButtonSize.lg => const EdgeInsets.symmetric(
-            horizontal: AppSpacing.lg,
-          ),
-        FgButtonSize.xl => const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xxl,
-          ),
-      };
+    FgButtonSize.sm => const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+    FgButtonSize.md ||
+    FgButtonSize.lg => const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+    FgButtonSize.xl => const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+  };
+
+  OutlinedBorder _shapeFor(FgButtonShape value) {
+    return switch (value) {
+      FgButtonShape.circle => const CircleBorder(),
+      FgButtonShape.rounded || FgButtonShape.pill => RoundedRectangleBorder(
+        borderRadius: _borderRadius(value),
+      ),
+    };
+  }
 
   BorderRadius _borderRadius(FgButtonShape value) {
     return switch (value) {

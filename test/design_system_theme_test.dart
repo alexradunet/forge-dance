@@ -76,6 +76,7 @@ void main() {
           AppTypography.bodyFamily,
         );
         expect(theme.forgeColors, isA<ForgeColors>());
+        expect(theme.forgeEmphasis, isA<ForgeEmphasis>());
       });
 
       test('$name keeps interactive controls at least 48 logical pixels', () {
@@ -92,6 +93,20 @@ void main() {
         );
       });
     }
+
+    test('high-contrast themes remove blur and shadow-only emphasis', () {
+      for (final theme in [
+        AppThemes.highContrastLight,
+        AppThemes.highContrastDark,
+      ]) {
+        final emphasis = theme.forgeEmphasis;
+        expect(emphasis.glassBlurSigma, 0);
+        expect(emphasis.raised, isEmpty);
+        expect(emphasis.floating, isEmpty);
+        expect(emphasis.primaryAction, isEmpty);
+        expect(emphasis.glassBorder, theme.colorScheme.outline);
+      }
+    });
   });
 
   testWidgets('selected ThemeData reaches rendered Material components', (
@@ -124,12 +139,10 @@ void main() {
     );
 
     final scheme = AppThemes.light.colorScheme;
-    final container = tester.widget<AnimatedContainer>(
-      find.byType(AnimatedContainer),
-    );
+    final button = tester.widget<FilledButton>(find.byType(FilledButton));
     final label = tester.widget<Text>(find.text('Dance'));
 
-    expect((container.decoration as BoxDecoration).color, scheme.primary);
+    expect(button.style?.backgroundColor?.resolve({}), scheme.primary);
     expect(label.style?.color, scheme.onPrimary);
   });
 }

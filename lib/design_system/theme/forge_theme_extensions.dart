@@ -1,4 +1,7 @@
+import 'dart:ui' show lerpDouble;
+
 import 'package:flutter/material.dart';
+import 'package:forge_dance/design_system/tokens/app_animation.dart';
 
 /// Semantic colors that do not map to Material's [ColorScheme] roles.
 @immutable
@@ -90,6 +93,91 @@ class ForgeColors extends ThemeExtension<ForgeColors> {
   }
 }
 
+/// Tonal elevation and high-emphasis rendering beyond Material elevation.
+@immutable
+class ForgeEmphasis extends ThemeExtension<ForgeEmphasis> {
+  const ForgeEmphasis({
+    required this.raised,
+    required this.floating,
+    required this.primaryAction,
+    required this.glassFill,
+    required this.glassBorder,
+    required this.glassBlurSigma,
+  });
+
+  final List<BoxShadow> raised;
+  final List<BoxShadow> floating;
+  final List<BoxShadow> primaryAction;
+  final Color glassFill;
+  final Color glassBorder;
+  final double glassBlurSigma;
+
+  @override
+  ForgeEmphasis copyWith({
+    List<BoxShadow>? raised,
+    List<BoxShadow>? floating,
+    List<BoxShadow>? primaryAction,
+    Color? glassFill,
+    Color? glassBorder,
+    double? glassBlurSigma,
+  }) {
+    return ForgeEmphasis(
+      raised: raised ?? this.raised,
+      floating: floating ?? this.floating,
+      primaryAction: primaryAction ?? this.primaryAction,
+      glassFill: glassFill ?? this.glassFill,
+      glassBorder: glassBorder ?? this.glassBorder,
+      glassBlurSigma: glassBlurSigma ?? this.glassBlurSigma,
+    );
+  }
+
+  @override
+  ForgeEmphasis lerp(ForgeEmphasis? other, double t) {
+    if (other is! ForgeEmphasis) return this;
+
+    return ForgeEmphasis(
+      raised: BoxShadow.lerpList(raised, other.raised, t) ?? const [],
+      floating: BoxShadow.lerpList(floating, other.floating, t) ?? const [],
+      primaryAction:
+          BoxShadow.lerpList(primaryAction, other.primaryAction, t) ?? const [],
+      glassFill: Color.lerp(glassFill, other.glassFill, t)!,
+      glassBorder: Color.lerp(glassBorder, other.glassBorder, t)!,
+      glassBlurSigma:
+          lerpDouble(glassBlurSigma, other.glassBlurSigma, t) ?? glassBlurSigma,
+    );
+  }
+}
+
+/// Runtime-resolved motion policy honoring platform accessibility settings.
+@immutable
+class ForgeMotion {
+  const ForgeMotion._({required this.disableAnimations});
+
+  factory ForgeMotion.of(BuildContext context) {
+    return ForgeMotion._(
+      disableAnimations:
+          MediaQuery.maybeOf(context)?.disableAnimations ?? false,
+    );
+  }
+
+  final bool disableAnimations;
+
+  Duration get fast => disableAnimations ? Duration.zero : AppAnimation.fast;
+  Duration get standard =>
+      disableAnimations ? Duration.zero : AppAnimation.standard;
+  Duration get slow => disableAnimations ? Duration.zero : AppAnimation.slow;
+
+  Curve get enterCurve =>
+      disableAnimations ? Curves.linear : AppAnimation.easeOutCubic;
+  Curve get exitCurve =>
+      disableAnimations ? Curves.linear : AppAnimation.easeInOutCubic;
+}
+
 extension ForgeThemeDataExtension on ThemeData {
   ForgeColors get forgeColors => extension<ForgeColors>()!;
+  ForgeEmphasis get forgeEmphasis => extension<ForgeEmphasis>()!;
+}
+
+extension ForgeBuildContextExtension on BuildContext {
+  ForgeMotion get forgeMotion => ForgeMotion.of(this);
 }

@@ -1,4 +1,5 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:forge_dance/design_system/atoms/visuals/fg_tech_pattern_painter.dart';
 
@@ -106,8 +107,10 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
       decoration: BoxDecoration(
         color: AppColors.surfaceCard,
         borderRadius: AppBorderRadius.xxLarge,
-        border:
-            Border.all(color: AppColors.forgeFire.withOpacity(0.5), width: 2),
+        border: Border.all(
+          color: AppColors.forgeFire.withOpacity(0.5),
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.forgeFire.withOpacity(0.4),
@@ -168,14 +171,16 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
                           if (widget.subtitle != null)
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 2),
+                                horizontal: 8,
+                                vertical: 2,
+                              ),
                               margin: const EdgeInsets.only(bottom: 8),
                               decoration: BoxDecoration(
                                 color: Colors.black.withOpacity(0.6),
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
-                                    color:
-                                        AppColors.forgeFire.withOpacity(0.3)),
+                                  color: AppColors.forgeFire.withOpacity(0.3),
+                                ),
                               ),
                               child: Text(
                                 widget.subtitle!.toUpperCase(),
@@ -196,9 +201,10 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
                               letterSpacing: 1.2,
                               shadows: [
                                 Shadow(
-                                    color: Colors.black.withOpacity(0.8),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4)),
+                                  color: Colors.black.withOpacity(0.8),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
                               ],
                             ),
                           ),
@@ -209,13 +215,14 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
 
                   // Center Content (Play Button or Custom Overlay)
                   Center(
-                    child: widget.centerOverlay ??
+                    child:
+                        widget.centerOverlay ??
                         FgIconButton(
                           icon: Icons.play_arrow,
+                          semanticLabel: widget.title,
                           onPressed: widget.onPlayTap,
                           variant: FgIconButtonVariant.glass,
                           size: FgIconButtonSize.xl,
-                          color: Colors.white,
                         ),
                   ),
 
@@ -227,12 +234,11 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
                       icon: widget.isFavorited
                           ? Icons.favorite
                           : Icons.favorite_border,
+                      semanticLabel: widget.title,
                       onPressed: widget.onToggleFavorite,
                       variant: FgIconButtonVariant.glass,
                       size: FgIconButtonSize.md,
-                      color: widget.isFavorited
-                          ? AppColors.forgeFire
-                          : Colors.white,
+                      isSelected: widget.isFavorited,
                     ),
                   ),
 
@@ -242,10 +248,10 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
                     right: 16,
                     child: FgIconButton(
                       icon: Icons.replay,
+                      semanticLabel: widget.backTitle ?? widget.title,
                       onPressed: _toggleFlip,
                       variant: FgIconButtonVariant.glass,
                       size: FgIconButtonSize.md,
-                      color: Colors.white,
                     ),
                   ),
 
@@ -279,9 +285,11 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
                         .toDouble(), // Pseudo-offset alignment
                     child: Container(
                       padding: EdgeInsets.only(
-                          left: MediaQuery.of(context).size.width *
-                              0.4 *
-                              widget.progress),
+                        left:
+                            MediaQuery.of(context).size.width *
+                            0.4 *
+                            widget.progress,
+                      ),
                       child: Container(
                         width: 6,
                         height: 6,
@@ -300,21 +308,28 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               color: Colors.black.withOpacity(0.6),
-              child: widget.footer ??
+              child:
+                  widget.footer ??
                   Row(
                     children: [
-                      _buildFooterStat('STYLE', widget.style ?? 'Hip Hop',
-                          Icons.style, Colors.blueAccent),
-                      Container(
-                          width: 1,
-                          height: 24,
-                          color: Colors.white.withOpacity(0.1),
-                          margin: const EdgeInsets.symmetric(horizontal: 16)),
                       _buildFooterStat(
-                          'DIFFICULTY',
-                          widget.difficulty ?? 'Easy',
-                          Icons.signal_cellular_alt,
-                          Colors.greenAccent),
+                        'STYLE',
+                        widget.style ?? 'Hip Hop',
+                        Icons.style,
+                        Colors.blueAccent,
+                      ),
+                      Container(
+                        width: 1,
+                        height: 24,
+                        color: Colors.white.withOpacity(0.1),
+                        margin: const EdgeInsets.symmetric(horizontal: 16),
+                      ),
+                      _buildFooterStat(
+                        'DIFFICULTY',
+                        widget.difficulty ?? 'Easy',
+                        Icons.signal_cellular_alt,
+                        Colors.greenAccent,
+                      ),
                     ],
                   ),
             ),
@@ -329,8 +344,10 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
       decoration: BoxDecoration(
         color: AppColors.surfaceCard,
         borderRadius: AppBorderRadius.xxLarge,
-        border:
-            Border.all(color: AppColors.forgeFire.withOpacity(0.5), width: 2),
+        border: Border.all(
+          color: AppColors.forgeFire.withOpacity(0.5),
+          width: 2,
+        ),
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
@@ -359,29 +376,33 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
                     if (widget.backSubtitle != null)
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 2),
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.black.withOpacity(0.6),
                           borderRadius: BorderRadius.circular(4),
                           border: Border.all(
-                              color: AppColors.forgeFire.withOpacity(0.3)),
+                            color: AppColors.forgeFire.withOpacity(0.3),
+                          ),
                         ),
                         child: Text(
                           widget.backSubtitle!.toUpperCase(),
                           style: AppTypography.label.copyWith(
-                              color: AppColors.forgeFire, fontSize: 8),
+                            color: AppColors.forgeFire,
+                            fontSize: 8,
+                          ),
                         ),
                       ),
                     FgIconButton(
                       icon: widget.isFavorited
                           ? Icons.favorite
                           : Icons.favorite_border,
+                      semanticLabel: widget.title,
                       onPressed: widget.onToggleFavorite,
                       variant: FgIconButtonVariant.glass,
                       size: FgIconButtonSize.md,
-                      color: widget.isFavorited
-                          ? AppColors.forgeFire
-                          : Colors.white,
+                      isSelected: widget.isFavorited,
                     ),
                   ],
                 ),
@@ -393,17 +414,24 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
                   child: Text(
                     widget.backTitle!.toUpperCase(),
                     style: AppTypography.h2.copyWith(
-                        color: Colors.white, fontSize: 32, letterSpacing: 2),
+                      color: Colors.white,
+                      fontSize: 32,
+                      letterSpacing: 2,
+                    ),
                   ),
                 ),
 
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(24),
-                  child: widget.backContent ??
+                  child:
+                      widget.backContent ??
                       const Center(
-                          child: Text('No details available',
-                              style: TextStyle(color: Colors.white54))),
+                        child: Text(
+                          'No details available',
+                          style: TextStyle(color: Colors.white54),
+                        ),
+                      ),
                 ),
               ),
 
@@ -414,31 +442,43 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
                   alignment: Alignment.centerRight,
                   child: FgIconButton(
                     icon: Icons.replay,
+                    semanticLabel: widget.title,
                     onPressed: _toggleFlip,
                     variant: FgIconButtonVariant.glass,
                     size: FgIconButtonSize.md,
-                    color: Colors.white,
                   ),
                 ),
               ),
 
               // Back Footer
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 color: Colors.black.withOpacity(0.6),
-                child: widget.backFooter ??
+                child:
+                    widget.backFooter ??
                     Row(
                       children: [
                         _buildFooterStat(
-                            'TIME SIG', '4/4', Icons.timer, Colors.white54),
+                          'TIME SIG',
+                          '4/4',
+                          Icons.timer,
+                          Colors.white54,
+                        ),
                         Container(
-                            width: 1,
-                            height: 24,
-                            color: Colors.white.withOpacity(0.1),
-                            margin: const EdgeInsets.symmetric(horizontal: 16)),
+                          width: 1,
+                          height: 24,
+                          color: Colors.white.withOpacity(0.1),
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                        ),
                         _buildFooterStat(
-                            'TEMPO', '120 BPM', Icons.flash_on, Colors.white54),
+                          'TEMPO',
+                          '120 BPM',
+                          Icons.flash_on,
+                          Colors.white54,
+                        ),
                       ],
                     ),
               ),
@@ -450,7 +490,11 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
   }
 
   Widget _buildFooterStat(
-      String label, String value, IconData icon, Color accentColor) {
+    String label,
+    String value,
+    IconData icon,
+    Color accentColor,
+  ) {
     return Expanded(
       child: FgIconLabel(
         label: label,

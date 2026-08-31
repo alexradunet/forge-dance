@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
-import '/design_system/tokens/app_colors.dart';
-import '/design_system/tokens/app_typography.dart';
-import 'primary_button.dart';
-import 'secondary_button.dart';
+import '../../../../design_system/atoms/buttons/fg_button.dart';
+import '../../../../design_system/tokens/app_border_radius.dart';
+import '../../../../design_system/tokens/app_spacing.dart';
 
-class CommonDialog extends ConsumerWidget {
+class CommonDialog extends StatelessWidget {
   final String title;
   final String content;
   final String primaryButtonLabel;
-  final Function()? primaryButtonAction;
-  final Color primaryButtonBackground;
+  final VoidCallback? primaryButtonAction;
+  final FgButtonVariant primaryButtonVariant;
   final String? secondaryButtonLabel;
-  final Function()? secondaryButtonAction;
+  final VoidCallback? secondaryButtonAction;
 
   const CommonDialog({
     super.key,
@@ -22,69 +19,62 @@ class CommonDialog extends ConsumerWidget {
     required this.content,
     required this.primaryButtonLabel,
     this.primaryButtonAction,
-    this.primaryButtonBackground = AppColors.forgeFire,
+    this.primaryButtonVariant = FgButtonVariant.primary,
     this.secondaryButtonLabel,
     this.secondaryButtonAction,
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Dialog(
-      insetPadding: const EdgeInsets.symmetric(horizontal: 24),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
+      insetPadding: AppSpacing.horizontalXXL,
+      shape: const RoundedRectangleBorder(
+        borderRadius: AppBorderRadius.xxLarge,
       ),
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
-          borderRadius: BorderRadius.circular(24),
-        ),
+      child: Padding(
+        padding: AppSpacing.allXXL,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: AppTypography.h5),
-            const SizedBox(height: 16),
-            Text(content, style: AppTypography.bodySmall),
-            const SizedBox(height: 16),
-            secondaryButtonLabel != null
-                ? Row(
-                    children: [
-                      Expanded(
-                        child: SecondaryButton(
-                          text: secondaryButtonLabel ?? '',
-                          onPressed: () {
-                            secondaryButtonAction?.call();
-                            context.pop();
-                          },
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: PrimaryButton(
-                          text: primaryButtonLabel,
-                          backgroundColor: primaryButtonBackground,
-                          onPressed: () {
-                            primaryButtonAction?.call();
-                            context.pop();
-                          },
-                        ),
-                      ),
-                    ],
-                  )
-                : PrimaryButton(
-                    text: primaryButtonLabel,
-                    backgroundColor: primaryButtonBackground,
-                    onPressed: () {
-                      primaryButtonAction?.call();
-                      context.pop();
-                    },
+            Text(title, style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: AppSpacing.lg),
+            Text(content, style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(height: AppSpacing.xxl),
+            if (secondaryButtonLabel case final label?)
+              Row(
+                children: [
+                  Expanded(
+                    child: FgButton(
+                      text: label,
+                      variant: FgButtonVariant.secondary,
+                      onPressed: () {
+                        secondaryButtonAction?.call();
+                        Navigator.of(context).pop();
+                      },
+                    ),
                   ),
+                  const SizedBox(width: AppSpacing.lg),
+                  Expanded(child: _primaryButton(context)),
+                ],
+              )
+            else
+              _primaryButton(context),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _primaryButton(BuildContext context) {
+    return FgButton(
+      text: primaryButtonLabel,
+      variant: primaryButtonVariant,
+      expand: true,
+      onPressed: () {
+        primaryButtonAction?.call();
+        Navigator.of(context).pop();
+      },
     );
   }
 }

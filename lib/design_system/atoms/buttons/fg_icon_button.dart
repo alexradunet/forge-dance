@@ -1,198 +1,188 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
-import '../../tokens/app_colors.dart';
-import '../../tokens/app_shadows.dart';
 
-enum FgIconButtonVariant {
-  primary,
-  secondary,
-  glass,
-  ghost,
-}
+import '../../theme/forge_theme_extensions.dart';
+import '../../tokens/app_sizes.dart';
 
-enum FgIconButtonSize {
-  sm, // 32px
-  md, // 40px
-  lg, // 48px
-  xl, // 56px
-}
+enum FgIconButtonVariant { primary, secondary, glass, ghost }
 
-/// A standard icon-only button used throughout the application.
+enum FgIconButtonSize { sm, md, lg, xl }
+
+/// Icon-only action with a semantic label and a minimum 48px target.
 ///
-/// Variants:
-/// - [primary]: Solid Forge Fire color.
-/// - [secondary]: Solid Electric Blue color.
-/// - [glass]: Frosted glass effect (for overlays).
-/// - [ghost]: Transparent background (for minimal actions).
+/// [size] controls the visual circle. The interactive target remains at least
+/// [AppSizes.comfortableTouchTarget] for pointer, keyboard, and assistive input.
 class FgIconButton extends StatelessWidget {
-  final IconData icon;
-  final VoidCallback? onPressed;
-  final FgIconButtonVariant variant;
-  final FgIconButtonSize size;
-  final Color? color; // Custom override for icon color
-  final bool isLoading;
-  final bool isEnabled;
-
   const FgIconButton({
     super.key,
     required this.icon,
+    required this.semanticLabel,
     this.onPressed,
     this.variant = FgIconButtonVariant.glass,
     this.size = FgIconButtonSize.md,
-    this.color,
+    this.isSelected = false,
     this.isLoading = false,
     this.isEnabled = true,
+    this.focusNode,
+    this.autofocus = false,
   });
 
-  /// Factory for a standard "Back" button
-  factory FgIconButton.back({
-    VoidCallback? onPressed,
-    FgIconButtonVariant variant = FgIconButtonVariant.glass,
-    Color? color,
-  }) {
-    return FgIconButton(
-      icon: Icons.arrow_back_ios_new,
-      onPressed: onPressed,
-      variant: variant,
-      size: FgIconButtonSize.md,
-      color: color,
-    );
-  }
-
-  /// Factory for a standard "Close" button
-  factory FgIconButton.close({
-    VoidCallback? onPressed,
-    FgIconButtonVariant variant = FgIconButtonVariant.glass,
-    Color? color,
-  }) {
-    return FgIconButton(
-      icon: Icons.close,
-      onPressed: onPressed,
-      variant: variant,
-      size: FgIconButtonSize.md,
-      color: color,
-    );
-  }
+  final IconData icon;
+  final String semanticLabel;
+  final VoidCallback? onPressed;
+  final FgIconButtonVariant variant;
+  final FgIconButtonSize size;
+  final bool isSelected;
+  final bool isLoading;
+  final bool isEnabled;
+  final FocusNode? focusNode;
+  final bool autofocus;
 
   @override
   Widget build(BuildContext context) {
-    Widget buttonContent = AnimatedContainer(
-      duration: const Duration(milliseconds: 200),
-      width: _dimesnion,
-      height: _dimesnion,
-      decoration: _decoration,
+    final scheme = Theme.of(context).colorScheme;
+    final emphasis = Theme.of(context).forgeEmphasis;
+    final motion = context.forgeMotion;
+    final isInteractive = isEnabled && !isLoading && onPressed != null;
+    final targetDimension = _targetDimension;
+    final visualDimension = _visualDimension;
+    final foreground = _foregroundColor(scheme, isInteractive);
+
+    Widget visual = AnimatedContainer(
+      duration: motion.fast,
+      curve: motion.enterCurve,
+      width: visualDimension,
+      height: visualDimension,
+      decoration: _decoration(scheme, emphasis, isInteractive: isInteractive),
+      alignment: Alignment.center,
       child: isLoading
-          ? const Center(
-              child: SizedBox(
-                width: 16,
-                height: 16,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation(Colors.white),
-                ),
+          ? SizedBox.square(
+              dimension: _iconSize,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: foreground,
               ),
             )
-          : Icon(
-              icon,
-              size: _iconSize,
-              color: _iconColor,
-            ),
+          : Icon(icon, size: _iconSize, color: foreground),
     );
 
-    if (variant == FgIconButtonVariant.glass) {
-      buttonContent = ClipRRect(
-        borderRadius: BorderRadius.circular(_dimesnion / 2),
+    if (variant == FgIconButtonVariant.glass && emphasis.glassBlurSigma > 0) {
+      visual = ClipOval(
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-          child: buttonContent,
+          filter: ImageFilter.blur(
+            sigmaX: emphasis.glassBlurSigma,
+            sigmaY: emphasis.glassBlurSigma,
+          ),
+          child: visual,
         ),
       );
     }
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: isEnabled && !isLoading ? onPressed : null,
-        borderRadius: BorderRadius.circular(_dimesnion / 2),
-        child: buttonContent,
+    return Semantics(
+      button: true,
+      enabled: isInteractive,
+      selected: isSelected,
+      label: semanticLabel,
+      liveRegion: isLoading,
+      onTap: isInteractive ? onPressed : null,
+      child: ExcludeSemantics(
+        child: Tooltip(
+          message: semanticLabel,
+          child: SizedBox.square(
+            dimension: targetDimension,
+            child: IconButton(
+              focusNode: focusNode,
+              autofocus: autofocus,
+              onPressed: isInteractive ? onPressed : null,
+              padding: EdgeInsets.all((targetDimension - visualDimension) / 2),
+              constraints: BoxConstraints.tightFor(
+                width: targetDimension,
+                height: targetDimension,
+              ),
+              style: IconButton.styleFrom(
+                minimumSize: Size.square(targetDimension),
+                tapTargetSize: MaterialTapTargetSize.padded,
+                shape: const CircleBorder(),
+              ),
+              icon: visual,
+            ),
+          ),
+        ),
       ),
     );
   }
 
-  double get _dimesnion {
-    switch (size) {
-      case FgIconButtonSize.sm:
-        return 32;
-      case FgIconButtonSize.md:
-        return 40;
-      case FgIconButtonSize.lg:
-        return 48;
-      case FgIconButtonSize.xl:
-        return 56;
+  BoxDecoration _decoration(
+    ColorScheme scheme,
+    ForgeEmphasis emphasis, {
+    required bool isInteractive,
+  }) {
+    if (!isInteractive && !isLoading) {
+      return BoxDecoration(
+        shape: BoxShape.circle,
+        color: scheme.onSurface.withValues(alpha: 0.12),
+      );
     }
+
+    return switch (variant) {
+      FgIconButtonVariant.primary => BoxDecoration(
+        shape: BoxShape.circle,
+        color: scheme.primary,
+        boxShadow: emphasis.primaryAction,
+      ),
+      FgIconButtonVariant.secondary => BoxDecoration(
+        shape: BoxShape.circle,
+        color: scheme.secondary,
+        boxShadow: emphasis.raised,
+      ),
+      FgIconButtonVariant.glass => BoxDecoration(
+        shape: BoxShape.circle,
+        color: emphasis.glassFill,
+        border: Border.all(color: emphasis.glassBorder),
+        boxShadow: emphasis.raised,
+      ),
+      FgIconButtonVariant.ghost => const BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.transparent,
+      ),
+    };
   }
 
-  double get _iconSize {
-    switch (size) {
-      case FgIconButtonSize.sm:
-        return 16;
-      case FgIconButtonSize.md:
-        return 20;
-      case FgIconButtonSize.lg:
-        return 24;
-      case FgIconButtonSize.xl:
-        return 28;
+  Color _foregroundColor(ColorScheme scheme, bool isInteractive) {
+    if (!isInteractive && !isLoading) {
+      return scheme.onSurface.withValues(alpha: 0.38);
     }
+    if (isSelected &&
+        (variant == FgIconButtonVariant.glass ||
+            variant == FgIconButtonVariant.ghost)) {
+      return scheme.primary;
+    }
+
+    return switch (variant) {
+      FgIconButtonVariant.primary => scheme.onPrimary,
+      FgIconButtonVariant.secondary => scheme.onSecondary,
+      FgIconButtonVariant.glass => scheme.onSurface,
+      FgIconButtonVariant.ghost => scheme.onSurfaceVariant,
+    };
   }
 
-  BoxDecoration? get _decoration {
-    if (variant == FgIconButtonVariant.ghost) return null;
+  double get _targetDimension =>
+      _visualDimension < AppSizes.comfortableTouchTarget
+      ? AppSizes.comfortableTouchTarget
+      : _visualDimension;
 
-    final base = BoxDecoration(
-      shape: BoxShape.circle,
-      boxShadow: isEnabled ? [AppShadows.shadowSm] : null,
-    );
+  double get _visualDimension => switch (size) {
+    FgIconButtonSize.sm => AppSizes.iconXl,
+    FgIconButtonSize.md => AppSizes.avatarMd,
+    FgIconButtonSize.lg => AppSizes.comfortableTouchTarget,
+    FgIconButtonSize.xl => AppSizes.fabSizeSm,
+  };
 
-    if (!isEnabled) {
-      return base.copyWith(color: AppColors.gray800);
-    }
-
-    switch (variant) {
-      case FgIconButtonVariant.primary:
-        return base.copyWith(
-          color: AppColors.forgeFire,
-          boxShadow: [AppShadows.glowPrimary],
-        );
-      case FgIconButtonVariant.secondary:
-        return base.copyWith(
-          color: AppColors.electricBlue,
-          boxShadow: [AppShadows.glowBlue],
-        );
-      case FgIconButtonVariant.glass:
-        return base.copyWith(
-          color: AppColors.gray900.withOpacity(0.4),
-          border: Border.all(
-            color: Colors.white.withOpacity(0.1),
-            width: 1,
-          ),
-        );
-      case FgIconButtonVariant.ghost:
-        return null;
-    }
-  }
-
-  Color get _iconColor {
-    if (color != null) return color!;
-    if (!isEnabled) return AppColors.gray500;
-
-    switch (variant) {
-      case FgIconButtonVariant.primary:
-      case FgIconButtonVariant.secondary:
-        return AppColors.textMain;
-      case FgIconButtonVariant.glass:
-        return AppColors.textMain;
-      case FgIconButtonVariant.ghost:
-        return AppColors.textMain;
-    }
-  }
+  double get _iconSize => switch (size) {
+    FgIconButtonSize.sm => AppSizes.iconSm,
+    FgIconButtonSize.md => AppSizes.iconMd,
+    FgIconButtonSize.lg => AppSizes.iconLg,
+    FgIconButtonSize.xl => AppSizes.iconXl,
+  };
 }

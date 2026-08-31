@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../../tokens/app_colors.dart';
 import '../../organisms/lessons/lesson_node_models.dart';
 import '../../atoms/progress/fg_progress_bar.dart';
@@ -36,7 +37,7 @@ class FgLessonTimelineMovementCard extends StatelessWidget {
                     color: AppColors.forgeFire.withOpacity(0.2),
                     blurRadius: 20,
                     spreadRadius: -5,
-                  )
+                  ),
                 ],
               ),
               clipBehavior: Clip.antiAlias,
@@ -84,6 +85,7 @@ class FgLessonTimelineMovementCard extends StatelessWidget {
                           right: 0,
                           child: FgIconButton(
                             icon: Icons.play_arrow,
+                            semanticLabel: node.title,
                             variant: FgIconButtonVariant.primary,
                             size: FgIconButtonSize.lg,
                             onPressed: () => onNavigate?.call('ignite'),
@@ -116,28 +118,39 @@ class FgLessonTimelineMovementCard extends StatelessWidget {
                             const SizedBox(height: 12),
                             Row(
                               children: [
-                                Icon(Icons.schedule,
-                                    size: 14, color: AppColors.textMuted),
+                                Icon(
+                                  Icons.schedule,
+                                  size: 14,
+                                  color: AppColors.textMuted,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   node.duration,
                                   style: TextStyle(
-                                      fontSize: 11, color: AppColors.textMuted),
+                                    fontSize: 11,
+                                    color: AppColors.textMuted,
+                                  ),
                                 ),
                                 Container(
                                   margin: const EdgeInsets.symmetric(
-                                      horizontal: 12),
+                                    horizontal: 12,
+                                  ),
                                   width: 1,
                                   height: 12,
                                   color: Colors.white.withOpacity(0.2),
                                 ),
-                                Icon(Icons.bar_chart,
-                                    size: 14, color: AppColors.textMuted),
+                                Icon(
+                                  Icons.bar_chart,
+                                  size: 14,
+                                  color: AppColors.textMuted,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   node.difficulty,
                                   style: TextStyle(
-                                      fontSize: 11, color: AppColors.textMuted),
+                                    fontSize: 11,
+                                    color: AppColors.textMuted,
+                                  ),
                                 ),
                               ],
                             ),
@@ -150,7 +163,9 @@ class FgLessonTimelineMovementCard extends StatelessWidget {
                                 Text(
                                   'Progress',
                                   style: TextStyle(
-                                      fontSize: 11, color: AppColors.textMuted),
+                                    fontSize: 11,
+                                    color: AppColors.textMuted,
+                                  ),
                                 ),
                                 Text(
                                   '${(node.progress * 100).toInt()}%',

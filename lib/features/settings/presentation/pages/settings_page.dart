@@ -7,6 +7,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../../../../constants/constants.dart';
 import '../../../../extensions/build_context_extension.dart';
 import '../../../../design_system/atoms/visuals/fg_background.dart';
+import '../../../../design_system/atoms/buttons/fg_button.dart';
 import '../../../../design_system/organisms/navigation/app_header.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../features/common/ui/widgets/common_dialog.dart';
@@ -40,7 +41,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   Widget build(BuildContext context) {
     // If profile was not passed via extra, we try to watch it from the store
     // This handles deep linking or refresh scenarios better
-    final profile = widget.profile ??
+    final profile =
+        widget.profile ??
         ref.watch(profileViewModelProvider.select((it) => it.value?.profile));
 
     return Scaffold(
@@ -48,10 +50,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       body: FgBackground(
         child: Column(
           children: [
-            AppHeader(
-              title: 'SETTINGS',
-              onBack: () => context.pop(),
-            ),
+            AppHeader(title: 'SETTINGS', onBack: () => context.pop()),
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
@@ -154,14 +153,17 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   void _getPackageInfo() {
-    PackageInfo.fromPlatform().then((info) {
-      setState(() {
-        _version = info.version;
-      });
-    }).catchError((error) {
-      debugPrint(
-          '${Constants.tag} [_SettingsPageState._getPackageInfo] Error: $error');
-    });
+    PackageInfo.fromPlatform()
+        .then((info) {
+          setState(() {
+            _version = info.version;
+          });
+        })
+        .catchError((error) {
+          debugPrint(
+            '${Constants.tag} [_SettingsPageState._getPackageInfo] Error: $error',
+          );
+        });
   }
 
   void _signOut(BuildContext context) {
@@ -171,7 +173,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         title: LocaleKeys.logOutTitle.tr(),
         content: LocaleKeys.logOutMessage.tr(),
         primaryButtonLabel: LocaleKeys.logOut.tr(),
-        primaryButtonBackground: AppColors.passionRed,
+        primaryButtonVariant: FgButtonVariant.destructive,
         secondaryButtonLabel: LocaleKeys.cancel.tr(),
         primaryButtonAction: () async {
           try {
@@ -182,8 +184,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             }
           } catch (error) {
             if (context.mounted) {
-              context
-                  .showErrorSnackBar(LocaleKeys.unexpectedErrorOccurred.tr());
+              context.showErrorSnackBar(
+                LocaleKeys.unexpectedErrorOccurred.tr(),
+              );
             }
           } finally {
             Global.hideLoading();
@@ -200,7 +203,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         title: LocaleKeys.deleteAccountTitle.tr(),
         content: LocaleKeys.deleteAccountMessage.tr(),
         primaryButtonLabel: LocaleKeys.deleteAccount.tr(),
-        primaryButtonBackground: AppColors.passionRed,
+        primaryButtonVariant: FgButtonVariant.destructive,
         secondaryButtonLabel: LocaleKeys.cancel.tr(),
         primaryButtonAction: () async {
           try {
@@ -211,8 +214,9 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             }
           } catch (error) {
             if (context.mounted) {
-              context
-                  .showErrorSnackBar(LocaleKeys.unexpectedErrorOccurred.tr());
+              context.showErrorSnackBar(
+                LocaleKeys.unexpectedErrorOccurred.tr(),
+              );
             }
           } finally {
             Global.hideLoading();
