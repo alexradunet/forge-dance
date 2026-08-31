@@ -41,48 +41,46 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyDHcEmnieB8kA9Tc2fc_CFYw30mI7FKsPg',
-    appId: '1:125200254439:web:01b3303894b624e5b46942',
-    messagingSenderId: '125200254439',
-    projectId: 'forge-dance-1bcc7',
-    authDomain: 'forge-dance-1bcc7.firebaseapp.com',
-    storageBucket: 'forge-dance-1bcc7.firebasestorage.app',
-    measurementId: 'G-W3L0GGCBSN',
+    apiKey: 'AIzaSyDSxWn0PFFt2b4bw93UdcLIMGQbngFJ5hg',
+    appId: '1:84194566505:web:be25bae63acfe11c9f5df8',
+    messagingSenderId: '84194566505',
+    projectId: 'forgedance-52c54',
+    authDomain: 'forgedance-52c54.firebaseapp.com',
+    storageBucket: 'forgedance-52c54.firebasestorage.app',
+    measurementId: 'G-SXVSHNKLFR',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyCrbxxi1tpkI35AOsLhH9ZnIjT_QIixKtI',
-    appId: '1:125200254439:android:7716c685b2698e11b46942',
-    messagingSenderId: '125200254439',
-    projectId: 'forge-dance-1bcc7',
-    storageBucket: 'forge-dance-1bcc7.firebasestorage.app',
+    apiKey: 'AIzaSyCJURmKz0HBB8Ryeb51LNhgbF-P0fX-1qw',
+    appId: '1:84194566505:android:e48121a47eb1bdf49f5df8',
+    messagingSenderId: '84194566505',
+    projectId: 'forgedance-52c54',
+    storageBucket: 'forgedance-52c54.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCWmbloURoUt6JQxC7LFrHBq_wz7rMrwS8',
-    appId: '1:125200254439:ios:6fb628be883a2608b46942',
-    messagingSenderId: '125200254439',
-    projectId: 'forge-dance-1bcc7',
-    storageBucket: 'forge-dance-1bcc7.firebasestorage.app',
+    apiKey: 'AIzaSyAqpb0EpA_E9J7YwrQyP3lSog3RWrFsOME',
+    appId: '1:84194566505:ios:e44d0cc9d33e239d9f5df8',
+    messagingSenderId: '84194566505',
+    projectId: 'forgedance-52c54',
+    storageBucket: 'forgedance-52c54.firebasestorage.app',
     iosBundleId: 'dance.forge.app',
   );
-
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyCWmbloURoUt6JQxC7LFrHBq_wz7rMrwS8',
-    appId: '1:125200254439:ios:6fb628be883a2608b46942',
-    messagingSenderId: '125200254439',
-    projectId: 'forge-dance-1bcc7',
-    storageBucket: 'forge-dance-1bcc7.firebasestorage.app',
+    apiKey: 'AIzaSyAqpb0EpA_E9J7YwrQyP3lSog3RWrFsOME',
+    appId: '1:84194566505:ios:e44d0cc9d33e239d9f5df8',
+    messagingSenderId: '84194566505',
+    projectId: 'forgedance-52c54',
+    storageBucket: 'forgedance-52c54.firebasestorage.app',
     iosBundleId: 'dance.forge.app',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyDHcEmnieB8kA9Tc2fc_CFYw30mI7FKsPg',
-    appId: '1:125200254439:web:9547622fe0cd3fdab46942',
-    messagingSenderId: '125200254439',
-    projectId: 'forge-dance-1bcc7',
-    authDomain: 'forge-dance-1bcc7.firebaseapp.com',
-    storageBucket: 'forge-dance-1bcc7.firebasestorage.app',
-    measurementId: 'G-EL5GJE8WX9',
+    apiKey: 'AIzaSyDSxWn0PFFt2b4bw93UdcLIMGQbngFJ5hg',
+    appId: '1:84194566505:web:0e3903cc52ce83ad9f5df8',
+    messagingSenderId: '84194566505',
+    projectId: 'forgedance-52c54',
+    authDomain: 'forgedance-52c54.firebaseapp.com',
+    storageBucket: 'forgedance-52c54.firebasestorage.app',
+    measurementId: 'G-K4E0HHXPB5',
   );
 }

@@ -2,6 +2,11 @@
 
 Rules for AI agents and contributors working on Forge Dance.
 
+## Target platforms
+
+- Mobile (Android and iOS) and Web are the primary product targets.
+- Linux desktop is a local UI-development target only and skips Firebase initialization because FlutterFire does not support Linux.
+
 ## Backend
 
 - Firebase is the selected backend for the MVP because speed to market is the priority.
@@ -54,7 +59,6 @@ Rules for AI agents and contributors working on Forge Dance.
   ```
   VS Code picks up `.fvm/flutter_sdk` automatically (`.vscode/settings.json`). Use `fvm flutter …` in a plain terminal, or just `flutter …` inside the VS Code integrated terminal once the Dart extension has switched SDKs.
 - Do not run `flutter upgrade` on this repo without a deliberate version bump.
-- **Linux desktop** runs locally but skips Firebase initialization (no FlutterFire Linux config).
 - For auth/Firestore locally: `firebase emulators:start`, then `fvm flutter run --dart-define=USE_FIREBASE_EMULATOR=true`.
 - **MCP (AI assistants):** The official Dart & Flutter MCP server is configured for Cursor (`.cursor/mcp.json`) and VS Code (`dart.mcpServer` in `.vscode/settings.json`). Requires `fvm use` so `.fvm/flutter_sdk` exists. Restart the editor after cloning. In Cursor, enable the **dart** server under Settings → MCP.
 

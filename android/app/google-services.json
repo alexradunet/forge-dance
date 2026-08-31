@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "125200254439",
-    "project_id": "forge-dance-1bcc7",
-    "storage_bucket": "forge-dance-1bcc7.firebasestorage.app"
+    "project_number": "84194566505",
+    "project_id": "forgedance-52c54",
+    "storage_bucket": "forgedance-52c54.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:125200254439:android:7716c685b2698e11b46942",
+        "mobilesdk_app_id": "1:84194566505:android:e48121a47eb1bdf49f5df8",
         "android_client_info": {
           "package_name": "dance.forge.app"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCrbxxi1tpkI35AOsLhH9ZnIjT_QIixKtI"
+          "current_key": "AIzaSyCJURmKz0HBB8Ryeb51LNhgbF-P0fX-1qw"
         }
       ],
       "services": {

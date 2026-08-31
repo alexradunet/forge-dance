@@ -5,7 +5,7 @@ description: Work with Firebase Auth, Cloud Firestore, and local persistence in 
 
 # Firebase & Data Layer
 
-Firebase project: `forge-dance-1bcc7` (Auth email/password + Cloud Firestore). Chosen for MVP speed — **do not add another backend-as-a-service dependency**.
+Firebase project: `forgedance-52c54` (Auth email/password + Cloud Firestore). Chosen for MVP speed — **do not add another backend-as-a-service dependency**.
 
 ## Golden rule
 
@@ -104,6 +104,6 @@ Cross-feature auth flows go through `SessionCoordinator` (`features/session/appl
 
 ## Environment setup (for humans/CI running against real Firebase)
 
-- `flutterfire configure --project=forge-dance-1bcc7` regenerates `lib/firebase_options.dart` + platform configs.
+- `flutterfire configure --project=forgedance-52c54` regenerates `lib/firebase_options.dart` + platform configs.
 - Firebase Console prerequisites: **Authentication → Email/Password enabled** and a **Firestore database** created.
 - Without these, the app still runs — auth-dependent features degrade per the nullable pattern.

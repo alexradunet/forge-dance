@@ -22,7 +22,7 @@ Forge Dance is a gamified dance-training app ("THE STAGE IS YOURS") built with F
 
 - Package name: `forge_dance` (imports: `package:forge_dance/...`)
 - Platforms: Android, iOS, macOS, web, Windows (Firebase configured); Linux runs but skips Firebase entirely
-- Backend: Firebase Auth + Cloud Firestore, project `forge-dance-1bcc7`
+- Backend: Firebase Auth + Cloud Firestore, project `forgedance-52c54`
 
 ## Critical: generated code is gitignored
 
