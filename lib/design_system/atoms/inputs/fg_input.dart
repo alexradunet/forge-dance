@@ -1,16 +1,18 @@
+import 'dart:ui' show SemanticsValidationResult;
+
 import 'package:flutter/material.dart';
 
-import '../../tokens/app_animation.dart';
-import '../../tokens/app_border_radius.dart';
+import '../../theme/forge_theme_extensions.dart';
 import '../../tokens/app_sizes.dart';
 import '../../tokens/app_spacing.dart';
-import '../../tokens/app_typography.dart';
 import '../typography/fg_label.dart';
 
 enum FgInputVariant { standard, password, search, multiline }
 
-/// Forge Dance text-entry primitive with semantic focus, error, and disabled
-/// states. Feature code owns validation and passes [errorText] when needed.
+/// Forge text-entry primitive backed by [TextFormField].
+///
+/// Feature code owns validation and localized copy. This module owns semantic
+/// state, Material interaction behavior, target sizing, and theme integration.
 class FgInput extends StatefulWidget {
   const FgInput({
     super.key,
@@ -22,7 +24,6 @@ class FgInput extends StatefulWidget {
     this.onChanged,
     this.onSubmitted,
     this.prefixIcon,
-    this.suffixWidget,
     this.isEnabled = true,
     this.isRequired = false,
     this.autofocus = false,
@@ -31,10 +32,22 @@ class FgInput extends StatefulWidget {
     this.textInputAction,
     this.autofillHints,
     this.textCapitalization = TextCapitalization.none,
-    this.variant = FgInputVariant.standard,
-    this.showPasswordSemanticsLabel,
-    this.hidePasswordSemanticsLabel,
-  });
+    this.readOnly = false,
+    this.onTap,
+    this.isLoading = false,
+    this.loadingSemanticsLabel,
+  }) : variant = FgInputVariant.standard,
+       showPasswordSemanticsLabel = null,
+       hidePasswordSemanticsLabel = null,
+       _onClear = null,
+       _clearSemanticsLabel = null,
+       _showFilter = false,
+       _onFilterPressed = null,
+       _filterSemanticsLabel = null,
+       assert(
+         !isLoading || loadingSemanticsLabel != null,
+         'Loading FgInput requires a loadingSemanticsLabel.',
+       );
 
   factory FgInput.password({
     Key? key,
@@ -47,13 +60,19 @@ class FgInput extends StatefulWidget {
     ValueChanged<String>? onSubmitted,
     bool isEnabled = true,
     bool isRequired = false,
+    bool autofocus = false,
     FocusNode? focusNode,
     TextInputAction? textInputAction,
     Iterable<String>? autofillHints,
-    String? showPasswordSemanticsLabel,
-    String? hidePasswordSemanticsLabel,
+    TextCapitalization textCapitalization = TextCapitalization.none,
+    bool readOnly = false,
+    VoidCallback? onTap,
+    bool isLoading = false,
+    String? loadingSemanticsLabel,
+    required String showPasswordSemanticsLabel,
+    required String hidePasswordSemanticsLabel,
   }) {
-    return FgInput(
+    return FgInput._internal(
       key: key,
       label: label,
       placeholder: placeholder,
@@ -64,10 +83,16 @@ class FgInput extends StatefulWidget {
       onSubmitted: onSubmitted,
       isEnabled: isEnabled,
       isRequired: isRequired,
+      autofocus: autofocus,
       focusNode: focusNode,
       keyboardType: TextInputType.visiblePassword,
       textInputAction: textInputAction,
       autofillHints: autofillHints,
+      textCapitalization: textCapitalization,
+      readOnly: readOnly,
+      onTap: onTap,
+      isLoading: isLoading,
+      loadingSemanticsLabel: loadingSemanticsLabel,
       prefixIcon: Icons.lock_outline_rounded,
       variant: FgInputVariant.password,
       showPasswordSemanticsLabel: showPasswordSemanticsLabel,
@@ -77,35 +102,56 @@ class FgInput extends StatefulWidget {
 
   factory FgInput.search({
     Key? key,
+    String? label,
     String? placeholder,
     TextEditingController? controller,
     ValueChanged<String>? onChanged,
     ValueChanged<String>? onSubmitted,
     VoidCallback? onClear,
+    String? clearSemanticsLabel,
     bool isEnabled = true,
+    bool autofocus = false,
+    FocusNode? focusNode,
+    bool readOnly = false,
+    VoidCallback? onTap,
+    bool isLoading = false,
+    String? loadingSemanticsLabel,
     bool showFilter = false,
     VoidCallback? onFilterPressed,
+    String? filterSemanticsLabel,
   }) {
-    return FgInput(
+    assert(
+      onClear == null || clearSemanticsLabel != null,
+      'Search clear actions require a clearSemanticsLabel.',
+    );
+    assert(
+      !showFilter || onFilterPressed == null || filterSemanticsLabel != null,
+      'Search filter actions require a filterSemanticsLabel.',
+    );
+
+    return FgInput._internal(
       key: key,
+      label: label,
       placeholder: placeholder,
       controller: controller,
       onChanged: onChanged,
       onSubmitted: onSubmitted,
       isEnabled: isEnabled,
+      autofocus: autofocus,
+      focusNode: focusNode,
       keyboardType: TextInputType.text,
       textInputAction: TextInputAction.search,
+      readOnly: readOnly,
+      onTap: onTap,
+      isLoading: isLoading,
+      loadingSemanticsLabel: loadingSemanticsLabel,
       prefixIcon: Icons.search_rounded,
       variant: FgInputVariant.search,
-      suffixWidget: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (controller != null && onClear != null)
-            _ClearButton(controller: controller, onClear: onClear),
-          if (showFilter && onFilterPressed != null)
-            _FilterButton(onPressed: onFilterPressed),
-        ],
-      ),
+      onClear: onClear,
+      clearSemanticsLabel: clearSemanticsLabel,
+      showFilter: showFilter,
+      onFilterPressed: onFilterPressed,
+      filterSemanticsLabel: filterSemanticsLabel,
     );
   }
 
@@ -117,11 +163,19 @@ class FgInput extends StatefulWidget {
     String? helperText,
     TextEditingController? controller,
     ValueChanged<String>? onChanged,
+    ValueChanged<String>? onSubmitted,
     bool isEnabled = true,
     bool isRequired = false,
+    bool autofocus = false,
+    FocusNode? focusNode,
+    Iterable<String>? autofillHints,
     TextCapitalization textCapitalization = TextCapitalization.sentences,
+    bool readOnly = false,
+    VoidCallback? onTap,
+    bool isLoading = false,
+    String? loadingSemanticsLabel,
   }) {
-    return FgInput(
+    return FgInput._internal(
       key: key,
       label: label,
       placeholder: placeholder,
@@ -129,14 +183,63 @@ class FgInput extends StatefulWidget {
       helperText: helperText,
       controller: controller,
       onChanged: onChanged,
+      onSubmitted: onSubmitted,
       isEnabled: isEnabled,
       isRequired: isRequired,
+      autofocus: autofocus,
+      focusNode: focusNode,
       keyboardType: TextInputType.multiline,
       textInputAction: TextInputAction.newline,
+      autofillHints: autofillHints,
       textCapitalization: textCapitalization,
+      readOnly: readOnly,
+      onTap: onTap,
+      isLoading: isLoading,
+      loadingSemanticsLabel: loadingSemanticsLabel,
       variant: FgInputVariant.multiline,
     );
   }
+
+  const FgInput._internal({
+    super.key,
+    this.label,
+    this.placeholder,
+    this.errorText,
+    this.helperText,
+    this.controller,
+    this.onChanged,
+    this.onSubmitted,
+    this.prefixIcon,
+    this.isEnabled = true,
+    this.isRequired = false,
+    this.autofocus = false,
+    this.focusNode,
+    this.keyboardType,
+    this.textInputAction,
+    this.autofillHints,
+    this.textCapitalization = TextCapitalization.none,
+    this.readOnly = false,
+    this.onTap,
+    this.isLoading = false,
+    this.loadingSemanticsLabel,
+    required this.variant,
+    this.showPasswordSemanticsLabel,
+    this.hidePasswordSemanticsLabel,
+    this._onClear,
+    this._clearSemanticsLabel,
+    this._showFilter = false,
+    this._onFilterPressed,
+    this._filterSemanticsLabel,
+  }) : assert(
+         variant != FgInputVariant.password ||
+             (showPasswordSemanticsLabel != null &&
+                 hidePasswordSemanticsLabel != null),
+         'Password inputs require show and hide semantic labels.',
+       ),
+       assert(
+         !isLoading || loadingSemanticsLabel != null,
+         'Loading FgInput requires a loadingSemanticsLabel.',
+       );
 
   final String? label;
   final String? placeholder;
@@ -146,7 +249,6 @@ class FgInput extends StatefulWidget {
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final IconData? prefixIcon;
-  final Widget? suffixWidget;
   final bool isEnabled;
   final bool isRequired;
   final bool autofocus;
@@ -155,265 +257,229 @@ class FgInput extends StatefulWidget {
   final TextInputAction? textInputAction;
   final Iterable<String>? autofillHints;
   final TextCapitalization textCapitalization;
+  final bool readOnly;
+  final VoidCallback? onTap;
+  final bool isLoading;
+  final String? loadingSemanticsLabel;
   final FgInputVariant variant;
   final String? showPasswordSemanticsLabel;
   final String? hidePasswordSemanticsLabel;
+  final VoidCallback? _onClear;
+  final String? _clearSemanticsLabel;
+  final bool _showFilter;
+  final VoidCallback? _onFilterPressed;
+  final String? _filterSemanticsLabel;
 
   @override
   State<FgInput> createState() => _FgInputState();
 }
 
 class _FgInputState extends State<FgInput> {
-  late FocusNode _focusNode;
-  late bool _ownsFocusNode;
-  bool _isFocused = false;
   bool _obscureText = false;
 
   @override
   void initState() {
     super.initState();
-    _attachFocusNode(widget.focusNode);
     _obscureText = widget.variant == FgInputVariant.password;
   }
 
   @override
   void didUpdateWidget(covariant FgInput oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.focusNode != widget.focusNode) {
-      _focusNode.removeListener(_handleFocusChange);
-      if (_ownsFocusNode) _focusNode.dispose();
-      _attachFocusNode(widget.focusNode);
-    }
     if (oldWidget.variant != widget.variant) {
       _obscureText = widget.variant == FgInputVariant.password;
     }
   }
 
-  void _attachFocusNode(FocusNode? node) {
-    _ownsFocusNode = node == null;
-    _focusNode = node ?? FocusNode();
-    _isFocused = _focusNode.hasFocus;
-    _focusNode.addListener(_handleFocusChange);
-  }
-
-  @override
-  void dispose() {
-    _focusNode.removeListener(_handleFocusChange);
-    if (_ownsFocusNode) _focusNode.dispose();
-    super.dispose();
-  }
-
-  void _handleFocusChange() {
-    if (mounted) setState(() => _isFocused = _focusNode.hasFocus);
-  }
-
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).colorScheme;
-    final hasError = widget.errorText?.isNotEmpty ?? false;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final motion = context.forgeMotion;
     final isMultiline = widget.variant == FgInputVariant.multiline;
-    final labelTone = hasError
+    final effectiveEnabled = widget.isEnabled && !widget.isLoading;
+    final suffix = _buildSuffix();
+
+    final field = TextFormField(
+      controller: widget.controller,
+      focusNode: widget.focusNode,
+      onChanged: widget.onChanged,
+      onFieldSubmitted: widget.onSubmitted,
+      onTap: widget.onTap,
+      obscureText: _obscureText,
+      keyboardType: widget.keyboardType ?? TextInputType.text,
+      textInputAction: widget.textInputAction,
+      autofillHints: widget.autofillHints,
+      textCapitalization: widget.textCapitalization,
+      autocorrect: widget.variant != FgInputVariant.password,
+      enableSuggestions: widget.variant != FgInputVariant.password,
+      enabled: effectiveEnabled,
+      readOnly: widget.readOnly,
+      autofocus: widget.autofocus,
+      maxLines: isMultiline ? 5 : 1,
+      minLines: isMultiline ? 3 : 1,
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: effectiveEnabled
+            ? scheme.onSurface
+            : scheme.onSurface.withValues(alpha: 0.38),
+      ),
+      decoration: InputDecoration(
+        labelText: null,
+        hintText: widget.placeholder,
+        helperText: widget.errorText == null ? widget.helperText : null,
+        errorText: widget.errorText,
+        errorMaxLines: 6,
+        helperMaxLines: 6,
+        alignLabelWithHint: isMultiline,
+        prefixIcon: widget.prefixIcon == null ? null : Icon(widget.prefixIcon),
+        suffixIcon: suffix == null
+            ? null
+            : AnimatedSwitcher(
+                duration: motion.fast,
+                switchInCurve: motion.enterCurve,
+                switchOutCurve: motion.exitCurve,
+                child: suffix,
+              ),
+        fillColor: !widget.isEnabled
+            ? scheme.onSurface.withValues(alpha: 0.06)
+            : widget.readOnly
+            ? scheme.surfaceContainerHigh
+            : null,
+      ),
+    );
+
+    final semanticField = Semantics(
+      label: widget.label,
+      isRequired: widget.isRequired,
+      validationResult: widget.errorText == null
+          ? SemanticsValidationResult.none
+          : SemanticsValidationResult.invalid,
+      child: field,
+    );
+
+    if (widget.label == null) return semanticField;
+
+    final labelTone = widget.errorText != null
         ? FgLabelTone.error
-        : !widget.isEnabled
-            ? FgLabelTone.disabled
-            : _isFocused
-                ? FgLabelTone.accent
-                : FgLabelTone.neutral;
-    final borderColor = hasError
-        ? colors.error
-        : _isFocused
-            ? colors.primary
-            : colors.onSurface.withAlpha(31);
+        : !effectiveEnabled
+        ? FgLabelTone.disabled
+        : FgLabelTone.neutral;
 
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (widget.label != null) ...[
-          FgLabel(
+        ExcludeSemantics(
+          child: FgLabel(
             text: widget.label!,
             isRequired: widget.isRequired,
             tone: labelTone,
           ),
-          const SizedBox(height: AppSpacing.sm),
-        ],
-        AnimatedContainer(
-          duration: AppAnimation.fast,
-          curve: AppAnimation.easeOut,
-          constraints: isMultiline
-              ? const BoxConstraints()
-              : const BoxConstraints(minHeight: AppSizes.inputLg),
-          decoration: BoxDecoration(
-            color: widget.isEnabled
-                ? colors.surfaceContainerHighest
-                : colors.onSurface.withAlpha(13),
-            borderRadius: AppBorderRadius.extraLarge,
-            border: Border.all(
-              color: borderColor,
-              width: _isFocused || hasError ? 1.5 : 1,
-            ),
-            boxShadow: _isFocused && !hasError
-                ? [
-                    BoxShadow(
-                      color: colors.primary.withAlpha(38),
-                      blurRadius: AppSpacing.md,
-                    ),
-                  ]
-                : null,
-          ),
-          child: Row(
-            crossAxisAlignment: isMultiline
-                ? CrossAxisAlignment.start
-                : CrossAxisAlignment.center,
-            children: [
-              if (widget.prefixIcon != null)
-                Padding(
-                  padding: EdgeInsets.only(
-                    left: AppSpacing.lg,
-                    top: isMultiline ? AppSpacing.lg : 0,
-                  ),
-                  child: Icon(
-                    widget.prefixIcon,
-                    color:
-                        _isFocused ? colors.primary : colors.onSurfaceVariant,
-                    size: AppSizes.iconMd,
-                  ),
-                ),
-              Expanded(
-                child: TextField(
-                  controller: widget.controller,
-                  focusNode: _focusNode,
-                  onChanged: widget.onChanged,
-                  onSubmitted: widget.onSubmitted,
-                  obscureText: _obscureText,
-                  keyboardType: widget.keyboardType ??
-                      (isMultiline
-                          ? TextInputType.multiline
-                          : TextInputType.text),
-                  textInputAction: widget.textInputAction,
-                  autofillHints: widget.autofillHints,
-                  textCapitalization: widget.textCapitalization,
-                  autocorrect: widget.variant != FgInputVariant.password,
-                  enableSuggestions: widget.variant != FgInputVariant.password,
-                  enabled: widget.isEnabled,
-                  autofocus: widget.autofocus,
-                  maxLines: isMultiline ? 5 : 1,
-                  minLines: isMultiline ? 3 : 1,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: widget.isEnabled
-                        ? colors.onSurface
-                        : colors.onSurface.withAlpha(97),
-                    fontWeight: FontWeight.w500,
-                  ),
-                  cursorColor: colors.primary,
-                  decoration: InputDecoration(
-                    hintText: widget.placeholder,
-                    hintStyle: AppTypography.bodySmall.copyWith(
-                      color: colors.onSurfaceVariant.withAlpha(153),
-                    ),
-                    border: InputBorder.none,
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: widget.prefixIcon == null
-                          ? AppSpacing.lg
-                          : AppSpacing.md,
-                      vertical: AppSpacing.lg,
-                    ),
-                    isDense: true,
-                  ),
-                ),
-              ),
-              if (widget.variant == FgInputVariant.password)
-                _PasswordVisibilityButton(
-                  isObscured: _obscureText,
-                  showLabel: widget.showPasswordSemanticsLabel,
-                  hideLabel: widget.hidePasswordSemanticsLabel,
-                  onPressed: () {
-                    setState(() => _obscureText = !_obscureText);
-                  },
-                )
-              else if (widget.suffixWidget != null)
-                Padding(
-                  padding: const EdgeInsets.only(right: AppSpacing.sm),
-                  child: widget.suffixWidget,
-                ),
-            ],
-          ),
         ),
-        if (hasError || widget.helperText != null)
-          Padding(
-            padding: const EdgeInsets.only(
-              top: AppSpacing.sm,
-              left: AppSpacing.xs,
-            ),
-            child: Semantics(
-              liveRegion: hasError,
-              child: Text(
-                widget.errorText ?? widget.helperText!,
-                style: AppTypography.caption.copyWith(
-                  color: hasError ? colors.error : colors.onSurfaceVariant,
-                ),
-              ),
-            ),
-          ),
+        const SizedBox(height: AppSpacing.sm),
+        semanticField,
       ],
     );
   }
+
+  Widget? _buildSuffix() {
+    if (widget.isLoading) {
+      return _InputLoadingIndicator(
+        key: const ValueKey('loading'),
+        semanticLabel: widget.loadingSemanticsLabel!,
+      );
+    }
+
+    return switch (widget.variant) {
+      FgInputVariant.password => _InputActionButton(
+        key: ValueKey(_obscureText),
+        icon: _obscureText
+            ? Icons.visibility_outlined
+            : Icons.visibility_off_outlined,
+        semanticLabel: _obscureText
+            ? widget.showPasswordSemanticsLabel!
+            : widget.hidePasswordSemanticsLabel!,
+        toggled: !_obscureText,
+        onPressed: () => setState(() => _obscureText = !_obscureText),
+      ),
+      FgInputVariant.search => Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (widget.controller != null && widget._onClear != null)
+            _ClearInputAction(
+              controller: widget.controller!,
+              semanticLabel: widget._clearSemanticsLabel!,
+              onPressed: widget._onClear!,
+            ),
+          if (widget._showFilter && widget._onFilterPressed != null)
+            _InputActionButton(
+              icon: Icons.tune_rounded,
+              semanticLabel: widget._filterSemanticsLabel!,
+              onPressed: widget._onFilterPressed!,
+            ),
+        ],
+      ),
+      FgInputVariant.standard || FgInputVariant.multiline => null,
+    };
+  }
 }
 
-class _PasswordVisibilityButton extends StatelessWidget {
-  const _PasswordVisibilityButton({
-    required this.isObscured,
+class _InputActionButton extends StatelessWidget {
+  const _InputActionButton({
+    super.key,
+    required this.icon,
+    required this.semanticLabel,
     required this.onPressed,
-    this.showLabel,
-    this.hideLabel,
+    this.toggled,
   });
 
-  final bool isObscured;
+  final IconData icon;
+  final String semanticLabel;
   final VoidCallback onPressed;
-  final String? showLabel;
-  final String? hideLabel;
+  final bool? toggled;
 
   @override
   Widget build(BuildContext context) {
     return Semantics(
       button: true,
-      label: isObscured ? showLabel : hideLabel,
-      child: IconButton(
-        icon: Icon(
-          isObscured
-              ? Icons.visibility_outlined
-              : Icons.visibility_off_outlined,
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
-          size: AppSizes.iconMd,
+      label: semanticLabel,
+      toggled: toggled,
+      onTap: onPressed,
+      child: ExcludeSemantics(
+        child: IconButton(
+          tooltip: semanticLabel,
+          icon: Icon(icon, size: AppSizes.iconMd),
+          onPressed: onPressed,
         ),
-        onPressed: onPressed,
       ),
     );
   }
 }
 
-class _ClearButton extends StatelessWidget {
-  const _ClearButton({required this.controller, required this.onClear});
+class _ClearInputAction extends StatelessWidget {
+  const _ClearInputAction({
+    required this.controller,
+    required this.semanticLabel,
+    required this.onPressed,
+  });
 
   final TextEditingController controller;
-  final VoidCallback onClear;
+  final String semanticLabel;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder(
+    return ValueListenableBuilder<TextEditingValue>(
       valueListenable: controller,
       builder: (context, value, child) {
         if (value.text.isEmpty) return const SizedBox.shrink();
 
-        return IconButton(
-          icon: Icon(
-            Icons.close_rounded,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            size: AppSizes.iconSm,
-          ),
+        return _InputActionButton(
+          icon: Icons.close_rounded,
+          semanticLabel: semanticLabel,
           onPressed: () {
             controller.clear();
-            onClear();
+            onPressed();
           },
         );
       },
@@ -421,20 +487,27 @@ class _ClearButton extends StatelessWidget {
   }
 }
 
-class _FilterButton extends StatelessWidget {
-  const _FilterButton({required this.onPressed});
+class _InputLoadingIndicator extends StatelessWidget {
+  const _InputLoadingIndicator({super.key, required this.semanticLabel});
 
-  final VoidCallback onPressed;
+  final String semanticLabel;
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(
-        Icons.tune_rounded,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-        size: AppSizes.iconSm,
+    return Semantics(
+      label: semanticLabel,
+      liveRegion: true,
+      child: ExcludeSemantics(
+        child: Center(
+          child: SizedBox.square(
+            dimension: AppSizes.iconMd,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+          ),
+        ),
       ),
-      onPressed: onPressed,
     );
   }
 }

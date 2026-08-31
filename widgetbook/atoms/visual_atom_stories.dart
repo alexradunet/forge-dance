@@ -22,10 +22,7 @@ List<WidgetbookNode> buildVisualAtomStories() {
     _component('FgGradientOverlay', (_) => const _GradientStory()),
     _component('FgAspectRatio', (_) => const _AspectRatioStory()),
     _component('FgTooltip', (_) => const _TooltipStory()),
-    _component(
-      'FgLessonTimelineTrack',
-      (_) => const _TimelineTrackStory(),
-    ),
+    _component('FgLessonTimelineTrack', (_) => const _TimelineTrackStory()),
   ];
 }
 
@@ -114,6 +111,16 @@ class _LabelStory extends StatelessWidget {
               FgLabel(text: 'Email'),
               FgLabel(text: 'Password', isRequired: true),
               FgLabel(text: 'Tempo', icon: Icons.music_note_rounded),
+              FgLabel(text: 'Focused', tone: FgLabelTone.accent),
+              FgLabel(text: 'Invalid', tone: FgLabelTone.error),
+              FgLabel(text: 'Unavailable', tone: FgLabelTone.disabled),
+              SizedBox(
+                width: 220,
+                child: FgLabel(
+                  text: 'Preferred training notification address',
+                  isRequired: true,
+                ),
+              ),
             ],
           ),
         ),
@@ -159,10 +166,7 @@ class _DividerStory extends StatelessWidget {
   Widget build(BuildContext context) {
     return StoryCanvas(
       children: [
-        const StorySection(
-          title: 'Horizontal',
-          child: FgDivider.horizontal(),
-        ),
+        const StorySection(title: 'Horizontal', child: FgDivider.horizontal()),
         StorySection(
           title: 'Vertical',
           child: SizedBox(
@@ -266,9 +270,7 @@ class _GlassStory extends StatelessWidget {
             padding: AppSpacing.allLG,
             child: Text(
               'Layered content remains legible.',
-              style: AppTypography.body.copyWith(
-                color: AppColors.crystalWhite,
-              ),
+              style: AppTypography.body.copyWith(color: AppColors.crystalWhite),
             ),
           ),
         ),
@@ -347,8 +349,9 @@ class _AspectRatioStory extends StatelessWidget {
             ratio: 16 / 9,
             child: ColoredBox(
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
-              child:
-                  const Center(child: FgIcon(icon: Icons.play_arrow_rounded)),
+              child: const Center(
+                child: FgIcon(icon: Icons.play_arrow_rounded),
+              ),
             ),
           ),
         ),
@@ -389,7 +392,9 @@ class _TimelineTrackStory extends StatelessWidget {
         StorySection(
           title: 'Vertical progression track',
           child: SizedBox(
-              height: 280, child: Center(child: FgLessonTimelineTrack())),
+            height: 280,
+            child: Center(child: FgLessonTimelineTrack()),
+          ),
         ),
       ],
     );

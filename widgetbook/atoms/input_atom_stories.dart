@@ -9,9 +9,14 @@ List<WidgetbookNode> buildInputAtomStories() {
     WidgetbookComponent(
       name: 'FgInput',
       useCases: [
+        WidgetbookUseCase(name: 'Playground', builder: _inputPlayground),
         WidgetbookUseCase(
           name: 'Variants and states',
           builder: (_) => const _InputStates(),
+        ),
+        WidgetbookUseCase(
+          name: 'Content stress',
+          builder: (_) => const _InputContentStress(),
         ),
       ],
     ),
@@ -27,10 +32,7 @@ List<WidgetbookNode> buildInputAtomStories() {
     WidgetbookComponent(
       name: 'FgRadioButton',
       useCases: [
-        WidgetbookUseCase(
-          name: 'States',
-          builder: (_) => const _RadioStory(),
-        ),
+        WidgetbookUseCase(name: 'States', builder: (_) => const _RadioStory()),
       ],
     ),
     WidgetbookComponent(
@@ -63,18 +65,72 @@ List<WidgetbookNode> buildInputAtomStories() {
   ];
 }
 
-class _InputStates extends StatelessWidget {
+Widget _inputPlayground(BuildContext context) {
+  final label = context.knobs.string(label: 'Label', initialValue: 'Email');
+  final placeholder = context.knobs.string(
+    label: 'Placeholder',
+    initialValue: 'dancer@example.com',
+  );
+  final helper = context.knobs.string(
+    label: 'Helper',
+    initialValue: 'Used for account recovery',
+  );
+  final error = context.knobs.string(label: 'Error');
+  final enabled = context.knobs.boolean(label: 'Enabled', initialValue: true);
+  final readOnly = context.knobs.boolean(label: 'Read only');
+  final required = context.knobs.boolean(label: 'Required');
+  final loading = context.knobs.boolean(label: 'Loading');
+
+  return StoryCanvas(
+    children: [
+      StorySection(
+        title: 'Input playground',
+        description:
+            'Theme-owned field appearance with semantic state and copy.',
+        child: FgInput(
+          label: label,
+          placeholder: placeholder,
+          helperText: helper.isEmpty ? null : helper,
+          errorText: error.isEmpty ? null : error,
+          isEnabled: enabled,
+          readOnly: readOnly,
+          isRequired: required,
+          isLoading: loading,
+          loadingSemanticsLabel: loading ? 'Loading field' : null,
+        ),
+      ),
+    ],
+  );
+}
+
+class _InputStates extends StatefulWidget {
   const _InputStates();
+
+  @override
+  State<_InputStates> createState() => _InputStatesState();
+}
+
+class _InputStatesState extends State<_InputStates> {
+  final _emailController = TextEditingController(text: 'dancer@example.com');
+  final _searchController = TextEditingController(text: 'House');
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return StoryCanvas(
       children: [
-        const StorySection(
-          title: 'Standard',
+        StorySection(
+          title: 'Filled',
           child: FgInput(
             label: 'Email',
-            placeholder: 'dancer@example.com',
+            controller: _emailController,
+            prefixIcon: Icons.mail_outline_rounded,
             isRequired: true,
           ),
         ),
@@ -90,11 +146,15 @@ class _InputStates extends StatelessWidget {
           ),
         ),
         StorySection(
-          title: 'Search',
+          title: 'Search actions',
           child: FgInput.search(
             placeholder: 'Search dance styles',
+            controller: _searchController,
+            onClear: () {},
+            clearSemanticsLabel: 'Clear search',
             showFilter: true,
             onFilterPressed: () {},
+            filterSemanticsLabel: 'Filter search',
           ),
         ),
         const StorySection(
@@ -111,6 +171,64 @@ class _InputStates extends StatelessWidget {
             label: 'Email',
             placeholder: 'dancer@example.com',
             isEnabled: false,
+          ),
+        ),
+        StorySection(
+          title: 'Read only',
+          child: FgInput(
+            label: 'Email',
+            controller: _emailController,
+            readOnly: true,
+          ),
+        ),
+        const StorySection(
+          title: 'Loading',
+          child: FgInput(
+            label: 'Email',
+            isLoading: true,
+            loadingSemanticsLabel: 'Loading email',
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InputContentStress extends StatelessWidget {
+  const _InputContentStress();
+
+  @override
+  Widget build(BuildContext context) {
+    return StoryCanvas(
+      children: [
+        const StorySection(
+          title: 'Long copy',
+          description:
+              'Long labels, helpers, and errors remain readable at large text '
+              'scales.',
+          child: FgInput(
+            label: 'Preferred email address for training notifications',
+            helperText:
+                'We use this address for recovery and important changes to '
+                'your training plan.',
+            isRequired: true,
+          ),
+        ),
+        StorySection(
+          title: 'Multiline',
+          child: FgInput.multiline(
+            label: 'Training notes',
+            placeholder: 'Describe what you want to improve',
+            helperText: 'Include movement names, tempo, and current blockers.',
+          ),
+        ),
+        const StorySection(
+          title: 'Long error',
+          child: FgInput(
+            label: 'Email',
+            errorText:
+                'Enter a complete email address including the domain, such as '
+                'dancer@example.com.',
           ),
         ),
       ],

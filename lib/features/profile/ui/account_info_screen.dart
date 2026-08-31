@@ -10,8 +10,8 @@ import '../../../design_system/tokens/app_typography.dart';
 import '../../../utils/global_loading.dart';
 import '../../../design_system/organisms/navigation/app_header.dart';
 import '../../../design_system/atoms/visuals/fg_background.dart';
-import '../../common/ui/widgets/common_text_form_field.dart';
 import '../../../design_system/atoms/buttons/fg_button.dart';
+import '../../../design_system/atoms/inputs/fg_input.dart';
 import '../model/profile.dart';
 import '../repository/device_avatar_repository.dart';
 import 'view_model/profile_view_model.dart';
@@ -114,9 +114,11 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
                     style: AppTypography.body,
                   ),
                   const SizedBox(height: 32),
-                  CommonTextFormField(
+                  FgInput(
                     label: LocaleKeys.name.tr(),
                     controller: nameController,
+                    textCapitalization: TextCapitalization.words,
+                    textInputAction: TextInputAction.done,
                   ),
                 ],
               ),

@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../extensions/build_context_extension.dart';
-import '../../../features/common/ui/widgets/common_text_form_field.dart';
 import '../../../design_system/atoms/buttons/fg_button.dart';
+import '../../../design_system/atoms/inputs/fg_input.dart';
 import '../../../features/profile/ui/view_model/profile_view_model.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../../routing/routes.dart';
@@ -78,9 +78,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                       ),
                     ),
                     const SizedBox(height: 32),
-                    CommonTextFormField(
+                    FgInput(
                       label: LocaleKeys.yourName.tr(),
                       controller: _nameController,
+                      isRequired: true,
+                      textCapitalization: TextCapitalization.words,
+                      textInputAction: TextInputAction.done,
                     ),
                     const Spacer(),
                     FgButton(

@@ -3,6 +3,7 @@ import 'package:forge_dance/design_system/theme/forge_theme_extensions.dart';
 import 'package:forge_dance/design_system/tokens/app_border_radius.dart';
 import 'package:forge_dance/design_system/tokens/app_colors.dart';
 import 'package:forge_dance/design_system/tokens/app_spacing.dart';
+import 'package:forge_dance/design_system/tokens/app_sizes.dart';
 import 'package:forge_dance/design_system/tokens/app_typography.dart';
 
 /// Material 3 themes and Forge-specific semantic roles.
@@ -119,6 +120,9 @@ abstract final class AppThemes {
         labelStyle: textTheme.bodyMedium?.copyWith(
           color: scheme.onSurfaceVariant,
         ),
+        floatingLabelStyle: textTheme.labelMedium?.copyWith(
+          color: forgeColors.focusRing,
+        ),
         hintStyle: textTheme.bodyMedium?.copyWith(
           color: scheme.onSurfaceVariant,
         ),
@@ -134,6 +138,12 @@ abstract final class AppThemes {
           borderRadius: AppBorderRadius.large,
           borderSide: BorderSide(color: scheme.outlineVariant),
         ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: AppBorderRadius.large,
+          borderSide: BorderSide(
+            color: scheme.onSurface.withValues(alpha: 0.12),
+          ),
+        ),
         focusedBorder: OutlineInputBorder(
           borderRadius: AppBorderRadius.large,
           borderSide: BorderSide(color: forgeColors.focusRing, width: 2),
@@ -145,6 +155,17 @@ abstract final class AppThemes {
         focusedErrorBorder: OutlineInputBorder(
           borderRadius: AppBorderRadius.large,
           borderSide: BorderSide(color: scheme.error, width: 2),
+        ),
+        constraints: const BoxConstraints(
+          minHeight: AppSizes.comfortableTouchTarget,
+        ),
+        prefixIconConstraints: const BoxConstraints(
+          minWidth: AppSizes.comfortableTouchTarget,
+          minHeight: AppSizes.comfortableTouchTarget,
+        ),
+        suffixIconConstraints: const BoxConstraints(
+          minWidth: AppSizes.comfortableTouchTarget,
+          minHeight: AppSizes.comfortableTouchTarget,
         ),
       ),
       chipTheme: base.chipTheme.copyWith(

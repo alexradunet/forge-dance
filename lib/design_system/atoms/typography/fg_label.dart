@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../tokens/app_colors.dart';
 import '../../tokens/app_sizes.dart';
 import '../../tokens/app_spacing.dart';
 import '../../tokens/app_typography.dart';
@@ -26,20 +25,19 @@ class FgLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = _color(Theme.of(context).colorScheme);
+    final scheme = Theme.of(context).colorScheme;
+    final color = _color(scheme);
     final label = uppercase ? text.toUpperCase() : text;
 
     return Semantics(
       label: text,
+      isRequired: isRequired,
       child: ExcludeSemantics(
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
+        child: Wrap(
+          crossAxisAlignment: WrapCrossAlignment.center,
+          spacing: AppSpacing.xs,
           children: [
-            if (icon != null) ...[
-              Icon(icon, size: AppSizes.iconXs, color: color),
-              const SizedBox(width: AppSpacing.xs),
-            ],
+            if (icon != null) Icon(icon, size: AppSizes.iconXs, color: color),
             Text.rich(
               TextSpan(
                 text: label,
@@ -49,11 +47,13 @@ class FgLabel extends StatelessWidget {
                     TextSpan(
                       text: ' *',
                       style: AppTypography.overline.copyWith(
-                        color: AppColors.passionRed,
+                        color: scheme.error,
                       ),
                     ),
                 ],
               ),
+              maxLines: 3,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),
@@ -61,12 +61,12 @@ class FgLabel extends StatelessWidget {
     );
   }
 
-  Color _color(ColorScheme colors) {
+  Color _color(ColorScheme scheme) {
     return switch (tone) {
-      FgLabelTone.neutral => colors.onSurfaceVariant,
-      FgLabelTone.accent => colors.primary,
-      FgLabelTone.error => colors.error,
-      FgLabelTone.disabled => colors.onSurface.withAlpha(97),
+      FgLabelTone.neutral => scheme.onSurfaceVariant,
+      FgLabelTone.accent => scheme.primary,
+      FgLabelTone.error => scheme.error,
+      FgLabelTone.disabled => scheme.onSurface.withValues(alpha: 0.38),
     };
   }
 }
