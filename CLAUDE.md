@@ -2,6 +2,20 @@
 
 Guidance for Claude Code when working in this repository. `AGENTS.md` contains the contributor rules this file builds on — read it before making changes. Task-specific playbooks live in `.claude/skills/`.
 
+## Agent skills
+
+### Issue tracker
+
+Issues are tracked in this repository’s GitHub Issues. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Triage uses the five default canonical labels. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+This repository uses a single-context domain-doc layout. See `docs/agents/domain.md`.
+
 ## What this app is
 
 Forge Dance is a gamified dance-training app ("THE STAGE IS YOURS") built with Flutter. Users sign in, follow structured lesson paths (modules → lessons → movements, with boss nodes), run training/WOD sessions with BPM control, and track levels, diamonds, and achievements. Visual identity is dark and game-like: forge fire orange `#FF4500`, electric blue, Bebas Neue display type.
