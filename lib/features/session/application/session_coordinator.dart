@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../authentication/model/auth_session.dart';
@@ -14,7 +13,7 @@ part 'session_coordinator.g.dart';
 SessionCoordinator sessionCoordinator(Ref ref) {
   final coordinator = SessionCoordinator(ref);
   ref.listen(authenticationViewModelProvider, (_, next) {
-    final auth = next.valueOrNull;
+    final auth = next.value;
     final user = auth?.authSession?.user;
     if (user != null) {
       unawaited(coordinator.syncProfileFromAuthUser(user).then(
@@ -76,7 +75,7 @@ class SessionCoordinator {
   }
 
   Future<void> _syncCurrentAuthProfile() async {
-    final authState = _ref.read(authenticationViewModelProvider).valueOrNull;
+    final authState = _ref.read(authenticationViewModelProvider).value;
     final user = authState?.authSession?.user;
     if (user == null) return;
 

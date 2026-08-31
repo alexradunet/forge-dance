@@ -27,7 +27,7 @@ class StatsPage extends ConsumerWidget {
       body: FgBackground(
         child: stats.when(
           loading: () => const Center(child: FgSpinner()),
-          error: (_, __) => const CommonError(),
+          error: (_, _) => const CommonError(),
           data: (stats) => _buildMainContent(context, stats),
         ),
       ),

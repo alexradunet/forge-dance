@@ -63,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen>
                     children: [
                       Text(
                         'FORGE',
-                        style: AppTheme.h1.copyWith(
+                        style: AppTypography.h1.copyWith(
                           fontSize: 48,
                           fontWeight: FontWeight.w700,
                           color: AppColors.crystalWhite,
@@ -71,7 +71,7 @@ class _SplashScreenState extends State<SplashScreen>
                       ),
                       Text(
                         '.DANCE',
-                        style: AppTheme.h1.copyWith(
+                        style: AppTypography.h1.copyWith(
                           fontSize: 48,
                           fontWeight: FontWeight.w700,
                           color: AppColors.forgeFire,
@@ -85,7 +85,7 @@ class _SplashScreenState extends State<SplashScreen>
                   // Tagline
                   Text(
                     'THE STAGE IS YOURS.',
-                    style: AppTheme.body.copyWith(
+                    style: AppTypography.body.copyWith(
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
                       letterSpacing: 1.2,

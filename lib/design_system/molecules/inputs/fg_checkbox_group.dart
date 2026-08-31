@@ -107,7 +107,7 @@ class _FgCheckboxGroupState extends State<FgCheckboxGroup> {
                   Expanded(
                     child: Text(
                       item.label,
-                      style: AppTheme.body.copyWith(
+                      style: AppTypography.body.copyWith(
                         fontWeight:
                             item.value ? FontWeight.w600 : FontWeight.w500,
                         color: item.value

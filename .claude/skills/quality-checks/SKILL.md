@@ -1,6 +1,6 @@
 ---
 name: quality-checks
-description: Run the full Forge Dance verification pipeline (code generation, custom_lint, analyze, test, web build) and fix common failures like missing part files, stale generated code, or freezed/riverpod codegen errors. Use before committing or handing off, after pulling changes, or when builds fail with unresolved generated symbols.
+description: Run the full Forge Dance verification pipeline (code generation, analyzer and Riverpod lints, tests, web build) and fix common failures like missing part files, stale generated code, or freezed/riverpod codegen errors. Use before committing or handing off, after pulling changes, or when builds fail with unresolved generated symbols.
 ---
 
 # Quality Checks & Codegen Pipeline
@@ -11,25 +11,25 @@ description: Run the full Forge Dance verification pipeline (code generation, cu
 bash tool/checks.sh
 ```
 
-It runs, fail-fast and in order: `pub get` → localization keygen → `build_runner` → `custom_lint` → `analyze` → `test`. CI (`.github/workflows/flutter.yml`, Flutter **3.35.5**) runs exactly this script on every push to `main` — and commits land directly on `main` — so local green == CI green. Never hand off without it passing.
+It runs, fail-fast and in order: `pub get` → localization keygen → `build_runner` → `analyze` (including `riverpod_lint`) → `test`. CI (`.github/workflows/flutter.yml`, Flutter **3.47.2**) runs exactly this script on every push to `main` — and commits land directly on `main` — so local green == CI green. Never hand off without it passing.
 
 For risky changes, also confirm the release target CI builds: `flutter build web --release`.
 
 ## Why this exact pipeline
 
 - `*.g.dart`, `*.freezed.dart`, and `lib/generated/locale_keys.g.dart` are **gitignored** — every fresh checkout starts broken until codegen runs.
-- `custom_lint` (riverpod_lint) is NOT registered as an analyzer plugin in `analysis_options.yaml`, so `flutter analyze` does not include Riverpod lints — the CLI run is the only local way to see them, and CI enforces them.
+- `riverpod_lint` is registered through Dart's analyzer plugin system in `analysis_options.yaml`, so `flutter analyze` enforces Riverpod diagnostics in local checks and CI.
 - `analysis_options.yaml` excludes generated files from analysis and ignores `invalid_annotation_target` (needed for json_annotation on freezed classes) — don't "fix" these.
-- During iteration, prefer `flutter pub run build_runner watch --delete-conflicting-outputs`.
+- During iteration, prefer `dart run build_runner watch`.
 
 ## Common failures → fixes
 
 | Symptom | Fix |
 |---|---|
 | `Target of URI hasn't been generated: '*.g.dart'` / missing `part` file | Run build_runner (and the localization generate for `locale_keys.g.dart`) |
-| `Conflicting outputs were detected` | You forgot `--delete-conflicting-outputs` |
+| Build script references removed `build_runner_core` APIs | Remove `.dart_tool/build`, then rerun `dart run build_runner build` |
 | `Undefined name 'LocaleKeys'` or missing key getter | Regenerate LocaleKeys; check the key exists in `assets/translations/en.json` AND `vi.json` |
-| Freezed: `Missing concrete implementation` / mixin errors | freezed 3 requires `abstract class X with _$X` — the old non-abstract syntax no longer compiles |
+| Freezed: `Missing concrete implementation` / mixin errors | Freezed 4 requires `abstract class X with _$X` for immutable models — the old non-abstract syntax does not compile |
 | Riverpod: provider name not found after adding `@riverpod` | The generated provider is `<functionName>Provider` / `<className>Provider` — rerun build_runner, check the `part '<file>.g.dart';` directive matches the filename |
 | Weird stale-codegen behavior after refactors/renames | `flutter clean && flutter pub get`, then rerun both generators |
 | `permission-denied` from Firestore at runtime | Rules not deployed — `firebase deploy --only firestore:rules` (see firebase-data skill) |

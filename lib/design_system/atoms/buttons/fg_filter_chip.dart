@@ -61,7 +61,7 @@ class FgFilterChip extends StatelessWidget {
               ],
               Text(
                 label,
-                style: AppTheme.bodySmall.copyWith(
+                style: AppTypography.bodySmall.copyWith(
                   color: textColor,
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),

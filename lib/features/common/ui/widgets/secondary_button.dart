@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '/extensions/build_context_extension.dart';
 import '/design_system/tokens/app_colors.dart';
 import '/design_system/tokens/app_typography.dart';
 import 'material_ink_well.dart';
@@ -28,7 +27,7 @@ class SecondaryButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final txtColor = textColor ?? context.primaryTextColor;
+    final txtColor = textColor ?? Theme.of(context).colorScheme.onSurface;
     final bgColor = backgroundColor ?? Colors.transparent;
     return Container(
       height: 48,
@@ -55,7 +54,7 @@ class SecondaryButton extends ConsumerWidget {
                     const SizedBox(width: 8),
                     Text(
                       text,
-                      style: AppTheme.bodySmall.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         fontWeight: FontWeight.w600,
                         color: isEnable ? txtColor : AppColors.gray400,
                       ),
@@ -64,7 +63,7 @@ class SecondaryButton extends ConsumerWidget {
                 )
               : Text(
                   text,
-                  style: AppTheme.bodySmall.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     fontWeight: FontWeight.w600,
                     color: isEnable ? txtColor : AppColors.gray400,
                   ),

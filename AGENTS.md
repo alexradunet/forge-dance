@@ -51,10 +51,10 @@ Rules for AI agents and contributors working on Forge Dance.
 
 ## Local development
 
-- **Flutter SDK** is pinned to **3.35.5** via [FVM](https://fvm.app) (`.fvmrc`, matches CI in `.github/workflows/flutter.yml`). After cloning:
+- **Flutter SDK** is pinned to **3.47.2** via [FVM](https://fvm.app) (`.fvmrc`, matches CI in `.github/workflows/flutter.yml`). After cloning:
   ```bash
   dart pub global activate fvm   # one-time
-  fvm install                    # downloads 3.35.5
+  fvm install                    # downloads 3.47.2
   fvm use                        # creates .fvm/flutter_sdk symlink
   ```
   VS Code picks up `.fvm/flutter_sdk` automatically (`.vscode/settings.json`). Use `fvm flutter …` in a plain terminal, or just `flutter …` inside the VS Code integrated terminal once the Dart extension has switched SDKs.
@@ -70,4 +70,4 @@ Run before handing off. CI runs the same script, so local green == CI green:
 bash tool/checks.sh
 ```
 
-That runs `flutter pub get`, localization codegen, `build_runner`, `custom_lint`, `flutter analyze`, and `flutter test`. Note: `custom_lint` (Riverpod lints) is not part of `flutter analyze`.
+That runs `flutter pub get`, localization codegen, `build_runner`, `flutter analyze` (including `riverpod_lint` through the analyzer plugin), and `flutter test`.

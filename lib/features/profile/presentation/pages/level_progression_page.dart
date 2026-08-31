@@ -34,7 +34,7 @@ class LevelProgressionPage extends ConsumerWidget {
         backgroundColor: AppColors.bgDeep,
         body: Center(child: FgSpinner()),
       ),
-      error: (_, __) => const Scaffold(
+      error: (_, _) => const Scaffold(
         backgroundColor: AppColors.bgDeep,
         body: CommonError(),
       ),

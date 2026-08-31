@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../constants/constants.dart';
 import '../../../../routing/routes.dart';
 import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../design_system/tokens/app_typography.dart';
 import '../../../../generated/locale_keys.g.dart';
 import '../../../stats/model/user_stats.dart';
 import '../../../stats/ui/view_model/user_stats_provider.dart';
@@ -43,30 +44,29 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => LevelProgressionPage(
-        initialLevelIndex: initialIndex,
-      ),
+      builder: (context) =>
+          LevelProgressionPage(initialLevelIndex: initialIndex),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final profile =
-        ref.watch(profileViewModelProvider.select((it) => it.value?.profile));
-    final stats = ref.watch(userStatsProvider).valueOrNull ?? const UserStats();
+    final profile = ref.watch(
+      profileViewModelProvider.select((it) => it.value?.profile),
+    );
+    final stats = ref.watch(userStatsProvider).value ?? const UserStats();
 
     return Scaffold(
       backgroundColor: Colors.transparent, // Background handled by FgBackground
-      body: FgBackground(
-        child: _buildMainContent(profile, stats),
-      ),
+      body: FgBackground(child: _buildMainContent(profile, stats)),
     );
   }
 
   Widget _buildMainContent(Profile? profile, UserStats stats) {
     final levels = DanceLevel.buildAll(totalXp: stats.totalXp);
-    final levelSubtitle = LocaleKeys.levelBeltSubtitle
-        .tr(args: ['${stats.level}', stats.beltName]);
+    final levelSubtitle = LocaleKeys.levelBeltSubtitle.tr(
+      args: ['${stats.level}', stats.beltName],
+    );
 
     return CustomScrollView(
       slivers: [
@@ -158,10 +158,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         const SizedBox(height: 4),
         Text(
           levelSubtitle,
-          style: TextStyle(
-            fontSize: 12,
-            fontFamily: 'JetBrains Mono',
+          style: AppTypography.monoSmall.copyWith(
             color: AppColors.textMuted,
+            fontSize: 12,
           ),
         ),
         const SizedBox(height: 24),

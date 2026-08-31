@@ -281,7 +281,7 @@ class _FilterSheetStory extends StatelessWidget {
                     'Style': ['Hip hop', 'House', 'Breaking'],
                   },
                   selectedFilters: const {'Difficulty': 'Beginner'},
-                  onFilterSelected: (_, __) {},
+                  onFilterSelected: (_, _) {},
                 );
               },
             ),

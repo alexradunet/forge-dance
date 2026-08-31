@@ -6,23 +6,25 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-if command -v fvm >/dev/null 2>&1; then
+if [[ -x .fvm/flutter_sdk/bin/flutter ]]; then
+  FLUTTER=(.fvm/flutter_sdk/bin/flutter)
+  DART=(.fvm/flutter_sdk/bin/dart)
+elif command -v fvm >/dev/null 2>&1; then
   FLUTTER=(fvm flutter)
+  DART=(fvm dart)
 else
   FLUTTER=(flutter)
+  DART=(dart)
 fi
 
 echo "==> flutter pub get"
 "${FLUTTER[@]}" pub get
 
 echo "==> generate localization keys"
-"${FLUTTER[@]}" pub run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir assets/translations
+"${DART[@]}" run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir assets/translations
 
 echo "==> generate riverpod/freezed/json code"
-"${FLUTTER[@]}" pub run build_runner build --delete-conflicting-outputs
-
-echo "==> riverpod lints (custom_lint)"
-"${FLUTTER[@]}" pub run custom_lint
+"${DART[@]}" run build_runner build
 
 echo "==> flutter analyze"
 "${FLUTTER[@]}" analyze

@@ -66,7 +66,7 @@ ProviderContainer containerWith(
     ],
   );
   addTearDown(container.dispose);
-  container.listen(workoutViewModelProvider, (_, __) {});
+  container.listen(workoutViewModelProvider, (_, _) {});
   return container;
 }
 

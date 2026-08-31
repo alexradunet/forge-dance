@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-import '/extensions/build_context_extension.dart';
 import '/design_system/tokens/app_typography.dart';
 import '../../../common/ui/widgets/material_ink_well.dart';
 import 'common_rounded_item.dart';
@@ -40,21 +39,21 @@ class ProfileItem extends StatelessWidget {
             border: Border(
               bottom: isLast
                   ? BorderSide.none
-                  : BorderSide(color: context.dividerColor),
+                  : BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
             ),
           ),
           child: Row(
             children: [
               HugeIcon(
                 icon: icon,
-                color: textColor ?? context.primaryTextColor,
+                color: textColor ?? Theme.of(context).colorScheme.onSurface,
                 size: 20,
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Text(
                   text,
-                  style: AppTheme.body.copyWith(color: textColor),
+                  style: AppTypography.body.copyWith(color: textColor),
                 ),
               ),
               if (isShowArrow)
@@ -62,7 +61,7 @@ class ProfileItem extends StatelessWidget {
                   padding: const EdgeInsets.only(left: 16),
                   child: HugeIcon(
                     icon: HugeIcons.strokeRoundedArrowRight01,
-                    color: textColor ?? context.primaryTextColor,
+                    color: textColor ?? Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
             ],

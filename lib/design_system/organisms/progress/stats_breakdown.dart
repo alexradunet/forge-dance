@@ -42,7 +42,7 @@ class StatsBreakdown extends StatelessWidget {
                 children: [
                   Text(
                     'TOTAL XP',
-                    style: AppTheme.caption.copyWith(
+                    style: AppTypography.caption.copyWith(
                       color: AppColors.gray400,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.2,
@@ -55,7 +55,7 @@ class StatsBreakdown extends StatelessWidget {
                     children: [
                       Text(
                         _formatNumber(totalXP),
-                        style: AppTheme.h1.copyWith(
+                        style: AppTypography.h1.copyWith(
                           color: AppColors.crystalWhite,
                           fontSize: 48,
                         ),
@@ -63,7 +63,7 @@ class StatsBreakdown extends StatelessWidget {
                       const SizedBox(width: AppSpacing.xs),
                       Text(
                         'pts',
-                        style: AppTheme.bodySmall.copyWith(
+                        style: AppTypography.bodySmall.copyWith(
                           color: AppColors.gray400,
                         ),
                       ),
@@ -106,7 +106,7 @@ class StatsBreakdown extends StatelessWidget {
                       const SizedBox(width: AppSpacing.xs),
                       Text(
                         trend!,
-                        style: AppTheme.caption.copyWith(
+                        style: AppTypography.caption.copyWith(
                           fontWeight: FontWeight.w700,
                           color: isPositiveTrend
                               ? AppColors.growthGreen
@@ -140,7 +140,7 @@ class StatsBreakdown extends StatelessWidget {
                 children: [
                   Text(
                     'WEEKLY GOAL',
-                    style: AppTheme.caption.copyWith(
+                    style: AppTypography.caption.copyWith(
                       color: AppColors.gray400,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.2,
@@ -149,7 +149,7 @@ class StatsBreakdown extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     _formatNumber(weeklyGoal),
-                    style: AppTheme.h5.copyWith(
+                    style: AppTypography.h5.copyWith(
                       color: AppColors.crystalWhite,
                     ),
                   ),
@@ -160,7 +160,7 @@ class StatsBreakdown extends StatelessWidget {
                 children: [
                   Text(
                     'RANK',
-                    style: AppTheme.caption.copyWith(
+                    style: AppTypography.caption.copyWith(
                       color: AppColors.gray400,
                       fontWeight: FontWeight.w700,
                       letterSpacing: 1.2,
@@ -169,7 +169,7 @@ class StatsBreakdown extends StatelessWidget {
                   const SizedBox(height: AppSpacing.xs),
                   Text(
                     '#$rank',
-                    style: AppTheme.h5.copyWith(
+                    style: AppTypography.h5.copyWith(
                       color: AppColors.forgeFire,
                     ),
                   ),

@@ -29,7 +29,7 @@ class WorkoutViewModel extends _$WorkoutViewModel {
   /// Completes today's WOD. Returns true when XP was awarded (first
   /// completion today) — repeating the same WOD on the same day is free.
   Future<bool> completeWod() async {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current == null) return false;
     if (current.wodCompletedToday) return false;
 

@@ -33,7 +33,7 @@ class ModuleViewScreen extends ConsumerWidget {
       body: FgBackground(
         child: learnState.when(
           loading: () => const Center(child: FgSpinner()),
-          error: (_, __) => const CommonError(),
+          error: (_, _) => const CommonError(),
           data: (state) => _buildPath(context, ref, state),
         ),
       ),

@@ -26,7 +26,7 @@ String? computeRedirect({
   required String matchedLocation,
   required AsyncValue<AuthenticationState> auth,
 }) {
-  final state = auth.valueOrNull;
+  final state = auth.value;
 
   if (state == null) {
     if (auth.isLoading) {

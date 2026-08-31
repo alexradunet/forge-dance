@@ -1,5 +1,5 @@
 {
-  "dart.flutterSdkPath": ".fvm/versions/3.35.5",
+  "dart.flutterSdkPath": ".fvm/versions/3.47.2",
   "dart.mcpServer": true,
   "search.exclude": {
     "**/.fvm": true,
@@ -21,9 +21,6 @@
   "dart.previewFlutterUiGuidesCustomTracking": true,
   "dart.openDevTools": "flutter",
   "dart.runPubGetOnPubspecChanges": true,
-  "dart.buildRunnerAdditionalArgs": [
-    "--delete-conflicting-outputs"
-  ],
   "dart.flutterHotReloadOnSave": "manual",
   "editor.formatOnSave": true,
   "editor.rulers": [

@@ -78,7 +78,7 @@ class _OfflineContainerState extends ConsumerState<OfflineContainer> {
                     const SizedBox(width: 8),
                     Text(
                       LocaleKeys.offline.tr(),
-                      style: AppTheme.bodySmall.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: AppColors.crystalWhite,
                       ),
                     ),

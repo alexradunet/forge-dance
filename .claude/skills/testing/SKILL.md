@@ -80,4 +80,4 @@ Wrap in `ProviderScope(overrides: [...])` + `MaterialApp`. Screens using `Locale
 
 ## Before handing off
 
-`flutter test` is part of the required check pipeline (with build_runner, custom_lint, analyze) and runs in CI on every push to main. See `.claude/skills/quality-checks/SKILL.md`.
+`flutter test` is part of the required check pipeline (with build_runner and `flutter analyze`, including the Riverpod analyzer plugin) and runs in CI on every push to main. See `.claude/skills/quality-checks/SKILL.md`.

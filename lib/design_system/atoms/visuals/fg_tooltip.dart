@@ -31,7 +31,7 @@ class FgTooltip extends StatelessWidget {
         boxShadow: [AppShadows.shadowMd],
         border: Border.all(color: AppColors.gray700),
       ),
-      textStyle: AppTheme.label.copyWith(
+      textStyle: AppTypography.label.copyWith(
         color: AppColors.textMain,
         fontSize: 12,
       ),

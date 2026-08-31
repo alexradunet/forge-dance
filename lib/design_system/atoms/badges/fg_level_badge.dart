@@ -35,7 +35,7 @@ class FgLevelBadge extends StatelessWidget {
       ),
       child: Text(
         level.toString(),
-        style: AppTheme.label.copyWith(
+        style: AppTypography.label.copyWith(
           color: AppColors.gray950,
           fontWeight: FontWeight.bold,
           fontSize: size * 0.5,

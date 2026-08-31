@@ -21,7 +21,7 @@ lib/features/<feature>/
 └── application/            # only for cross-feature coordinators (see step 7)
 ```
 
-## 2. Model (freezed 3 — `abstract class` is required)
+## 2. Model (Freezed 4 — `abstract class` is required)
 
 ```dart
 import 'package:freezed_annotation/freezed_annotation.dart';

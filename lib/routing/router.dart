@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -140,22 +139,22 @@ List<RouteBase> _routes(Ref ref) => [
           child: child,
         ),
         routes: [
-          GoRoute(path: Routes.main, redirect: (_, __) => Routes.home),
+          GoRoute(path: Routes.main, redirect: (_, _) => Routes.home),
           GoRoute(
             path: Routes.library,
-            builder: (_, __) => const CollectionPage(),
+            builder: (_, _) => const CollectionPage(),
           ),
           GoRoute(
             path: Routes.explore,
-            builder: (_, __) => const ExplorePage(),
+            builder: (_, _) => const ExplorePage(),
           ),
-          GoRoute(path: Routes.home, builder: (_, __) => const HomePage()),
+          GoRoute(path: Routes.home, builder: (_, _) => const HomePage()),
           GoRoute(
             path: Routes.workout,
-            builder: (_, __) => const TrainingSessionPage(),
+            builder: (_, _) => const TrainingSessionPage(),
           ),
           GoRoute(
-              path: Routes.profile, builder: (_, __) => const ProfilePage()),
+              path: Routes.profile, builder: (_, _) => const ProfilePage()),
           GoRoute(
             path: '${Routes.main}/module/:moduleId',
             builder: (context, state) {
@@ -176,7 +175,7 @@ List<RouteBase> _routes(Ref ref) => [
                   ref
                       .read(learnViewModelProvider.notifier)
                       .selectModule(moduleId);
-                  final learn = ref.read(learnViewModelProvider).valueOrNull;
+                  final learn = ref.read(learnViewModelProvider).value;
                   if (learn == null || !learn.canOpenLesson(lessonId)) {
                     return ModuleViewScreen(onBack: () => context.pop());
                   }

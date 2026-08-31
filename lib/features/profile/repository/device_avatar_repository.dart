@@ -58,10 +58,9 @@ class LocalAvatarStorage implements AvatarStorage {
 /// Device-only avatar module. Profile never persists these local paths.
 class DeviceAvatarRepository {
   const DeviceAvatarRepository({
-    required AvatarPicker picker,
-    required AvatarStorage storage,
-  })  : _picker = picker,
-        _storage = storage;
+    required this._picker,
+    required this._storage,
+  });
 
   final AvatarPicker _picker;
   final AvatarStorage _storage;

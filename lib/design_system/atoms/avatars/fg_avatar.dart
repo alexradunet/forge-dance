@@ -135,7 +135,7 @@ class FgAvatar extends StatelessWidget {
               child: Center(
                 child: Text(
                   '$level',
-                  style: AppTheme.caption.copyWith(
+                  style: AppTypography.caption.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.crystalWhite,
                     fontSize: size * 0.15,
@@ -187,7 +187,7 @@ class FgAvatar extends StatelessWidget {
               child: Center(
                 child: Text(
                   notificationCount! > 9 ? '9+' : '${notificationCount!}',
-                  style: AppTheme.caption.copyWith(
+                  style: AppTypography.caption.copyWith(
                     fontWeight: FontWeight.w700,
                     color: AppColors.crystalWhite,
                     fontSize: 10,
@@ -207,7 +207,7 @@ class FgAvatar extends StatelessWidget {
           ? Center(
               child: Text(
                 initials!.toUpperCase(),
-                style: AppTheme.h6.copyWith(
+                style: AppTypography.h6.copyWith(
                   color: AppColors.crystalWhite,
                   fontSize: size * 0.4,
                 ),

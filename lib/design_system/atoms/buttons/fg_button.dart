@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../tokens/app_border_radius.dart';
-import '../../tokens/app_colors.dart';
 import '../../tokens/app_shadows.dart';
 import '../../tokens/app_sizes.dart';
 import '../../tokens/app_spacing.dart';
@@ -154,7 +153,7 @@ class FgButton extends StatelessWidget {
     }
 
     return switch (variant) {
-      FgButtonVariant.primary => AppColors.forgeFire,
+      FgButtonVariant.primary => colors.primary,
       FgButtonVariant.secondary => Colors.transparent,
       FgButtonVariant.tertiary => colors.surfaceContainerHighest,
       FgButtonVariant.ghost => Colors.transparent,
@@ -168,7 +167,7 @@ class FgButton extends StatelessWidget {
     }
 
     return switch (variant) {
-      FgButtonVariant.primary => AppColors.crystalWhite,
+      FgButtonVariant.primary => colors.onPrimary,
       FgButtonVariant.secondary => colors.secondary,
       FgButtonVariant.tertiary => colors.onSurface,
       FgButtonVariant.ghost => colors.primary,

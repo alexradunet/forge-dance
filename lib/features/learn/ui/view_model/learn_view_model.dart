@@ -25,7 +25,7 @@ class LearnViewModel extends _$LearnViewModel {
   /// Opens a module in the lesson path (session-local selection, not
   /// persisted — the default after a restart is the first module).
   void selectModule(String moduleId) {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current == null || current.activeModuleId == moduleId) return;
     if (!current.modules.any((module) => module.id == moduleId)) return;
 
@@ -34,7 +34,7 @@ class LearnViewModel extends _$LearnViewModel {
 
   /// Marks a lesson as started (no-op if it is already completed).
   Future<void> startLesson(String lessonId) async {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current == null) return;
     if (current.progress[lessonId]?.status == LessonStatus.completed) return;
 
@@ -46,7 +46,7 @@ class LearnViewModel extends _$LearnViewModel {
 
   /// Marks a lesson as completed, unlocking the next one on the path.
   Future<void> completeLesson(String lessonId) async {
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current == null) return;
     final lesson = current.modules
         .expand((module) => module.lessons)

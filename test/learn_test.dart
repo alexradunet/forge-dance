@@ -71,7 +71,7 @@ ProviderContainer containerWith(
     ],
   );
   addTearDown(container.dispose);
-  container.listen(learnViewModelProvider, (_, __) {});
+  container.listen(learnViewModelProvider, (_, _) {});
   return container;
 }
 

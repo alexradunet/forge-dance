@@ -18,14 +18,14 @@ class SignInAgreement extends StatelessWidget {
         child: RichText(
           textAlign: TextAlign.center,
           text: TextSpan(
-            style: AppTheme.caption.copyWith(
-              color: context.secondaryTextColor,
+            style: AppTypography.caption.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
             children: [
               TextSpan(text: '${LocaleKeys.signInAgreementPrefix.tr()} '),
               TextSpan(
                 text: LocaleKeys.termOfService.tr(),
-                style: AppTheme.caption.copyWith(fontWeight: FontWeight.w600),
+                style: AppTypography.caption.copyWith(fontWeight: FontWeight.w600),
                 recognizer: TapGestureRecognizer()
                   ..onTap = () {
                     context.tryLaunchUrl(Constants.termOfService);
@@ -34,7 +34,7 @@ class SignInAgreement extends StatelessWidget {
               TextSpan(text: ' ${LocaleKeys.signInAgreementMiddle.tr()} '),
               TextSpan(
                 text: LocaleKeys.privacyPolicy.tr(),
-                style: AppTheme.caption.copyWith(fontWeight: FontWeight.w600),
+                style: AppTypography.caption.copyWith(fontWeight: FontWeight.w600),
                 recognizer: TapGestureRecognizer()
                   ..onTap = () {
                     context.tryLaunchUrl(Constants.privacyPolicy);

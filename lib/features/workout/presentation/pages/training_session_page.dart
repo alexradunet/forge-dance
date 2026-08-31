@@ -149,7 +149,7 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
   @override
   Widget build(BuildContext context) {
     final workoutState = ref.watch(workoutViewModelProvider);
-    final state = workoutState.valueOrNull;
+    final state = workoutState.value;
 
     if (state == null) {
       return Scaffold(
@@ -239,7 +239,7 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
   }
 
   void _showLockedFeedback() {
-    final wod = ref.read(workoutViewModelProvider).valueOrNull?.wod;
+    final wod = ref.read(workoutViewModelProvider).value?.wod;
     if (wod == null) return;
 
     HapticFeedback.heavyImpact();
@@ -326,7 +326,7 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
   }
 
   Widget _buildCompleteCard(Workout wod, ProjectionHealth projectionHealth) {
-    final streak = ref.watch(userStatsProvider).valueOrNull?.streakCount ?? 0;
+    final streak = ref.watch(userStatsProvider).value?.streakCount ?? 0;
 
     return FgInteractiveCard(
       title: LocaleKeys.sessionComplete.tr().toUpperCase(),

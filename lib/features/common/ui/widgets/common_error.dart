@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '/constants/assets.dart';
-import '/extensions/build_context_extension.dart';
 import '/generated/locale_keys.g.dart';
 import '/design_system/tokens/app_typography.dart';
 
@@ -28,8 +27,8 @@ class CommonError extends StatelessWidget {
           const SizedBox(height: 16),
           Text(
             LocaleKeys.unexpectedErrorOccurred.tr(),
-            style: AppTheme.bodySmall.copyWith(
-              color: context.secondaryTextColor,
+            style: AppTypography.bodySmall.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
         ],

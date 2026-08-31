@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../design_system/tokens/app_typography.dart';
 
 /// Stats card displaying a single metric (streak, XP, rank, etc.)
 class ProfileStatCard extends StatelessWidget {
@@ -24,9 +25,7 @@ class ProfileStatCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: AppColors.surfaceDark.withOpacity(0.8),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.05),
-        ),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.3),
@@ -52,16 +51,11 @@ class ProfileStatCard extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                size: 18,
-                color: iconColor,
-              ),
+              Icon(icon, size: 18, color: iconColor),
               const SizedBox(width: 4),
               Text(
                 value,
-                style: const TextStyle(
-                  fontFamily: 'JetBrains Mono',
+                style: AppTypography.monoLarge.copyWith(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,

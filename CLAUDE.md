@@ -30,15 +30,15 @@ Forge Dance is a gamified dance-training app ("THE STAGE IS YOURS") built with F
 
 ```bash
 flutter pub get
-flutter pub run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir assets/translations
-flutter pub run build_runner build --delete-conflicting-outputs
+dart run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir assets/translations
+dart run build_runner build
 ```
 
 Never commit generated files.
 
 ## Commands
 
-**One command verifies everything** (codegen → custom_lint → analyze → test). Run it before every hand-off; CI runs exactly the same script, so local green == CI green:
+**One command verifies everything** (codegen → analyze, including Riverpod lints → test). Run it before every hand-off; CI runs exactly the same script, so local green == CI green:
 
 ```bash
 bash tool/checks.sh
@@ -49,10 +49,10 @@ Individual commands when you need just one step:
 | Task | Command |
 |---|---|
 | Install deps | `flutter pub get` |
-| Generate LocaleKeys | `flutter pub run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir assets/translations` |
-| Generate Riverpod/freezed/json code | `flutter pub run build_runner build --delete-conflicting-outputs` |
-| Codegen watch mode | `flutter pub run build_runner watch --delete-conflicting-outputs` |
-| Riverpod lints | `flutter pub run custom_lint` |
+| Generate LocaleKeys | `dart run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir assets/translations` |
+| Generate Riverpod/freezed/json code | `dart run build_runner build` |
+| Codegen watch mode | `dart run build_runner watch` |
+| Riverpod lints | `flutter analyze` (via the `riverpod_lint` analyzer plugin) |
 | Analyze | `flutter analyze` |
 | Tests | `flutter test` |
 | Run app | `flutter run -d chrome` (or another device) |
@@ -60,7 +60,7 @@ Individual commands when you need just one step:
 | Web release build | `flutter build web --release` |
 | Deploy Firestore rules | `firebase deploy --only firestore:rules` |
 
-CI (`.github/workflows/flutter.yml`, Flutter 3.35.5) runs `tool/checks.sh` + a web release build on every push to `main` — and commits land directly on `main`, so breakage is immediately visible. Note: `custom_lint` (Riverpod lints) is NOT part of `flutter analyze` — the checks script runs it explicitly.
+CI (`.github/workflows/flutter.yml`, Flutter 3.47.2) runs `tool/checks.sh` + a web release build on every push to `main` — and commits land directly on `main`, so breakage is immediately visible. `riverpod_lint` is registered in `analysis_options.yaml`, so `flutter analyze` runs both Dart and Riverpod diagnostics.
 
 ## Architecture
 
@@ -98,7 +98,7 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 
 ### The canonical pattern (copy from learn or authentication/profile)
 
-- **Model**: `@freezed abstract class X with _$X` (freezed 3 syntax); add `fromJson` only if it's persisted
+- **Model**: `@freezed abstract class X with _$X` (Freezed 4 syntax); add `fromJson` only if it's persisted
 - **Repository**: plain class whose constructor takes **nullable** `FirebaseAuth?` / `FirebaseFirestore?` and degrades gracefully (reads return empty, writes no-op); Firestore access goes through a typed `withConverter` reference; exposed via a `@riverpod` / `@Riverpod(keepAlive: true)` function
 - **ViewModel**: `@riverpod class XViewModel extends _$XViewModel` with `FutureOr<XState> build()`; mutations set `AsyncValue.loading()` then use `AsyncValue.guard(...)`
 - Widgets NEVER call Firebase SDKs directly (hard rule from `AGENTS.md`)

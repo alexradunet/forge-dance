@@ -9,6 +9,7 @@
 
 export 'tokens/tokens.dart';
 export 'theme/app_themes.dart';
+export 'theme/forge_theme_extensions.dart';
 
 // ───────────────────────────────────────────────────────────
 // ATOMS

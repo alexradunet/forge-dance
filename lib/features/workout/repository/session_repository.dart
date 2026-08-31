@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../firebase/repository/firebase_providers.dart';
@@ -22,10 +21,9 @@ SessionRepository sessionRepository(Ref ref) {
 /// Degrades gracefully when Firebase is unconfigured or signed out.
 class SessionRepository {
   const SessionRepository({
-    required firebase_auth.FirebaseAuth? auth,
-    required FirebaseFirestore? firestore,
-  })  : _auth = auth,
-        _firestore = firestore;
+    required this._auth,
+    required this._firestore,
+  });
 
   final firebase_auth.FirebaseAuth? _auth;
   final FirebaseFirestore? _firestore;

@@ -83,7 +83,7 @@ class FgRadioGroup<T> extends StatelessWidget {
                   Expanded(
                     child: Text(
                       item.label,
-                      style: AppTheme.body.copyWith(
+                      style: AppTypography.body.copyWith(
                         fontWeight:
                             isSelected ? FontWeight.w600 : FontWeight.w500,
                         color: isSelected

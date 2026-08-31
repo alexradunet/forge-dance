@@ -94,7 +94,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
       body: FgBackground(
         child: learnState.when(
           loading: () => const Center(child: FgSpinner()),
-          error: (_, __) => const CommonError(),
+          error: (_, _) => const CommonError(),
           data: (state) => _buildContent(state),
         ),
       ),

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '/extensions/build_context_extension.dart';
 import '/design_system/tokens/app_colors.dart';
 import '/design_system/tokens/app_typography.dart';
 import 'primary_button.dart';
@@ -39,16 +38,16 @@ class CommonDialog extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
         width: double.infinity,
         decoration: BoxDecoration(
-          color: context.primaryBackgroundColor,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(24),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: AppTheme.h5),
+            Text(title, style: AppTypography.h5),
             const SizedBox(height: 16),
-            Text(content, style: AppTheme.bodySmall),
+            Text(content, style: AppTypography.bodySmall),
             const SizedBox(height: 16),
             secondaryButtonLabel != null
                 ? Row(

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../extensions/build_context_extension.dart';
 import '../../../../features/common/ui/providers/app_theme_mode_provider.dart';
 import '../../../../features/profile/ui/widgets/common_rounded_item.dart';
 import '../../../../design_system/tokens/app_colors.dart';
@@ -37,7 +36,7 @@ class AppearanceItem extends ConsumerWidget {
           border: Border(
             bottom: isLast
                 ? BorderSide.none
-                : BorderSide(color: context.dividerColor),
+                : BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
           ),
         ),
         child: Row(
@@ -50,7 +49,7 @@ class AppearanceItem extends ConsumerWidget {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   text,
-                  style: AppTheme.body,
+                  style: AppTypography.body,
                 ),
               ),
             ),
@@ -64,7 +63,7 @@ class AppearanceItem extends ConsumerWidget {
               fillColor: WidgetStateProperty.resolveWith(
                     (states) => states.contains(WidgetState.selected)
                     ? AppColors.forgeFire
-                    : context.secondaryTextColor,
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],

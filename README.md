@@ -64,8 +64,8 @@ Refine the lowest applicable layer first, export reusable components from `lib/d
 
 ```bash
 flutter pub get
-flutter pub run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir assets/translations
-flutter pub run build_runner build --delete-conflicting-outputs
+dart run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir assets/translations
+dart run build_runner build
 flutter analyze
 flutter test
 ```

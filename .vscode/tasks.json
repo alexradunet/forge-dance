@@ -26,21 +26,21 @@
     {
       "label": "forge: localization",
       "type": "shell",
-      "command": "fvm flutter pub run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir assets/translations",
+      "command": "fvm dart run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir assets/translations",
       "group": "build",
       "problemMatcher": []
     },
     {
       "label": "forge: build_runner",
       "type": "shell",
-      "command": "fvm flutter pub run build_runner build --delete-conflicting-outputs",
+      "command": "fvm dart run build_runner build",
       "group": "build",
       "problemMatcher": []
     },
     {
       "label": "forge: build_runner watch",
       "type": "shell",
-      "command": "fvm flutter pub run build_runner watch --delete-conflicting-outputs",
+      "command": "fvm dart run build_runner watch",
       "isBackground": true,
       "group": "build",
       "presentation": {
@@ -58,13 +58,6 @@
           "endsPattern": "Synchronizing|Watching for file changes"
         }
       }
-    },
-    {
-      "label": "forge: custom_lint",
-      "type": "shell",
-      "command": "fvm flutter pub run custom_lint",
-      "group": "test",
-      "problemMatcher": []
     },
     {
       "label": "forge: analyze",

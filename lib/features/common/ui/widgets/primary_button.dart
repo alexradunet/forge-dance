@@ -49,7 +49,7 @@ class PrimaryButton extends StatelessWidget {
                     const SizedBox(width: 8),
                     Text(
                       text,
-                      style: AppTheme.bodySmall.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         fontWeight: FontWeight.w600,
                         color: isEnable ? txtColor : AppColors.gray600,
                       ),
@@ -58,7 +58,7 @@ class PrimaryButton extends StatelessWidget {
                 )
               : Text(
                   text,
-                  style: AppTheme.bodySmall.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     fontWeight: FontWeight.w600,
                     color: isEnable ? txtColor : AppColors.gray600,
                   ),

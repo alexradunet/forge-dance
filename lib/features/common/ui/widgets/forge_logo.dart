@@ -43,7 +43,7 @@ class ForgeLogo extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             'FORGE.',
-            style: AppTheme.h6.copyWith(
+            style: AppTypography.h6.copyWith(
               fontSize: fontSizeValue,
               fontWeight: FontWeight.w600,
               color: AppColors.crystalWhite,
@@ -51,7 +51,7 @@ class ForgeLogo extends StatelessWidget {
           ),
           Text(
             'DANCE',
-            style: AppTheme.h6.copyWith(
+            style: AppTypography.h6.copyWith(
               fontSize: fontSizeValue,
               fontWeight: FontWeight.w600,
               color: AppColors.forgeFire,

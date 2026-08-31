@@ -39,7 +39,7 @@ class HomePage extends ConsumerWidget {
       body: FgBackground(
         child: learnState.when(
           loading: () => const Center(child: FgSpinner()),
-          error: (_, __) => const CommonError(),
+          error: (_, _) => const CommonError(),
           data: (state) => _buildContent(context, ref, state),
         ),
       ),
@@ -48,8 +48,8 @@ class HomePage extends ConsumerWidget {
 
   Widget _buildContent(BuildContext context, WidgetRef ref, LearnState state) {
     final profileName =
-        ref.watch(profileViewModelProvider).valueOrNull?.profile?.name;
-    final stats = ref.watch(userStatsProvider).valueOrNull ?? const UserStats();
+        ref.watch(profileViewModelProvider).value?.profile?.name;
+    final stats = ref.watch(userStatsProvider).value ?? const UserStats();
 
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),

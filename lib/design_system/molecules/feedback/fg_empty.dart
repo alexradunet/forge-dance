@@ -60,7 +60,7 @@ class FgEmpty extends StatelessWidget {
           const SizedBox(height: AppSpacing.xxl),
           Text(
             title,
-            style: AppTheme.h3.copyWith(
+            style: AppTypography.h3.copyWith(
               color: AppColors.crystalWhite,
             ),
             textAlign: TextAlign.center,
@@ -68,7 +68,7 @@ class FgEmpty extends StatelessWidget {
           const SizedBox(height: AppSpacing.md),
           Text(
             description,
-            style: AppTheme.bodySmall.copyWith(
+            style: AppTypography.bodySmall.copyWith(
               color: AppColors.gray400,
             ),
             textAlign: TextAlign.center,

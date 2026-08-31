@@ -56,7 +56,7 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
   }
 
   void _showFilterSheet() {
-    final projection = ref.read(learnViewModelProvider).valueOrNull?.library;
+    final projection = ref.read(learnViewModelProvider).value?.library;
     if (projection == null) return;
     final draft = {..._selectedFilters};
     FgFilterSheet.show(
@@ -94,7 +94,7 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
       body: FgBackground(
         child: learnState.when(
           loading: () => const Center(child: FgSpinner()),
-          error: (_, __) => const CommonError(),
+          error: (_, _) => const CommonError(),
           data: (state) => _buildContent(state),
         ),
       ),

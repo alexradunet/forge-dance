@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../learn/model/lesson.dart';
@@ -34,12 +33,10 @@ TrainingActivity trainingActivity(Ref ref) => TrainingActivity(
 /// Owns durable Training Activity completion and repairable stats projection.
 class TrainingActivity {
   const TrainingActivity({
-    required ProgressRepository progressRepository,
-    required SessionRepository sessionRepository,
-    required ProfileRepository profileRepository,
-  })  : _progressRepository = progressRepository,
-        _sessionRepository = sessionRepository,
-        _profileRepository = profileRepository;
+    required this._progressRepository,
+    required this._sessionRepository,
+    required this._profileRepository,
+  });
 
   final ProgressRepository _progressRepository;
   final SessionRepository _sessionRepository;

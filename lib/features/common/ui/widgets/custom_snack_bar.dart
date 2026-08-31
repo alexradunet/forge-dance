@@ -20,7 +20,7 @@ class CustomSnackBar extends SnackBar {
               Expanded(
                 child: Text(
                   text,
-                  style: AppTheme.bodySmall.copyWith(color: AppColors.crystalWhite),
+                  style: AppTypography.bodySmall.copyWith(color: AppColors.crystalWhite),
                 ),
               ),
             ],
@@ -50,7 +50,7 @@ class CustomSnackBar extends SnackBar {
               Expanded(
                 child: Text(
                   text,
-                  style: AppTheme.bodySmall.copyWith(color: AppColors.crystalWhite),
+                  style: AppTypography.bodySmall.copyWith(color: AppColors.crystalWhite),
                 ),
               ),
             ],
@@ -80,7 +80,7 @@ class CustomSnackBar extends SnackBar {
               Expanded(
                 child: Text(
                   text,
-                  style: AppTheme.bodySmall.copyWith(color: AppColors.gray950),
+                  style: AppTypography.bodySmall.copyWith(color: AppColors.gray950),
                 ),
               ),
             ],
@@ -110,7 +110,7 @@ class CustomSnackBar extends SnackBar {
               Expanded(
                 child: Text(
                   text,
-                  style: AppTheme.bodySmall.copyWith(color: AppColors.crystalWhite),
+                  style: AppTypography.bodySmall.copyWith(color: AppColors.crystalWhite),
                 ),
               ),
             ],

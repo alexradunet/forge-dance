@@ -46,7 +46,7 @@ ProviderContainer containerWith(FakeAuthenticationRepository repository) {
   addTearDown(container.dispose);
   // Mirror production: the router keeps a permanent listener on the view
   // model, so it never auto-disposes between reads.
-  container.listen(authenticationViewModelProvider, (_, __) {});
+  container.listen(authenticationViewModelProvider, (_, _) {});
   return container;
 }
 
@@ -101,7 +101,7 @@ void main() {
         () =>
             container
                 .read(authenticationViewModelProvider)
-                .valueOrNull
+                .value
                 ?.isLoggedIn ==
             false,
       );

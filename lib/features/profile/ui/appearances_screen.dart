@@ -5,7 +5,6 @@ import 'package:hugeicons/hugeicons.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../generated/locale_keys.g.dart';
-import '../../../extensions/build_context_extension.dart';
 import '../../../design_system/organisms/navigation/app_header.dart';
 import '../../../design_system/atoms/visuals/fg_background.dart';
 import 'widgets/appearance_item.dart';
@@ -31,7 +30,7 @@ class AppearancesScreen extends ConsumerWidget {
                   AppearanceItem(
                     icon: HugeIcon(
                       icon: HugeIcons.strokeRoundedSettings01,
-                      color: context.primaryTextColor,
+                      color: Theme.of(context).colorScheme.onSurface,
                       size: 20,
                     ),
                     text: 'auto'.tr(),
@@ -41,7 +40,7 @@ class AppearancesScreen extends ConsumerWidget {
                   AppearanceItem(
                     icon: HugeIcon(
                       icon: HugeIcons.strokeRoundedIdea,
-                      color: context.primaryTextColor,
+                      color: Theme.of(context).colorScheme.onSurface,
                       size: 20,
                     ),
                     text: LocaleKeys.lightMode.tr(),
@@ -50,7 +49,7 @@ class AppearancesScreen extends ConsumerWidget {
                   AppearanceItem(
                     icon: HugeIcon(
                       icon: HugeIcons.strokeRoundedMoon02,
-                      color: context.primaryTextColor,
+                      color: Theme.of(context).colorScheme.onSurface,
                       size: 20,
                     ),
                     text: LocaleKeys.darkMode.tr(),

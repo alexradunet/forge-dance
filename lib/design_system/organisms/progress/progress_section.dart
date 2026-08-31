@@ -32,7 +32,7 @@ class ProgressSection extends StatelessWidget {
           children: [
             Text(
               title,
-              style: AppTheme.h5.copyWith(
+              style: AppTypography.h5.copyWith(
                 color: AppColors.crystalWhite,
               ),
             ),
@@ -41,7 +41,7 @@ class ProgressSection extends StatelessWidget {
                 onPressed: onAction,
                 child: Text(
                   actionLabel!,
-                  style: AppTheme.bodySmall.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: AppColors.gray400,
                   ),
                 ),
@@ -70,14 +70,14 @@ class ProgressSection extends StatelessWidget {
                       children: [
                         Text(
                           stat.value + (stat.unit ?? ''),
-                          style: AppTheme.h5.copyWith(
+                          style: AppTypography.h5.copyWith(
                             color: AppColors.crystalWhite,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(
                           stat.label,
-                          style: AppTheme.bodySmall.copyWith(
+                          style: AppTypography.bodySmall.copyWith(
                             color: AppColors.gray400,
                           ),
                         ),
@@ -105,13 +105,13 @@ class ProgressSection extends StatelessWidget {
                   children: [
                     Text(
                       levelProgress!.label,
-                      style: AppTheme.h6.copyWith(
+                      style: AppTypography.h6.copyWith(
                         color: AppColors.crystalWhite,
                       ),
                     ),
                     Text(
                       '${levelProgress!.current} / ${levelProgress!.target} XP',
-                      style: AppTheme.bodySmall.copyWith(
+                      style: AppTypography.bodySmall.copyWith(
                         color: AppColors.gray400,
                       ),
                     ),
@@ -125,7 +125,7 @@ class ProgressSection extends StatelessWidget {
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   levelProgress!.message,
-                  style: AppTheme.bodySmall.copyWith(
+                  style: AppTypography.bodySmall.copyWith(
                     color: AppColors.gray400,
                   ),
                 ),

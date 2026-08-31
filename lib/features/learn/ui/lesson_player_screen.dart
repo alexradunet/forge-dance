@@ -50,7 +50,7 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
   @override
   Widget build(BuildContext context) {
     final learnState = ref.watch(learnViewModelProvider);
-    final state = learnState.valueOrNull;
+    final state = learnState.value;
 
     if (state == null) {
       return Scaffold(
