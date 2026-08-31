@@ -2,6 +2,10 @@
 
 Forge Dance is a Flutter app built with Riverpod, Firebase, and a feature-first architecture.
 
+## Target platforms
+
+Mobile (Android and iOS) and Web are the primary product targets. Linux desktop is available only for local UI development and skips Firebase initialization because FlutterFire does not support Linux.
+
 ## Backend
 
 Firebase is the selected MVP backend for fastest path to market.
@@ -9,7 +13,7 @@ Firebase is the selected MVP backend for fastest path to market.
 Firebase project:
 
 - Display name: `forge-dance`
-- Project ID: `forge-dance-1bcc7`
+- Project ID: `forgedance-52c54`
 
 Current stack:
 
@@ -31,11 +35,30 @@ Useful Firebase commands:
 
 ```bash
 firebase login
-flutterfire configure --project=forge-dance-1bcc7
+flutterfire configure --project=forgedance-52c54
 firebase deploy --only firestore:rules
 ```
 
-Linux desktop is kept as a local development target; Firebase initialization is skipped there because FlutterFire did not generate Linux options.
+## Widgetbook
+
+Use the integrated workbench to develop Forge Dance foundations, components, and screens in isolation:
+
+```bash
+fvm flutter run -d web-server -t widgetbook/main.dart --web-port=7357
+```
+
+Open `http://127.0.0.1:7357`. Widgetbook uses the production design-system tokens and themes without initializing Firebase.
+
+The catalog follows the production composition order:
+
+1. **Foundations** — tokens and themes
+2. **Atoms** — indivisible controls and visuals
+3. **Molecules** — small atom compositions
+4. **Organisms** — reusable application sections
+5. **Templates** — screen-level layout contracts
+6. **Screens** — integrated feature surfaces
+
+Refine the lowest applicable layer first, export reusable components from `lib/design_system/design_system.dart`, then compose them into higher layers.
 
 ## Commands
 

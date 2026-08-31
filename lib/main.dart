@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'extensions/build_context_extension.dart';
+import 'design_system/theme/app_themes.dart';
 import 'features/common/ui/providers/app_theme_mode_provider.dart';
 import 'features/common/ui/widgets/offline_container.dart';
 import 'features/firebase/repository/firebase_bootstrap.dart';
@@ -47,8 +47,8 @@ class MainApp extends ConsumerWidget {
     ref.watch(sessionCoordinatorProvider);
 
     return MaterialApp.router(
-      theme: context.lightTheme,
-      darkTheme: context.darkTheme,
+      theme: AppThemes.light,
+      darkTheme: AppThemes.dark,
       themeMode: themeMode.value,
       localizationsDelegates: context.localizationDelegates,
       supportedLocales: context.supportedLocales,

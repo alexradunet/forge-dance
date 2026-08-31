@@ -1,26 +1,15 @@
 import 'package:flutter/material.dart';
+
 import '../../tokens/app_colors.dart';
+import '../../tokens/app_spacing.dart';
+import '../../tokens/app_typography.dart';
 
-enum FgLogoVariant {
-  full, // Icon + Text
-  iconOnly, // Just the flame/hammer icon
-  textOnly, // Just the wordmark
-}
+enum FgLogoVariant { full, iconOnly, textOnly }
 
-enum FgLogoColor {
-  brand, // Orange/White or standard colors
-  white, // Pure white (for dark backgrounds)
-  black, // Pure black (for light backgrounds)
-}
+enum FgLogoColor { brand, white, black }
 
-/// Standardized Forge app logo.
-///
-/// Uses standard SVG assets or Icon equivalents.
+/// Canonical Forge Dance brand mark and wordmark.
 class FgLogo extends StatelessWidget {
-  final double size;
-  final FgLogoVariant variant;
-  final FgLogoColor color;
-
   const FgLogo({
     super.key,
     this.size = 32,
@@ -28,64 +17,153 @@ class FgLogo extends StatelessWidget {
     this.color = FgLogoColor.brand,
   });
 
+  final double size;
+  final FgLogoVariant variant;
+  final FgLogoColor color;
+
   @override
   Widget build(BuildContext context) {
-    // In a real implementation, this would use SvgPicture.asset(Assets.logo...)
-    // For now, we simulate the logo using Icons and Text as placeholders
-    // to avoid dependency errors if assets aren't set up.
+    final colors = _resolveColors(Theme.of(context).colorScheme);
+    final mark = _ForgeMark(size: size, color: colors.mark);
+    final wordmark = _ForgeWordmark(
+      fontSize: size * 0.72,
+      primaryColor: colors.wordmark,
+      accentColor: colors.accent,
+    );
 
-    switch (variant) {
-      case FgLogoVariant.iconOnly:
-        return Icon(
-          Icons.local_fire_department,
-          size: size,
-          color: _getColor(),
-        );
-      case FgLogoVariant.textOnly:
-        return Text(
-          'FORGE',
-          style: TextStyle(
-            fontFamily: 'Oswald', // Assuming standard font
-            fontWeight: FontWeight.bold,
-            fontSize: size,
-            color: _getColor(),
-            letterSpacing: size * 0.1,
-          ),
-        );
-      case FgLogoVariant.full:
-        return Row(
+    final logo = switch (variant) {
+      FgLogoVariant.iconOnly => mark,
+      FgLogoVariant.textOnly => wordmark,
+      FgLogoVariant.full => Row(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Icon(
-              Icons.local_fire_department,
-              size: size,
-              color: _getColor(),
-            ),
-            SizedBox(width: size * 0.25),
-            Text(
-              'FORGE',
-              style: TextStyle(
-                fontFamily: 'Oswald',
-                fontWeight: FontWeight.bold,
-                fontSize: size * 0.8,
-                color: _getColor(),
-                letterSpacing: size * 0.1,
-              ),
-            ),
+            mark,
+            const SizedBox(width: AppSpacing.sm),
+            wordmark,
           ],
-        );
-    }
+        ),
+    };
+
+    return Semantics(
+      image: true,
+      label: 'Forge Dance',
+      child: ExcludeSemantics(child: logo),
+    );
   }
 
-  Color _getColor() {
-    switch (color) {
-      case FgLogoColor.brand:
-        return AppColors.forgeFire;
-      case FgLogoColor.white:
-        return Colors.white;
-      case FgLogoColor.black:
-        return Colors.black;
-    }
+  _LogoColors _resolveColors(ColorScheme colors) {
+    return switch (color) {
+      FgLogoColor.brand => _LogoColors(
+          mark: AppColors.forgeFire,
+          wordmark: colors.onSurface,
+          accent: AppColors.forgeFire,
+        ),
+      FgLogoColor.white => const _LogoColors(
+          mark: AppColors.crystalWhite,
+          wordmark: AppColors.crystalWhite,
+          accent: AppColors.crystalWhite,
+        ),
+      FgLogoColor.black => const _LogoColors(
+          mark: AppColors.gray950,
+          wordmark: AppColors.gray950,
+          accent: AppColors.gray950,
+        ),
+    };
   }
+}
+
+class _ForgeMark extends StatelessWidget {
+  const _ForgeMark({required this.size, required this.color});
+
+  final double size;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox.square(
+      dimension: size,
+      child: CustomPaint(painter: _ForgeMarkPainter(color)),
+    );
+  }
+}
+
+class _ForgeWordmark extends StatelessWidget {
+  const _ForgeWordmark({
+    required this.fontSize,
+    required this.primaryColor,
+    required this.accentColor,
+  });
+
+  final double fontSize;
+  final Color primaryColor;
+  final Color accentColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = AppTypography.h2.copyWith(
+      fontSize: fontSize,
+      height: 1,
+      letterSpacing: fontSize * 0.06,
+    );
+
+    return Text.rich(
+      TextSpan(
+        children: [
+          TextSpan(text: 'FORGE', style: style.copyWith(color: primaryColor)),
+          TextSpan(text: '.DANCE', style: style.copyWith(color: accentColor)),
+        ],
+      ),
+      maxLines: 1,
+    );
+  }
+}
+
+class _ForgeMarkPainter extends CustomPainter {
+  const _ForgeMarkPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final width = size.width;
+    final height = size.height;
+    final primary = Paint()..color = color;
+    final secondary = Paint()..color = color.withAlpha(92);
+
+    final bolt = Path()
+      ..moveTo(width * 0.18, height * 0.08)
+      ..lineTo(width * 0.76, height * 0.08)
+      ..lineTo(width * 0.53, height * 0.42)
+      ..lineTo(width * 0.82, height * 0.42)
+      ..lineTo(width * 0.24, height * 0.94)
+      ..lineTo(width * 0.39, height * 0.57)
+      ..lineTo(width * 0.14, height * 0.57)
+      ..close();
+    canvas.drawPath(bolt, primary);
+
+    final spark = Path()
+      ..moveTo(width * 0.7, height * 0.66)
+      ..lineTo(width * 0.9, height * 0.55)
+      ..lineTo(width * 0.82, height * 0.81)
+      ..close();
+    canvas.drawPath(spark, secondary);
+  }
+
+  @override
+  bool shouldRepaint(covariant _ForgeMarkPainter oldDelegate) {
+    return oldDelegate.color != color;
+  }
+}
+
+class _LogoColors {
+  const _LogoColors({
+    required this.mark,
+    required this.wordmark,
+    required this.accent,
+  });
+
+  final Color mark;
+  final Color wordmark;
+  final Color accent;
 }

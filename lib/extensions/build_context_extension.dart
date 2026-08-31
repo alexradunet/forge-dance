@@ -26,36 +26,7 @@ extension ThemeModeExtension on BuildContext {
   Color get secondaryTextColor =>
       isDarkMode ? AppColors.gray400 : AppColors.gray600;
 
-  Color get dividerColor =>
-      isDarkMode ? AppColors.gray700 : AppColors.gray200;
-
-  ThemeData get lightTheme => ThemeData.light().copyWith(
-        scaffoldBackgroundColor: AppColors.gray50,
-        colorScheme: Theme.of(this).colorScheme.copyWith(
-              brightness: Brightness.light,
-              primary: AppColors.forgeFire,
-              secondary: AppColors.electricBlue,
-              error: AppColors.passionRed,
-              surface: AppColors.gray100,
-            ),
-        textTheme: Theme.of(this).textTheme.apply(
-              bodyColor: AppColors.gray950,
-            ),
-      );
-
-  ThemeData get darkTheme => ThemeData.dark().copyWith(
-        scaffoldBackgroundColor: AppColors.gray950,
-        colorScheme: Theme.of(this).colorScheme.copyWith(
-              brightness: Brightness.dark,
-              primary: AppColors.forgeFire,
-              secondary: AppColors.electricBlue,
-              error: AppColors.passionRed,
-              surface: AppColors.gray900,
-            ),
-        textTheme: Theme.of(this).textTheme.apply(
-              bodyColor: AppColors.crystalWhite,
-            ),
-      );
+  Color get dividerColor => isDarkMode ? AppColors.gray700 : AppColors.gray200;
 
   void showSuccessSnackBar(String text, {SnackBarAction? action}) {
     ScaffoldMessenger.of(this).showSnackBar(

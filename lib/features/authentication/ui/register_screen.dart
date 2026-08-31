@@ -6,11 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../constants/assets.dart';
 import '../../../constants/constants.dart';
-import '../../../design_system/atoms/buttons/fg_button.dart';
-import '../../../design_system/atoms/inputs/fg_input.dart';
-import '../../../design_system/atoms/visuals/fg_background.dart';
-import '../../../design_system/organisms/navigation/app_header.dart';
-import '../../../design_system/tokens/app_typography.dart';
+import '../../../design_system/design_system.dart';
 import '../../../extensions/build_context_extension.dart';
 import '../../../features/authentication/ui/view_model/authentication_view_model.dart';
 import '../../../features/authentication/ui/widgets/sign_in_agreement.dart';
@@ -30,6 +26,8 @@ class RegisterScreen extends ConsumerStatefulWidget {
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   late final TextEditingController _emailController;
   late final TextEditingController _passwordController;
+  late final FocusNode _emailFocusNode;
+  late final FocusNode _passwordFocusNode;
   bool _isFormValid = false;
 
   @override
@@ -37,6 +35,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.initState();
     _emailController = TextEditingController()..addListener(_validateForm);
     _passwordController = TextEditingController()..addListener(_validateForm);
+    _emailFocusNode = FocusNode();
+    _passwordFocusNode = FocusNode();
   }
 
   @override
@@ -45,6 +45,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     _passwordController.removeListener(_validateForm);
     _emailController.dispose();
     _passwordController.dispose();
+    _emailFocusNode.dispose();
+    _passwordFocusNode.dispose();
     super.dispose();
   }
 
@@ -53,6 +55,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       _isFormValid = isValidEmail(_emailController.text) &&
           _passwordController.text.trim().length >= 6;
     });
+  }
+
+  void _submit() {
+    if (!_isFormValid) return;
+    _passwordFocusNode.unfocus();
+    ref.read(sessionCoordinatorProvider).registerWithEmailAndPassword(
+          email: _emailController.text,
+          password: _passwordController.text,
+        );
   }
 
   @override
@@ -84,84 +95,108 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     return Scaffold(
       backgroundColor: Colors.transparent,
-      body: FgBackground(
-        child: Column(
-          children: [
-            AppHeader(
-              title: 'JOIN THE FORGE',
-              subtitle: 'Start your rhythm journey',
-              onBack: context.canPop() ? () => context.pop() : null,
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      height: 200,
-                      child: SvgPicture.asset(
-                        Assets.welcome,
-                        fit: BoxFit.contain,
-                        alignment: Alignment.center,
-                        semanticsLabel: 'Welcome',
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'register'.tr(),
-                      style: AppTypography.h1.copyWith(color: Colors.white),
-                    ),
-                    const SizedBox(height: 24),
-                    FgInput(
-                      label: 'Email',
-                      controller: _emailController,
-                    ),
-                    const SizedBox(height: 16),
-                    FgInput.password(
-                      controller: _passwordController,
-                      helperText: 'Use at least 6 characters',
-                    ),
-                    const SizedBox(height: 32),
-                    FgButton(
-                      onPressed: _isFormValid
-                          ? () => ref
-                              .read(sessionCoordinatorProvider)
-                              .registerWithEmailAndPassword(
-                                email: _emailController.text,
-                                password: _passwordController.text,
-                              )
-                          : null,
-                      text: 'register'.tr(),
-                      width: double.infinity,
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
+      body: Theme(
+        data: AppThemes.dark,
+        child: FgBackground(
+          child: Column(
+            children: [
+              AppHeader(
+                title: LocaleKeys.register.tr(),
+                subtitle: LocaleKeys.welcome.tr(),
+                onBack: context.canPop() ? () => context.pop() : null,
+                rightSlot: const FgLogo(size: AppSizes.iconLg),
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: AppSpacing.screen,
+                  child: AutofillGroup(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          LocaleKeys.alreadyHaveAccount.tr(),
-                          style: AppTheme.bodySmall,
-                        ),
-                        const SizedBox(width: 4),
-                        TextButton(
-                          onPressed: () => context.push(Routes.login),
-                          child: Text(
-                            LocaleKeys.signIn.tr(),
-                            style: AppTheme.bodySmall.copyWith(
-                              fontWeight: FontWeight.w600,
-                            ),
+                        SizedBox(
+                          height: AppSizes.squareTileLg,
+                          child: SvgPicture.asset(
+                            Assets.welcome,
+                            fit: BoxFit.contain,
+                            alignment: Alignment.center,
+                            semanticsLabel: LocaleKeys.welcome.tr(),
                           ),
                         ),
+                        const SizedBox(height: AppSpacing.lg),
+                        Text(
+                          LocaleKeys.register.tr(),
+                          style: AppTypography.h1.copyWith(
+                            color: AppColors.crystalWhite,
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xxl),
+                        FgInput(
+                          label: LocaleKeys.email.tr(),
+                          controller: _emailController,
+                          focusNode: _emailFocusNode,
+                          prefixIcon: Icons.mail_outline_rounded,
+                          keyboardType: TextInputType.emailAddress,
+                          textInputAction: TextInputAction.next,
+                          autofillHints: const [
+                            AutofillHints.username,
+                            AutofillHints.email,
+                          ],
+                          isRequired: true,
+                          onSubmitted: (_) => _passwordFocusNode.requestFocus(),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        FgInput.password(
+                          label: LocaleKeys.password.tr(),
+                          controller: _passwordController,
+                          focusNode: _passwordFocusNode,
+                          helperText: LocaleKeys.passwordRequirement.tr(),
+                          textInputAction: TextInputAction.done,
+                          autofillHints: const [AutofillHints.newPassword],
+                          isRequired: true,
+                          showPasswordSemanticsLabel:
+                              LocaleKeys.showPassword.tr(),
+                          hidePasswordSemanticsLabel:
+                              LocaleKeys.hidePassword.tr(),
+                          onSubmitted: (_) => _submit(),
+                        ),
+                        const SizedBox(height: AppSpacing.xxxl),
+                        FgButton(
+                          onPressed: _isFormValid ? _submit : null,
+                          text: LocaleKeys.register.tr(),
+                          size: FgButtonSize.lg,
+                          expand: true,
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Center(
+                          child: Wrap(
+                            alignment: WrapAlignment.center,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            children: [
+                              Text(
+                                LocaleKeys.alreadyHaveAccount.tr(),
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.gray300,
+                                ),
+                              ),
+                              FgButton(
+                                text: LocaleKeys.signIn.tr(),
+                                variant: FgButtonVariant.ghost,
+                                size: FgButtonSize.sm,
+                                onPressed: () => context.push(Routes.login),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        const SignInAgreement(),
+                        const SizedBox(height: AppSpacing.xxxl),
                       ],
                     ),
-                    const SizedBox(height: 16),
-                    const SignInAgreement(),
-                    const SizedBox(height: 32),
-                  ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

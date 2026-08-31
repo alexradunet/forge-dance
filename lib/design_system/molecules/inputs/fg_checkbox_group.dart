@@ -18,21 +18,21 @@ class FgCheckboxGroupItem {
   });
 }
 
-class CheckboxGroup extends StatefulWidget {
+class FgCheckboxGroup extends StatefulWidget {
   final List<FgCheckboxGroupItem> items;
   final ValueChanged<List<String>>? onChanged;
 
-  const CheckboxGroup({
+  const FgCheckboxGroup({
     super.key,
     required this.items,
     this.onChanged,
   });
 
   @override
-  State<CheckboxGroup> createState() => _CheckboxGroupState();
+  State<FgCheckboxGroup> createState() => _FgCheckboxGroupState();
 }
 
-class _CheckboxGroupState extends State<CheckboxGroup> {
+class _FgCheckboxGroupState extends State<FgCheckboxGroup> {
   late List<FgCheckboxGroupItem> _items;
 
   @override

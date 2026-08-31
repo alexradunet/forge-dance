@@ -16,12 +16,12 @@ class FgRadioGroupItem<T> {
   });
 }
 
-class RadioGroup<T> extends StatelessWidget {
+class FgRadioGroup<T> extends StatelessWidget {
   final List<FgRadioGroupItem<T>> items;
   final T? selectedValue;
   final ValueChanged<T>? onChanged;
 
-  const RadioGroup({
+  const FgRadioGroup({
     super.key,
     required this.items,
     this.selectedValue,

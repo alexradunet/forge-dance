@@ -8,6 +8,7 @@
 // ───────────────────────────────────────────────────────────
 
 export 'tokens/tokens.dart';
+export 'theme/app_themes.dart';
 
 // ───────────────────────────────────────────────────────────
 // ATOMS
@@ -31,6 +32,7 @@ export 'atoms/avatars/fg_avatar.dart';
 
 // Status
 export 'atoms/status/fg_status_dot.dart';
+export 'atoms/status/fg_lesson_timeline_indicator.dart';
 
 // Dividers
 export 'atoms/dividers/fg_divider.dart';
@@ -52,6 +54,8 @@ export 'atoms/visuals/fg_tooltip.dart';
 export 'atoms/visuals/fg_aspect_ratio.dart';
 export 'atoms/visuals/fg_image.dart';
 export 'atoms/visuals/fg_rating.dart';
+export 'atoms/visuals/fg_icon_label.dart';
+export 'atoms/visuals/fg_lesson_timeline_track.dart';
 export 'atoms/typography/fg_label.dart';
 export 'atoms/surfaces/fg_card.dart';
 
@@ -64,6 +68,8 @@ export 'atoms/icons/fg_icon.dart';
 
 // Cards
 export 'molecules/cards/fg_content_card.dart';
+export 'molecules/cards/fg_interactive_card.dart';
+export 'molecules/cards/fg_interactive_card_thumbnail.dart';
 
 // Inputs
 export 'molecules/inputs/fg_checkbox_group.dart';
@@ -72,6 +78,14 @@ export 'molecules/inputs/fg_radio_group.dart';
 // Feedback
 export 'molecules/feedback/fg_empty.dart';
 
+// Navigation
+export 'molecules/navigation/fg_app_nav_button.dart';
+
+// Lessons
+export 'molecules/lessons/fg_lesson_timeline_boss_node.dart';
+export 'molecules/lessons/fg_lesson_timeline_movement_card.dart';
+export 'molecules/lessons/fg_lesson_timeline_standard_node.dart';
+
 // ───────────────────────────────────────────────────────────
 // ORGANISMS
 // ───────────────────────────────────────────────────────────
@@ -79,7 +93,21 @@ export 'molecules/feedback/fg_empty.dart';
 // Modals
 export 'organisms/modals/forge_bottom_sheet.dart';
 export 'organisms/modals/forge_alert_dialog.dart';
+export 'organisms/modals/fg_filter_sheet.dart';
 
 // Progress
 export 'organisms/progress/progress_section.dart';
 export 'organisms/progress/stats_breakdown.dart';
+
+// Navigation
+export 'organisms/navigation/app_bottom_nav.dart';
+export 'organisms/navigation/app_header.dart';
+
+// Lessons
+export 'organisms/lessons/lesson_path_timeline.dart';
+
+// ───────────────────────────────────────────────────────────
+// TEMPLATES
+// ───────────────────────────────────────────────────────────
+
+export 'templates/swipeable_card_screen_template.dart';
