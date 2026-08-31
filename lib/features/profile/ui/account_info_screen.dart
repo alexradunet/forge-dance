@@ -14,6 +14,7 @@ import '../../common/ui/widgets/common_text_form_field.dart';
 import '../../common/ui/widgets/primary_button.dart';
 import '../../common/ui/widgets/secondary_button.dart';
 import '../model/profile.dart';
+import '../repository/device_avatar_repository.dart';
 import 'view_model/profile_view_model.dart';
 import 'widgets/avatar.dart';
 
@@ -42,12 +43,25 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
     name = widget.originalProfile.name;
 
     nameController.addListener(_updateName);
+    _loadDeviceAvatar();
+  }
+
+  Future<void> _loadDeviceAvatar() async {
+    final identity = widget.originalProfile.id ?? 'local-development';
+    final saved = await ref.read(deviceAvatarRepositoryProvider).load(identity);
+    if (mounted && saved != null) setState(() => avatar = saved);
   }
 
   Future<void> _selectImage() async {
-    final result =
-        await ref.read(profileViewModelProvider.notifier).selectImage(context);
-    setState(() => avatar = result);
+    try {
+      final identity = widget.originalProfile.id ?? 'local-development';
+      final result = await ref
+          .read(deviceAvatarRepositoryProvider)
+          .selectAndSave(identity);
+      if (mounted && result != null) setState(() => avatar = result);
+    } catch (error) {
+      if (mounted) context.showErrorSnackBar(error.toString());
+    }
   }
 
   void _updateName() {
@@ -121,8 +135,7 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
                     Global.showLoading(context);
                     await ref
                         .read(profileViewModelProvider.notifier)
-                        .updateProfile(
-                          avatar: avatar,
+                        .editProfile(
                           name: name,
                         );
                     if (context.mounted) {

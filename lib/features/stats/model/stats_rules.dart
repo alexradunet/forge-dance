@@ -31,7 +31,7 @@ int totalXpFrom(List<Module> modules, Map<String, LessonProgress> progress) {
   for (final module in modules) {
     for (final lesson in module.lessons) {
       if (progress[lesson.id]?.status == LessonStatus.completed) {
-        total += xpForLessonType(lesson.type);
+        total += progress[lesson.id]?.awardedXp ?? xpForLessonType(lesson.type);
       }
     }
   }
@@ -45,7 +45,7 @@ int workoutXpFrom(List<Workout> workouts, Iterable<WorkoutSession> sessions) {
   final byId = {for (final workout in workouts) workout.id: workout};
   var total = 0;
   for (final session in sessions) {
-    total += byId[session.workoutId]?.xp ?? 0;
+    total += session.awardedXp ?? byId[session.workoutId]?.xp ?? 0;
   }
   return total;
 }
@@ -137,12 +137,15 @@ UserStats buildUserStats({
   required String? lastActivityDate,
   required DateTime now,
   int workoutXp = 0,
+  int minimumXp = 0,
 }) {
-  final totalXp = totalXpFrom(modules, progress) + workoutXp;
+  final derivedXp = totalXpFrom(modules, progress) + workoutXp;
+  final totalXp = derivedXp > minimumXp ? derivedXp : minimumXp;
   final beltIndex = beltIndexForXp(totalXp);
   final isMax = beltIndex == beltThresholds.length - 1;
   final xpIntoLevel = totalXp - beltThresholds[beltIndex];
-  final span = isMax ? 0 : beltThresholds[beltIndex + 1] - beltThresholds[beltIndex];
+  final span =
+      isMax ? 0 : beltThresholds[beltIndex + 1] - beltThresholds[beltIndex];
 
   return UserStats(
     totalXp: totalXp,

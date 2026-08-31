@@ -8,6 +8,14 @@ import '../features/authentication/ui/register_screen.dart';
 import '../features/authentication/ui/state/authentication_state.dart';
 import '../features/authentication/ui/view_model/authentication_view_model.dart';
 import '../features/main/presentation/pages/main_screen.dart';
+import '../features/home/presentation/pages/home_page.dart';
+import '../features/explore/presentation/pages/explore_page.dart';
+import '../features/library/presentation/pages/collection_page.dart';
+import '../features/profile/presentation/pages/profile_page.dart';
+import '../features/workout/presentation/pages/training_session_page.dart';
+import '../features/learn/ui/module_view_screen.dart';
+import '../features/learn/ui/lesson_player_screen.dart';
+import '../features/learn/ui/view_model/learn_view_model.dart';
 import '../features/onboarding/ui/onboarding_screen.dart';
 import '../features/onboarding/ui/splash_screen.dart';
 import '../features/profile/model/profile.dart';
@@ -103,57 +111,112 @@ GoRouter router(Ref ref) {
       matchedLocation: state.matchedLocation,
       auth: authState.value,
     ),
-    routes: _routes,
+    routes: _routes(ref),
   );
 }
 
-final List<GoRoute> _routes = [
-    GoRoute(
-      path: Routes.splash,
-      pageBuilder: (context, state) => state.slidePage(const SplashScreen()),
-    ),
-    GoRoute(
-      path: Routes.register,
-      pageBuilder: (context, state) => state.slidePage(const RegisterScreen()),
-    ),
-    GoRoute(
-      path: Routes.login,
-      pageBuilder: (context, state) => state.slidePage(const SignInScreen()),
-    ),
-    GoRoute(
-      path: Routes.onboarding,
-      pageBuilder: (context, state) =>
-          state.slidePage(const OnboardingScreen()),
-    ),
-    GoRoute(
-      path: Routes.main,
-      pageBuilder: (context, state) => state.slidePage(const MainScreen()),
-    ),
-    GoRoute(
-      path: Routes.accountInformation,
-      pageBuilder: (context, state) {
-        final profile = state.extra as Profile;
-        return state.slidePage(AccountInfoScreen(originalProfile: profile));
-      },
-    ),
-    GoRoute(
-      path: Routes.appearances,
-      pageBuilder: (context, state) =>
-          state.slidePage(const AppearancesScreen()),
-    ),
-    GoRoute(
-      path: Routes.languages,
-      pageBuilder: (context, state) => state.slidePage(const LanguagesScreen()),
-    ),
-    GoRoute(
-      path: Routes.settings,
-      pageBuilder: (context, state) => state.slidePage(
-        const SettingsPage(),
-        direction: SlideDirection.right,
+List<RouteBase> _routes(Ref ref) => [
+      GoRoute(
+        path: Routes.splash,
+        pageBuilder: (context, state) => state.slidePage(const SplashScreen()),
       ),
-    ),
-    GoRoute(
-      path: Routes.stats,
-      pageBuilder: (context, state) => state.slidePage(const StatsPage()),
-    ),
-  ];
+      GoRoute(
+        path: Routes.register,
+        pageBuilder: (context, state) =>
+            state.slidePage(const RegisterScreen()),
+      ),
+      GoRoute(
+        path: Routes.login,
+        pageBuilder: (context, state) => state.slidePage(const SignInScreen()),
+      ),
+      GoRoute(
+        path: Routes.onboarding,
+        pageBuilder: (context, state) =>
+            state.slidePage(const OnboardingScreen()),
+      ),
+      ShellRoute(
+        builder: (context, state, child) => MainScreen(
+          location: state.uri.path,
+          child: child,
+        ),
+        routes: [
+          GoRoute(path: Routes.main, redirect: (_, __) => Routes.home),
+          GoRoute(
+            path: Routes.library,
+            builder: (_, __) => const CollectionPage(),
+          ),
+          GoRoute(
+            path: Routes.explore,
+            builder: (_, __) => const ExplorePage(),
+          ),
+          GoRoute(path: Routes.home, builder: (_, __) => const HomePage()),
+          GoRoute(
+            path: Routes.workout,
+            builder: (_, __) => const TrainingSessionPage(),
+          ),
+          GoRoute(
+              path: Routes.profile, builder: (_, __) => const ProfilePage()),
+          GoRoute(
+            path: '${Routes.main}/module/:moduleId',
+            builder: (context, state) {
+              final moduleId = state.pathParameters['moduleId']!;
+              ref.read(learnViewModelProvider.notifier).selectModule(moduleId);
+              return ModuleViewScreen(
+                onBack: () => context.pop(),
+                onLessonNavigate: (lessonId) =>
+                    LessonDestination(moduleId, lessonId).push<void>(context),
+              );
+            },
+            routes: [
+              GoRoute(
+                path: 'lesson/:lessonId',
+                builder: (context, state) {
+                  final moduleId = state.pathParameters['moduleId']!;
+                  final lessonId = state.pathParameters['lessonId']!;
+                  ref
+                      .read(learnViewModelProvider.notifier)
+                      .selectModule(moduleId);
+                  final learn = ref.read(learnViewModelProvider).valueOrNull;
+                  if (learn == null || !learn.canOpenLesson(lessonId)) {
+                    return ModuleViewScreen(onBack: () => context.pop());
+                  }
+                  return LessonPlayerScreen(
+                    lessonId: lessonId,
+                    onBack: () => context.pop(),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+      GoRoute(
+        path: Routes.accountInformation,
+        pageBuilder: (context, state) {
+          final profile = state.extra;
+          if (profile is! Profile) return state.slidePage(const ProfilePage());
+          return state.slidePage(AccountInfoScreen(originalProfile: profile));
+        },
+      ),
+      GoRoute(
+        path: Routes.appearances,
+        pageBuilder: (context, state) =>
+            state.slidePage(const AppearancesScreen()),
+      ),
+      GoRoute(
+        path: Routes.languages,
+        pageBuilder: (context, state) =>
+            state.slidePage(const LanguagesScreen()),
+      ),
+      GoRoute(
+        path: Routes.settings,
+        pageBuilder: (context, state) => state.slidePage(
+          const SettingsPage(),
+          direction: SlideDirection.right,
+        ),
+      ),
+      GoRoute(
+        path: Routes.stats,
+        pageBuilder: (context, state) => state.slidePage(const StatsPage()),
+      ),
+    ];

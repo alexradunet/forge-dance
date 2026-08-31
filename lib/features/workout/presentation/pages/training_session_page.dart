@@ -15,6 +15,7 @@ import '../../../../design_system/atoms/buttons/fg_button.dart';
 import '../../../../generated/locale_keys.g.dart';
 import '../../../common/ui/widgets/common_error.dart';
 import '../../../stats/ui/view_model/user_stats_provider.dart';
+import '../../../stats/model/projection_health.dart';
 import '../../model/workout.dart';
 import '../../ui/state/workout_state.dart';
 import '../../ui/view_model/workout_view_model.dart';
@@ -214,8 +215,7 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
             setState(() {
               _currentPage = index;
               final exerciseIndex = index - 1;
-              if (exerciseIndex >= 0 &&
-                  exerciseIndex < wod.exercises.length) {
+              if (exerciseIndex >= 0 && exerciseIndex < wod.exercises.length) {
                 _timeLeft = wod.exercises[exerciseIndex].seconds;
               }
               _stopTimer();
@@ -275,7 +275,7 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
       return _buildIntroCard(wod);
     }
     if (index == _totalPageCount(wod) - 1) {
-      return _buildCompleteCard(wod);
+      return _buildCompleteCard(wod, state.projectionHealth);
     }
     return _buildExerciseCard(wod, index - 1);
   }
@@ -325,9 +325,8 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
     );
   }
 
-  Widget _buildCompleteCard(Workout wod) {
-    final streak =
-        ref.watch(userStatsProvider).valueOrNull?.streakCount ?? 0;
+  Widget _buildCompleteCard(Workout wod, ProjectionHealth projectionHealth) {
+    final streak = ref.watch(userStatsProvider).valueOrNull?.streakCount ?? 0;
 
     return FgInteractiveCard(
       title: LocaleKeys.sessionComplete.tr().toUpperCase(),
@@ -347,9 +346,11 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
                 size: 60, color: AppColors.forgeFire),
             const SizedBox(height: 16),
             Text(
-              _xpAwarded
-                  ? LocaleKeys.youEarnedXp.tr(args: ['${wod.xp}'])
-                  : LocaleKeys.alreadyCompletedToday.tr(),
+              projectionHealth == ProjectionHealth.pendingRepair
+                  ? LocaleKeys.statsSyncing.tr()
+                  : _xpAwarded
+                      ? LocaleKeys.youEarnedXp.tr(args: ['${wod.xp}'])
+                      : LocaleKeys.alreadyCompletedToday.tr(),
               textAlign: TextAlign.center,
               style: AppTypography.h3.copyWith(color: Colors.white),
             ),

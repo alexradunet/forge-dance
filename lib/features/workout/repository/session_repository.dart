@@ -42,8 +42,8 @@ class SessionRepository {
         .doc(user.uid)
         .collection('sessions')
         .withConverter<WorkoutSession>(
-          fromFirestore: (snapshot, _) =>
-              WorkoutSession.fromJson(_normalizeFirestoreJson(snapshot.data()!)),
+          fromFirestore: (snapshot, _) => WorkoutSession.fromJson(
+              _normalizeFirestoreJson(snapshot.data()!)),
           toFirestore: (session, _) => _firestorePayload(session),
         );
   }
@@ -61,6 +61,30 @@ class SessionRepository {
     if (ref == null) return;
 
     await ref.doc(session.docKey).set(session, SetOptions(merge: true));
+  }
+
+  /// Creates a daily completion once and returns the preserved record.
+  Future<({WorkoutSession session, bool created})> completeOnce(
+    WorkoutSession completion,
+  ) async {
+    final ref = _sessionsRef();
+    if (ref == null) return (session: completion, created: true);
+    final doc = ref.doc(completion.docKey);
+    return _firestore!.runTransaction((transaction) async {
+      final snapshot = await transaction.get(doc);
+      final existing = snapshot.data();
+      if (existing != null) {
+        final backfilled = existing.copyWith(
+          awardedXp: existing.awardedXp ?? completion.awardedXp,
+        );
+        if (backfilled != existing) {
+          transaction.set(doc, backfilled, SetOptions(merge: true));
+        }
+        return (session: backfilled, created: false);
+      }
+      transaction.set(doc, completion, SetOptions(merge: true));
+      return (session: completion, created: true);
+    });
   }
 
   Map<String, Object?> _firestorePayload(WorkoutSession session) {

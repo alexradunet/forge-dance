@@ -23,6 +23,16 @@ class FakeSessionRepository extends SessionRepository {
   Future<void> complete(WorkoutSession session) async {
     store[session.docKey] = session;
   }
+
+  @override
+  Future<({WorkoutSession session, bool created})> completeOnce(
+    WorkoutSession completion,
+  ) async {
+    final existing = store[completion.docKey];
+    if (existing != null) return (session: existing, created: false);
+    store[completion.docKey] = completion;
+    return (session: completion, created: true);
+  }
 }
 
 class FakeProfileRepository extends ProfileRepository {
@@ -113,8 +123,7 @@ void main() {
       expect(state.wodCompletedToday, isFalse);
     });
 
-    test('completeWod persists once per day and reports the dedupe',
-        () async {
+    test('completeWod persists once per day and reports the dedupe', () async {
       final repository = FakeSessionRepository();
       final container = containerWith(repository);
       await container.read(workoutViewModelProvider.future);

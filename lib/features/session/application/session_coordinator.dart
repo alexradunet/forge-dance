@@ -1,14 +1,31 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../authentication/model/auth_session.dart';
 import '../../authentication/ui/view_model/authentication_view_model.dart';
 import '../../profile/ui/view_model/profile_view_model.dart';
+import '../../stats/application/training_activity.dart';
 
 part 'session_coordinator.g.dart';
 
 @Riverpod(keepAlive: true)
-SessionCoordinator sessionCoordinator(Ref ref) => SessionCoordinator(ref);
+SessionCoordinator sessionCoordinator(Ref ref) {
+  final coordinator = SessionCoordinator(ref);
+  ref.listen(authenticationViewModelProvider, (_, next) {
+    final auth = next.valueOrNull;
+    final user = auth?.authSession?.user;
+    if (user != null) {
+      unawaited(coordinator.syncProfileFromAuthUser(user).then(
+            (_) => ref.read(trainingActivityProvider).repairProjection(),
+          ));
+    } else if (auth != null && !auth.isFirebaseConfigured) {
+      unawaited(ref.read(trainingActivityProvider).repairProjection());
+    }
+  }, fireImmediately: true);
+  return coordinator;
+}
 
 class SessionCoordinator {
   const SessionCoordinator(this._ref);
@@ -26,6 +43,7 @@ class SessionCoordinator {
           password: password,
         );
     await _syncCurrentAuthProfile();
+    await _ref.read(trainingActivityProvider).repairProjection();
   }
 
   Future<void> signInWithEmailAndPassword({
@@ -39,6 +57,7 @@ class SessionCoordinator {
           password: password,
         );
     await _syncCurrentAuthProfile();
+    await _ref.read(trainingActivityProvider).repairProjection();
   }
 
   Future<void> signOut() async {
@@ -48,7 +67,7 @@ class SessionCoordinator {
 
   Future<void> syncProfileFromAuthUser(AuthUser user) async {
     final metaData = user.metadata;
-    await _ref.read(profileViewModelProvider.notifier).updateProfile(
+    await _ref.read(profileViewModelProvider.notifier).syncAuthentication(
           id: user.id,
           email: user.email,
           name: metaData?['full_name'] as String?,

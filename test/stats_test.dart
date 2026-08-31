@@ -34,7 +34,8 @@ void main() {
       );
     });
 
-    test('CALIBRATION: completing the whole catalog equals the Black Belt '
+    test(
+        'CALIBRATION: completing the whole catalog equals the Black Belt '
         'threshold — catalog changes must re-calibrate beltThresholds', () {
       final allCompleted = {
         for (final module in allModules)
@@ -173,6 +174,19 @@ void main() {
       expect(stats.beltName, 'Black');
       expect(stats.nextLevelXp, isNull);
       expect(stats.levelProgress, 1.0);
+    });
+
+    test('incomplete migrated history never reduces persisted XP', () {
+      final stats = buildUserStats(
+        modules: const [],
+        progress: const {},
+        persistedStreak: 0,
+        lastActivityDate: null,
+        now: noon,
+        minimumXp: 700,
+      );
+
+      expect(stats.totalXp, 700);
     });
   });
 

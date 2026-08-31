@@ -16,14 +16,13 @@ import '../../../common/ui/widgets/common_error.dart';
 import '../../../learn/model/lesson.dart';
 import '../../../learn/ui/state/learn_state.dart';
 import '../../../learn/ui/view_model/learn_view_model.dart';
+import '../../../../routing/routes.dart';
 
 /// Explore — the full module catalog grouped by category, with live title
 /// search and real per-module progress. The filter sheet is cosmetic until
 /// modules carry difficulty metadata.
 class ExplorePage extends ConsumerStatefulWidget {
-  final Function(String)? onNavigate;
-
-  const ExplorePage({super.key, this.onNavigate});
+  const ExplorePage({super.key});
 
   @override
   ConsumerState<ExplorePage> createState() => _ExplorePageState();
@@ -107,8 +106,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
       for (final category in ModuleCategory.values)
         (category: category, modules: _modulesFor(state, category)),
     ];
-    final nothingMatches =
-        sections.every((section) => section.modules.isEmpty);
+    final nothingMatches = sections.every((section) => section.modules.isEmpty);
 
     return CustomScrollView(
       slivers: [
@@ -210,7 +208,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
       width: width,
       onTap: () {
         ref.read(learnViewModelProvider.notifier).selectModule(module.id);
-        widget.onNavigate?.call('lesson-path');
+        ModuleDestination(module.id).push<void>(context);
       },
     );
   }

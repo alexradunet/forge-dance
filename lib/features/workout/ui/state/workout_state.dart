@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../model/workout.dart';
 import '../../model/workout_session.dart';
+import '../../../stats/model/projection_health.dart';
 
 part 'workout_state.freezed.dart';
 
@@ -16,6 +17,7 @@ abstract class WorkoutState with _$WorkoutState {
     required String wodId,
     required String todayKey,
     @Default(<String, WorkoutSession>{}) Map<String, WorkoutSession> sessions,
+    @Default(ProjectionHealth.current) ProjectionHealth projectionHealth,
   }) = _WorkoutState;
 
   /// Today's workout of the day.

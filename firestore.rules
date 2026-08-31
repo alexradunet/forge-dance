@@ -35,7 +35,9 @@ service cloud.firestore {
       match /progress/{lessonId} {
         allow create, update: if ownsUserDocument(userId)
           && request.resource.data.lessonId == lessonId
-          && request.resource.data.status in ['notStarted', 'inProgress', 'completed'];
+          && request.resource.data.status in ['notStarted', 'inProgress', 'completed']
+          && (!('awardedXp' in request.resource.data) || request.resource.data.awardedXp is int)
+          && (!('completedDate' in request.resource.data) || request.resource.data.completedDate is string);
         allow read, delete: if ownsUserDocument(userId);
       }
 
@@ -45,6 +47,7 @@ service cloud.firestore {
         allow create, update: if ownsUserDocument(userId)
           && request.resource.data.workoutId is string
           && request.resource.data.date is string
+          && (!('awardedXp' in request.resource.data) || request.resource.data.awardedXp is int)
           && sessionId == request.resource.data.date + '_' + request.resource.data.workoutId;
         allow read, delete: if ownsUserDocument(userId);
       }

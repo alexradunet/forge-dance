@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
@@ -55,19 +54,18 @@ class ProfileRepository {
   Future<Profile?> get() async {
     final localProfile = await _getLocalProfile();
     final firebaseProfile = await _getFromFirestore();
-    if (firebaseProfile != null) {
-      return _mergeLocalOnlyFields(
-        firebaseProfile: firebaseProfile,
-        localProfile: localProfile,
-      );
-    }
-
-    return localProfile;
+    return firebaseProfile ?? localProfile;
   }
 
   Future<Profile?> _getLocalProfile() async {
+    final key = _localProfileKey;
+    if (key == null) return null;
     final prefs = await SharedPreferences.getInstance();
-    final profileStr = prefs.getString(Constants.profileKey);
+    var profileStr = prefs.getString(key);
+    if (profileStr == null && _auth == null) {
+      profileStr = prefs.getString(Constants.profileKey);
+      if (profileStr != null) await prefs.setString(key, profileStr);
+    }
     if (profileStr == null) return null;
 
     return Profile.fromJson(jsonDecode(profileStr));
@@ -101,8 +99,17 @@ class ProfileRepository {
   }
 
   Future<void> _updateLocalProfile(Profile profile) async {
+    final key = _localProfileKey;
+    if (key == null) return;
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(Constants.profileKey, jsonEncode(profile.toJson()));
+    await prefs.setString(key, jsonEncode(profile.toJson()));
+  }
+
+  String? get _localProfileKey {
+    final userId = _auth?.currentUser?.uid;
+    if (userId != null) return '${Constants.profileKey}:$userId';
+    if (_auth == null) return '${Constants.profileKey}:local-development';
+    return null;
   }
 
   Map<String, Object?> _normalizeFirestoreJson(Map<String, dynamic> data) {
@@ -113,41 +120,6 @@ class ProfileRepository {
       }
       return MapEntry(key, value);
     });
-  }
-
-  Profile _mergeLocalOnlyFields({
-    required Profile firebaseProfile,
-    required Profile? localProfile,
-  }) {
-    final localAvatar = localProfile?.avatar;
-    if (localAvatar == null ||
-        localAvatar.isUrl ||
-        !File(localAvatar).existsSync() ||
-        !_isSameProfile(
-            firebaseProfile: firebaseProfile, localProfile: localProfile)) {
-      return firebaseProfile;
-    }
-
-    return firebaseProfile.copyWith(avatar: localAvatar);
-  }
-
-  bool _isSameProfile({
-    required Profile firebaseProfile,
-    required Profile? localProfile,
-  }) {
-    if (localProfile == null) return false;
-
-    final firebaseId = firebaseProfile.id;
-    final localId = localProfile.id;
-    if (firebaseId != null && localId != null && firebaseId == localId) {
-      return true;
-    }
-
-    final firebaseEmail = firebaseProfile.email;
-    final localEmail = localProfile.email;
-    return firebaseEmail != null &&
-        localEmail != null &&
-        firebaseEmail == localEmail;
   }
 
   Map<String, Object?> _firestorePayload({

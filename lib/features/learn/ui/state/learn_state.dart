@@ -2,6 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../model/lesson.dart';
 import '../../model/lesson_progress.dart';
+import '../../model/library_projection.dart';
+import '../../../stats/model/projection_health.dart';
 
 part 'learn_state.freezed.dart';
 
@@ -17,6 +19,7 @@ abstract class LearnState with _$LearnState {
     required List<Module> modules,
     required String activeModuleId,
     @Default(<String, LessonProgress>{}) Map<String, LessonProgress> progress,
+    @Default(ProjectionHealth.current) ProjectionHealth projectionHealth,
   }) = _LearnState;
 
   /// The module currently open in the lesson path / player.
@@ -27,6 +30,17 @@ abstract class LearnState with _$LearnState {
 
   LessonStatus statusOf(Lesson lesson) =>
       progress[lesson.id]?.status ?? LessonStatus.notStarted;
+
+  bool canOpenLesson(String lessonId) {
+    for (final module in modules) {
+      final index =
+          module.lessons.indexWhere((lesson) => lesson.id == lessonId);
+      if (index < 0) continue;
+      return index == 0 ||
+          statusOf(module.lessons[index - 1]) == LessonStatus.completed;
+    }
+    return false;
+  }
 
   double lessonProgressOf(Lesson lesson) =>
       progress[lesson.id]?.progress ?? 0.0;
@@ -48,8 +62,8 @@ abstract class LearnState with _$LearnState {
       ? 0.0
       : completedCountIn(module) / module.lessons.length;
 
-  bool hasStartedModule(Module module) =>
-      module.lessons.any((lesson) => statusOf(lesson) != LessonStatus.notStarted);
+  bool hasStartedModule(Module module) => module.lessons
+      .any((lesson) => statusOf(lesson) != LessonStatus.notStarted);
 
   // Active-module shortcuts (what the path, player, and home hero render).
   Lesson? get currentLesson => currentLessonIn(activeModule);
@@ -77,12 +91,14 @@ abstract class LearnState with _$LearnState {
       .take(3)
       .toList();
 
-  /// Every lesson the user has started or completed, paired with its module
-  /// (the collection/library grid). Catalog order.
-  List<({Module module, Lesson lesson})> get collectedLessons => [
+  LibraryProjection get library => LibraryProjection([
         for (final module in modules)
           for (final lesson in module.lessons)
             if (statusOf(lesson) != LessonStatus.notStarted)
-              (module: module, lesson: lesson),
-      ];
+              (
+                module: module,
+                lesson: lesson,
+                status: statusOf(lesson),
+              ),
+      ]);
 }

@@ -23,6 +23,7 @@ Future<UserStats> userStats(Ref ref) async {
     modules: learn.modules,
     progress: learn.progress,
     workoutXp: workoutXpFrom(workout.workouts, workout.sessions.values),
+    minimumXp: profile?.xp ?? 0,
     persistedStreak: profile?.streakCount ?? 0,
     lastActivityDate: profile?.lastActivityDate,
     now: DateTime.now(),

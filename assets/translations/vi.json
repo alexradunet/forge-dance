@@ -124,5 +124,6 @@
   "focusLabel": "Trọng tâm",
   "breathLabel": "Hơi thở",
   "energyLabel": "Năng lượng",
-  "stepN": "Bước {}"
+  "stepN": "Bước {}",
+  "statsSyncing": "Đã hoàn thành bài tập — chỉ số đang đồng bộ."
 }

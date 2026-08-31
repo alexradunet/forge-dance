@@ -1,8 +1,6 @@
-import 'package:flutter/foundation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../../constants/constants.dart';
-import '../../../stats/application/stats_coordinator.dart';
+import '../../../stats/application/training_activity.dart';
 import '../../model/lesson_progress.dart';
 import '../../repository/lesson_catalog.dart';
 import '../../repository/progress_repository.dart';
@@ -50,15 +48,24 @@ class LearnViewModel extends _$LearnViewModel {
   Future<void> completeLesson(String lessonId) async {
     final current = state.valueOrNull;
     if (current == null) return;
+    final lesson = current.modules
+        .expand((module) => module.lessons)
+        .where((lesson) => lesson.id == lessonId)
+        .firstOrNull;
+    if (lesson == null) return;
 
-    await _applyProgress(
-      current,
-      LessonProgress(
-        lessonId: lessonId,
-        status: LessonStatus.completed,
-        progress: 1.0,
-      ),
-    );
+    state = const AsyncValue.loading();
+    try {
+      final result = await ref
+          .read(trainingActivityProvider)
+          .completeLesson(lesson: lesson);
+      state = AsyncData(current.copyWith(
+        progress: {...current.progress, lessonId: result.record},
+        projectionHealth: result.projection,
+      ));
+    } catch (error, stackTrace) {
+      state = AsyncError(error, stackTrace);
+    }
   }
 
   Future<void> _applyProgress(
@@ -78,13 +85,5 @@ class LearnViewModel extends _$LearnViewModel {
         progress: {...previous.progress, update.lessonId: update},
       ),
     );
-
-    // Best-effort stats sync (XP + streak onto the user doc). A stats
-    // failure must never fail the training flow itself.
-    try {
-      await ref.read(statsCoordinatorProvider).recordTrainingActivity();
-    } catch (error) {
-      debugPrint('${Constants.tag} [LearnViewModel] stats sync failed: $error');
-    }
   }
 }

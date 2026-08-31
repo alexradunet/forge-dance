@@ -124,5 +124,6 @@
   "focusLabel": "Focus",
   "breathLabel": "Breath",
   "energyLabel": "Energy",
-  "stepN": "Step {}"
+  "stepN": "Step {}",
+  "statsSyncing": "Workout complete — stats are syncing."
 }

@@ -17,6 +17,7 @@ abstract class WorkoutSession with _$WorkoutSession {
     /// Local date of the session, yyyy-MM-dd (see stats_rules.dateKey).
     required String date,
     DateTime? completedAt,
+    int? awardedXp,
   }) = _WorkoutSession;
 
   factory WorkoutSession.fromJson(Map<String, Object?> json) =>

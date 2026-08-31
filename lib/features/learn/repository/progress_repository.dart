@@ -44,8 +44,8 @@ class ProgressRepository {
         .doc(user.uid)
         .collection('progress')
         .withConverter<LessonProgress>(
-          fromFirestore: (snapshot, _) =>
-              LessonProgress.fromJson(_normalizeFirestoreJson(snapshot.data()!)),
+          fromFirestore: (snapshot, _) => LessonProgress.fromJson(
+              _normalizeFirestoreJson(snapshot.data()!)),
           toFirestore: (progress, _) => _firestorePayload(progress),
         );
   }
@@ -67,6 +67,41 @@ class ProgressRepository {
     if (ref == null) return;
 
     await ref.doc(progress.lessonId).set(progress, SetOptions(merge: true));
+  }
+
+  /// Completes once and preserves the first completion facts across replays
+  /// and concurrent devices.
+  Future<({LessonProgress progress, bool created})> completeOnce(
+    LessonProgress completion,
+  ) async {
+    final ref = _progressRef();
+    if (ref == null) return (progress: completion, created: true);
+    final doc = ref.doc(completion.lessonId);
+    return _firestore!.runTransaction((transaction) async {
+      final snapshot = await transaction.get(doc);
+      final existing = snapshot.data();
+      if (existing?.status == LessonStatus.completed) {
+        final backfilled = existing!.copyWith(
+          completedDate:
+              existing.completedDate ?? _localDate(existing.updatedAt),
+          awardedXp: existing.awardedXp ?? completion.awardedXp,
+        );
+        if (backfilled != existing) {
+          transaction.set(doc, backfilled, SetOptions(merge: true));
+        }
+        return (progress: backfilled, created: false);
+      }
+      transaction.set(doc, completion, SetOptions(merge: true));
+      return (progress: completion, created: true);
+    });
+  }
+
+  String? _localDate(DateTime? moment) {
+    if (moment == null) return null;
+    final year = moment.year.toString().padLeft(4, '0');
+    final month = moment.month.toString().padLeft(2, '0');
+    final day = moment.day.toString().padLeft(2, '0');
+    return '$year-$month-$day';
   }
 
   Map<String, Object?> _firestorePayload(LessonProgress progress) {

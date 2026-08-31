@@ -28,9 +28,7 @@ import '../../../profile/ui/view_model/profile_view_model.dart';
 /// continue-training rail derive from real data (profile + lesson progress).
 /// The recommended rail is still mock discovery content.
 class HomePage extends ConsumerWidget {
-  final Function(String)? onNavigate;
-
-  const HomePage({super.key, this.onNavigate});
+  const HomePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -69,7 +67,7 @@ class HomePage extends ConsumerWidget {
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-            child: _buildDailySessionCard(ref, state),
+            child: _buildDailySessionCard(context, ref, state),
           ),
         ),
 
@@ -81,10 +79,11 @@ class HomePage extends ConsumerWidget {
         // Continue Training — every module the user is partway through
         SliverToBoxAdapter(
           child: _buildHorizontalSection(
+            context: context,
             title: LocaleKeys.continueTraining.tr().toUpperCase(),
             children: _interleave([
               for (final module in state.inProgressModules)
-                _moduleCard(ref, state, module),
+                _moduleCard(context, ref, state, module),
             ]),
           ),
         ),
@@ -93,11 +92,12 @@ class HomePage extends ConsumerWidget {
         if (state.recommendedModules.isNotEmpty)
           SliverToBoxAdapter(
             child: _buildHorizontalSection(
+              context: context,
               title: LocaleKeys.recommendedForYou.tr().toUpperCase(),
               showViewAll: true,
               children: _interleave([
                 for (final module in state.recommendedModules)
-                  _moduleCard(ref, state, module, width: 180),
+                  _moduleCard(context, ref, state, module, width: 180),
               ]),
             ),
           ),
@@ -126,6 +126,7 @@ class HomePage extends ConsumerWidget {
   }
 
   Widget _moduleCard(
+    BuildContext context,
     WidgetRef ref,
     LearnState state,
     Module module, {
@@ -138,13 +139,13 @@ class HomePage extends ConsumerWidget {
       progress: state.moduleProgressOf(module),
       footerLabel: _lessonsCompletedLabel(state, module),
       width: width,
-      onTap: () => _openModule(ref, module),
+      onTap: () => _openModule(context, ref, module),
     );
   }
 
-  void _openModule(WidgetRef ref, Module module) {
+  void _openModule(BuildContext context, WidgetRef ref, Module module) {
     ref.read(learnViewModelProvider.notifier).selectModule(module.id);
-    onNavigate?.call('lesson-path');
+    ModuleDestination(module.id).push<void>(context);
   }
 
   List<Widget> _interleave(List<Widget> cards) => [
@@ -154,7 +155,11 @@ class HomePage extends ConsumerWidget {
         ],
       ];
 
-  Widget _buildDailySessionCard(WidgetRef ref, LearnState state) {
+  Widget _buildDailySessionCard(
+    BuildContext context,
+    WidgetRef ref,
+    LearnState state,
+  ) {
     final lesson = state.currentLesson;
 
     if (lesson == null) {
@@ -164,12 +169,14 @@ class HomePage extends ConsumerWidget {
         subtitle: LocaleKeys.moduleCompleteSubtitle.tr(),
         tags: [state.activeModule.title.toUpperCase()],
         imageUrl: state.activeModule.imageUrl,
-        onTap: () => onNavigate?.call('lesson-path'),
+        onTap: () =>
+            ModuleDestination(state.activeModule.id).push<void>(context),
         action: FgButton(
           text: LocaleKeys.replayLessons.tr(),
           variant: FgButtonVariant.primary,
           size: FgButtonSize.lg,
-          onPressed: () => onNavigate?.call('lesson-path'),
+          onPressed: () =>
+              ModuleDestination(state.activeModule.id).push<void>(context),
         ),
       );
     }
@@ -186,19 +193,24 @@ class HomePage extends ConsumerWidget {
         lesson.type.label.toUpperCase(),
       ],
       imageUrl: state.activeModule.imageUrl,
-      onTap: () => _startCurrentLesson(ref, lesson),
+      onTap: () => _startCurrentLesson(context, ref, state, lesson),
       action: FgButton(
         text: LocaleKeys.startLesson.tr(),
         variant: FgButtonVariant.primary,
         size: FgButtonSize.lg,
-        onPressed: () => _startCurrentLesson(ref, lesson),
+        onPressed: () => _startCurrentLesson(context, ref, state, lesson),
       ),
     );
   }
 
-  void _startCurrentLesson(WidgetRef ref, Lesson lesson) {
+  void _startCurrentLesson(
+    BuildContext context,
+    WidgetRef ref,
+    LearnState state,
+    Lesson lesson,
+  ) {
     ref.read(learnViewModelProvider.notifier).startLesson(lesson.id);
-    onNavigate?.call('lesson-player');
+    LessonDestination(state.activeModule.id, lesson.id).push<void>(context);
   }
 
   Widget _buildNotificationToggle() {
@@ -282,9 +294,9 @@ class HomePage extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                  LocaleKeys.dayN
-                                      .tr(args: ['${stats.streakCount}'])
-                                      .toUpperCase(),
+                                  LocaleKeys.dayN.tr(args: [
+                                    '${stats.streakCount}'
+                                  ]).toUpperCase(),
                                   style: AppTypography.body
                                       .copyWith(fontWeight: FontWeight.bold)),
                               Text(LocaleKeys.currentStreak.tr().toUpperCase(),
@@ -299,14 +311,12 @@ class HomePage extends ConsumerWidget {
                         children: [
                           Text(
                               LocaleKeys.levelLabel
-                                  .tr(args: ['${stats.level}'])
-                                  .toUpperCase(),
+                                  .tr(args: ['${stats.level}']).toUpperCase(),
                               style: AppTypography.body
                                   .copyWith(fontWeight: FontWeight.bold)),
                           Text(
                               LocaleKeys.beltNameLabel
-                                  .tr(args: [stats.beltName])
-                                  .toUpperCase(),
+                                  .tr(args: [stats.beltName]).toUpperCase(),
                               style: AppTypography.label.copyWith(
                                   color: AppColors.textMuted, fontSize: 9)),
                         ],
@@ -321,16 +331,14 @@ class HomePage extends ConsumerWidget {
                     children: [
                       Text(
                           LocaleKeys.xpValue
-                              .tr(args: ['${stats.totalXp}'])
-                              .toUpperCase(),
+                              .tr(args: ['${stats.totalXp}']).toUpperCase(),
                           style: AppTypography.caption
                               .copyWith(color: AppColors.textMuted)),
                       Text(
                           stats.nextLevelXp == null
                               ? LocaleKeys.maxLevelReached.tr().toUpperCase()
-                              : LocaleKeys.nextLevelXp
-                                  .tr(args: ['${stats.nextLevelXp}'])
-                                  .toUpperCase(),
+                              : LocaleKeys.nextLevelXp.tr(
+                                  args: ['${stats.nextLevelXp}']).toUpperCase(),
                           style: AppTypography.caption
                               .copyWith(color: AppColors.textMuted)),
                     ],
@@ -345,6 +353,7 @@ class HomePage extends ConsumerWidget {
   }
 
   Widget _buildHorizontalSection({
+    required BuildContext context,
     required String title,
     required List<Widget> children,
     bool showViewAll = false,
@@ -364,7 +373,7 @@ class HomePage extends ConsumerWidget {
               ),
               if (showViewAll)
                 GestureDetector(
-                  onTap: () => onNavigate?.call('explore'),
+                  onTap: () => MainTabDestination.explore.go(context),
                   child: Text(
                     LocaleKeys.viewAll.tr().toUpperCase(),
                     style: AppTypography.label.copyWith(

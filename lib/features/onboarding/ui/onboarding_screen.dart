@@ -101,7 +101,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   Future<void> _saveNameAndContinue(BuildContext context) async {
     try {
-      await ref.read(profileViewModelProvider.notifier).updateProfile(
+      await ref.read(profileViewModelProvider.notifier).editProfile(
             name: _nameController.text.trim(),
           );
       if (context.mounted) {

@@ -19,11 +19,15 @@ import '../ui/view_model/learn_view_model.dart';
 /// completion action that persists progress and unlocks the next lesson.
 class LessonPlayerScreen extends ConsumerStatefulWidget {
   final VoidCallback? onBack;
-  const LessonPlayerScreen({super.key, this.onBack});
+  final String lessonId;
+  const LessonPlayerScreen({
+    required this.lessonId,
+    super.key,
+    this.onBack,
+  });
 
   @override
-  ConsumerState<LessonPlayerScreen> createState() =>
-      _LessonPlayerScreenState();
+  ConsumerState<LessonPlayerScreen> createState() => _LessonPlayerScreenState();
 }
 
 class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
@@ -57,7 +61,10 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
       );
     }
 
-    final lesson = state.currentLesson ?? state.activeModule.lessons.last;
+    final lesson = state.activeModule.lessons.firstWhere(
+      (lesson) => lesson.id == widget.lessonId,
+      orElse: () => state.currentLesson ?? state.activeModule.lessons.last,
+    );
     final steps = stepsFor(lesson);
     final lessonNumber = state.activeModule.lessons.indexOf(lesson) + 1;
     final isLastStep = _currentStep == steps.length - 1;

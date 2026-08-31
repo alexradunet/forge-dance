@@ -8,6 +8,7 @@ import 'extensions/build_context_extension.dart';
 import 'features/common/ui/providers/app_theme_mode_provider.dart';
 import 'features/common/ui/widgets/offline_container.dart';
 import 'features/firebase/repository/firebase_bootstrap.dart';
+import 'features/session/application/session_coordinator.dart';
 import 'routing/router.dart';
 import 'utils/provider_observer.dart';
 
@@ -43,6 +44,7 @@ class MainApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final themeMode = ref.watch(appThemeModeProvider);
     final router = ref.watch(routerProvider);
+    ref.watch(sessionCoordinatorProvider);
 
     return MaterialApp.router(
       theme: context.lightTheme,

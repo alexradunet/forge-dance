@@ -17,6 +17,8 @@ abstract class LessonProgress with _$LessonProgress {
     @Default(LessonStatus.notStarted) LessonStatus status,
     @Default(0.0) double progress,
     DateTime? updatedAt,
+    String? completedDate,
+    int? awardedXp,
   }) = _LessonProgress;
 
   factory LessonProgress.fromJson(Map<String, Object?> json) =>

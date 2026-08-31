@@ -1,0 +1,1 @@
+enum ProjectionHealth { current, pendingRepair }

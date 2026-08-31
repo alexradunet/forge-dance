@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:forge_dance/features/learn/model/lesson_progress.dart';
+import 'package:forge_dance/features/learn/model/lesson.dart';
 import 'package:forge_dance/features/learn/repository/lesson_catalog.dart';
 import 'package:forge_dance/features/learn/repository/progress_repository.dart';
 import 'package:forge_dance/features/learn/ui/view_model/learn_view_model.dart';
@@ -22,6 +23,18 @@ class FakeProgressRepository extends ProgressRepository {
   @override
   Future<void> upsert(LessonProgress progress) async {
     store[progress.lessonId] = progress;
+  }
+
+  @override
+  Future<({LessonProgress progress, bool created})> completeOnce(
+    LessonProgress completion,
+  ) async {
+    final existing = store[completion.lessonId];
+    if (existing?.status == LessonStatus.completed) {
+      return (progress: existing!, created: false);
+    }
+    store[completion.lessonId] = completion;
+    return (progress: completion, created: true);
   }
 }
 
@@ -160,6 +173,19 @@ void main() {
       );
     });
 
+    test('Learn owns locked lesson entry policy', () async {
+      final container = containerWith(FakeProgressRepository());
+      var state = await container.read(learnViewModelProvider.future);
+      expect(state.canOpenLesson(lessons.first.id), isTrue);
+      expect(state.canOpenLesson(lessons[1].id), isFalse);
+
+      await container
+          .read(learnViewModelProvider.notifier)
+          .completeLesson(lessons.first.id);
+      state = container.read(learnViewModelProvider).value!;
+      expect(state.canOpenLesson(lessons[1].id), isTrue);
+    });
+
     test('module progress is isolated per module', () async {
       final container = containerWith(
         FakeProgressRepository({
@@ -197,9 +223,9 @@ void main() {
       final state = await container.read(learnViewModelProvider.future);
 
       // Collection: exactly the two touched lessons, paired with modules.
-      expect(state.collectedLessons.length, 2);
-      expect(state.collectedLessons.first.module, topRock);
-      expect(state.collectedLessons.first.lesson, topRock.lessons.first);
+      expect(state.library.entries.length, 2);
+      expect(state.library.entries.first.module, topRock);
+      expect(state.library.entries.first.lesson, topRock.lessons.first);
 
       // Continue rail: the started modules (active module is untouched).
       expect(state.inProgressModules, [topRock, house]);
@@ -210,8 +236,25 @@ void main() {
       expect(state.recommendedModules.length, 3);
     });
 
-    test('completing a lesson records XP and streak on the profile',
+    test('library projection applies query and catalog-backed filters',
         () async {
+      final lesson = topRock.lessons.first;
+      final container = containerWith(FakeProgressRepository({
+        lesson.id: LessonProgress(
+          lessonId: lesson.id,
+          status: LessonStatus.completed,
+        ),
+      }));
+      final library =
+          (await container.read(learnViewModelProvider.future)).library;
+
+      expect(library.matching(query: topRock.title), hasLength(1));
+      expect(library.matching(type: lesson.type.label), hasLength(1));
+      expect(library.matching(type: 'Concept'), isEmpty);
+      expect(library.types, contains(lesson.type.label));
+    });
+
+    test('completing a lesson records XP and streak on the profile', () async {
       final profileRepository = FakeProfileRepository();
       final container = containerWith(
         FakeProgressRepository(),

@@ -16,6 +16,7 @@ import '../../../../generated/locale_keys.g.dart';
 import '../../../common/ui/widgets/common_error.dart';
 import '../../../learn/model/lesson.dart';
 import '../../../learn/model/lesson_progress.dart';
+import '../../../learn/model/library_projection.dart';
 import '../../../learn/ui/state/learn_state.dart';
 import '../../../learn/ui/view_model/learn_view_model.dart';
 
@@ -34,7 +35,7 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
   int _crossAxisCount = 2;
   String _query = '';
 
-  final Map<String, String> _selectedFilters = {
+  Map<String, String> _selectedFilters = {
     'Difficulty': 'All',
     'Style': 'All',
     'Type': 'All',
@@ -55,33 +56,30 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
   }
 
   void _showFilterSheet() {
+    final projection = ref.read(learnViewModelProvider).valueOrNull?.library;
+    if (projection == null) return;
+    final draft = {..._selectedFilters};
     FgFilterSheet.show(
       context: context,
       sections: {
-        'Difficulty': ['All', 'Beginner', 'Intermediate', 'Advanced'],
-        'Style': [
-          'All',
-          'Hip Hop',
-          'Breaking',
-          'Contemporary',
-          'Freestyle',
-          'General'
-        ],
-        'Type': ['All', 'Drill', 'Dance Step', 'Concept'],
+        'Difficulty': ['All', ...projection.difficulties],
+        'Style': ['All', ...projection.styles],
+        'Type': ['All', ...projection.types],
       },
-      selectedFilters: _selectedFilters,
+      selectedFilters: draft,
       onFilterSelected: (section, value) {
-        setState(() {
-          _selectedFilters[section] = value;
-        });
+        draft[section] = value;
       },
       onReset: () {
         setState(() {
-          _selectedFilters.updateAll((key, value) => 'All');
+          _selectedFilters = {
+            for (final key in _selectedFilters.keys) key: 'All',
+          };
         });
         Navigator.pop(context);
       },
       onApply: () {
+        setState(() => _selectedFilters = draft);
         Navigator.pop(context);
       },
     );
@@ -104,13 +102,13 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
   }
 
   Widget _buildContent(LearnState state) {
-    final collected = state.collectedLessons;
-    final items = collected
-        .where((item) =>
-            _query.isEmpty ||
-            item.lesson.title.toLowerCase().contains(_query) ||
-            item.module.title.toLowerCase().contains(_query))
-        .toList();
+    final projection = state.library;
+    final items = projection.matching(
+      query: _query,
+      difficulty: _filter('Difficulty'),
+      style: _filter('Style'),
+      type: _filter('Type'),
+    );
 
     return CustomScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -139,7 +137,7 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           sliver: SliverToBoxAdapter(
-            child: collected.isEmpty
+            child: projection.entries.isEmpty
                 ? FgEmpty(
                     icon: Icons.library_music,
                     title: LocaleKeys.emptyLibraryTitle.tr(),
@@ -151,7 +149,7 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
                         title: LocaleKeys.noResults.tr(),
                         description: LocaleKeys.searchLibraryHint.tr(),
                       )
-                    : _buildGridView(state, items),
+                    : _buildGridView(items),
           ),
         ),
 
@@ -162,16 +160,13 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
     );
   }
 
-  String _statusLabel(LearnState state, Lesson lesson) {
-    return state.statusOf(lesson) == LessonStatus.completed
+  String _statusLabel(LessonStatus status) {
+    return status == LessonStatus.completed
         ? LocaleKeys.statusCompleted.tr()
         : LocaleKeys.statusInProgress.tr();
   }
 
-  Widget _buildGridView(
-    LearnState state,
-    List<({Module module, Lesson lesson})> items,
-  ) {
+  Widget _buildGridView(List<LibraryEntry> items) {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -186,11 +181,11 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
         final item = items[index];
         return FgInteractiveCardThumbnail(
           title: item.lesson.title.toUpperCase(),
-          level: _statusLabel(state, item.lesson).toUpperCase(),
+          level: _statusLabel(item.status).toUpperCase(),
           backgroundImage: item.module.imageUrl,
           backTitle: item.module.title.toUpperCase(),
           backSubtitle: item.lesson.type.label,
-          onTap: (isFlipped) => _showCardPopup(context, state, item, isFlipped),
+          onTap: (isFlipped) => _showCardPopup(context, item, isFlipped),
         );
       },
     );
@@ -198,8 +193,7 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
 
   void _showCardPopup(
     BuildContext context,
-    LearnState state,
-    ({Module module, Lesson lesson}) item,
+    LibraryEntry item,
     bool isFlipped,
   ) {
     showDialog(
@@ -220,7 +214,7 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
                   title: item.lesson.title.toUpperCase(),
                   subtitle: item.module.title,
                   backgroundImage: item.module.imageUrl,
-                  level: _statusLabel(state, item.lesson).toUpperCase(),
+                  level: _statusLabel(item.status).toUpperCase(),
                   style: item.module.tag,
                   difficulty: item.lesson.difficulty,
                   isFavorited: false,
@@ -233,6 +227,11 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
         );
       },
     );
+  }
+
+  String? _filter(String name) {
+    final value = _selectedFilters[name];
+    return value == null || value == 'All' ? null : value;
   }
 
   Widget _buildColumnToggle() {

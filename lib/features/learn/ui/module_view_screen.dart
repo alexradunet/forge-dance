@@ -69,7 +69,7 @@ class ModuleViewScreen extends ConsumerWidget {
                             .read(learnViewModelProvider.notifier)
                             .startLesson(current.id);
                       }
-                      onLessonNavigate?.call('lesson-player');
+                      onLessonNavigate?.call(current!.id);
                     }
                   },
                 ),
