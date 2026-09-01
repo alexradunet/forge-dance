@@ -129,5 +129,18 @@
   "breathLabel": "Hơi thở",
   "energyLabel": "Năng lượng",
   "stepN": "Bước {}",
-  "statsSyncing": "Đã hoàn thành bài tập — chỉ số đang đồng bộ."
+  "statsSyncing": "Đã hoàn thành bài tập — chỉ số đang đồng bộ.",
+  "loadingLabel": "Đang tải",
+  "clearSearch": "Xóa tìm kiếm",
+  "filterSearch": "Lọc tìm kiếm",
+  "chooseGridColumns": "Chọn số cột lưới",
+  "gridColumns": "{} cột",
+  "settings": "Cài đặt",
+  "lessonNumberType": "Bài học {} • {}",
+  "previousPage": "Trang trước",
+  "timerSeconds": "Còn {} giây",
+  "flipCard": "Lật thẻ",
+  "filters": "Bộ lọc",
+  "reset": "Đặt lại",
+  "applyFilters": "Áp dụng bộ lọc"
 }

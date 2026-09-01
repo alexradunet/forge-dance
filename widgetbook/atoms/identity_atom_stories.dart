@@ -59,19 +59,30 @@ class _AvatarStory extends StatelessWidget {
             runSpacing: AppSpacing.xxl,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              FgAvatar.small(initials: 'FD'),
-              FgAvatar.medium(initials: 'FD', isOnline: true),
+              FgAvatar.small(
+                initials: 'FD',
+                semanticLabel: 'Small Forge dancer avatar',
+              ),
+              FgAvatar.medium(
+                initials: 'FD',
+                isOnline: true,
+                semanticLabel: 'Online Forge dancer avatar',
+              ),
               FgAvatar.large(
                 initials: 'FD',
                 level: 12,
                 notificationCount: 3,
+                semanticLabel: 'Level 12 Forge dancer avatar',
               ),
             ],
           ),
         ),
         const StorySection(
           title: 'Loading',
-          child: FgAvatar.medium(isLoading: true),
+          child: FgAvatar.medium(
+            isLoading: true,
+            semanticLabel: 'Loading dancer avatar',
+          ),
         ),
       ],
     );

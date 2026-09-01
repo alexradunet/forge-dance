@@ -4,38 +4,32 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../constants/assets.dart';
+import '../../../../design_system/atoms/avatars/fg_avatar.dart';
 import '../../../../extensions/string_extension.dart';
-import '../../../../design_system/tokens/app_colors.dart';
 
+/// Resolves persisted profile image locations into the Forge avatar primitive.
 class Avatar extends StatelessWidget {
-  final String? url;
+  const Avatar({super.key, this.url, this.semanticLabel});
 
-  const Avatar({
-    super.key,
-    this.url,
-  });
+  final String? url;
+  final String? semanticLabel;
 
   @override
   Widget build(BuildContext context) {
-    return CircleAvatar(
-      radius: 48,
-      backgroundColor: AppColors.legendGold.withOpacity(0.5),
-      backgroundImage: AssetImage(Assets.avatar),
-      foregroundImage: _foregroundImage(),
+    return FgAvatar.large(
+      imageProvider: _imageProvider(),
+      tone: FgAvatarTone.reward,
+      semanticLabel: semanticLabel,
     );
   }
 
-  ImageProvider<Object>? _foregroundImage() {
-    if (url == null) return null;
-
-    if (url.isUrl) {
+  ImageProvider<Object> _imageProvider() {
+    if (url?.isUrl ?? false) {
       return CachedNetworkImageProvider(url.orEmpty());
     }
-
-    if (File(url!).existsSync()) {
+    if (url != null && File(url!).existsSync()) {
       return FileImage(File(url!));
     }
-
-    return null;
+    return const AssetImage(Assets.avatar);
   }
 }

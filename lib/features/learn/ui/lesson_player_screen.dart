@@ -1,16 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forge_dance/design_system/molecules/cards/fg_interactive_card.dart';
-
-import '../../../design_system/atoms/buttons/fg_button.dart';
-import '../../../design_system/atoms/progress/fg_spinner.dart';
-import '../../../design_system/templates/swipeable_card_screen_template.dart';
-import '../../../design_system/tokens/app_colors.dart';
-import '../../../design_system/tokens/app_typography.dart';
-import '../../../design_system/tokens/app_spacing.dart';
+import '../../../design_system/design_system.dart';
 import '../../../generated/locale_keys.g.dart';
-import '../../common/ui/widgets/common_error.dart';
 import '../model/lesson.dart';
 import '../repository/lesson_catalog.dart';
 import '../ui/view_model/learn_view_model.dart';
@@ -54,10 +46,15 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
 
     if (state == null) {
       return Scaffold(
-        backgroundColor: AppColors.bgDeep,
-        body: learnState.hasError
-            ? const CommonError()
-            : const Center(child: FgSpinner()),
+        body: FgBackground(
+          child: learnState.hasError
+              ? FgEmpty(
+                  icon: Icons.error_outline,
+                  title: LocaleKeys.unexpectedErrorOccurred.tr(),
+                  tone: FgEmptyTone.error,
+                )
+              : const Center(child: FgSpinner()),
+        ),
       );
     }
 
@@ -71,16 +68,19 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
 
     return SwipeableCardScreenTemplate(
       title: lesson.title,
-      subtitle: 'Lesson $lessonNumber • ${lesson.type.label}',
+      subtitle: LocaleKeys.lessonNumberType.tr(
+        args: ['$lessonNumber', lesson.type.label],
+      ),
       onBack: widget.onBack ?? () => Navigator.of(context).pop(),
       progressSteps: steps.length,
       currentStep: _currentStep,
       useFullWidth: false,
       onStepClick: (index) {
+        final motion = context.forgeMotion;
         _pageController.animateToPage(
           index,
-          duration: const Duration(milliseconds: 400),
-          curve: Curves.easeInOut,
+          duration: motion.standard,
+          curve: motion.enterCurve,
         );
       },
       actionZone: isLastStep
@@ -106,6 +106,7 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
               padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
               child: FgInteractiveCard(
                 title: step.title,
+                flipSemanticLabel: LocaleKeys.flipCard.tr(),
                 subtitle:
                     LocaleKeys.stepN.tr(args: ['${index + 1}']).toUpperCase(),
                 backgroundImage:
@@ -121,10 +122,12 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
                     if (step.description.isNotEmpty)
                       Text(
                         step.description,
-                        style: AppTypography.bodySmall
-                            .copyWith(color: Colors.white70),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color:
+                                  Theme.of(context).colorScheme.onSurfaceVariant,
+                            ),
                       ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.xxl),
                     if (step.focus.isNotEmpty)
                       _buildTechniquePoint(
                           LocaleKeys.focusLabel.tr(), step.focus),
@@ -157,22 +160,18 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
 
   Widget _buildTechniquePoint(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label.toUpperCase(),
-            style: AppTypography.label.copyWith(
-              color: AppColors.forgeFire,
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-            ),
+          FgLabel(
+            text: label,
+            tone: FgLabelTone.accent,
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             value,
-            style: AppTypography.bodySmall.copyWith(color: Colors.white),
+            style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
       ),

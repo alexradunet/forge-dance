@@ -6,11 +6,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../../../constants/constants.dart';
 import '../../../../extensions/build_context_extension.dart';
-import '../../../../design_system/atoms/visuals/fg_background.dart';
-import '../../../../design_system/atoms/buttons/fg_button.dart';
-import '../../../../design_system/organisms/navigation/app_header.dart';
-import '../../../../design_system/tokens/app_colors.dart';
-import '../../../../features/common/ui/widgets/common_dialog.dart';
+import '../../../../design_system/design_system.dart';
 import '../../../../features/profile/model/profile.dart';
 import '../../../../features/profile/ui/view_model/profile_view_model.dart';
 import '../../../../features/profile/ui/widgets/profile_menu.dart';
@@ -46,30 +42,35 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         ref.watch(profileViewModelProvider.select((it) => it.value?.profile));
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
       body: FgBackground(
         child: Column(
           children: [
-            AppHeader(title: 'SETTINGS', onBack: () => context.pop()),
+            AppHeader(
+              title: LocaleKeys.settings.tr().toUpperCase(),
+              onBack: () => context.pop(),
+            ),
             Expanded(
               child: SingleChildScrollView(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xxl,
+                  ),
                   child: Column(
                     children: [
-                      const SizedBox(height: 24),
+                      const SizedBox(height: AppSpacing.xxl),
                       _buildSettingsMenu(profile),
-                      const SizedBox(height: 48),
+                      const SizedBox(height: AppSpacing.huge2),
                       Center(
                         child: Text(
                           'Version $_version',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textMuted.withOpacity(0.5),
-                          ),
+                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
+                              ),
                         ),
                       ),
-                      const SizedBox(height: 48),
+                      const SizedBox(height: AppSpacing.huge2),
                     ],
                   ),
                 ),
@@ -107,7 +108,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpacing.xxl),
         ProfileMenuSection(
           title: 'Support',
           items: [
@@ -128,21 +129,21 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
           ],
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpacing.xxl),
         ProfileMenuSection(
           title: 'Account',
           items: [
             ProfileMenuItem(
               icon: Icons.logout,
               label: LocaleKeys.logOut.tr(),
-              textColor: AppColors.passionRed,
+              tone: ProfileMenuTone.destructive,
               showArrow: false,
               onTap: () => _signOut(context),
             ),
             ProfileMenuItem(
               icon: Icons.delete_outline,
               label: LocaleKeys.deleteAccount.tr(),
-              textColor: AppColors.passionRed,
+              tone: ProfileMenuTone.destructive,
               showArrow: false,
               onTap: () => _deleteAccount(context),
             ),
@@ -167,62 +168,60 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   }
 
   void _signOut(BuildContext context) {
-    showDialog(
+    ForgeAlertDialog.show(
       context: context,
-      builder: (dialogContext) => CommonDialog(
-        title: LocaleKeys.logOutTitle.tr(),
-        content: LocaleKeys.logOutMessage.tr(),
-        primaryButtonLabel: LocaleKeys.logOut.tr(),
-        primaryButtonVariant: FgButtonVariant.destructive,
-        secondaryButtonLabel: LocaleKeys.cancel.tr(),
-        primaryButtonAction: () async {
-          try {
-            Global.showLoading(context);
-            await ref.read(sessionCoordinatorProvider).signOut();
-            if (context.mounted) {
-              context.pushReplacement(Routes.register);
-            }
-          } catch (error) {
-            if (context.mounted) {
-              context.showErrorSnackBar(
-                LocaleKeys.unexpectedErrorOccurred.tr(),
-              );
-            }
-          } finally {
-            Global.hideLoading();
+      title: LocaleKeys.logOutTitle.tr(),
+      message: LocaleKeys.logOutMessage.tr(),
+      primaryActionLabel: LocaleKeys.logOut.tr(),
+      secondaryActionLabel: LocaleKeys.cancel.tr(),
+      tone: ForgeAlertTone.destructive,
+      isPrimaryDestructive: true,
+      onPrimaryAction: () async {
+        try {
+          Global.showLoading(context);
+          await ref.read(sessionCoordinatorProvider).signOut();
+          if (context.mounted) {
+            context.pushReplacement(Routes.register);
           }
-        },
-      ),
+        } catch (error) {
+          if (context.mounted) {
+            context.showErrorSnackBar(
+              LocaleKeys.unexpectedErrorOccurred.tr(),
+            );
+          }
+        } finally {
+          Global.hideLoading();
+        }
+      },
     );
   }
 
   void _deleteAccount(BuildContext context) {
-    showDialog(
+    ForgeAlertDialog.show(
       context: context,
-      builder: (dialogContext) => CommonDialog(
-        title: LocaleKeys.deleteAccountTitle.tr(),
-        content: LocaleKeys.deleteAccountMessage.tr(),
-        primaryButtonLabel: LocaleKeys.deleteAccount.tr(),
-        primaryButtonVariant: FgButtonVariant.destructive,
-        secondaryButtonLabel: LocaleKeys.cancel.tr(),
-        primaryButtonAction: () async {
-          try {
-            Global.showLoading(context);
-            await ref.read(sessionCoordinatorProvider).signOut();
-            if (context.mounted) {
-              context.pushReplacement(Routes.register);
-            }
-          } catch (error) {
-            if (context.mounted) {
-              context.showErrorSnackBar(
-                LocaleKeys.unexpectedErrorOccurred.tr(),
-              );
-            }
-          } finally {
-            Global.hideLoading();
+      title: LocaleKeys.deleteAccountTitle.tr(),
+      message: LocaleKeys.deleteAccountMessage.tr(),
+      primaryActionLabel: LocaleKeys.deleteAccount.tr(),
+      secondaryActionLabel: LocaleKeys.cancel.tr(),
+      tone: ForgeAlertTone.destructive,
+      isPrimaryDestructive: true,
+      onPrimaryAction: () async {
+        try {
+          Global.showLoading(context);
+          await ref.read(sessionCoordinatorProvider).signOut();
+          if (context.mounted) {
+            context.pushReplacement(Routes.register);
           }
-        },
-      ),
+        } catch (error) {
+          if (context.mounted) {
+            context.showErrorSnackBar(
+              LocaleKeys.unexpectedErrorOccurred.tr(),
+            );
+          }
+        } finally {
+          Global.hideLoading();
+        }
+      },
     );
   }
 }

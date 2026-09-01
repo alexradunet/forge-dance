@@ -7,14 +7,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '/constants/constants.dart';
+import '/design_system/design_system.dart';
 import '/generated/locale_keys.g.dart';
-import '/design_system/tokens/app_colors.dart';
-import '/design_system/tokens/app_typography.dart';
 
 class OfflineContainer extends ConsumerStatefulWidget {
-  final Widget? child;
-
   const OfflineContainer({super.key, required this.child});
+
+  final Widget? child;
 
   @override
   ConsumerState<OfflineContainer> createState() => _OfflineContainerState();
@@ -44,48 +43,56 @@ class _OfflineContainerState extends ConsumerState<OfflineContainer> {
       _isOffline = result.contains(ConnectivityResult.none);
     });
     debugPrint(
-        '${Constants.tag} [_OfflineContainerState._updateConnectionStatus] $result => ${_isOffline ? 'offline' : 'online'}');
+      '${Constants.tag} [_OfflineContainerState._updateConnectionStatus] '
+      '$result => ${_isOffline ? 'offline' : 'online'}',
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      body: Stack(
+      body: Column(
         children: [
-          Container(
-            padding: EdgeInsets.only(top: _isOffline ? 20 : 0),
-            child: widget.child,
-          ),
           if (_isOffline)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: Container(
-                padding: EdgeInsets.only(
-                  top: MediaQuery.paddingOf(context).top + 2,
-                  bottom: 2,
-                ),
-                color: AppColors.gray600,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.signal_wifi_connected_no_internet_4,
-                      size: 16,
-                      color: AppColors.crystalWhite,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      LocaleKeys.offline.tr(),
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.crystalWhite,
+            Semantics(
+              liveRegion: true,
+              label: LocaleKeys.offline.tr(),
+              child: ExcludeSemantics(
+                child: ColoredBox(
+                  color: scheme.surfaceContainerHighest,
+                  child: SafeArea(
+                    bottom: false,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                        vertical: AppSpacing.xs,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.signal_wifi_connected_no_internet_4,
+                            size: AppSizes.iconSm,
+                            color: scheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Flexible(
+                            child: Text(
+                              LocaleKeys.offline.tr(),
+                              style: Theme.of(context).textTheme.bodySmall,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
+          Expanded(child: widget.child ?? const SizedBox.shrink()),
         ],
       ),
     );

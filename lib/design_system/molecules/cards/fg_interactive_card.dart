@@ -9,6 +9,7 @@ import '../../tokens/app_typography.dart';
 import '../../atoms/visuals/fg_gradient_overlay.dart';
 import '../../atoms/visuals/fg_icon_label.dart';
 import '../../atoms/buttons/fg_icon_button.dart';
+import '../../theme/forge_theme_extensions.dart';
 
 class FgInteractiveCard extends StatefulWidget {
   final String title;
@@ -24,18 +25,21 @@ class FgInteractiveCard extends StatefulWidget {
   final String? backTitle;
   final String? backSubtitle;
   final Widget? backFooter;
-  final VoidCallback? onTap;
   final VoidCallback? onPlayTap;
   final bool isFavorited;
   final VoidCallback? onToggleFavorite;
   final Widget? footer;
   final bool initialFlipped;
   final Widget? centerOverlay;
+  final String flipSemanticLabel;
+  final String? playSemanticLabel;
+  final String? favoriteSemanticLabel;
 
   const FgInteractiveCard({
     super.key,
     required this.title,
     required this.backgroundImage,
+    required this.flipSemanticLabel,
     this.subtitle,
     this.tags = const [],
     this.level,
@@ -47,14 +51,22 @@ class FgInteractiveCard extends StatefulWidget {
     this.backTitle,
     this.backSubtitle,
     this.backFooter,
-    this.onTap,
     this.onPlayTap,
     this.isFavorited = false,
     this.onToggleFavorite,
     this.footer,
     this.initialFlipped = false,
     this.centerOverlay,
-  });
+    this.playSemanticLabel,
+    this.favoriteSemanticLabel,
+  }) : assert(
+         onPlayTap == null || playSemanticLabel != null,
+         'Interactive play actions require a semantic label.',
+       ),
+       assert(
+         onToggleFavorite == null || favoriteSemanticLabel != null,
+         'Favorite actions require a semantic label.',
+       );
 
   @override
   State<FgInteractiveCard> createState() => _FgInteractiveCardState();
@@ -78,10 +90,12 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
 
   @override
   Widget build(BuildContext context) {
+    final motion = context.forgeMotion;
+
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(begin: 0, end: _isFlipped ? 180 : 0),
-      duration: const Duration(milliseconds: 600),
-      curve: Curves.easeInOutBack,
+      duration: motion.slow,
+      curve: motion.enterCurve,
       builder: (context, angle, child) {
         final isBackVisible = angle >= 90;
 
@@ -120,113 +134,113 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
         ],
       ),
       clipBehavior: Clip.antiAlias,
-      child: GestureDetector(
-        onTap: widget.onTap,
-        child: Column(
-          children: [
-            // Main Content Area (Flex Grow)
-            Expanded(
-              child: Stack(
-                children: [
-                  // Media Layer
-                  Positioned.fill(
-                    child: Image.network(
-                      widget.backgroundImage,
-                      fit: BoxFit.cover,
-                      color: Colors.black.withOpacity(0.6),
-                      colorBlendMode: BlendMode.darken,
+      child: Column(
+        children: [
+          // Main Content Area (Flex Grow)
+          Expanded(
+            child: Stack(
+              children: [
+                // Media Layer
+                Positioned.fill(
+                  child: Image.network(
+                    widget.backgroundImage,
+                    fit: BoxFit.cover,
+                    color: Colors.black.withOpacity(0.6),
+                    colorBlendMode: BlendMode.darken,
+                  ),
+                ),
+
+                // Tech Pattern Overlay
+                Positioned.fill(
+                  child: CustomPaint(
+                    painter: FgTechPatternPainter(
+                      color: Colors.white,
+                      opacity: 0.1,
+                      spacing: 16.0,
                     ),
                   ),
+                ),
 
-                  // Tech Pattern Overlay
-                  Positioned.fill(
-                    child: CustomPaint(
-                      painter: FgTechPatternPainter(
-                        color: Colors.white,
-                        opacity: 0.1,
-                        spacing: 16.0,
-                      ),
-                    ),
+                // Overlay Gradient
+                Positioned.fill(
+                  child: FgGradientOverlay(
+                    colors: [
+                      Colors.black.withOpacity(0.4),
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.8),
+                    ],
+                    stops: const [0.0, 0.4, 1.0],
                   ),
+                ),
 
-                  // Overlay Gradient
-                  Positioned.fill(
-                    child: FgGradientOverlay(
-                      colors: [
-                        Colors.black.withOpacity(0.4),
-                        Colors.transparent,
-                        Colors.black.withOpacity(0.8),
-                      ],
-                      stops: const [0.0, 0.4, 1.0],
-                    ),
-                  ),
-
-                  // Centered Title & Subtitle
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (widget.subtitle != null)
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 2,
-                              ),
-                              margin: const EdgeInsets.only(bottom: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.black.withOpacity(0.6),
-                                borderRadius: BorderRadius.circular(4),
-                                border: Border.all(
-                                  color: AppColors.forgeFire.withOpacity(0.3),
-                                ),
-                              ),
-                              child: Text(
-                                widget.subtitle!.toUpperCase(),
-                                style: AppTypography.label.copyWith(
-                                  color: AppColors.forgeFire,
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                // Centered Title & Subtitle
+                Center(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (widget.subtitle != null)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
+                            margin: const EdgeInsets.only(bottom: 8),
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.6),
+                              borderRadius: BorderRadius.circular(4),
+                              border: Border.all(
+                                color: AppColors.forgeFire.withOpacity(0.3),
                               ),
                             ),
-                          Text(
-                            widget.title.toUpperCase(),
-                            textAlign: TextAlign.center,
-                            style: AppTypography.h1.copyWith(
-                              color: Colors.white,
-                              fontSize: 56,
-                              height: 0.9,
-                              letterSpacing: 1.2,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black.withOpacity(0.8),
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
+                            child: Text(
+                              widget.subtitle!.toUpperCase(),
+                              style: AppTypography.label.copyWith(
+                                color: AppColors.forgeFire,
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ],
-                      ),
+                        Text(
+                          widget.title.toUpperCase(),
+                          textAlign: TextAlign.center,
+                          style: AppTypography.h1.copyWith(
+                            color: Colors.white,
+                            fontSize: 56,
+                            height: 0.9,
+                            letterSpacing: 1.2,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withOpacity(0.8),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                ),
 
-                  // Center Content (Play Button or Custom Overlay)
+                // Center Content (Play Button or Custom Overlay)
+                if (widget.centerOverlay != null || widget.onPlayTap != null)
                   Center(
                     child:
                         widget.centerOverlay ??
                         FgIconButton(
                           icon: Icons.play_arrow,
-                          semanticLabel: widget.title,
+                          semanticLabel: widget.playSemanticLabel!,
                           onPressed: widget.onPlayTap,
                           variant: FgIconButtonVariant.glass,
                           size: FgIconButtonSize.xl,
                         ),
                   ),
 
-                  // Top Right: Favorite
+                // Top Right: Favorite
+                if (widget.onToggleFavorite != null)
                   Positioned(
                     top: 16,
                     right: 16,
@@ -234,7 +248,7 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
                       icon: widget.isFavorited
                           ? Icons.favorite
                           : Icons.favorite_border,
-                      semanticLabel: widget.title,
+                      semanticLabel: widget.favoriteSemanticLabel!,
                       onPressed: widget.onToggleFavorite,
                       variant: FgIconButtonVariant.glass,
                       size: FgIconButtonSize.md,
@@ -242,99 +256,98 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
                     ),
                   ),
 
-                  // Bottom Right: Flip
-                  Positioned(
-                    bottom: 16,
-                    right: 16,
-                    child: FgIconButton(
-                      icon: Icons.replay,
-                      semanticLabel: widget.backTitle ?? widget.title,
-                      onPressed: _toggleFlip,
-                      variant: FgIconButtonVariant.glass,
-                      size: FgIconButtonSize.md,
-                    ),
+                // Bottom Right: Flip
+                Positioned(
+                  bottom: 16,
+                  right: 16,
+                  child: FgIconButton(
+                    icon: Icons.replay,
+                    semanticLabel: widget.flipSemanticLabel,
+                    onPressed: _toggleFlip,
+                    variant: FgIconButtonVariant.glass,
+                    size: FgIconButtonSize.md,
                   ),
+                ),
 
-                  // Progress Bar
-                  Positioned(
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      height: 2,
-                      color: Colors.white.withOpacity(0.1),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            flex: (widget.progress * 100).toInt(),
-                            child: Container(color: AppColors.forgeFire),
-                          ),
-                          Expanded(
-                            flex: ((1 - widget.progress) * 100).toInt(),
-                            child: const SizedBox(),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Progress Handle
-                  Positioned(
-                    bottom: 0,
-                    left: (widget.progress * -10)
-                        .toDouble(), // Pseudo-offset alignment
-                    child: Container(
-                      padding: EdgeInsets.only(
-                        left:
-                            MediaQuery.of(context).size.width *
-                            0.4 *
-                            widget.progress,
-                      ),
-                      child: Container(
-                        width: 6,
-                        height: 6,
-                        decoration: const BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
+                // Progress Bar
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    height: 2,
+                    color: Colors.white.withOpacity(0.1),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: (widget.progress * 100).toInt(),
+                          child: Container(color: AppColors.forgeFire),
                         ),
+                        Expanded(
+                          flex: ((1 - widget.progress) * 100).toInt(),
+                          child: const SizedBox(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                // Progress Handle
+                Positioned(
+                  bottom: 0,
+                  left: (widget.progress * -10)
+                      .toDouble(), // Pseudo-offset alignment
+                  child: Container(
+                    padding: EdgeInsets.only(
+                      left:
+                          MediaQuery.of(context).size.width *
+                          0.4 *
+                          widget.progress,
+                    ),
+                    child: Container(
+                      width: 6,
+                      height: 6,
+                      decoration: const BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
 
-            // Footer Strip
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              color: Colors.black.withOpacity(0.6),
-              child:
-                  widget.footer ??
-                  Row(
-                    children: [
-                      _buildFooterStat(
-                        'STYLE',
-                        widget.style ?? 'Hip Hop',
-                        Icons.style,
-                        Colors.blueAccent,
-                      ),
-                      Container(
-                        width: 1,
-                        height: 24,
-                        color: Colors.white.withOpacity(0.1),
-                        margin: const EdgeInsets.symmetric(horizontal: 16),
-                      ),
-                      _buildFooterStat(
-                        'DIFFICULTY',
-                        widget.difficulty ?? 'Easy',
-                        Icons.signal_cellular_alt,
-                        Colors.greenAccent,
-                      ),
-                    ],
-                  ),
-            ),
-          ],
-        ),
+          // Footer Strip
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+            color: Colors.black.withOpacity(0.6),
+            child:
+                widget.footer ??
+                Row(
+                  children: [
+                    _buildFooterStat(
+                      'STYLE',
+                      widget.style ?? 'Hip Hop',
+                      Icons.style,
+                      Colors.blueAccent,
+                    ),
+                    Container(
+                      width: 1,
+                      height: 24,
+                      color: Colors.white.withOpacity(0.1),
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                    _buildFooterStat(
+                      'DIFFICULTY',
+                      widget.difficulty ?? 'Easy',
+                      Icons.signal_cellular_alt,
+                      Colors.greenAccent,
+                    ),
+                  ],
+                ),
+          ),
+        ],
       ),
     );
   }
@@ -367,46 +380,35 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
           Column(
             children: [
               // Header
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const SizedBox(width: 40), // Spacer for center alignment
-                    if (widget.backSubtitle != null)
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.6),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(
-                            color: AppColors.forgeFire.withOpacity(0.3),
-                          ),
-                        ),
-                        child: Text(
-                          widget.backSubtitle!.toUpperCase(),
-                          style: AppTypography.label.copyWith(
-                            color: AppColors.forgeFire,
-                            fontSize: 8,
-                          ),
+              if (widget.backSubtitle != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 72, 16),
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.6),
+                        borderRadius: BorderRadius.circular(4),
+                        border: Border.all(
+                          color: AppColors.forgeFire.withOpacity(0.3),
                         ),
                       ),
-                    FgIconButton(
-                      icon: widget.isFavorited
-                          ? Icons.favorite
-                          : Icons.favorite_border,
-                      semanticLabel: widget.title,
-                      onPressed: widget.onToggleFavorite,
-                      variant: FgIconButtonVariant.glass,
-                      size: FgIconButtonSize.md,
-                      isSelected: widget.isFavorited,
+                      child: Text(
+                        widget.backSubtitle!.toUpperCase(),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.label.copyWith(
+                          color: AppColors.forgeFire,
+                          fontSize: 8,
+                        ),
+                      ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
 
               if (widget.backTitle != null)
                 Padding(
@@ -442,7 +444,7 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
                   alignment: Alignment.centerRight,
                   child: FgIconButton(
                     icon: Icons.replay,
-                    semanticLabel: widget.title,
+                    semanticLabel: widget.flipSemanticLabel,
                     onPressed: _toggleFlip,
                     variant: FgIconButtonVariant.glass,
                     size: FgIconButtonSize.md,
@@ -484,6 +486,21 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
               ),
             ],
           ),
+          if (widget.onToggleFavorite != null)
+            Positioned(
+              top: 16,
+              right: 16,
+              child: FgIconButton(
+                icon: widget.isFavorited
+                    ? Icons.favorite
+                    : Icons.favorite_border,
+                semanticLabel: widget.favoriteSemanticLabel!,
+                onPressed: widget.onToggleFavorite,
+                variant: FgIconButtonVariant.glass,
+                size: FgIconButtonSize.md,
+                isSelected: widget.isFavorited,
+              ),
+            ),
         ],
       ),
     );

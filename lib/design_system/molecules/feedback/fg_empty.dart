@@ -1,93 +1,89 @@
 import 'package:flutter/material.dart';
 
-import '../../tokens/app_colors.dart';
-import '../../tokens/app_spacing.dart';
-import '../../tokens/app_typography.dart';
 import '../../atoms/buttons/fg_button.dart';
+import '../../theme/forge_theme_extensions.dart';
+import '../../tokens/app_sizes.dart';
+import '../../tokens/app_spacing.dart';
 
-/// Empty state atom - With icon, title, description, and optional CTA
+enum FgEmptyTone { primary, neutral, error, success, reward }
+
+/// Semantic empty or feedback state with an optional recovery action.
 class FgEmpty extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String description;
-  final String? actionLabel;
-  final VoidCallback? onAction;
-  final Color? iconColor;
-
   const FgEmpty({
     super.key,
     required this.icon,
     required this.title,
-    required this.description,
+    this.description,
     this.actionLabel,
     this.onAction,
-    this.iconColor,
+    this.tone = FgEmptyTone.primary,
   });
+
+  final IconData icon;
+  final String title;
+  final String? description;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+  final FgEmptyTone tone;
 
   @override
   Widget build(BuildContext context) {
-    final icnColor = iconColor ?? AppColors.forgeFire;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final forgeColors = theme.forgeColors;
+    final accent = switch (tone) {
+      FgEmptyTone.primary => scheme.primary,
+      FgEmptyTone.neutral => scheme.onSurfaceVariant,
+      FgEmptyTone.error => scheme.error,
+      FgEmptyTone.success => forgeColors.success,
+      FgEmptyTone.reward => forgeColors.reward,
+    };
 
     return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xxl),
+      padding: AppSpacing.allXXL,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            width: 96,
-            height: 96,
-            decoration: BoxDecoration(
-              color: AppColors.gray800,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: icnColor.withOpacity(0.3),
-                width: 2,
+          ExcludeSemantics(
+            child: Container(
+              width: AppSizes.squareTileSm,
+              height: AppSizes.squareTileSm,
+              decoration: BoxDecoration(
+                color: scheme.surfaceContainer,
+                shape: BoxShape.circle,
+                border: Border.all(color: accent.withValues(alpha: 0.32)),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: icnColor.withOpacity(0.1),
-                  blurRadius: 80,
-                  offset: const Offset(0, 0),
-                ),
-              ],
-            ),
-            child: Icon(
-              icon,
-              size: 48,
-              color: icnColor,
+              alignment: Alignment.center,
+              child: Icon(icon, size: AppSizes.iconHuge, color: accent),
             ),
           ),
           const SizedBox(height: AppSpacing.xxl),
           Text(
             title,
-            style: AppTypography.h3.copyWith(
-              color: AppColors.crystalWhite,
-            ),
+            style: theme.textTheme.titleLarge,
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            description,
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.gray400,
+          if (description != null) ...[
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              description!,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
+          ],
           if (actionLabel != null && onAction != null) ...[
             const SizedBox(height: AppSpacing.xxl),
-            SizedBox(
-              width: 200,
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: AppSizes.cardStandardWidth,
+              ),
               child: FgButton(
                 text: actionLabel!,
                 onPressed: onAction,
-                variant: FgButtonVariant.primary,
-                icon: const Icon(
-                  Icons.local_fire_department,
-                  size: 20,
-                  color: AppColors.crystalWhite,
-                ),
+                expand: true,
               ),
             ),
           ],

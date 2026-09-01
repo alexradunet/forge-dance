@@ -1,73 +1,64 @@
 import 'package:flutter/material.dart';
 
-import '../../../../design_system/tokens/app_colors.dart';
+import '../../theme/forge_theme_extensions.dart';
 
-/// Gradient divider atom - Horizontal/vertical with Forge Fire gradient
+enum FgDividerTone { neutral, primary, secondary, success, reward }
+
+/// Decorative divider with semantic theme-owned tones.
 class FgDivider extends StatelessWidget {
-  final bool isVertical;
-  final Color? startColor;
-  final Color? endColor;
-  final double thickness;
-
   const FgDivider({
     super.key,
     this.isVertical = false,
-    this.startColor,
-    this.endColor,
-    this.thickness = 1.0,
+    this.tone = FgDividerTone.neutral,
+    this.thickness = 1,
   });
 
   const FgDivider.horizontal({
     super.key,
-    Color? startColor,
-    Color? endColor,
-    this.thickness = 1.0,
-  })  : isVertical = false,
-        startColor = startColor ?? Colors.transparent,
-        endColor = endColor ?? AppColors.forgeFire;
+    this.tone = FgDividerTone.neutral,
+    this.thickness = 1,
+  }) : isVertical = false;
 
   const FgDivider.vertical({
     super.key,
-    Color? startColor,
-    Color? endColor,
-    this.thickness = 1.0,
-  })  : isVertical = true,
-        startColor = startColor ?? Colors.transparent,
-        endColor = endColor ?? AppColors.forgeFire;
+    this.tone = FgDividerTone.neutral,
+    this.thickness = 1,
+  }) : isVertical = true;
+
+  final bool isVertical;
+  final FgDividerTone tone;
+  final double thickness;
 
   @override
   Widget build(BuildContext context) {
-    final start = startColor ?? Colors.transparent;
-    final end = endColor ?? AppColors.forgeFire;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final forgeColors = theme.forgeColors;
+    final color = switch (tone) {
+      FgDividerTone.neutral => scheme.outlineVariant,
+      FgDividerTone.primary => scheme.primary,
+      FgDividerTone.secondary => scheme.secondary,
+      FgDividerTone.success => forgeColors.success,
+      FgDividerTone.reward => forgeColors.reward,
+    };
 
-    if (isVertical) {
-      return Container(
-        width: thickness,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [start, end, start],
+    return ExcludeSemantics(
+      child: SizedBox(
+        width: isVertical ? thickness : double.infinity,
+        height: isVertical ? double.infinity : thickness,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: isVertical ? Alignment.topCenter : Alignment.centerLeft,
+              end: isVertical ? Alignment.bottomCenter : Alignment.centerRight,
+              colors: [
+                color.withValues(alpha: 0),
+                color,
+                color.withValues(alpha: 0),
+              ],
+            ),
           ),
         ),
-      );
-    }
-
-    return Container(
-      height: thickness,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-          colors: [start, end, start],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: end.withOpacity(0.5),
-            blurRadius: 10,
-            offset: const Offset(0, 0),
-          ),
-        ],
       ),
     );
   }

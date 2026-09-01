@@ -1,20 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../tokens/app_colors.dart';
-import '../../tokens/app_typography.dart';
-import '../../tokens/app_border_radius.dart';
-import '../../tokens/app_shadows.dart';
+import '../../atoms/buttons/fg_button.dart';
+import '../../atoms/surfaces/fg_card.dart';
+import '../../tokens/app_spacing.dart';
 
-/// Bottom Sheet modal with filters and toggles
-/// Based on HTML mockup: forge.dance_home_dashboard_15 (01. Standard Bottom Sheet)
+/// Material 3 modal bottom sheet with Forge actions and responsive content.
 class ForgeBottomSheet extends StatelessWidget {
-  final String title;
-  final Widget child;
-  final String? resetLabel;
-  final VoidCallback? onReset;
-  final String? actionLabel;
-  final VoidCallback? onAction;
-
   const ForgeBottomSheet({
     super.key,
     required this.title,
@@ -25,7 +16,13 @@ class ForgeBottomSheet extends StatelessWidget {
     this.onAction,
   });
 
-  /// Show the bottom sheet as a modal
+  final String title;
+  final Widget child;
+  final String? resetLabel;
+  final VoidCallback? onReset;
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
   static Future<T?> show<T>({
     required BuildContext context,
     required String title,
@@ -37,8 +34,9 @@ class ForgeBottomSheet extends StatelessWidget {
   }) {
     return showModalBottomSheet<T>(
       context: context,
-      backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: true,
       builder: (context) => ForgeBottomSheet(
         title: title,
         resetLabel: resetLabel,
@@ -50,129 +48,97 @@ class ForgeBottomSheet extends StatelessWidget {
     );
   }
 
+  /// Presents a full-height feature surface without exposing modal styling.
+  static Future<T?> showPage<T>({
+    required BuildContext context,
+    required Widget child,
+  }) {
+    return showModalBottomSheet<T>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      showDragHandle: false,
+      builder: (context) =>
+          SizedBox(height: MediaQuery.sizeOf(context).height, child: child),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF161616),
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
-        ),
-        border: Border(
-          top: BorderSide(
-            color: AppColors.crystalWhite.withOpacity(0.1),
-            width: 1,
-          ),
-        ),
-        boxShadow: const [AppShadows.shadowXl],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Handle
-          Container(
-            padding: const EdgeInsets.only(top: 12, bottom: 4),
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppColors.crystalWhite.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
+    final theme = Theme.of(context);
 
-          // Header
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: AppTypography.h3.copyWith(
-                    color: AppColors.crystalWhite,
+    return Semantics(
+      label: title,
+      container: true,
+      scopesRoute: true,
+      namesRoute: true,
+      explicitChildNodes: true,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.only(
+            left: AppSpacing.xxl,
+            right: AppSpacing.xxl,
+            bottom: AppSpacing.xxl,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(title, style: theme.textTheme.titleLarge),
                   ),
-                ),
-                if (resetLabel != null)
-                  GestureDetector(
-                    onTap: onReset,
-                    child: Text(
-                      resetLabel!.toUpperCase(),
-                      style: AppTypography.overline.copyWith(
-                        color: AppColors.forgeFire,
-                        fontWeight: FontWeight.w700,
-                      ),
+                  if (resetLabel != null)
+                    FgButton(
+                      text: resetLabel!,
+                      variant: FgButtonVariant.ghost,
+                      size: FgButtonSize.sm,
+                      onPressed: onReset,
                     ),
-                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Flexible(child: SingleChildScrollView(child: child)),
+              if (actionLabel != null) ...[
+                const SizedBox(height: AppSpacing.xxl),
+                FgButton(
+                  text: actionLabel!,
+                  expand: true,
+                  onPressed: onAction ?? () => Navigator.of(context).pop(),
+                ),
               ],
-            ),
+            ],
           ),
-
-          // Content
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: child,
-          ),
-
-          // Action button
-          if (actionLabel != null)
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: GestureDetector(
-                onTap: onAction ?? () => Navigator.of(context).pop(),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  decoration: BoxDecoration(
-                    color: AppColors.crystalWhite,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    actionLabel!,
-                    textAlign: TextAlign.center,
-                    style: AppTypography.body.copyWith(
-                      color: AppColors.bgDeep,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-
-          // Safe area padding
-          SizedBox(height: MediaQuery.of(context).padding.bottom),
-        ],
+        ),
       ),
     );
   }
 }
 
-/// Action Sheet with list of actions
-/// Based on HTML mockup: forge.dance_home_dashboard_15 (02. Action Sheet)
 class ForgeActionSheet extends StatelessWidget {
+  const ForgeActionSheet({
+    super.key,
+    required this.actions,
+    required this.cancelLabel,
+    this.title,
+  });
+
   final String? title;
   final List<ForgeActionSheetItem> actions;
   final String cancelLabel;
 
-  const ForgeActionSheet({
-    super.key,
-    this.title,
-    required this.actions,
-    this.cancelLabel = 'Cancel',
-  });
-
-  /// Show the action sheet
   static Future<T?> show<T>({
     required BuildContext context,
-    String? title,
     required List<ForgeActionSheetItem> actions,
-    String cancelLabel = 'Cancel',
+    required String cancelLabel,
+    String? title,
   }) {
     return showModalBottomSheet<T>(
       context: context,
-      backgroundColor: Colors.transparent,
+      useSafeArea: true,
+      showDragHandle: true,
       builder: (context) => ForgeActionSheet(
         title: title,
         actions: actions,
@@ -183,150 +149,92 @@ class ForgeActionSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        bottom: 16 + MediaQuery.of(context).padding.bottom,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Action list
-          Container(
-            decoration: BoxDecoration(
-              color: const Color(0xFF1E1E1E).withOpacity(0.8),
-              borderRadius: AppBorderRadius.large,
-              border: Border.all(
-                color: AppColors.crystalWhite.withOpacity(0.05),
-                width: 1,
-              ),
-            ),
-            child: Column(
-              children: [
-                // Title
-                if (title != null)
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      border: Border(
-                        bottom: BorderSide(
-                          color: AppColors.crystalWhite.withOpacity(0.1),
-                          width: 1,
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return SafeArea(
+      top: false,
+      child: Padding(
+        padding: const EdgeInsets.only(
+          left: AppSpacing.lg,
+          right: AppSpacing.lg,
+          bottom: AppSpacing.lg,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FgCard(
+              variant: FgCardVariant.outlined,
+              padding: EdgeInsets.zero,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (title != null) ...[
+                    Padding(
+                      padding: AppSpacing.allMD,
+                      child: Text(
+                        title!,
+                        textAlign: TextAlign.center,
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: scheme.onSurfaceVariant,
                         ),
                       ),
                     ),
-                    child: Text(
-                      title!,
-                      textAlign: TextAlign.center,
-                      style: AppTypography.caption.copyWith(
-                        color: AppColors.textMuted,
-                        fontWeight: FontWeight.w500,
+                    const Divider(height: 1),
+                  ],
+                  for (var index = 0; index < actions.length; index++) ...[
+                    ListTile(
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        actions[index].onTap?.call();
+                      },
+                      leading: actions[index].icon == null
+                          ? null
+                          : Icon(
+                              actions[index].icon,
+                              color: actions[index].isDestructive
+                                  ? scheme.error
+                                  : scheme.primary,
+                            ),
+                      title: Text(
+                        actions[index].label,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: actions[index].isDestructive
+                              ? scheme.error
+                              : scheme.onSurface,
+                        ),
                       ),
                     ),
-                  ),
-
-                // Actions
-                ...actions.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final action = entry.value;
-                  final isLast = index == actions.length - 1;
-
-                  return GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).pop();
-                      action.onTap?.call();
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        border: isLast
-                            ? null
-                            : Border(
-                                bottom: BorderSide(
-                                  color:
-                                      AppColors.crystalWhite.withOpacity(0.1),
-                                  width: 1,
-                                ),
-                              ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          if (action.icon != null)
-                            Padding(
-                              padding: const EdgeInsets.only(right: 8),
-                              child: Icon(
-                                action.icon,
-                                color: action.isDestructive
-                                    ? AppColors.passionRed
-                                    : action.color ?? AppColors.forgeFire,
-                                size: 20,
-                              ),
-                            ),
-                          Text(
-                            action.label,
-                            style: AppTypography.body.copyWith(
-                              color: action.isDestructive
-                                  ? AppColors.passionRed
-                                  : action.color ?? AppColors.forgeFire,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 8),
-
-          // Cancel button
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E1E1E),
-                borderRadius: AppBorderRadius.large,
-                border: Border.all(
-                  color: AppColors.crystalWhite.withOpacity(0.05),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                cancelLabel,
-                textAlign: TextAlign.center,
-                style: AppTypography.body.copyWith(
-                  color: AppColors.crystalWhite,
-                  fontWeight: FontWeight.w700,
-                ),
+                    if (index < actions.length - 1) const Divider(height: 1),
+                  ],
+                ],
               ),
             ),
-          ),
-        ],
+            const SizedBox(height: AppSpacing.sm),
+            FgButton(
+              text: cancelLabel,
+              variant: FgButtonVariant.secondary,
+              expand: true,
+              onPressed: () => Navigator.of(context).pop(),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-/// Action sheet item model
+@immutable
 class ForgeActionSheetItem {
-  final String label;
-  final IconData? icon;
-  final Color? color;
-  final bool isDestructive;
-  final VoidCallback? onTap;
-
   const ForgeActionSheetItem({
     required this.label,
     this.icon,
-    this.color,
     this.isDestructive = false,
     this.onTap,
   });
+
+  final String label;
+  final IconData? icon;
+  final bool isDestructive;
+  final VoidCallback? onTap;
 }

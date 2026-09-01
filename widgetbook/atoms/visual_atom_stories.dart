@@ -49,6 +49,8 @@ class _CardStory extends StatelessWidget {
             child: FgCard(
               variant: variant,
               padding: AppSpacing.allLG,
+              semanticLabel: '${variant.name} card',
+              isSelected: variant == FgCardVariant.outlined,
               onTap: () {},
               child: Text(
                 'Reusable surface content',
@@ -351,6 +353,20 @@ class _AspectRatioStory extends StatelessWidget {
               color: Theme.of(context).colorScheme.surfaceContainerHighest,
               child: const Center(
                 child: FgIcon(icon: Icons.play_arrow_rounded),
+              ),
+            ),
+          ),
+        ),
+        StorySection(
+          title: '9:16 portrait card',
+          child: SizedBox(
+            width: AppSizes.cardCompactWidth,
+            child: FgAspectRatio.portrait(
+              child: ColoredBox(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                child: const Center(
+                  child: FgIcon(icon: Icons.directions_run_rounded),
+                ),
               ),
             ),
           ),

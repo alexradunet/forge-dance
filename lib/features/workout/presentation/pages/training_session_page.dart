@@ -5,15 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../design_system/atoms/progress/fg_spinner.dart';
-import '../../../../design_system/molecules/cards/fg_interactive_card.dart';
-import '../../../../design_system/templates/swipeable_card_screen_template.dart';
-import '../../../../design_system/tokens/app_colors.dart';
-import '../../../../design_system/tokens/app_typography.dart';
-import '../../../../design_system/tokens/app_spacing.dart';
-import '../../../../design_system/atoms/buttons/fg_button.dart';
+import '../../../../design_system/design_system.dart';
 import '../../../../generated/locale_keys.g.dart';
-import '../../../common/ui/widgets/common_error.dart';
 import '../../../stats/ui/view_model/user_stats_provider.dart';
 import '../../../stats/model/projection_health.dart';
 import '../../model/workout.dart';
@@ -83,9 +76,10 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
   void _previousPage() {
     HapticFeedback.lightImpact();
     if (_currentPage > 0) {
+      final motion = context.forgeMotion;
       _pageController.previousPage(
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
+        duration: motion.slow,
+        curve: motion.enterCurve,
       );
     }
   }
@@ -97,9 +91,10 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
     }
     HapticFeedback.lightImpact();
     if (_currentPage < _totalPageCount(wod) - 1) {
+      final motion = context.forgeMotion;
       _pageController.nextPage(
-        duration: const Duration(milliseconds: 500),
-        curve: Curves.easeInOut,
+        duration: motion.slow,
+        curve: motion.enterCurve,
       );
     }
   }
@@ -153,10 +148,15 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
 
     if (state == null) {
       return Scaffold(
-        backgroundColor: AppColors.bgDeep,
-        body: workoutState.hasError
-            ? const CommonError()
-            : const Center(child: FgSpinner()),
+        body: FgBackground(
+          child: workoutState.hasError
+              ? FgEmpty(
+                  icon: Icons.error_outline,
+                  title: LocaleKeys.unexpectedErrorOccurred.tr(),
+                  tone: FgEmptyTone.error,
+                )
+              : const Center(child: FgSpinner()),
+        ),
       );
     }
 
@@ -168,11 +168,13 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
       title: LocaleKeys.dailyPractice.tr(),
       subtitle: isComplete
           ? LocaleKeys.sessionComplete.tr()
-          : '${wod.title} • ${wod.estimatedMinutes} min',
+          : '${wod.title} • '
+              '${LocaleKeys.minutesCount.tr(args: ['${wod.estimatedMinutes}'])}',
       onBack: widget.onClose ?? () => Navigator.of(context).pop(),
       headerLeft: isLocked
-          ? IconButton(
-              icon: const Icon(Icons.arrow_back, color: Colors.white),
+          ? FgIconButton(
+              icon: Icons.arrow_back_rounded,
+              semanticLabel: LocaleKeys.previousPage.tr(),
               onPressed: _previousPage,
             )
           : null,
@@ -186,10 +188,11 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
           return;
         }
 
+        final motion = context.forgeMotion;
         _pageController.animateToPage(
-          index + 1, // Skip intro page
-          duration: const Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
+          index + 1,
+          duration: motion.slow,
+          curve: motion.enterCurve,
         );
       },
       actionZone: null,
@@ -244,26 +247,12 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
 
     HapticFeedback.heavyImpact();
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            const Icon(Icons.lock, color: AppColors.forgeFire),
-            const SizedBox(width: 12),
-            Expanded(child: Text(LocaleKeys.completeTimerToContinue.tr())),
-            TextButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).hideCurrentSnackBar();
-                _skipCurrentExercise(wod);
-              },
-              child: Text(LocaleKeys.skip.tr().toUpperCase(),
-                  style: const TextStyle(color: AppColors.forgeFire)),
-            )
-          ],
-        ),
-        backgroundColor: Colors.grey[900],
-        duration: const Duration(seconds: 3),
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      FgSnackBar.build(
+        context,
+        text: LocaleKeys.completeTimerToContinue.tr(),
+        tone: FgSnackBarTone.warning,
+        actionLabel: LocaleKeys.skip.tr().toUpperCase(),
+        onAction: () => _skipCurrentExercise(wod),
       ),
     );
   }
@@ -283,6 +272,7 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
   Widget _buildIntroCard(Workout wod) {
     return FgInteractiveCard(
       title: wod.title.toUpperCase(),
+      flipSemanticLabel: LocaleKeys.flipCard.tr(),
       subtitle: LocaleKeys.wodTag.tr().toUpperCase(),
       backgroundImage: wod.imageUrl,
       style: wod.style,
@@ -295,9 +285,12 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
         children: [
           Text(
             wod.description,
-            style: const TextStyle(color: Colors.white70, height: 1.5),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  height: 1.5,
+                ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.xxl),
           _buildInfoRow(
             Icons.fitness_center,
             LocaleKeys.exercisesCount
@@ -330,11 +323,12 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
 
     return FgInteractiveCard(
       title: LocaleKeys.sessionComplete.tr().toUpperCase(),
+      flipSemanticLabel: LocaleKeys.flipCard.tr(),
       subtitle: LocaleKeys.greatWork.tr().toUpperCase(),
       backgroundImage:
           'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=2000',
       style: wod.style,
-      difficulty: 'Complete',
+      difficulty: LocaleKeys.statusCompleted.tr(),
       progress: 1.0,
       backTitle: LocaleKeys.statsSummary.tr().toUpperCase(),
       backSubtitle: LocaleKeys.dailyPractice.tr(),
@@ -342,9 +336,12 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.check_circle_outline,
-                size: 60, color: AppColors.forgeFire),
-            const SizedBox(height: 16),
+            FgIcon(
+              icon: Icons.check_circle_outline_rounded,
+              size: AppSizes.iconHuge,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: AppSpacing.lg),
             Text(
               projectionHealth == ProjectionHealth.pendingRepair
                   ? LocaleKeys.statsSyncing.tr()
@@ -352,14 +349,17 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
                       ? LocaleKeys.youEarnedXp.tr(args: ['${wod.xp}'])
                       : LocaleKeys.alreadyCompletedToday.tr(),
               textAlign: TextAlign.center,
-              style: AppTypography.h3.copyWith(color: Colors.white),
+              style: Theme.of(context).textTheme.titleLarge,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: AppSpacing.sm),
             if (streak > 0)
               Text(
                 LocaleKeys.dayStreakKeepUp.tr(args: ['$streak']),
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: Colors.white60),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color:
+                          Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
               ),
           ],
         ),
@@ -380,6 +380,7 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
 
     return FgInteractiveCard(
       title: exercise.name,
+      flipSemanticLabel: LocaleKeys.flipCard.tr(),
       subtitle: LocaleKeys.exerciseOf.tr(args: [
         '${exerciseIndex + 1}',
         '${wod.exercises.length}',
@@ -387,31 +388,17 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
       backgroundImage:
           'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=2000',
       style: wod.style,
-      difficulty: 'Active',
+      difficulty: LocaleKeys.statusInProgress.tr(),
       progress: (exerciseIndex + 1) / wod.exercises.length,
-      centerOverlay: GestureDetector(
-        onTap: _toggleTimer,
-        child: Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: Colors.black.withOpacity(0.4),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: _isTimerRunning ? AppColors.forgeFire : Colors.white,
-              width: 2,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              '${_timeLeft}s',
-              style: AppTypography.h3.copyWith(
-                color: Colors.white,
-                fontSize: 24,
-              ),
-            ),
-          ),
-        ),
+      centerOverlay: FgButton(
+        text: '${_timeLeft}s',
+        semanticLabel: LocaleKeys.timerSeconds.tr(args: ['$_timeLeft']),
+        shape: FgButtonShape.circle,
+        size: FgButtonSize.xl,
+        variant: _isTimerRunning
+            ? FgButtonVariant.primary
+            : FgButtonVariant.secondary,
+        onPressed: _toggleTimer,
       ),
       footer: null,
     );
@@ -419,14 +406,21 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
 
   Widget _buildInfoRow(IconData icon, String text) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppColors.forgeFire),
-          const SizedBox(width: 12),
-          Text(text,
-              style: const TextStyle(
-                  color: Colors.white, fontWeight: FontWeight.bold)),
+          FgIcon(
+            icon: icon,
+            size: AppSizes.iconMd,
+            color: Theme.of(context).colorScheme.primary,
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+          ),
         ],
       ),
     );

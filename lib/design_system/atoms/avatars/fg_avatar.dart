@@ -1,56 +1,50 @@
 import 'package:flutter/material.dart';
-import 'package:shimmer/shimmer.dart';
 
-import '../../../../design_system/tokens/app_colors.dart';
-import '../../../../design_system/tokens/app_spacing.dart';
-import '../../../../design_system/tokens/app_typography.dart';
+import '../../theme/forge_theme_extensions.dart';
+import '../../tokens/app_sizes.dart';
 
-/// User avatar atom - With level badges, online status, notification counts
+enum FgAvatarTone { primary, reward, success, neutral }
+
+/// Theme-aware identity avatar with optional status and count badges.
 class FgAvatar extends StatelessWidget {
-  final String? imageUrl;
-  final String? initials;
-  final int? level;
-  final bool isOnline;
-  final int? notificationCount;
-  final double size;
-  final Color? borderColor;
-  final bool isLoading;
-
   const FgAvatar({
     super.key,
     this.imageUrl,
+    this.imageProvider,
     this.initials,
     this.level,
     this.isOnline = false,
     this.notificationCount,
-    this.size = 56,
-    this.borderColor,
+    this.tone = FgAvatarTone.primary,
     this.isLoading = false,
-  });
+    this.semanticLabel,
+  }) : _size = AppSizes.avatarXl;
 
   const FgAvatar.large({
     super.key,
     this.imageUrl,
     this.initials,
+    this.imageProvider,
     this.level,
     this.isOnline = false,
     this.notificationCount,
-    this.size = 80,
-    this.borderColor,
+    this.tone = FgAvatarTone.primary,
     this.isLoading = false,
-  });
+    this.semanticLabel,
+  }) : _size = AppSizes.avatarXxl;
 
   const FgAvatar.medium({
     super.key,
     this.imageUrl,
     this.initials,
     this.level,
+    this.imageProvider,
     this.isOnline = false,
     this.notificationCount,
-    this.size = 56,
-    this.borderColor,
+    this.tone = FgAvatarTone.primary,
     this.isLoading = false,
-  });
+    this.semanticLabel,
+  }) : _size = AppSizes.avatarLg;
 
   const FgAvatar.small({
     super.key,
@@ -58,166 +52,139 @@ class FgAvatar extends StatelessWidget {
     this.initials,
     this.level,
     this.isOnline = false,
+    this.imageProvider,
     this.notificationCount,
-    this.size = 40,
-    this.borderColor,
+    this.tone = FgAvatarTone.primary,
     this.isLoading = false,
-  });
+    this.semanticLabel,
+  }) : _size = AppSizes.avatarMd;
+
+  final String? imageUrl;
+  final String? initials;
+  final int? level;
+  final bool isOnline;
+  final int? notificationCount;
+  final FgAvatarTone tone;
+  final bool isLoading;
+  final String? semanticLabel;
+  final ImageProvider<Object>? imageProvider;
+  final double _size;
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return Shimmer.fromColors(
-        baseColor: AppColors.gray800,
-        highlightColor: AppColors.gray700,
-        period: const Duration(milliseconds: 1500),
-        child: Container(
-          width: size,
-          height: size,
-          decoration: const BoxDecoration(
-            color: AppColors.gray800,
-            shape: BoxShape.circle,
-          ),
-        ),
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final forgeColors = theme.forgeColors;
+    final borderColor = switch (tone) {
+      FgAvatarTone.primary => scheme.primary,
+      FgAvatarTone.reward => forgeColors.reward,
+      FgAvatarTone.success => forgeColors.success,
+      FgAvatarTone.neutral => scheme.outline,
+    };
+
+    Widget avatar = Container(
+      width: _size,
+      height: _size,
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(color: borderColor, width: 2),
+      ),
+      child: ClipOval(
+        child: isLoading
+            ? ColoredBox(color: scheme.surfaceContainerHighest)
+            : _AvatarContent(
+                imageUrl: imageUrl,
+                imageProvider: imageProvider,
+                initials: initials,
+                size: _size,
+              ),
+      ),
+    );
+
+    if (level != null) {
+      avatar = Badge.count(
+        count: level!,
+        backgroundColor: scheme.primary,
+        textColor: scheme.onPrimary,
+        child: avatar,
+      );
+    }
+    if (notificationCount != null && notificationCount! > 0) {
+      avatar = Badge.count(
+        count: notificationCount!,
+        alignment: Alignment.topLeft,
+        backgroundColor: scheme.error,
+        textColor: scheme.onError,
+        child: avatar,
+      );
+    }
+    if (isOnline) {
+      avatar = Badge(
+        alignment: Alignment.bottomRight,
+        smallSize: AppSizes.iconXs,
+        backgroundColor: forgeColors.success,
+        child: avatar,
       );
     }
 
-    final border = borderColor ?? AppColors.forgeFire;
-    final borderWidth = size > 60 ? 3.0 : 2.0;
-
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: border,
-              width: borderWidth,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: border.withOpacity(0.3),
-                blurRadius: 15,
-                offset: const Offset(0, 0),
-              ),
-            ],
-          ),
-          child: ClipOval(
-            child: imageUrl != null
-                ? Image.network(
-                    imageUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        _buildPlaceholder(),
-                  )
-                : _buildPlaceholder(),
-          ),
-        ),
-        // Level badge
-        if (level != null)
-          Positioned(
-            top: -4,
-            right: -4,
-            child: Container(
-              width: size * 0.3,
-              height: size * 0.3,
-              decoration: BoxDecoration(
-                color: AppColors.forgeFire,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.gray950,
-                  width: 2,
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  '$level',
-                  style: AppTypography.caption.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.crystalWhite,
-                    fontSize: size * 0.15,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        // Online status
-        if (isOnline)
-          Positioned(
-            bottom: 2,
-            right: 2,
-            child: Container(
-              width: size * 0.25,
-              height: size * 0.25,
-              decoration: BoxDecoration(
-                color: AppColors.growthGreen,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.gray950,
-                  width: 2,
-                ),
-              ),
-            ),
-          ),
-        // Notification count
-        if (notificationCount != null && notificationCount! > 0)
-          Positioned(
-            top: -6,
-            left: -6,
-            child: Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xs,
-                vertical: 2,
-              ),
-              decoration: BoxDecoration(
-                color: AppColors.forgeFire,
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: AppColors.gray950,
-                  width: 2,
-                ),
-              ),
-              constraints: const BoxConstraints(
-                minWidth: 20,
-                minHeight: 20,
-              ),
-              child: Center(
-                child: Text(
-                  notificationCount! > 9 ? '9+' : '${notificationCount!}',
-                  style: AppTypography.caption.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.crystalWhite,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-            ),
-          ),
-      ],
+    return Semantics(
+      label: semanticLabel,
+      image: true,
+      child: ExcludeSemantics(child: avatar),
     );
   }
+}
 
-  Widget _buildPlaceholder() {
-    return Container(
-      color: AppColors.gray800,
-      child: initials != null
-          ? Center(
-              child: Text(
+class _AvatarContent extends StatelessWidget {
+  const _AvatarContent({
+    required this.imageUrl,
+    required this.initials,
+    required this.imageProvider,
+    required this.size,
+  });
+
+  final String? imageUrl;
+  final String? initials;
+  final double size;
+  final ImageProvider<Object>? imageProvider;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final fallback = ColoredBox(
+      color: scheme.surfaceContainerHighest,
+      child: Center(
+        child: initials == null
+            ? Icon(
+                Icons.person_rounded,
+                size: size * 0.55,
+                color: scheme.onSurfaceVariant,
+              )
+            : Text(
                 initials!.toUpperCase(),
-                style: AppTypography.h6.copyWith(
-                  color: AppColors.crystalWhite,
-                  fontSize: size * 0.4,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: scheme.onSurface,
+                  fontWeight: FontWeight.w700,
                 ),
               ),
-            )
-          : Icon(
-              Icons.person,
-              size: size * 0.6,
-              color: AppColors.gray400,
-            ),
+      ),
+    );
+
+    if (imageProvider != null) {
+      return Image(
+        image: imageProvider!,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => fallback,
+      );
+    }
+    if (imageUrl == null || imageUrl!.isEmpty) return fallback;
+
+    return Image.network(
+      imageUrl!,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => fallback,
     );
   }
 }

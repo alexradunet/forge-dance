@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../design_system/tokens/app_colors.dart';
-import '../../../design_system/organisms/lessons/lesson_path_timeline.dart';
-import '../../../design_system/organisms/navigation/app_header.dart';
-import '../../../design_system/atoms/progress/fg_spinner.dart';
-import '../../../design_system/atoms/visuals/fg_background.dart';
-import '../../common/ui/widgets/common_error.dart';
+import '../../../design_system/design_system.dart';
+import '../../../generated/locale_keys.g.dart';
 import '../model/lesson.dart';
 import '../model/lesson_progress.dart';
 import '../ui/state/learn_state.dart';
@@ -29,11 +26,14 @@ class ModuleViewScreen extends ConsumerWidget {
     final learnState = ref.watch(learnViewModelProvider);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
       body: FgBackground(
         child: learnState.when(
           loading: () => const Center(child: FgSpinner()),
-          error: (_, _) => const CommonError(),
+          error: (_, _) => FgEmpty(
+            icon: Icons.error_outline,
+            title: LocaleKeys.unexpectedErrorOccurred.tr(),
+            tone: FgEmptyTone.error,
+          ),
           data: (state) => _buildPath(context, ref, state),
         ),
       ),
@@ -41,56 +41,34 @@ class ModuleViewScreen extends ConsumerWidget {
   }
 
   Widget _buildPath(BuildContext context, WidgetRef ref, LearnState state) {
-    return Stack(
-      children: [
-        CustomScrollView(
-          slivers: [
-            // Header
-            SliverToBoxAdapter(
-              child: _buildHeader(context, state),
-            ),
-
-            // Spacing
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 24),
-            ),
-
-            // Lesson path
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: LessonPathTimeline(
-                  nodes: _buildNodes(state),
-                  onNavigate: (tab) {
-                    if (tab == 'ignite') {
-                      final current = state.currentLesson;
-                      if (current != null) {
-                        ref
-                            .read(learnViewModelProvider.notifier)
-                            .startLesson(current.id);
-                      }
-                      onLessonNavigate?.call(current!.id);
-                    }
-                  },
-                ),
-              ),
-            ),
-
-            // Bottom Spacing (FAB area)
-            const SliverToBoxAdapter(
-              child: SizedBox(height: 100),
-            ),
-          ],
+    return CustomScrollView(
+      slivers: [
+        SliverToBoxAdapter(
+          child: _buildHeader(context, state),
         ),
-
-        // FAB (Location / Map)
-        Positioned(
-          bottom: 24,
-          right: 24,
-          child: FloatingActionButton(
-            onPressed: () {},
-            backgroundColor: AppColors.surfaceCard,
-            child: const Icon(Icons.my_location, color: Colors.white),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: AppSpacing.xxl),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: LessonPathTimeline(
+              nodes: _buildNodes(state),
+              onNavigate: (tab) {
+                if (tab != 'ignite') return;
+                final current = state.currentLesson;
+                if (current == null) return;
+                ref
+                    .read(learnViewModelProvider.notifier)
+                    .startLesson(current.id);
+                onLessonNavigate?.call(current.id);
+              },
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(
+          child: SizedBox(
+            height: AppSizes.bottomNavHeight + AppSpacing.lg,
           ),
         ),
       ],
@@ -102,20 +80,6 @@ class ModuleViewScreen extends ConsumerWidget {
       title: state.activeModule.title,
       subtitle: state.activeModule.subtitle,
       onBack: onBack ?? () => Navigator.of(context).pop(),
-      rightSlot: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: AppColors.surfaceDark,
-          shape: BoxShape.circle,
-          border: Border.all(color: Colors.white.withOpacity(0.1)),
-        ),
-        child: IconButton(
-          icon: const Icon(Icons.more_vert, size: 20),
-          color: AppColors.textMuted,
-          onPressed: () {},
-        ),
-      ),
     );
   }
 

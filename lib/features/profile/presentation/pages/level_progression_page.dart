@@ -2,14 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:forge_dance/design_system/molecules/cards/fg_interactive_card.dart';
-
-import '../../../../design_system/atoms/progress/fg_spinner.dart';
-import '../../../../design_system/templates/swipeable_card_screen_template.dart';
-import '../../../../design_system/tokens/app_typography.dart';
-import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../design_system/design_system.dart';
 import '../../../../generated/locale_keys.g.dart';
-import '../../../common/ui/widgets/common_error.dart';
 import '../../../stats/ui/view_model/user_stats_provider.dart';
 import '../../model/level_model.dart';
 
@@ -31,12 +25,14 @@ class LevelProgressionPage extends ConsumerWidget {
 
     return stats.when(
       loading: () => const Scaffold(
-        backgroundColor: AppColors.bgDeep,
         body: Center(child: FgSpinner()),
       ),
-      error: (_, _) => const Scaffold(
-        backgroundColor: AppColors.bgDeep,
-        body: CommonError(),
+      error: (_, _) => Scaffold(
+        body: FgEmpty(
+          icon: Icons.error_outline,
+          title: LocaleKeys.unexpectedErrorOccurred.tr(),
+          tone: FgEmptyTone.error,
+        ),
       ),
       data: (stats) => _LevelPager(
         levels: DanceLevel.buildAll(totalXp: stats.totalXp),
@@ -80,10 +76,11 @@ class _LevelPagerState extends State<_LevelPager> {
   }
 
   void _onStepClick(int index) {
+    final motion = context.forgeMotion;
     _pageController.animateToPage(
       index,
-      duration: const Duration(milliseconds: 500),
-      curve: Curves.easeInOut,
+      duration: motion.slow,
+      curve: motion.enterCurve,
     );
   }
 
@@ -109,7 +106,7 @@ class _LevelPagerState extends State<_LevelPager> {
         itemBuilder: (context, index) {
           return Center(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: _buildLevelCard(widget.levels[index]),
             ),
           );
@@ -119,10 +116,13 @@ class _LevelPagerState extends State<_LevelPager> {
   }
 
   Widget _buildLevelCard(DanceLevel level) {
-    final bool isLocked = level.isLocked;
-
+    final isLocked = level.isLocked;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final forgeColors = theme.forgeColors;
     return FgInteractiveCard(
       title: isLocked ? LocaleKeys.lockedLabel.tr().toUpperCase() : level.name,
+      flipSemanticLabel: LocaleKeys.flipCard.tr(),
       subtitle: level.status.name,
       backgroundImage:
           'https://images.unsplash.com/photo-1547153760-18fc86324498?q=80&w=1000&auto=format&fit=crop',
@@ -138,15 +138,19 @@ class _LevelPagerState extends State<_LevelPager> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.lock_outline,
-                      size: 64, color: AppColors.textMuted),
-                  const SizedBox(height: 16),
+                  FgIcon(
+                    icon: Icons.lock_outline_rounded,
+                    size: AppSizes.iconHuge,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
                   Text(
                     LocaleKeys.reachXpRequirement
                         .tr(args: ['${level.xpThreshold}']),
                     textAlign: TextAlign.center,
-                    style:
-                        AppTypography.body.copyWith(color: AppColors.textMuted),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
                   ),
                 ],
               ),
@@ -154,34 +158,36 @@ class _LevelPagerState extends State<_LevelPager> {
           : Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: level.requirements
-                  .map((req) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              req.isMet
-                                  ? Icons.check_circle
-                                  : Icons.circle_outlined,
-                              color: req.isMet
-                                  ? AppColors.growthGreen
-                                  : AppColors.textMuted,
-                              size: 16,
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                req.description,
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: req.isMet
-                                      ? Colors.white
-                                      : AppColors.textMuted,
-                                ),
+                  .map(
+                    (req) => Padding(
+                      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          FgIcon(
+                            icon: req.isMet
+                                ? Icons.check_circle_rounded
+                                : Icons.circle_outlined,
+                            color: req.isMet
+                                ? forgeColors.success
+                                : scheme.onSurfaceVariant,
+                            size: AppSizes.iconSm,
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Text(
+                              req.description,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: req.isMet
+                                    ? scheme.onSurface
+                                    : scheme.onSurfaceVariant,
                               ),
                             ),
-                          ],
-                        ),
-                      ))
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
                   .toList(),
             ),
 
@@ -193,11 +199,11 @@ class _LevelPagerState extends State<_LevelPager> {
               children: [
                 Text(
                   level.isCompleted ? 'COMPLETED' : 'IN PROGRESS',
-                  style: AppTypography.label.copyWith(
+                  style: theme.textTheme.labelMedium?.copyWith(
                     color: level.isCompleted
-                        ? AppColors.growthGreen
-                        : AppColors.forgeFire,
-                    letterSpacing: 2,
+                        ? forgeColors.success
+                        : scheme.primary,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],

@@ -1,61 +1,34 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hugeicons/hugeicons.dart';
 
-import '../../../../features/common/ui/widgets/material_ink_well.dart';
-import '../../../../features/profile/model/language.dart';
-import '../../../../features/profile/ui/widgets/common_rounded_item.dart';
-import '../../../../design_system/tokens/app_typography.dart';
+import '../../../../design_system/design_system.dart';
+import '../../model/language.dart';
 
-class LanguageItem extends ConsumerWidget {
+class LanguageItem extends StatelessWidget {
+  const LanguageItem({super.key, required this.language});
+
   final Language language;
-  final bool isFirst;
-  final bool isLast;
-
-  const LanguageItem({
-    super.key,
-    required this.language,
-    this.isFirst = false,
-    this.isLast = false,
-  });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return CommonRoundedItem(
-      isFirst: isFirst,
-      isLast: isLast,
-      child: MaterialInkWell(
-        onTap: () {
-          context.setLocale(Locale(language.code));
-        },
-        child: Container(
-          height: 56,
-          margin: const EdgeInsets.symmetric(horizontal: 16),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: isLast
-                  ? BorderSide.none
-                  : BorderSide(color: Theme.of(context).colorScheme.outlineVariant),
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Container(
-                  height: 60,
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    language.name,
-                    style: AppTypography.body,
-                  ),
-                ),
-              ),
-              if (language.code == context.locale.languageCode)
-                Icon(HugeIcons.strokeRoundedTick01),
-            ],
-          ),
-        ),
+  Widget build(BuildContext context) {
+    final isSelected = language.code == context.locale.languageCode;
+
+    return FgCard(
+      variant: FgCardVariant.outlined,
+      padding: EdgeInsets.zero,
+      isSelected: isSelected,
+      onTap: () => context.setLocale(Locale(language.code)),
+      child: ListTile(
+        contentPadding: AppSpacing.horizontal,
+        title: Text(language.name),
+        trailing: isSelected
+            ? Icon(
+                HugeIcons.strokeRoundedTick01,
+                color: Theme.of(context).colorScheme.primary,
+                size: AppSizes.iconMd,
+              )
+            : null,
       ),
     );
   }

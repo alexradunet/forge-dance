@@ -38,6 +38,15 @@ List<WidgetbookNode> buildActionAtomStories() {
         ),
       ],
     ),
+    WidgetbookComponent(
+      name: 'FgMenuButton',
+      useCases: [
+        WidgetbookUseCase(
+          name: 'Selection',
+          builder: (_) => const _MenuButtonStory(),
+        ),
+      ],
+    ),
   ];
 }
 
@@ -274,3 +283,38 @@ class _FilterChipStoryState extends State<_FilterChipStory> {
 }
 
 void _noop() {}
+
+class _MenuButtonStory extends StatefulWidget {
+  const _MenuButtonStory();
+
+  @override
+  State<_MenuButtonStory> createState() => _MenuButtonStoryState();
+}
+
+class _MenuButtonStoryState extends State<_MenuButtonStory> {
+  int _columns = 2;
+
+  @override
+  Widget build(BuildContext context) {
+    return StoryCanvas(
+      children: [
+        StorySection(
+          title: 'Typed menu selection',
+          child: FgMenuButton<int>(
+            icon: Icons.grid_view_rounded,
+            semanticLabel: 'Choose grid columns',
+            items: [
+              for (final columns in const [2, 3, 4])
+                FgMenuItem(
+                  value: columns,
+                  label: '$columns columns',
+                  isSelected: columns == _columns,
+                ),
+            ],
+            onSelected: (value) => setState(() => _columns = value),
+          ),
+        ),
+      ],
+    );
+  }
+}

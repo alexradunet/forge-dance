@@ -7,18 +7,8 @@ import '../../../../constants/constants.dart';
 import '../../../../routing/routes.dart';
 import '../../../stats/model/user_stats.dart';
 import '../../../stats/ui/view_model/user_stats_provider.dart';
-import '../../../../design_system/tokens/app_colors.dart';
-import '../../../../design_system/tokens/app_typography.dart';
-import '../../../../design_system/atoms/progress/fg_progress_bar.dart';
-import '../../../../design_system/atoms/progress/fg_spinner.dart';
-import '../../../../design_system/atoms/icons/fg_icon.dart';
-import '../../../../design_system/molecules/cards/fg_content_card.dart';
-import '../../../../design_system/organisms/navigation/app_header.dart';
-import '../../../../design_system/tokens/app_shadows.dart';
-import '../../../../design_system/atoms/buttons/fg_button.dart';
-import '../../../../design_system/atoms/visuals/fg_background.dart';
+import '../../../../design_system/design_system.dart';
 import '../../../../generated/locale_keys.g.dart';
-import '../../../common/ui/widgets/common_error.dart';
 import '../../../learn/model/lesson.dart';
 import '../../../learn/ui/state/learn_state.dart';
 import '../../../learn/ui/view_model/learn_view_model.dart';
@@ -35,11 +25,14 @@ class HomePage extends ConsumerWidget {
     final learnState = ref.watch(learnViewModelProvider);
 
     return Scaffold(
-      backgroundColor: Colors.transparent, // Background handled by FgBackground
       body: FgBackground(
         child: learnState.when(
           loading: () => const Center(child: FgSpinner()),
-          error: (_, _) => const CommonError(),
+          error: (_, _) => FgEmpty(
+            icon: Icons.error_outline,
+            title: LocaleKeys.unexpectedErrorOccurred.tr(),
+            tone: FgEmptyTone.error,
+          ),
           data: (state) => _buildContent(context, ref, state),
         ),
       ),
@@ -66,7 +59,10 @@ class HomePage extends ConsumerWidget {
         // Daily session hero — the user's current lesson on the path
         SliverToBoxAdapter(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.xxl,
+              vertical: AppSpacing.sm,
+            ),
             child: _buildDailySessionCard(context, ref, state),
           ),
         ),
@@ -97,13 +93,23 @@ class HomePage extends ConsumerWidget {
               showViewAll: true,
               children: _interleave([
                 for (final module in state.recommendedModules)
-                  _moduleCard(context, ref, state, module, width: 180),
+                  _moduleCard(
+                    context,
+                    ref,
+                    state,
+                    module,
+                    width: AppSizes.cardCompactWidth,
+                  ),
               ]),
             ),
           ),
 
         // Bottom Spacing for BottomNav
-        const SliverToBoxAdapter(child: SizedBox(height: 100)),
+        const SliverToBoxAdapter(
+          child: SizedBox(
+            height: AppSizes.bottomNavHeight + AppSpacing.xxl,
+          ),
+        ),
       ],
     );
   }
@@ -150,7 +156,7 @@ class HomePage extends ConsumerWidget {
 
   List<Widget> _interleave(List<Widget> cards) => [
         for (var i = 0; i < cards.length; i++) ...[
-          if (i > 0) const SizedBox(width: 16),
+          if (i > 0) const SizedBox(width: AppSpacing.lg),
           cards[i],
         ],
       ];
@@ -214,140 +220,47 @@ class HomePage extends ConsumerWidget {
   }
 
   Widget _buildNotificationToggle() {
-    return Container(
-      width: 44,
-      height: 44,
-      decoration: BoxDecoration(
-        color: AppColors.surfaceDark,
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          const FgIcon(
-              icon: Icons.notifications_none, size: 20, color: Colors.white),
-          Positioned(
-            top: 12,
-            right: 12,
-            child: Container(
-              width: 8,
-              height: 8,
-              decoration: BoxDecoration(
-                color: AppColors.forgeFire,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.bgDeep, width: 1.5),
-              ),
-            ),
-          ),
-        ],
+    return const ExcludeSemantics(
+      child: FgIcon(
+        icon: Icons.notifications_none_rounded,
+        size: AppSizes.iconLg,
       ),
     );
   }
 
   Widget _buildProgressSection(BuildContext context, UserStats stats) {
+    final nextLevelTarget = stats.nextLevelXp?.toDouble();
+
     return Padding(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            LocaleKeys.myProgress.tr().toUpperCase(),
-            style: AppTypography.h3
-                .copyWith(color: AppColors.textMain, fontSize: 20),
+      padding: const EdgeInsets.all(AppSpacing.xxl),
+      child: FgProgressSection(
+        title: LocaleKeys.myProgress.tr().toUpperCase(),
+        stats: [
+          FgStatData(
+            label: LocaleKeys.currentStreak.tr().toUpperCase(),
+            value: LocaleKeys.dayN.tr(args: ['${stats.streakCount}']),
+            icon: Icons.local_fire_department_rounded,
+            tone: FgStatTone.primary,
           ),
-          const SizedBox(height: 16),
-          GestureDetector(
-            onTap: () => context.push(Routes.stats),
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceCard,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white.withOpacity(0.05)),
-                boxShadow: [AppShadows.shadowCard],
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: AppColors.surfaceDark,
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                  color: Colors.white.withOpacity(0.05)),
-                            ),
-                            child: const FgIcon(
-                              icon: Icons.local_fire_department,
-                              color: AppColors.forgeFire,
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                  LocaleKeys.dayN.tr(args: [
-                                    '${stats.streakCount}'
-                                  ]).toUpperCase(),
-                                  style: AppTypography.body
-                                      .copyWith(fontWeight: FontWeight.bold)),
-                              Text(LocaleKeys.currentStreak.tr().toUpperCase(),
-                                  style: AppTypography.label.copyWith(
-                                      color: AppColors.textMuted, fontSize: 9)),
-                            ],
-                          ),
-                        ],
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                              LocaleKeys.levelLabel
-                                  .tr(args: ['${stats.level}']).toUpperCase(),
-                              style: AppTypography.body
-                                  .copyWith(fontWeight: FontWeight.bold)),
-                          Text(
-                              LocaleKeys.beltNameLabel
-                                  .tr(args: [stats.beltName]).toUpperCase(),
-                              style: AppTypography.label.copyWith(
-                                  color: AppColors.textMuted, fontSize: 9)),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  FgProgressBar(value: stats.levelProgress, height: 10),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                          LocaleKeys.xpValue
-                              .tr(args: ['${stats.totalXp}']).toUpperCase(),
-                          style: AppTypography.caption
-                              .copyWith(color: AppColors.textMuted)),
-                      Text(
-                          stats.nextLevelXp == null
-                              ? LocaleKeys.maxLevelReached.tr().toUpperCase()
-                              : LocaleKeys.nextLevelXp.tr(
-                                  args: ['${stats.nextLevelXp}']).toUpperCase(),
-                          style: AppTypography.caption
-                              .copyWith(color: AppColors.textMuted)),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+          FgStatData(
+            label: LocaleKeys.beltNameLabel
+                .tr(args: [stats.beltName])
+                .toUpperCase(),
+            value: LocaleKeys.levelLabel.tr(args: ['${stats.level}']),
+            icon: Icons.workspace_premium_rounded,
+            tone: FgStatTone.reward,
           ),
         ],
+        levelProgress: FgProgressData(
+          label: LocaleKeys.beltNameLabel.tr(args: [stats.beltName]),
+          current: stats.totalXp.toDouble(),
+          target: nextLevelTarget ?? stats.totalXp.toDouble(),
+          valueLabel: nextLevelTarget == null
+              ? LocaleKeys.maxLevelReached.tr()
+              : LocaleKeys.nextLevelXp.tr(args: ['${stats.nextLevelXp}']),
+          message: LocaleKeys.xpValue.tr(args: ['${stats.totalXp}']),
+        ),
+        onProgressTap: () => context.push(Routes.stats),
       ),
     );
   }
@@ -358,37 +271,34 @@ class HomePage extends ConsumerWidget {
     required List<Widget> children,
     bool showViewAll = false,
   }) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xxl,
+            vertical: AppSpacing.lg,
+          ),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: AppTypography.h3
-                    .copyWith(color: AppColors.textMain, fontSize: 20),
+              Expanded(
+                child: Text(title, style: theme.textTheme.titleLarge),
               ),
               if (showViewAll)
-                GestureDetector(
-                  onTap: () => MainTabDestination.explore.go(context),
-                  child: Text(
-                    LocaleKeys.viewAll.tr().toUpperCase(),
-                    style: AppTypography.label.copyWith(
-                      color: AppColors.forgeFire,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1.2,
-                    ),
-                  ),
+                FgButton(
+                  text: LocaleKeys.viewAll.tr().toUpperCase(),
+                  variant: FgButtonVariant.ghost,
+                  size: FgButtonSize.sm,
+                  onPressed: () => MainTabDestination.explore.go(context),
                 ),
             ],
           ),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
           physics: const BouncingScrollPhysics(),
           child: Row(children: children),
         ),

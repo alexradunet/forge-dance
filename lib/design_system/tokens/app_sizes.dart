@@ -83,6 +83,9 @@ class AppSizes {
   /// Full width card (with margins)
   static const double cardFullWidth = double.infinity;
 
+  /// Portrait lesson-card ratio used by adaptive grids.
+  static const double lessonCardAspectRatio = 0.7;
+
   /// Square tile size (small)
   static const double squareTileSm = 80.0;
 

@@ -1,7 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-import '/design_system/tokens/app_typography.dart';
+import '/design_system/design_system.dart';
 
 class HorizontalDivider extends StatelessWidget {
   const HorizontalDivider({super.key});
@@ -10,26 +10,17 @@ class HorizontalDivider extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(
-          child: Divider(
-            thickness: 1,
-            color: Theme.of(context).colorScheme.outlineVariant,
-          ),
-        ),
+        const Expanded(child: FgDivider()),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           child: Text(
             'or'.tr(),
-            style: AppTypography.bodySmall
-                .copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
           ),
         ),
-        Expanded(
-          child: Divider(
-            thickness: 1,
-            color: Theme.of(context).colorScheme.outlineVariant,
-          ),
-        ),
+        const Expanded(child: FgDivider()),
       ],
     );
   }

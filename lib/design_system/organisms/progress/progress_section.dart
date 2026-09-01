@@ -1,135 +1,164 @@
 import 'package:flutter/material.dart';
-import 'package:forge_dance/design_system/atoms/progress/fg_progress_bar.dart';
 
-import '../../../design_system/tokens/app_colors.dart';
-import '../../../design_system/tokens/app_spacing.dart';
-import '../../../design_system/tokens/app_typography.dart';
+import '../../atoms/buttons/fg_button.dart';
+import '../../atoms/progress/fg_progress_bar.dart';
+import '../../atoms/surfaces/fg_card.dart';
+import '../../theme/forge_theme_extensions.dart';
+import '../../tokens/app_sizes.dart';
+import '../../tokens/app_spacing.dart';
 
-/// Progress section organism - Combines stat cards, progress bars, level indicators
-class ProgressSection extends StatelessWidget {
+enum FgStatTone { primary, secondary, success, reward, neutral }
+
+/// Responsive progress summary composed from Forge cards and progress atoms.
+class FgProgressSection extends StatelessWidget {
+  const FgProgressSection({
+    super.key,
+    required this.title,
+    required this.stats,
+    this.actionLabel,
+    this.onAction,
+    this.levelProgress,
+    this.onProgressTap,
+  });
+
   final String title;
   final String? actionLabel;
   final VoidCallback? onAction;
-  final List<StatCardData> stats;
-  final ProgressData? levelProgress;
-
-  const ProgressSection({
-    super.key,
-    required this.title,
-    this.actionLabel,
-    this.onAction,
-    required this.stats,
-    this.levelProgress,
-  });
+  final List<FgStatData> stats;
+  final FgProgressData? levelProgress;
+  final VoidCallback? onProgressTap;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              title,
-              style: AppTypography.h5.copyWith(
-                color: AppColors.crystalWhite,
-              ),
-            ),
+            Expanded(child: Text(title, style: theme.textTheme.titleLarge)),
             if (actionLabel != null && onAction != null)
-              TextButton(
+              FgButton(
+                text: actionLabel!,
+                variant: FgButtonVariant.ghost,
+                size: FgButtonSize.sm,
                 onPressed: onAction,
-                child: Text(
-                  actionLabel!,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.gray400,
-                  ),
-                ),
               ),
           ],
         ),
-        const SizedBox(height: AppSpacing.md),
-        // Stat cards
-        if (stats.isNotEmpty)
-          Row(
-            children: List.generate(stats.length, (index) {
-              final stat = stats[index];
-              return Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    right: index < stats.length - 1 ? AppSpacing.md : 0,
-                  ),
-                  child: Container(
-                    padding: AppSpacing.card,
-                    decoration: BoxDecoration(
-                      color: AppColors.gray800,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          stat.value + (stat.unit ?? ''),
-                          style: AppTypography.h5.copyWith(
-                            color: AppColors.crystalWhite,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          stat.label,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.gray400,
-                          ),
-                        ),
-                      ],
-                    ),
+        if (stats.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.md),
+          Wrap(
+            spacing: AppSpacing.md,
+            runSpacing: AppSpacing.md,
+            children: [
+              for (final stat in stats)
+                SizedBox(
+                  width: AppSizes.cardCompactWidth,
+                  child: FgCard(
+                    child: _StatContent(stat: stat),
                   ),
                 ),
-              );
-            }),
+            ],
           ),
-        // Level progress card
+        ],
         if (levelProgress != null) ...[
           const SizedBox(height: AppSpacing.md),
-          Container(
-            padding: AppSpacing.card,
-            decoration: BoxDecoration(
-              color: AppColors.gray800,
-              borderRadius: BorderRadius.circular(16),
+          FgCard(
+            variant: FgCardVariant.elevated,
+            onTap: onProgressTap,
+            child: _ProgressContent(progress: levelProgress!),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _StatContent extends StatelessWidget {
+  const _StatContent({required this.stat});
+
+  final FgStatData stat;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final forgeColors = theme.forgeColors;
+    final accent = switch (stat.tone) {
+      FgStatTone.primary => scheme.primary,
+      FgStatTone.secondary => scheme.secondary,
+      FgStatTone.success => forgeColors.success,
+      FgStatTone.reward => forgeColors.reward,
+      FgStatTone.neutral => scheme.onSurfaceVariant,
+    };
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (stat.icon != null) ...[
+          Icon(stat.icon, color: accent, size: AppSizes.iconLg),
+          const SizedBox(height: AppSpacing.sm),
+        ],
+        Text(
+          '${stat.value}${stat.unit ?? ''}',
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+            fontFeatures: const [FontFeature.tabularFigures()],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          stat.label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: scheme.onSurfaceVariant,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ProgressContent extends StatelessWidget {
+  const _ProgressContent({required this.progress});
+
+  final FgProgressData progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final ratio = progress.target <= 0
+        ? 0.0
+        : (progress.current / progress.target).clamp(0.0, 1.0);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          alignment: WrapAlignment.spaceBetween,
+          spacing: AppSpacing.lg,
+          runSpacing: AppSpacing.xs,
+          children: [
+            Text(progress.label, style: theme.textTheme.titleMedium),
+            Text(
+              progress.valueLabel,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: scheme.onSurfaceVariant,
+                fontFeatures: const [FontFeature.tabularFigures()],
+              ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      levelProgress!.label,
-                      style: AppTypography.h6.copyWith(
-                        color: AppColors.crystalWhite,
-                      ),
-                    ),
-                    Text(
-                      '${levelProgress!.current} / ${levelProgress!.target} XP',
-                      style: AppTypography.bodySmall.copyWith(
-                        color: AppColors.gray400,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.md),
-                FgProgressBar(
-                  value: levelProgress!.current / levelProgress!.target,
-                  height: 6,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  levelProgress!.message,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.gray400,
-                  ),
-                ),
-              ],
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        FgProgressBar(value: ratio),
+        if (progress.message != null) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            progress.message!,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: scheme.onSurfaceVariant,
             ),
           ),
         ],
@@ -138,32 +167,36 @@ class ProgressSection extends StatelessWidget {
   }
 }
 
-class StatCardData {
-  final String label;
-  final String value;
-  final String? unit;
-  final String? icon;
-  final Color? iconColor;
-
-  StatCardData({
+@immutable
+class FgStatData {
+  const FgStatData({
     required this.label,
     required this.value,
     this.unit,
     this.icon,
-    this.iconColor,
+    this.tone = FgStatTone.primary,
   });
+
+  final String label;
+  final String value;
+  final String? unit;
+  final IconData? icon;
+  final FgStatTone tone;
 }
 
-class ProgressData {
-  final String label;
-  final int current;
-  final int target;
-  final String message;
-
-  ProgressData({
+@immutable
+class FgProgressData {
+  const FgProgressData({
     required this.label,
     required this.current,
     required this.target,
-    required this.message,
+    required this.valueLabel,
+    this.message,
   });
+
+  final String label;
+  final double current;
+  final double target;
+  final String valueLabel;
+  final String? message;
 }

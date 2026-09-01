@@ -1,127 +1,77 @@
 import 'package:flutter/material.dart';
 
-import '../../../design_system/tokens/app_colors.dart';
-import '../../../design_system/tokens/app_spacing.dart';
-import '../../../design_system/tokens/app_typography.dart';
-import '../../../features/common/ui/widgets/material_ink_well.dart';
+import '../../atoms/surfaces/fg_card.dart';
+import '../../tokens/app_spacing.dart';
 
-/// Checkbox group molecule - Multi-select with custom styling
+@immutable
 class FgCheckboxGroupItem {
-  final String label;
-  final bool value;
-  final String? id;
-
-  FgCheckboxGroupItem({
+  const FgCheckboxGroupItem({
     required this.label,
     required this.value,
     this.id,
+    this.description,
+    this.isEnabled = true,
   });
+
+  final String label;
+  final bool value;
+  final String? id;
+  final String? description;
+  final bool isEnabled;
 }
 
-class FgCheckboxGroup extends StatefulWidget {
-  final List<FgCheckboxGroupItem> items;
-  final ValueChanged<List<String>>? onChanged;
-
+/// Controlled multi-select group using Flutter's native checkbox behavior.
+class FgCheckboxGroup extends StatelessWidget {
   const FgCheckboxGroup({
     super.key,
     required this.items,
     this.onChanged,
+    this.semanticLabel,
   });
 
-  @override
-  State<FgCheckboxGroup> createState() => _FgCheckboxGroupState();
-}
+  final List<FgCheckboxGroupItem> items;
+  final ValueChanged<List<String>>? onChanged;
+  final String? semanticLabel;
 
-class _FgCheckboxGroupState extends State<FgCheckboxGroup> {
-  late List<FgCheckboxGroupItem> _items;
-
-  @override
-  void initState() {
-    super.initState();
-    _items = List.from(widget.items);
-  }
-
-  void _toggleItem(int index) {
-    setState(() {
-      _items[index] = FgCheckboxGroupItem(
-        label: _items[index].label,
-        value: !_items[index].value,
-        id: _items[index].id,
-      );
-    });
-    widget.onChanged?.call(
-      _items
-          .where((item) => item.value)
-          .map((item) => item.id ?? item.label)
-          .toList(),
-    );
+  void _toggle(int index) {
+    final nextSelection = <String>[
+      for (var itemIndex = 0; itemIndex < items.length; itemIndex++)
+        if (itemIndex == index ? !items[itemIndex].value : items[itemIndex].value)
+          items[itemIndex].id ?? items[itemIndex].label,
+    ];
+    onChanged?.call(nextSelection);
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: List.generate(_items.length, (index) {
-        final item = _items[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.md),
-          child: MaterialInkWell(
-            onTap: () => _toggleItem(index),
-            radius: 12,
-            child: Container(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              decoration: BoxDecoration(
-                color: AppColors.gray800,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: item.value
-                      ? AppColors.forgeFire.withOpacity(0.3)
-                      : AppColors.gray700,
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 24,
-                    height: 24,
-                    decoration: BoxDecoration(
-                      color:
-                          item.value ? AppColors.forgeFire : Colors.transparent,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: item.value
-                            ? AppColors.forgeFire
-                            : AppColors.gray400,
-                        width: 2,
-                      ),
-                    ),
-                    child: item.value
-                        ? const Icon(
-                            Icons.check,
-                            size: 16,
-                            color: AppColors.crystalWhite,
-                          )
-                        : null,
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-                  Expanded(
-                    child: Text(
-                      item.label,
-                      style: AppTypography.body.copyWith(
-                        fontWeight:
-                            item.value ? FontWeight.w600 : FontWeight.w500,
-                        color: item.value
-                            ? AppColors.crystalWhite
-                            : AppColors.gray400,
-                      ),
-                    ),
-                  ),
-                ],
+    return Semantics(
+      label: semanticLabel,
+      container: semanticLabel != null,
+      child: Column(
+        children: [
+          for (var index = 0; index < items.length; index++) ...[
+            FgCard(
+              variant: FgCardVariant.outlined,
+              padding: EdgeInsets.zero,
+              child: CheckboxListTile.adaptive(
+                value: items[index].value,
+                onChanged: items[index].isEnabled && onChanged != null
+                    ? (_) => _toggle(index)
+                    : null,
+                title: Text(items[index].label),
+                subtitle: items[index].description == null
+                    ? null
+                    : Text(items[index].description!),
+                enabled: items[index].isEnabled,
+                controlAffinity: ListTileControlAffinity.leading,
+                contentPadding: AppSpacing.horizontal,
               ),
             ),
-          ),
-        );
-      }),
+            if (index < items.length - 1)
+              const SizedBox(height: AppSpacing.md),
+          ],
+        ],
+      ),
     );
   }
 }

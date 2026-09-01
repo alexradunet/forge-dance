@@ -55,7 +55,11 @@ class _ProgressStory extends StatelessWidget {
         for (final value in const [0.0, 0.25, 0.6, 1.0])
           StorySection(
             title: '${(value * 100).round()}%',
-            child: FgProgressBar(value: value),
+            child: FgProgressBar(
+              value: value,
+              semanticLabel:
+                  'Training progress ${(value * 100).round()} percent',
+            ),
           ),
       ],
     );

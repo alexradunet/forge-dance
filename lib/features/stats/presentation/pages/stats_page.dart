@@ -2,13 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../design_system/tokens/app_colors.dart';
-import '../../../../design_system/atoms/progress/fg_spinner.dart';
-import '../../../../design_system/atoms/visuals/fg_background.dart';
-import '../../../../design_system/organisms/navigation/app_header.dart';
+import '../../../../design_system/design_system.dart';
 import '../../../../generated/locale_keys.g.dart';
-import '../../../common/ui/widgets/common_error.dart';
-import '../../../profile/ui/widgets/profile_stats.dart';
 import '../../model/stats_rules.dart';
 import '../../model/user_stats.dart';
 import '../../ui/view_model/user_stats_provider.dart';
@@ -23,11 +18,14 @@ class StatsPage extends ConsumerWidget {
     final stats = ref.watch(userStatsProvider);
 
     return Scaffold(
-      backgroundColor: Colors.transparent, // Background handled by FgBackground
       body: FgBackground(
         child: stats.when(
           loading: () => const Center(child: FgSpinner()),
-          error: (_, _) => const CommonError(),
+          error: (_, _) => FgEmpty(
+            icon: Icons.error_outline,
+            title: LocaleKeys.unexpectedErrorOccurred.tr(),
+            tone: FgEmptyTone.error,
+          ),
           data: (stats) => _buildMainContent(context, stats),
         ),
       ),
@@ -43,63 +41,57 @@ class StatsPage extends ConsumerWidget {
           onBack: () => Navigator.of(context).pop(),
         ),
       ),
-      SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Row(
-            children: [
-              Expanded(
-                child: ProfileStatCard(
-                  label: LocaleKeys.currentStreak.tr(),
-                  value: LocaleKeys.daysValue
-                      .tr(args: ['${stats.streakCount}']),
-                  icon: Icons.local_fire_department,
-                  iconColor: AppColors.forgeFire,
-                ),
+      SliverPadding(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
+        sliver: SliverToBoxAdapter(
+          child: FgProgressSection(
+            title: LocaleKeys.statsSubtitle.tr(),
+            stats: [
+              FgStatData(
+                label: LocaleKeys.currentStreak.tr(),
+                value: LocaleKeys.daysValue.tr(args: ['${stats.streakCount}']),
+                icon: Icons.local_fire_department_rounded,
+                tone: FgStatTone.primary,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: ProfileStatCard(
-                  label: LocaleKeys.totalXpLabel.tr(),
-                  value: formatXp(stats.totalXp),
-                  icon: Icons.bolt,
-                  iconColor: AppColors.electricBlue,
-                ),
+              FgStatData(
+                label: LocaleKeys.totalXpLabel.tr(),
+                value: formatXp(stats.totalXp),
+                icon: Icons.bolt_rounded,
+                tone: FgStatTone.secondary,
               ),
-            ],
-          ),
-        ),
-      ),
-      SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Row(
-            children: [
-              Expanded(
-                child: ProfileStatCard(
-                  label: LocaleKeys.levelLabel.tr(args: ['${stats.level}']),
-                  value: LocaleKeys.beltNameLabel.tr(args: [stats.beltName]),
-                  icon: Icons.military_tech,
-                  iconColor: AppColors.legendGold,
-                ),
+              FgStatData(
+                label: LocaleKeys.levelLabel.tr(args: ['${stats.level}']),
+                value: LocaleKeys.beltNameLabel.tr(args: [stats.beltName]),
+                icon: Icons.military_tech_rounded,
+                tone: FgStatTone.reward,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: ProfileStatCard(
-                  label: stats.nextLevelXp == null
-                      ? LocaleKeys.maxLevelReached.tr()
-                      : LocaleKeys.nextLevelXp
-                          .tr(args: ['${stats.nextLevelXp}']),
-                  value: stats.nextLevelXp == null
-                      ? formatXp(stats.totalXp)
-                      : LocaleKeys.xpValue.tr(
-                          args: ['${stats.nextLevelXp! - stats.totalXp}'],
-                        ),
-                  icon: Icons.trending_up,
-                  iconColor: AppColors.mysticPurple,
-                ),
+              FgStatData(
+                label: stats.nextLevelXp == null
+                    ? LocaleKeys.maxLevelReached.tr()
+                    : LocaleKeys.nextLevelXp.tr(
+                        args: ['${stats.nextLevelXp}'],
+                      ),
+                value: stats.nextLevelXp == null
+                    ? formatXp(stats.totalXp)
+                    : LocaleKeys.xpValue.tr(
+                        args: ['${stats.nextLevelXp! - stats.totalXp}'],
+                      ),
+                icon: Icons.trending_up_rounded,
+                tone: FgStatTone.success,
               ),
             ],
+            levelProgress: FgProgressData(
+              label: LocaleKeys.beltNameLabel.tr(args: [stats.beltName]),
+              current: stats.totalXp.toDouble(),
+              target:
+                  stats.nextLevelXp?.toDouble() ?? stats.totalXp.toDouble(),
+              valueLabel: LocaleKeys.xpValue.tr(args: ['${stats.totalXp}']),
+              message: stats.nextLevelXp == null
+                  ? LocaleKeys.maxLevelReached.tr()
+                  : LocaleKeys.nextLevelXp.tr(
+                      args: ['${stats.nextLevelXp}'],
+                    ),
+            ),
           ),
         ),
       ),

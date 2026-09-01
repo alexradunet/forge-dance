@@ -26,6 +26,11 @@ class FgAspectRatio extends StatelessWidget {
     return FgAspectRatio(ratio: 1, child: child);
   }
 
+  /// Standard 9:16 for portrait cards and stories.
+  factory FgAspectRatio.portrait({required Widget child}) {
+    return FgAspectRatio(ratio: 9 / 16, child: child);
+  }
+
   @override
   Widget build(BuildContext context) {
     return AspectRatio(

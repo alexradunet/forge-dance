@@ -6,12 +6,8 @@ import 'package:go_router/go_router.dart';
 import '../../../extensions/build_context_extension.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../../extensions/string_extension.dart';
-import '../../../design_system/tokens/app_typography.dart';
+import '../../../design_system/design_system.dart';
 import '../../../utils/global_loading.dart';
-import '../../../design_system/organisms/navigation/app_header.dart';
-import '../../../design_system/atoms/visuals/fg_background.dart';
-import '../../../design_system/atoms/buttons/fg_button.dart';
-import '../../../design_system/atoms/inputs/fg_input.dart';
 import '../model/profile.dart';
 import '../repository/device_avatar_repository.dart';
 import 'view_model/profile_view_model.dart';
@@ -74,7 +70,6 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
       body: FgBackground(
         child: Column(
           children: [
@@ -85,35 +80,36 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.symmetric(
-                  vertical: 32,
-                  horizontal: 24,
+                  vertical: AppSpacing.xxxl,
+                  horizontal: AppSpacing.xxl,
                 ),
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    spacing: AppSpacing.lg,
+                    runSpacing: AppSpacing.lg,
                     children: [
-                      Avatar(url: avatar ?? widget.originalProfile.avatar),
-                      const SizedBox(width: 16),
-                      SizedBox(
-                        width: 120,
-                        child: FgButton(
-                          text: LocaleKeys.selectAvatar.tr(),
-                          variant: FgButtonVariant.secondary,
-                          size: FgButtonSize.sm,
-                          expand: true,
-                          onPressed: _selectImage,
-                        ),
+                      Avatar(
+                        url: avatar ?? widget.originalProfile.avatar,
+                        semanticLabel: name ?? widget.originalProfile.name,
+                      ),
+                      FgButton(
+                        text: LocaleKeys.selectAvatar.tr(),
+                        variant: FgButtonVariant.secondary,
+                        size: FgButtonSize.sm,
+                        onPressed: _selectImage,
                       ),
                     ],
                   ),
-                  const SizedBox(height: 32),
-                  Text(LocaleKeys.email.tr(), style: AppTypography.caption),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: AppSpacing.xxxl),
+                  FgLabel(text: LocaleKeys.email.tr()),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     widget.originalProfile.email.orEmpty(),
-                    style: AppTypography.body,
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: AppSpacing.xxxl),
                   FgInput(
                     label: LocaleKeys.name.tr(),
                     controller: nameController,
@@ -124,7 +120,11 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.only(left: 24, right: 24, bottom: 32),
+              padding: const EdgeInsets.only(
+                left: AppSpacing.xxl,
+                right: AppSpacing.xxl,
+                bottom: AppSpacing.xxxl,
+              ),
               child: FgButton(
                 text: LocaleKeys.confirm.tr(),
                 expand: true,

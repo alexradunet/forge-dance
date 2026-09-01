@@ -1,7 +1,11 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:forge_dance/design_system/atoms/visuals/fg_tech_pattern_painter.dart';
 
+import '../../atoms/buttons/fg_icon_button.dart';
+
+import '../../theme/forge_theme_extensions.dart';
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_border_radius.dart';
 import '../../tokens/app_typography.dart';
@@ -12,6 +16,7 @@ class FgInteractiveCardThumbnail extends StatefulWidget {
   final String backgroundImage;
   final String? level;
   final Function(bool)? onTap;
+  final String flipSemanticLabel;
 
   // Back content specific to thumbnails (simplified)
   final String? backTitle;
@@ -21,6 +26,7 @@ class FgInteractiveCardThumbnail extends StatefulWidget {
     super.key,
     required this.title,
     required this.backgroundImage,
+    required this.flipSemanticLabel,
     this.subtitle,
     this.level,
     this.onTap,
@@ -45,27 +51,56 @@ class _FgInteractiveCardThumbnailState extends State<FgInteractiveCardThumbnail>
 
   @override
   Widget build(BuildContext context) {
-    return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0, end: _isFlipped ? 180 : 0),
-      duration: const Duration(milliseconds: 600),
-      curve: Curves.easeInOutBack,
-      builder: (context, angle, child) {
-        final isBackVisible = angle >= 90;
+    final motion = context.forgeMotion;
 
-        return Transform(
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.001) // perspective
-            ..rotateY(angle * pi / 180),
-          alignment: Alignment.center,
-          child: isBackVisible
-              ? Transform(
-                  transform: Matrix4.identity()..rotateY(pi),
-                  alignment: Alignment.center,
-                  child: _buildBack(),
-                )
-              : _buildFront(),
-        );
-      },
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Semantics(
+            label: widget.title,
+            button: widget.onTap != null,
+            enabled: widget.onTap != null,
+            onTap: widget.onTap == null
+                ? null
+                : () => widget.onTap!.call(_isFlipped),
+            child: ExcludeSemantics(
+              child: TweenAnimationBuilder<double>(
+                tween: Tween<double>(begin: 0, end: _isFlipped ? 180 : 0),
+                duration: motion.slow,
+                curve: motion.enterCurve,
+                builder: (context, angle, child) {
+                  final isBackVisible = angle >= 90;
+
+                  return Transform(
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, 0.001)
+                      ..rotateY(angle * pi / 180),
+                    alignment: Alignment.center,
+                    child: isBackVisible
+                        ? Transform(
+                            transform: Matrix4.identity()..rotateY(pi),
+                            alignment: Alignment.center,
+                            child: _buildBack(),
+                          )
+                        : _buildFront(),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: FgIconButton(
+            icon: Icons.replay_rounded,
+            semanticLabel: widget.flipSemanticLabel,
+            size: FgIconButtonSize.sm,
+            variant: FgIconButtonVariant.ghost,
+            onPressed: _toggleFlip,
+          ),
+        ),
+      ],
     );
   }
 
@@ -74,8 +109,10 @@ class _FgInteractiveCardThumbnailState extends State<FgInteractiveCardThumbnail>
       decoration: BoxDecoration(
         color: AppColors.surfaceCard,
         borderRadius: AppBorderRadius.xxLarge,
-        border:
-            Border.all(color: AppColors.forgeFire.withOpacity(0.5), width: 2),
+        border: Border.all(
+          color: AppColors.forgeFire.withOpacity(0.5),
+          width: 2,
+        ),
         boxShadow: [
           BoxShadow(
             color: AppColors.forgeFire.withOpacity(0.4),
@@ -85,8 +122,9 @@ class _FgInteractiveCardThumbnailState extends State<FgInteractiveCardThumbnail>
         ],
       ),
       clipBehavior: Clip.antiAlias,
-      child: GestureDetector(
+      child: InkWell(
         onTap: () => widget.onTap?.call(_isFlipped),
+        excludeFromSemantics: true,
         child: Column(
           children: [
             Expanded(
@@ -140,14 +178,16 @@ class _FgInteractiveCardThumbnailState extends State<FgInteractiveCardThumbnail>
                           if (widget.subtitle != null)
                             Container(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 6, vertical: 2),
+                                horizontal: 6,
+                                vertical: 2,
+                              ),
                               margin: const EdgeInsets.only(bottom: 6),
                               decoration: BoxDecoration(
                                 color: Colors.black.withOpacity(0.6),
                                 borderRadius: BorderRadius.circular(4),
                                 border: Border.all(
-                                    color:
-                                        AppColors.forgeFire.withOpacity(0.3)),
+                                  color: AppColors.forgeFire.withOpacity(0.3),
+                                ),
                               ),
                               child: Text(
                                 widget.subtitle!.toUpperCase(),
@@ -168,34 +208,14 @@ class _FgInteractiveCardThumbnailState extends State<FgInteractiveCardThumbnail>
                               letterSpacing: 1.0,
                               shadows: [
                                 Shadow(
-                                    color: Colors.black.withOpacity(0.8),
-                                    blurRadius: 10,
-                                    offset: const Offset(0, 4)),
+                                  color: Colors.black.withOpacity(0.8),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
                               ],
                             ),
                           ),
                         ],
-                      ),
-                    ),
-                  ),
-
-                  // Flip Button
-                  Positioned(
-                    bottom: 8,
-                    right: 8,
-                    child: GestureDetector(
-                      onTap: _toggleFlip,
-                      child: Container(
-                        width: 24,
-                        height: 24,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.black.withOpacity(0.4),
-                          border:
-                              Border.all(color: Colors.white.withOpacity(0.2)),
-                        ),
-                        child: const Icon(Icons.replay,
-                            color: Colors.white, size: 14),
                       ),
                     ),
                   ),
@@ -213,13 +233,15 @@ class _FgInteractiveCardThumbnailState extends State<FgInteractiveCardThumbnail>
       decoration: BoxDecoration(
         color: AppColors.surfaceCard,
         borderRadius: AppBorderRadius.xxLarge,
-        border:
-            Border.all(color: AppColors.forgeFire.withOpacity(0.5), width: 2),
+        border: Border.all(
+          color: AppColors.forgeFire.withOpacity(0.5),
+          width: 2,
+        ),
       ),
       clipBehavior: Clip.antiAlias,
-      child: GestureDetector(
+      child: InkWell(
         onTap: () => widget.onTap?.call(_isFlipped),
-        behavior: HitTestBehavior.opaque,
+        excludeFromSemantics: true,
         child: Stack(
           children: [
             Positioned.fill(
@@ -240,15 +262,19 @@ class _FgInteractiveCardThumbnailState extends State<FgInteractiveCardThumbnail>
                   if (widget.backSubtitle != null)
                     Text(
                       widget.backSubtitle!.toUpperCase(),
-                      style: AppTypography.label
-                          .copyWith(color: AppColors.forgeFire, fontSize: 8),
+                      style: AppTypography.label.copyWith(
+                        color: AppColors.forgeFire,
+                        fontSize: 8,
+                      ),
                     ),
                   const SizedBox(height: 4),
                   if (widget.backTitle != null)
                     Text(
                       widget.backTitle!.toUpperCase(),
-                      style: AppTypography.h3
-                          .copyWith(color: Colors.white, fontSize: 16),
+                      style: AppTypography.h3.copyWith(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
                     ),
                   const SizedBox(height: 12),
                   // Hardcoded rhythm visual for now as per original mini card design
@@ -266,24 +292,6 @@ class _FgInteractiveCardThumbnailState extends State<FgInteractiveCardThumbnail>
                     ),
                   ),
                 ],
-              ),
-            ),
-            Positioned(
-              bottom: 8,
-              right: 8,
-              child: GestureDetector(
-                onTap: _toggleFlip,
-                child: Container(
-                  width: 24,
-                  height: 24,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withOpacity(0.1),
-                    border: Border.all(color: Colors.white.withOpacity(0.2)),
-                  ),
-                  child:
-                      const Icon(Icons.replay, color: Colors.white, size: 14),
-                ),
               ),
             ),
           ],

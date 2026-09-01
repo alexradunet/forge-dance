@@ -94,7 +94,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     });
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
       body: Theme(
         data: AppThemes.dark,
         child: FgBackground(
@@ -125,9 +124,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         const SizedBox(height: AppSpacing.lg),
                         Text(
                           LocaleKeys.register.tr(),
-                          style: AppTypography.h1.copyWith(
-                            color: AppColors.crystalWhite,
-                          ),
+                          style: AppTypography.h1,
                         ),
                         const SizedBox(height: AppSpacing.xxl),
                         FgInput(
@@ -174,9 +171,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             children: [
                               Text(
                                 LocaleKeys.alreadyHaveAccount.tr(),
-                                style: AppTypography.bodySmall.copyWith(
-                                  color: AppColors.gray300,
-                                ),
+                                style: AppTypography.bodySmall,
                               ),
                               FgButton(
                                 text: LocaleKeys.signIn.tr(),

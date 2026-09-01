@@ -2,18 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../design_system/tokens/app_colors.dart';
-import '../../../../design_system/tokens/app_spacing.dart';
-import '../../../../design_system/atoms/visuals/fg_background.dart';
-import '../../../../design_system/atoms/progress/fg_spinner.dart';
-import '../../../../design_system/organisms/navigation/app_header.dart';
-import '../../../../design_system/molecules/cards/fg_interactive_card.dart';
-import '../../../../design_system/molecules/cards/fg_interactive_card_thumbnail.dart';
-import '../../../../design_system/molecules/feedback/fg_empty.dart';
-import '../../../../design_system/atoms/icons/fg_icon.dart';
-import '../../../../design_system/organisms/modals/fg_filter_sheet.dart';
+import '../../../../design_system/design_system.dart';
 import '../../../../generated/locale_keys.g.dart';
-import '../../../common/ui/widgets/common_error.dart';
 import '../../../learn/model/lesson.dart';
 import '../../../learn/model/lesson_progress.dart';
 import '../../../learn/model/library_projection.dart';
@@ -61,6 +51,9 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
     final draft = {..._selectedFilters};
     FgFilterSheet.show(
       context: context,
+      title: LocaleKeys.filters.tr(),
+      resetLabel: LocaleKeys.reset.tr(),
+      applyLabel: LocaleKeys.applyFilters.tr(),
       sections: {
         'Difficulty': ['All', ...projection.difficulties],
         'Style': ['All', ...projection.styles],
@@ -90,11 +83,14 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
     final learnState = ref.watch(learnViewModelProvider);
 
     return Scaffold(
-      backgroundColor: Colors.transparent, // Background handled by FgBackground
       body: FgBackground(
         child: learnState.when(
           loading: () => const Center(child: FgSpinner()),
-          error: (_, _) => const CommonError(),
+          error: (_, _) => FgEmpty(
+            icon: Icons.error_outline,
+            title: LocaleKeys.unexpectedErrorOccurred.tr(),
+            tone: FgEmptyTone.error,
+          ),
           data: (state) => _buildContent(state),
         ),
       ),
@@ -128,14 +124,12 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
             top: AppSpacing.lg,
             bottom: AppSpacing.sm,
           ),
-          sliver: SliverToBoxAdapter(
-            child: _buildSearchBar(),
-          ),
+          sliver: SliverToBoxAdapter(child: _buildSearchBar()),
         ),
 
         // Content
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
           sliver: SliverToBoxAdapter(
             child: projection.entries.isEmpty
                 ? FgEmpty(
@@ -144,17 +138,17 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
                     description: LocaleKeys.emptyLibrarySubtitle.tr(),
                   )
                 : items.isEmpty
-                    ? FgEmpty(
-                        icon: Icons.search_off,
-                        title: LocaleKeys.noResults.tr(),
-                        description: LocaleKeys.searchLibraryHint.tr(),
-                      )
-                    : _buildGridView(items),
+                ? FgEmpty(
+                    icon: Icons.search_off,
+                    title: LocaleKeys.noResults.tr(),
+                    description: LocaleKeys.searchLibraryHint.tr(),
+                  )
+                : _buildGridView(items),
           ),
         ),
 
         const SliverToBoxAdapter(
-          child: SizedBox(height: 120),
+          child: SizedBox(height: AppSizes.bottomNavHeight + AppSpacing.xxxl),
         ),
       ],
     );
@@ -172,9 +166,9 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
       physics: const NeverScrollableScrollPhysics(),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: _crossAxisCount,
-        mainAxisSpacing: 16,
-        crossAxisSpacing: 16,
-        childAspectRatio: 0.7,
+        mainAxisSpacing: AppSpacing.lg,
+        crossAxisSpacing: AppSpacing.lg,
+        childAspectRatio: AppSizes.lessonCardAspectRatio,
       ),
       itemCount: items.length,
       itemBuilder: (context, index) {
@@ -182,6 +176,7 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
         return FgInteractiveCardThumbnail(
           title: item.lesson.title.toUpperCase(),
           level: _statusLabel(item.status).toUpperCase(),
+          flipSemanticLabel: LocaleKeys.flipCard.tr(),
           backgroundImage: item.module.imageUrl,
           backTitle: item.module.title.toUpperCase(),
           backSubtitle: item.lesson.type.label,
@@ -191,41 +186,23 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
     );
   }
 
-  void _showCardPopup(
-    BuildContext context,
-    LibraryEntry item,
-    bool isFlipped,
-  ) {
-    showDialog(
+  void _showCardPopup(BuildContext context, LibraryEntry item, bool isFlipped) {
+    ForgeBottomSheet.show<void>(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.9),
-      builder: (context) {
-        return Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 500,
-              maxHeight: 800,
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: AspectRatio(
-                aspectRatio: 9 / 16,
-                child: FgInteractiveCard(
-                  title: item.lesson.title.toUpperCase(),
-                  subtitle: item.module.title,
-                  backgroundImage: item.module.imageUrl,
-                  level: _statusLabel(item.status).toUpperCase(),
-                  style: item.module.tag,
-                  difficulty: item.lesson.difficulty,
-                  isFavorited: false,
-                  onTap: () {},
-                  initialFlipped: isFlipped,
-                ),
-              ),
-            ),
-          ),
-        );
-      },
+      title: item.lesson.title,
+      child: FgAspectRatio.portrait(
+        child: FgInteractiveCard(
+          title: item.lesson.title.toUpperCase(),
+          flipSemanticLabel: LocaleKeys.flipCard.tr(),
+          subtitle: item.module.title,
+          backgroundImage: item.module.imageUrl,
+          level: _statusLabel(item.status).toUpperCase(),
+          style: item.module.tag,
+          difficulty: item.lesson.difficulty,
+          isFavorited: false,
+          initialFlipped: isFlipped,
+        ),
+      ),
     );
   }
 
@@ -235,91 +212,30 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
   }
 
   Widget _buildColumnToggle() {
-    return PopupMenuButton<int>(
-      icon: const FgIcon(icon: Icons.grid_view, color: Colors.white, size: 24),
-      color: AppColors.surfaceDark,
-      offset: const Offset(0, 40),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      onSelected: (value) {
-        setState(() {
-          _crossAxisCount = value;
-        });
-      },
-      itemBuilder: (context) => [
-        _buildPopupMenuItem(2, "2 Columns"),
-        _buildPopupMenuItem(3, "3 Columns"),
-        _buildPopupMenuItem(4, "4 Columns"),
-      ],
-    );
-  }
-
-  PopupMenuItem<int> _buildPopupMenuItem(int value, String text) {
-    return PopupMenuItem(
-      value: value,
-      child: Row(
-        children: [
-          Icon(
-            _crossAxisCount == value
-                ? Icons.radio_button_checked
-                : Icons.radio_button_unchecked,
-            color: _crossAxisCount == value
-                ? AppColors.forgeFire
-                : AppColors.textMuted,
-            size: 20,
+    return FgMenuButton<int>(
+      icon: Icons.grid_view_rounded,
+      semanticLabel: LocaleKeys.chooseGridColumns.tr(),
+      items: [
+        for (final columns in const [2, 3, 4])
+          FgMenuItem(
+            value: columns,
+            label: LocaleKeys.gridColumns.tr(args: ['$columns']),
+            isSelected: columns == _crossAxisCount,
           ),
-          const SizedBox(width: 12),
-          Text(text, style: const TextStyle(color: Colors.white)),
-        ],
-      ),
+      ],
+      onSelected: (value) => setState(() => _crossAxisCount = value),
     );
   }
 
   Widget _buildSearchBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceDark,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          const FgIcon(icon: Icons.search, color: AppColors.textMuted),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextField(
-              controller: _searchController,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
-              decoration: InputDecoration(
-                hintText: LocaleKeys.searchLibraryHint.tr(),
-                hintStyle:
-                    const TextStyle(color: AppColors.textDark, fontSize: 14),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-            ),
-          ),
-          GestureDetector(
-            onTap: _showFilterSheet,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const FgIcon(
-                  icon: Icons.tune, color: AppColors.textMuted, size: 20),
-            ),
-          ),
-        ],
-      ),
+    return FgInput.search(
+      controller: _searchController,
+      placeholder: LocaleKeys.searchLibraryHint.tr(),
+      onClear: _searchController.clear,
+      clearSemanticsLabel: LocaleKeys.clearSearch.tr(),
+      showFilter: true,
+      onFilterPressed: _showFilterSheet,
+      filterSemanticsLabel: LocaleKeys.filterSearch.tr(),
     );
   }
 }

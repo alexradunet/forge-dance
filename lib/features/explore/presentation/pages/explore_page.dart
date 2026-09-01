@@ -2,17 +2,8 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../../design_system/tokens/app_colors.dart';
-import '../../../../design_system/tokens/app_typography.dart';
-import '../../../../design_system/molecules/cards/fg_content_card.dart';
-import '../../../../design_system/molecules/feedback/fg_empty.dart';
-import '../../../../design_system/organisms/navigation/app_header.dart';
-import '../../../../design_system/atoms/icons/fg_icon.dart';
-import '../../../../design_system/atoms/progress/fg_spinner.dart';
-import '../../../../design_system/atoms/visuals/fg_background.dart';
-import '../../../../design_system/organisms/modals/fg_filter_sheet.dart';
+import '../../../../design_system/design_system.dart';
 import '../../../../generated/locale_keys.g.dart';
-import '../../../common/ui/widgets/common_error.dart';
 import '../../../learn/model/lesson.dart';
 import '../../../learn/ui/state/learn_state.dart';
 import '../../../learn/ui/view_model/learn_view_model.dart';
@@ -55,6 +46,9 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
   void _showFilterSheet() {
     FgFilterSheet.show(
       context: context,
+      title: LocaleKeys.filters.tr(),
+      resetLabel: LocaleKeys.reset.tr(),
+      applyLabel: LocaleKeys.applyFilters.tr(),
       sections: {
         'Difficulty': ['All', 'Beginner', 'Intermediate', 'Advanced'],
         'Style': [
@@ -90,11 +84,14 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
     final learnState = ref.watch(learnViewModelProvider);
 
     return Scaffold(
-      backgroundColor: Colors.transparent, // Background handled by FgBackground
       body: FgBackground(
         child: learnState.when(
           loading: () => const Center(child: FgSpinner()),
-          error: (_, _) => const CommonError(),
+          error: (_, _) => FgEmpty(
+            icon: Icons.error_outline,
+            title: LocaleKeys.unexpectedErrorOccurred.tr(),
+            tone: FgEmptyTone.error,
+          ),
           data: (state) => _buildContent(state),
         ),
       ),
@@ -117,7 +114,10 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xxl,
+            vertical: AppSpacing.lg,
+          ),
           sliver: SliverToBoxAdapter(
             child: _buildSearchBar(),
           ),
@@ -136,11 +136,15 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
               SliverToBoxAdapter(
                 child: _buildSection(
                   title: _categoryLabel(section.category),
-                  titleColor: _categoryColor(section.category),
+                  dividerTone: _categoryTone(section.category),
                   children: _moduleCards(state, section),
                 ),
               ),
-        const SliverToBoxAdapter(child: SizedBox(height: 100)),
+        const SliverToBoxAdapter(
+          child: SizedBox(
+            height: AppSizes.bottomNavHeight + AppSpacing.lg,
+          ),
+        ),
       ],
     );
   }
@@ -166,15 +170,12 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
     }
   }
 
-  Color _categoryColor(ModuleCategory category) {
-    switch (category) {
-      case ModuleCategory.fundamentals:
-        return AppColors.forgeFire;
-      case ModuleCategory.streetStyles:
-        return AppColors.electricBlue;
-      case ModuleCategory.choreography:
-        return AppColors.mysticPurple;
-    }
+  FgDividerTone _categoryTone(ModuleCategory category) {
+    return switch (category) {
+      ModuleCategory.fundamentals => FgDividerTone.primary,
+      ModuleCategory.streetStyles => FgDividerTone.secondary,
+      ModuleCategory.choreography => FgDividerTone.reward,
+    };
   }
 
   List<Widget> _moduleCards(
@@ -182,12 +183,13 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
     ({ModuleCategory category, List<Module> modules}) section,
   ) {
     // Street styles keep the narrower card format from the original layout.
-    final width =
-        section.category == ModuleCategory.streetStyles ? 180.0 : null;
+    final width = section.category == ModuleCategory.streetStyles
+        ? AppSizes.cardCompactWidth
+        : null;
 
     return [
       for (var i = 0; i < section.modules.length; i++) ...[
-        if (i > 0) const SizedBox(width: 16),
+        if (i > 0) const SizedBox(width: AppSpacing.lg),
         _moduleCard(state, section.modules[i], width: width),
       ],
     ];
@@ -214,91 +216,44 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
   }
 
   Widget _buildSearchBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: AppColors.surfaceDark,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          const FgIcon(icon: Icons.search, color: AppColors.textMuted),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextField(
-              controller: _searchController,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
-              decoration: InputDecoration(
-                hintText: LocaleKeys.searchExploreHint.tr(),
-                hintStyle:
-                    const TextStyle(color: AppColors.textDark, fontSize: 14),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 16),
-              ),
-            ),
-          ),
-          GestureDetector(
-            onTap: _showFilterSheet,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.05),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const FgIcon(
-                  icon: Icons.tune, color: AppColors.textMuted, size: 20),
-            ),
-          ),
-        ],
-      ),
+    return FgInput.search(
+      controller: _searchController,
+      placeholder: LocaleKeys.searchExploreHint.tr(),
+      onClear: _searchController.clear,
+      clearSemanticsLabel: LocaleKeys.clearSearch.tr(),
+      showFilter: true,
+      onFilterPressed: _showFilterSheet,
+      filterSemanticsLabel: LocaleKeys.filterSearch.tr(),
     );
   }
 
   Widget _buildSection({
     required String title,
-    required Color titleColor,
+    required FgDividerTone dividerTone,
     required List<Widget> children,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xxl,
+            vertical: AppSpacing.lg,
+          ),
           child: Row(
             children: [
               Text(
-                title.toUpperCase(),
-                style: AppTypography.h3.copyWith(
-                  color: Colors.white,
-                  fontSize: 18,
-                  letterSpacing: 1.5,
-                ),
+                title,
+                style: Theme.of(context).textTheme.titleMedium,
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Container(
-                  height: 1,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [titleColor.withOpacity(0.4), Colors.transparent],
-                    ),
-                  ),
-                ),
-              ),
+              const SizedBox(width: AppSpacing.lg),
+              Expanded(child: FgDivider.horizontal(tone: dividerTone)),
             ],
           ),
         ),
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: 24),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
           child: Row(
             children: children,
           ),

@@ -4,14 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../extensions/build_context_extension.dart';
-import '../../../design_system/atoms/buttons/fg_button.dart';
-import '../../../design_system/atoms/inputs/fg_input.dart';
+import '../../../design_system/design_system.dart';
 import '../../../features/profile/ui/view_model/profile_view_model.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../../routing/routes.dart';
 
-import '../../../design_system/organisms/navigation/app_header.dart';
-import '../../../design_system/atoms/visuals/fg_background.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -49,7 +46,6 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent,
       body: FgBackground(
         child: Column(
           children: [
@@ -59,25 +55,16 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
             ),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: AppSpacing.allXXL,
                 child: Column(
                   children: [
-                    const SizedBox(height: 24),
-                    GestureDetector(
-                      onTap: () {
-                        // TODO: Implement image picker
-                      },
-                      child: CircleAvatar(
-                        radius: 50,
-                        backgroundColor: Colors.grey[300],
-                        child: const Icon(
-                          Icons.camera_alt,
-                          size: 40,
-                          color: Colors.grey,
-                        ),
-                      ),
+                    const SizedBox(height: AppSpacing.xxl),
+                    FgAvatar.large(
+                      initials: _nameController.text.trim().isEmpty
+                          ? null
+                          : _nameController.text.trim().characters.first,
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: AppSpacing.xxxl),
                     FgInput(
                       label: LocaleKeys.yourName.tr(),
                       controller: _nameController,
@@ -93,7 +80,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                           ? () => _saveNameAndContinue(context)
                           : null,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.lg),
                   ],
                 ),
               ),

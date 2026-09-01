@@ -30,12 +30,6 @@ List<WidgetbookNode> buildInputAtomStories() {
       ],
     ),
     WidgetbookComponent(
-      name: 'FgRadioButton',
-      useCases: [
-        WidgetbookUseCase(name: 'States', builder: (_) => const _RadioStory()),
-      ],
-    ),
-    WidgetbookComponent(
       name: 'FgCheckboxItem',
       useCases: [
         WidgetbookUseCase(
@@ -258,10 +252,19 @@ class _ToggleStoryState extends State<_ToggleStory> {
             children: [
               FgToggle(
                 value: _enabled,
+                semanticLabel: 'Enable practice reminders',
                 onChanged: (value) => setState(() => _enabled = value),
               ),
-              const FgToggle(value: false, isEnabled: false),
-              const FgToggle(value: true, isEnabled: false),
+              const FgToggle(
+                value: false,
+                semanticLabel: 'Disabled off toggle',
+                isEnabled: false,
+              ),
+              const FgToggle(
+                value: true,
+                semanticLabel: 'Disabled on toggle',
+                isEnabled: false,
+              ),
             ],
           ),
         ),
@@ -270,39 +273,6 @@ class _ToggleStoryState extends State<_ToggleStory> {
   }
 }
 
-class _RadioStory extends StatefulWidget {
-  const _RadioStory();
-
-  @override
-  State<_RadioStory> createState() => _RadioStoryState();
-}
-
-class _RadioStoryState extends State<_RadioStory> {
-  int _selected = 0;
-
-  @override
-  Widget build(BuildContext context) {
-    return StoryCanvas(
-      children: [
-        StorySection(
-          title: 'Selection states',
-          child: Wrap(
-            spacing: AppSpacing.xxl,
-            runSpacing: AppSpacing.lg,
-            children: [
-              for (var index = 0; index < 3; index++)
-                FgRadioButton(
-                  isSelected: _selected == index,
-                  onTap: () => setState(() => _selected = index),
-                ),
-              const FgRadioButton(isSelected: false, isEnabled: false),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
 
 class _CheckboxStory extends StatefulWidget {
   const _CheckboxStory();
@@ -312,11 +282,11 @@ class _CheckboxStory extends StatefulWidget {
 }
 
 class _CheckboxStoryState extends State<_CheckboxStory> {
-  CheckboxState _state = CheckboxState.unchecked;
+  FgCheckboxState _state = FgCheckboxState.unchecked;
 
   void _advanceState() {
-    final next = (_state.index + 1) % CheckboxState.values.length;
-    setState(() => _state = CheckboxState.values[next]);
+    final next = (_state.index + 1) % FgCheckboxState.values.length;
+    setState(() => _state = FgCheckboxState.values[next]);
   }
 
   @override
@@ -330,11 +300,22 @@ class _CheckboxStoryState extends State<_CheckboxStory> {
             spacing: AppSpacing.xxl,
             runSpacing: AppSpacing.lg,
             children: [
-              FgCheckboxItem(state: _state, onTap: _advanceState),
-              const FgCheckboxItem(state: CheckboxState.checked),
-              const FgCheckboxItem(state: CheckboxState.indeterminate),
+              FgCheckboxItem(
+                state: _state,
+                semanticLabel: 'Cycle tri-state option',
+                onTap: _advanceState,
+              ),
               const FgCheckboxItem(
-                state: CheckboxState.unchecked,
+                state: FgCheckboxState.checked,
+                semanticLabel: 'Checked option',
+              ),
+              const FgCheckboxItem(
+                state: FgCheckboxState.indeterminate,
+                semanticLabel: 'Mixed option',
+              ),
+              const FgCheckboxItem(
+                state: FgCheckboxState.unchecked,
+                semanticLabel: 'Disabled option',
                 isEnabled: false,
               ),
             ],
@@ -363,6 +344,7 @@ class _SliderStoryState extends State<_SliderStory> {
           title: 'Tempo',
           child: FgSlider(
             value: _value,
+            semanticLabel: 'Practice tempo',
             min: 60,
             max: 180,
             label: 'Practice tempo',
@@ -376,6 +358,7 @@ class _SliderStoryState extends State<_SliderStory> {
           title: 'Disabled',
           child: FgSlider(
             value: 72,
+            semanticLabel: 'Disabled practice tempo',
             min: 60,
             max: 180,
             label: 'Practice tempo',
@@ -405,6 +388,8 @@ class _StepperStoryState extends State<_StepperStory> {
           title: 'Workout rounds',
           child: FgStepper(
             value: _rounds,
+            decrementSemanticsLabel: 'Decrease workout rounds',
+            incrementSemanticsLabel: 'Increase workout rounds',
             min: 1,
             max: 10,
             label: 'Rounds',
@@ -417,6 +402,8 @@ class _StepperStoryState extends State<_StepperStory> {
           title: 'Disabled',
           child: FgStepper(
             value: 4,
+            decrementSemanticsLabel: 'Decrease workout rounds',
+            incrementSemanticsLabel: 'Increase workout rounds',
             min: 1,
             max: 10,
             label: 'Rounds',

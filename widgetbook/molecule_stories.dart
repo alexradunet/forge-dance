@@ -31,19 +31,16 @@ List<WidgetbookNode> buildMoleculeStories() {
       name: 'Feedback',
       children: [
         _component('FgEmpty', (_) => const _EmptyStory()),
+        _component('FgSnackBar', (_) => const _SnackBarStory()),
       ],
     ),
     WidgetbookCategory(
       name: 'Navigation',
-      children: [
-        _component('FgNavButton', (_) => const _NavButtonStory()),
-      ],
+      children: [_component('FgNavButton', (_) => const _NavButtonStory())],
     ),
     WidgetbookCategory(
       name: 'Lessons',
-      children: [
-        _component('Lesson nodes', (_) => const _LessonNodeStory()),
-      ],
+      children: [_component('Lesson nodes', (_) => const _LessonNodeStory())],
     ),
   ];
 }
@@ -122,13 +119,16 @@ class _InteractiveCardStory extends StatelessWidget {
       children: [
         StorySection(
           title: 'Flip card',
-          description: 'Tap the card to inspect its back content.',
+          description: 'Use the labeled controls to inspect every state.',
           child: Align(
             child: SizedBox(
               width: 320,
               height: 560,
               child: FgInteractiveCard(
                 title: 'Body control',
+                flipSemanticLabel: 'Flip lesson card',
+                playSemanticLabel: 'Play lesson',
+                favoriteSemanticLabel: 'Favorite lesson',
                 subtitle: 'Lesson 3 of 8',
                 backgroundImage: _danceImage,
                 tags: const ['Control', 'Foundations'],
@@ -138,7 +138,6 @@ class _InteractiveCardStory extends StatelessWidget {
                 progress: 0.38,
                 backTitle: 'Training focus',
                 backSubtitle: 'Isolation, posture, and clean transitions.',
-                onTap: () {},
                 onPlayTap: () {},
                 onToggleFavorite: () {},
               ),
@@ -165,6 +164,7 @@ class _InteractiveCardThumbnailStory extends StatelessWidget {
               height: 360,
               child: FgInteractiveCardThumbnail(
                 title: 'Groove theory',
+                flipSemanticLabel: 'Flip lesson card',
                 subtitle: 'Foundations',
                 backgroundImage: _danceImage,
                 level: 'In progress',
@@ -180,8 +180,15 @@ class _InteractiveCardThumbnailStory extends StatelessWidget {
   }
 }
 
-class _CheckboxGroupStory extends StatelessWidget {
+class _CheckboxGroupStory extends StatefulWidget {
   const _CheckboxGroupStory();
+
+  @override
+  State<_CheckboxGroupStory> createState() => _CheckboxGroupStoryState();
+}
+
+class _CheckboxGroupStoryState extends State<_CheckboxGroupStory> {
+  Set<String> _selected = {'musicality'};
 
   @override
   Widget build(BuildContext context) {
@@ -190,24 +197,20 @@ class _CheckboxGroupStory extends StatelessWidget {
         StorySection(
           title: 'Training goals',
           child: FgCheckboxGroup(
+            semanticLabel: 'Training goals',
             items: [
-              FgCheckboxGroupItem(
-                id: 'musicality',
-                label: 'Improve musicality',
-                value: true,
-              ),
-              FgCheckboxGroupItem(
-                id: 'conditioning',
-                label: 'Build conditioning',
-                value: false,
-              ),
-              FgCheckboxGroupItem(
-                id: 'freestyle',
-                label: 'Practice freestyle',
-                value: false,
-              ),
+              for (final option in const [
+                ('musicality', 'Improve musicality'),
+                ('conditioning', 'Build conditioning'),
+                ('freestyle', 'Practice freestyle'),
+              ])
+                FgCheckboxGroupItem(
+                  id: option.$1,
+                  label: option.$2,
+                  value: _selected.contains(option.$1),
+                ),
             ],
-            onChanged: (_) {},
+            onChanged: (values) => setState(() => _selected = values.toSet()),
           ),
         ),
       ],
@@ -232,6 +235,7 @@ class _RadioGroupStoryState extends State<_RadioGroupStory> {
         StorySection(
           title: 'Experience level',
           child: FgRadioGroup<String>(
+            semanticLabel: 'Experience level',
             items: [
               FgRadioGroupItem(label: 'Beginner', value: 'beginner'),
               FgRadioGroupItem(label: 'Intermediate', value: 'intermediate'),
@@ -261,6 +265,41 @@ class _EmptyStory extends StatelessWidget {
             description: 'Save lessons and workouts to find them here.',
             actionLabel: 'Explore training',
             onAction: () {},
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SnackBarStory extends StatelessWidget {
+  const _SnackBarStory();
+
+  @override
+  Widget build(BuildContext context) {
+    return StoryCanvas(
+      children: [
+        StorySection(
+          title: 'Semantic tones',
+          child: Wrap(
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
+            children: [
+              for (final tone in FgSnackBarTone.values)
+                FgButton(
+                  text: tone.name,
+                  variant: tone == FgSnackBarTone.error
+                      ? FgButtonVariant.destructive
+                      : FgButtonVariant.secondary,
+                  onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                    FgSnackBar.build(
+                      context,
+                      text: '${tone.name} feedback message',
+                      tone: tone,
+                    ),
+                  ),
+                ),
+            ],
           ),
         ),
       ],

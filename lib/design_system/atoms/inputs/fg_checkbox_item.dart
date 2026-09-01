@@ -1,172 +1,72 @@
 import 'package:flutter/material.dart';
 
-import '../../tokens/app_colors.dart';
-import '../../tokens/app_animation.dart';
-import '../../tokens/app_sizes.dart';
+/// Visual and semantic states supported by [FgCheckboxItem].
+enum FgCheckboxState { unchecked, checked, indeterminate }
 
-/// Checkbox state enum for tri-state checkboxes
-enum CheckboxState {
-  unchecked,
-  checked,
-  indeterminate,
-}
-
-/// Checkbox atom - Multi-selection control with check icon and glow effect
-/// Based on HTML mockup: forge.dance_home_dashboard_7 (03. Checkboxes)
+/// Semantic tri-state checkbox backed by Flutter's adaptive checkbox.
+///
+/// The caller owns [semanticLabel] so assistive text remains localized and
+/// describes the selected option rather than the generic control type.
 class FgCheckboxItem extends StatelessWidget {
-  final CheckboxState state;
-  final VoidCallback? onTap;
-  final bool isEnabled;
-
   const FgCheckboxItem({
     super.key,
     required this.state,
+    required this.semanticLabel,
     this.onTap,
     this.isEnabled = true,
+    this.focusNode,
+    this.autofocus = false,
   });
 
-  /// Convenience constructor for simple boolean checked state
   factory FgCheckboxItem.simple({
     Key? key,
     required bool isChecked,
+    required String semanticLabel,
     VoidCallback? onTap,
     bool isEnabled = true,
+    FocusNode? focusNode,
+    bool autofocus = false,
   }) {
     return FgCheckboxItem(
       key: key,
-      state: isChecked ? CheckboxState.checked : CheckboxState.unchecked,
+      state: isChecked ? FgCheckboxState.checked : FgCheckboxState.unchecked,
+      semanticLabel: semanticLabel,
       onTap: onTap,
       isEnabled: isEnabled,
+      focusNode: focusNode,
+      autofocus: autofocus,
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final isCheckedOrIndeterminate = state != CheckboxState.unchecked;
-
-    return GestureDetector(
-      onTap: isEnabled ? onTap : null,
-      child: AnimatedContainer(
-        duration: AppAnimation.fast,
-        curve: AppAnimation.easeOut,
-        width: AppSizes.checkboxSize,
-        height: AppSizes.checkboxSize,
-        decoration: BoxDecoration(
-          color: isCheckedOrIndeterminate
-              ? (state == CheckboxState.indeterminate
-                  ? AppColors.forgeFire.withOpacity(0.8)
-                  : AppColors.forgeFire)
-              : Colors.transparent,
-          borderRadius: BorderRadius.circular(4),
-          border: !isCheckedOrIndeterminate
-              ? Border.all(
-                  color: isEnabled ? AppColors.neutral600 : AppColors.neutral700,
-                  width: 2,
-                )
-              : null,
-          boxShadow: isCheckedOrIndeterminate
-              ? [
-                  BoxShadow(
-                    color: AppColors.forgeFire.withOpacity(0.4),
-                    blurRadius: 8,
-                    spreadRadius: 0,
-                  ),
-                ]
-              : null,
-        ),
-        child: Center(
-          child: AnimatedSwitcher(
-            duration: AppAnimation.fast,
-            child: isCheckedOrIndeterminate
-                ? Icon(
-                    state == CheckboxState.indeterminate
-                        ? Icons.remove
-                        : Icons.check,
-                    size: 14,
-                    color: AppColors.crystalWhite,
-                    key: ValueKey(state),
-                  )
-                : const SizedBox.shrink(),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Checkbox list item - Checkbox with label, description, and card styling
-class CheckboxListItem extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final CheckboxState state;
+  final FgCheckboxState state;
+  final String semanticLabel;
   final VoidCallback? onTap;
   final bool isEnabled;
-  final String? trailingLabel;
+  final FocusNode? focusNode;
+  final bool autofocus;
 
-  const CheckboxListItem({
-    super.key,
-    required this.title,
-    this.subtitle,
-    required this.state,
-    this.onTap,
-    this.isEnabled = true,
-    this.trailingLabel,
-  });
+  bool? get _value => switch (state) {
+        FgCheckboxState.unchecked => false,
+        FgCheckboxState.checked => true,
+        FgCheckboxState.indeterminate => null,
+      };
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: isEnabled ? onTap : null,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            FgCheckboxItem(
-              state: state,
-              isEnabled: isEnabled,
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: state == CheckboxState.checked
-                          ? FontWeight.w600
-                          : FontWeight.w500,
-                      color: state == CheckboxState.checked
-                          ? AppColors.textMain
-                          : isEnabled
-                              ? AppColors.textMuted
-                              : AppColors.neutral600,
-                    ),
-                  ),
-                  if (subtitle != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Text(
-                        subtitle!,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.textMuted,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            if (trailingLabel != null)
-              Text(
-                trailingLabel!,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textMuted,
-                ),
-              ),
-          ],
+    final effectiveOnChanged = isEnabled && onTap != null
+        ? (bool? _) => onTap!()
+        : null;
+
+    return MergeSemantics(
+      child: Semantics(
+        label: semanticLabel,
+        child: Checkbox.adaptive(
+          value: _value,
+          tristate: true,
+          onChanged: effectiveOnChanged,
+          focusNode: focusNode,
+          autofocus: autofocus,
+          materialTapTargetSize: MaterialTapTargetSize.padded,
         ),
       ),
     );

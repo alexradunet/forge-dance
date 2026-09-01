@@ -6,6 +6,7 @@ import '/constants/constants.dart';
 import '/extensions/build_context_extension.dart';
 import '/generated/locale_keys.g.dart';
 import '/design_system/tokens/app_typography.dart';
+import '/design_system/tokens/app_spacing.dart';
 
 class SignInAgreement extends StatelessWidget {
   const SignInAgreement({super.key});
@@ -14,7 +15,7 @@ class SignInAgreement extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
         child: RichText(
           textAlign: TextAlign.center,
           text: TextSpan(

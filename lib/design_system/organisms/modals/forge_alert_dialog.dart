@@ -1,198 +1,139 @@
 import 'package:flutter/material.dart';
 
-import '../../tokens/app_colors.dart';
-import '../../tokens/app_typography.dart';
-import '../../tokens/app_shadows.dart';
+import '../../atoms/buttons/fg_button.dart';
+import '../../theme/forge_theme_extensions.dart';
+import '../../tokens/app_sizes.dart';
+import '../../tokens/app_spacing.dart';
 
-/// Centered Alert Modal with icon and actions
-/// Based on HTML mockup: forge.dance_home_dashboard_15 (03. Centered Alert Modal)
+enum ForgeAlertTone { primary, destructive, success, reward }
+
+/// Forge-styled alert built on Flutter's semantic Material dialog.
 class ForgeAlertDialog extends StatelessWidget {
-  final String title;
-  final String? message;
-  final IconData? icon;
-  final Color? iconColor;
-  final String primaryActionLabel;
-  final VoidCallback? onPrimaryAction;
-  final String? secondaryActionLabel;
-  final VoidCallback? onSecondaryAction;
-  final bool isPrimaryDestructive;
-
   const ForgeAlertDialog({
     super.key,
     required this.title,
+    required this.primaryActionLabel,
     this.message,
     this.icon,
-    this.iconColor,
-    required this.primaryActionLabel,
+    this.tone = ForgeAlertTone.primary,
     this.onPrimaryAction,
     this.secondaryActionLabel,
     this.onSecondaryAction,
     this.isPrimaryDestructive = false,
   });
 
-  /// Show the alert dialog
+  final String title;
+  final String? message;
+  final IconData? icon;
+  final ForgeAlertTone tone;
+  final String primaryActionLabel;
+  final VoidCallback? onPrimaryAction;
+  final String? secondaryActionLabel;
+  final VoidCallback? onSecondaryAction;
+  final bool isPrimaryDestructive;
+
   static Future<bool?> show({
     required BuildContext context,
     required String title,
+    required String primaryActionLabel,
     String? message,
     IconData? icon,
-    Color? iconColor,
-    required String primaryActionLabel,
+    ForgeAlertTone tone = ForgeAlertTone.primary,
     VoidCallback? onPrimaryAction,
     String? secondaryActionLabel,
     VoidCallback? onSecondaryAction,
     bool isPrimaryDestructive = false,
+    bool barrierDismissible = true,
   }) {
     return showDialog<bool>(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.6),
-      builder: (context) => Center(
-        child: ForgeAlertDialog(
-          title: title,
-          message: message,
-          icon: icon,
-          iconColor: iconColor,
-          primaryActionLabel: primaryActionLabel,
-          onPrimaryAction: onPrimaryAction,
-          secondaryActionLabel: secondaryActionLabel,
-          onSecondaryAction: onSecondaryAction,
-          isPrimaryDestructive: isPrimaryDestructive,
-        ),
+      barrierDismissible: barrierDismissible,
+      builder: (context) => ForgeAlertDialog(
+        title: title,
+        message: message,
+        icon: icon,
+        tone: tone,
+        primaryActionLabel: primaryActionLabel,
+        onPrimaryAction: onPrimaryAction,
+        secondaryActionLabel: secondaryActionLabel,
+        onSecondaryAction: onSecondaryAction,
+        isPrimaryDestructive: isPrimaryDestructive,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final effectiveIconColor = iconColor ?? AppColors.forgeFire;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final forgeColors = theme.forgeColors;
+    final accent = switch (tone) {
+      ForgeAlertTone.primary => scheme.primary,
+      ForgeAlertTone.destructive => scheme.error,
+      ForgeAlertTone.success => forgeColors.success,
+      ForgeAlertTone.reward => forgeColors.reward,
+    };
 
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        width: 288,
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: const Color(0xFF161616),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(
-            color: AppColors.crystalWhite.withOpacity(0.1),
-            width: 1,
-          ),
-          boxShadow: const [AppShadows.shadowXl],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Icon
-            if (icon != null)
-              Container(
-                width: 56,
-                height: 56,
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: effectiveIconColor.withOpacity(0.1),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: effectiveIconColor.withOpacity(0.2),
-                    width: 1,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: effectiveIconColor.withOpacity(0.3),
-                      blurRadius: 20,
-                      spreadRadius: 0,
-                    ),
-                  ],
-                ),
-                child: Icon(
-                  icon,
-                  color: effectiveIconColor,
-                  size: 28,
-                ),
-              ),
-
-            // Title
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: AppTypography.h3.copyWith(
-                color: AppColors.crystalWhite,
-              ),
-            ),
-
-            // Message
-            if (message != null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  message!,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: AppColors.textMuted,
-                    height: 1.5,
-                  ),
-                ),
-              ),
-
-            const SizedBox(height: 24),
-
-            // Primary action
-            GestureDetector(
-              onTap: () {
-                Navigator.of(context).pop(true);
-                onPrimaryAction?.call();
-              },
+    return AlertDialog(
+      semanticLabel: title,
+      icon: icon == null
+          ? null
+          : ExcludeSemantics(
               child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 12),
+                width: AppSizes.buttonXl,
+                height: AppSizes.buttonXl,
                 decoration: BoxDecoration(
-                  color: isPrimaryDestructive
-                      ? AppColors.forgeFire
-                      : AppColors.forgeFire,
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.forgeFire.withOpacity(0.3),
-                      blurRadius: 20,
-                      spreadRadius: 0,
-                    ),
-                  ],
+                  color: accent.withValues(alpha: 0.12),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: accent.withValues(alpha: 0.24)),
                 ),
-                child: Text(
-                  primaryActionLabel,
-                  textAlign: TextAlign.center,
-                  style: AppTypography.body.copyWith(
-                    color: AppColors.crystalWhite,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
+                alignment: Alignment.center,
+                child: Icon(icon, color: accent, size: AppSizes.iconLg),
               ),
             ),
-
-            // Secondary action
-            if (secondaryActionLabel != null)
-              GestureDetector(
-                onTap: () {
-                  Navigator.of(context).pop(false);
-                  onSecondaryAction?.call();
-                },
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  margin: const EdgeInsets.only(top: 12),
-                  child: Text(
-                    secondaryActionLabel!,
-                    textAlign: TextAlign.center,
-                    style: AppTypography.body.copyWith(
-                      color: AppColors.textMuted,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
+      title: Text(title, textAlign: TextAlign.center),
+      content: message == null
+          ? null
+          : Text(
+              message!,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
               ),
-          ],
+            ),
+      actions: [
+        SizedBox(
+          width: double.infinity,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              FgButton(
+                text: primaryActionLabel,
+                variant: isPrimaryDestructive
+                    ? FgButtonVariant.destructive
+                    : FgButtonVariant.primary,
+                expand: true,
+                onPressed: () {
+                  Navigator.of(context).pop(true);
+                  onPrimaryAction?.call();
+                },
+              ),
+              if (secondaryActionLabel != null) ...[
+                const SizedBox(height: AppSpacing.sm),
+                FgButton(
+                  text: secondaryActionLabel!,
+                  variant: FgButtonVariant.ghost,
+                  expand: true,
+                  onPressed: () {
+                    Navigator.of(context).pop(false);
+                    onSecondaryAction?.call();
+                  },
+                ),
+              ],
+            ],
+          ),
         ),
-      ),
+      ],
     );
   }
 }

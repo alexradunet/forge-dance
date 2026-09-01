@@ -1,84 +1,70 @@
 import 'package:flutter/material.dart';
 
-import '../../../../design_system/tokens/app_colors.dart';
+import '../../../../design_system/design_system.dart';
 
-/// Menu item for profile settings
+enum ProfileMenuTone { neutral, destructive }
+
+/// Feature composition for profile and settings menu actions.
 class ProfileMenuItem extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback? onTap;
-  final Color? textColor;
-  final bool showArrow;
-
   const ProfileMenuItem({
     super.key,
     required this.icon,
     required this.label,
     this.onTap,
-    this.textColor,
+    this.tone = ProfileMenuTone.neutral,
     this.showArrow = true,
   });
 
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+  final ProfileMenuTone tone;
+  final bool showArrow;
+
   @override
   Widget build(BuildContext context) {
-    final color = textColor ?? Colors.white;
+    final scheme = Theme.of(context).colorScheme;
+    final foreground = switch (tone) {
+      ProfileMenuTone.neutral => scheme.onSurface,
+      ProfileMenuTone.destructive => scheme.error,
+    };
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          decoration: BoxDecoration(
-            color: AppColors.surfaceDark.withOpacity(0.5),
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.white.withOpacity(0.05),
-            ),
-          ),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 22,
-                color: textColor ?? AppColors.textMuted,
+    return FgCard(
+      variant: FgCardVariant.outlined,
+      padding: EdgeInsets.zero,
+      onTap: onTap,
+      child: ListTile(
+        contentPadding: AppSpacing.horizontal,
+        minVerticalPadding: AppSpacing.md,
+        leading: Icon(icon, size: AppSizes.iconLg, color: foreground),
+        title: Text(
+          label,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: foreground,
+                fontWeight: FontWeight.w500,
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: color,
-                  ),
-                ),
-              ),
-              if (showArrow)
-                Icon(
-                  Icons.chevron_right,
-                  size: 20,
-                  color: AppColors.textMuted.withOpacity(0.5),
-                ),
-            ],
-          ),
         ),
+        trailing: showArrow
+            ? Icon(
+                Icons.chevron_right,
+                size: AppSizes.iconMd,
+                color: scheme.onSurfaceVariant,
+              )
+            : null,
       ),
     );
   }
 }
 
-/// Section header for profile menu groups
 class ProfileMenuSection extends StatelessWidget {
-  final String title;
-  final List<ProfileMenuItem> items;
-
   const ProfileMenuSection({
     super.key,
     required this.title,
     required this.items,
   });
+
+  final String title;
+  final List<ProfileMenuItem> items;
 
   @override
   Widget build(BuildContext context) {
@@ -86,22 +72,15 @@ class ProfileMenuSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 4),
-          child: Text(
-            title.toUpperCase(),
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textMuted,
-              letterSpacing: 1.5,
-            ),
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
+          child: FgLabel(text: title),
         ),
-        const SizedBox(height: 12),
-        ...items.map((item) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: item,
-            )),
+        const SizedBox(height: AppSpacing.md),
+        for (var index = 0; index < items.length; index++) ...[
+          items[index],
+          if (index < items.length - 1)
+            const SizedBox(height: AppSpacing.sm),
+        ],
       ],
     );
   }

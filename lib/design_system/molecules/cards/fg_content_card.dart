@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
 import '../../tokens/app_border_radius.dart';
+import '../../tokens/app_spacing.dart';
 
 import '../../atoms/visuals/fg_image.dart';
 import '../../atoms/visuals/fg_gradient_overlay.dart';
@@ -216,13 +217,11 @@ class FgContentCard extends StatelessWidget {
                         ),
                     ],
                   ),
-                  const SizedBox(height: 6), // mb-1.5 space before bar
+                  const SizedBox(height: AppSpacing.sm),
                   if (progress != null)
                     FgProgressBar(
                       value: progress!,
-                      height: 4,
-                      backgroundColor: Colors.white.withOpacity(0.1),
-                      color: AppColors.forgeFire,
+                      size: FgProgressBarSize.sm,
                     ),
                 ],
               ),

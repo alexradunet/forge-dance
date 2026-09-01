@@ -1,115 +1,127 @@
 import 'package:flutter/material.dart';
 
-import '../../tokens/app_colors.dart';
+import '../../theme/forge_theme_extensions.dart';
+import '../../tokens/app_spacing.dart';
 
+enum FgProgressBarSize { sm, md, lg }
+
+enum FgProgressBarTone { primary, secondary, success, reward }
+
+/// Theme-aware linear or segmented progress indicator.
 class FgProgressBar extends StatelessWidget {
-  final double value; // 0.0 to 1.0
-  final double height;
-  final Color? color;
-  final Color? backgroundColor;
-  final int? segments;
-  final double spacing;
-  final bool isCumulative;
-
   const FgProgressBar({
     super.key,
     required this.value,
-    this.height = 8,
-    this.color,
-    this.backgroundColor,
-    this.segments,
-    this.spacing = 8,
-    this.isCumulative = true,
-  });
+    this.size = FgProgressBarSize.md,
+    this.tone = FgProgressBarTone.primary,
+    this.semanticLabel,
+  })  : segments = null,
+        isCumulative = true;
 
-  /// Factory for segmented progress using integer steps
-  factory FgProgressBar.segmented({
+  const FgProgressBar.segmented({
+    super.key,
     required int total,
     required int current,
-    double height = 8,
-    Color? color,
-    Color? backgroundColor,
-    double spacing = 8,
-    bool isCumulative = true,
-    Key? key,
-  }) {
-    return FgProgressBar(
-      key: key,
-      value: total > 0 ? (current + 1) / total : 0,
-      segments: total,
-      height: height,
-      color: color,
-      backgroundColor: backgroundColor,
-      spacing: spacing,
-      isCumulative: isCumulative,
-    );
-  }
+    this.size = FgProgressBarSize.md,
+    this.tone = FgProgressBarTone.primary,
+    this.semanticLabel,
+    this.isCumulative = true,
+  })  : value = total > 0 ? (current + 1) / total : 0,
+        segments = total;
+
+  final double value;
+  final FgProgressBarSize size;
+  final FgProgressBarTone tone;
+  final String? semanticLabel;
+  final int? segments;
+  final bool isCumulative;
 
   @override
   Widget build(BuildContext context) {
-    final activeColor = color ?? AppColors.forgeFire;
-    final trackColor = backgroundColor ?? activeColor.withOpacity(0.2);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final forgeColors = theme.forgeColors;
+    final activeColor = switch (tone) {
+      FgProgressBarTone.primary => scheme.primary,
+      FgProgressBarTone.secondary => scheme.secondary,
+      FgProgressBarTone.success => forgeColors.success,
+      FgProgressBarTone.reward => forgeColors.reward,
+    };
+    final trackColor = scheme.surfaceContainerHighest;
+    final normalizedValue = value.clamp(0.0, 1.0);
+    final height = switch (size) {
+      FgProgressBarSize.sm => AppSpacing.xs,
+      FgProgressBarSize.md => AppSpacing.sm,
+      FgProgressBarSize.lg => AppSpacing.md,
+    };
+    final valueLabel = '${(normalizedValue * 100).round()}%';
 
-    if (segments != null && segments! > 0) {
-      return _buildSegmented(activeColor, trackColor);
-    }
-
-    return _buildContinuous(activeColor, trackColor);
-  }
-
-  Widget _buildContinuous(Color activeColor, Color trackColor) {
-    return Container(
-      height: height,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: trackColor,
-        borderRadius: BorderRadius.circular(height / 2),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: FractionallySizedBox(
-        alignment: Alignment.centerLeft,
-        widthFactor: value.clamp(0.0, 1.0),
-        child: Container(
-          decoration: BoxDecoration(
-            color: activeColor,
-            borderRadius: BorderRadius.circular(height / 2),
-          ),
-        ),
+    return Semantics(
+      label: semanticLabel,
+      value: valueLabel,
+      readOnly: true,
+      child: ExcludeSemantics(
+        child: segments == null || segments! <= 0
+            ? LinearProgressIndicator(
+                value: normalizedValue,
+                minHeight: height,
+                color: activeColor,
+                backgroundColor: trackColor,
+                borderRadius: BorderRadius.circular(height / 2),
+              )
+            : _SegmentedProgress(
+                value: normalizedValue,
+                segments: segments!,
+                height: height,
+                activeColor: activeColor,
+                trackColor: trackColor,
+                isCumulative: isCumulative,
+              ),
       ),
     );
   }
+}
 
-  Widget _buildSegmented(Color activeColor, Color trackColor) {
-    final filledSegments = (value * segments!).round();
+class _SegmentedProgress extends StatelessWidget {
+  const _SegmentedProgress({
+    required this.value,
+    required this.segments,
+    required this.height,
+    required this.activeColor,
+    required this.trackColor,
+    required this.isCumulative,
+  });
+
+  final double value;
+  final int segments;
+  final double height;
+  final Color activeColor;
+  final Color trackColor;
+  final bool isCumulative;
+
+  @override
+  Widget build(BuildContext context) {
+    final filledSegments = (value * segments).round();
 
     return Row(
-      children: List.generate(segments!, (index) {
-        final bool isActive = isCumulative
-            ? index < filledSegments
-            : index == (filledSegments - 1);
-
-        return Expanded(
-          child: Container(
-            height: height,
-            margin: EdgeInsets.only(
-              right: index < segments! - 1 ? spacing : 0,
-            ),
-            decoration: BoxDecoration(
-              color: isActive ? activeColor : trackColor,
-              borderRadius: BorderRadius.circular(height / 2),
-              boxShadow: isActive
-                  ? [
-                      BoxShadow(
-                        color: activeColor.withOpacity(0.4),
-                        blurRadius: 8,
-                        offset: const Offset(0, 0),
-                      ),
-                    ]
-                  : null,
+      children: [
+        for (var index = 0; index < segments; index++) ...[
+          if (index > 0) const SizedBox(width: AppSpacing.sm),
+          Expanded(
+            child: Container(
+              height: height,
+              decoration: BoxDecoration(
+                color: isCumulative
+                    ? (index < filledSegments ? activeColor : trackColor)
+                    : (index == filledSegments - 1
+                        ? activeColor
+                        : trackColor),
+                borderRadius: BorderRadius.circular(height / 2),
+              ),
             ),
           ),
-        );
-      }),
+        ],
+      ],
     );
   }
 }

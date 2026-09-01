@@ -104,19 +104,20 @@ class _ProgressSectionStory extends StatelessWidget {
       children: [
         StorySection(
           title: 'Training progress',
-          child: ProgressSection(
+          child: FgProgressSection(
             title: 'This week',
             actionLabel: 'View stats',
             onAction: () {},
             stats: [
-              StatCardData(label: 'Sessions', value: '4'),
-              StatCardData(label: 'Minutes', value: '86'),
-              StatCardData(label: 'Streak', value: '7', unit: ' days'),
+              FgStatData(label: 'Sessions', value: '4'),
+              FgStatData(label: 'Minutes', value: '86'),
+              FgStatData(label: 'Streak', value: '7', unit: ' days'),
             ],
-            levelProgress: ProgressData(
+            levelProgress: FgProgressData(
               label: 'Orange belt',
               current: 680,
               target: 1000,
+              valueLabel: '680 / 1000 XP',
               message: '320 XP until the next belt',
             ),
           ),
@@ -234,6 +235,7 @@ class _ActionSheetStory extends StatelessWidget {
                 ForgeActionSheet.show<void>(
                   context: context,
                   title: 'Lesson actions',
+                  cancelLabel: 'Cancel',
                   actions: const [
                     ForgeActionSheetItem(
                       label: 'Save for later',
@@ -276,12 +278,17 @@ class _FilterSheetStory extends StatelessWidget {
               onPressed: () {
                 FgFilterSheet.show(
                   context: context,
+                  title: 'Filters',
+                  resetLabel: 'Reset',
+                  applyLabel: 'Apply filters',
                   sections: const {
                     'Difficulty': ['Beginner', 'Intermediate', 'Advanced'],
                     'Style': ['Hip hop', 'House', 'Breaking'],
                   },
                   selectedFilters: const {'Difficulty': 'Beginner'},
                   onFilterSelected: (_, _) {},
+                  onReset: () {},
+                  onApply: () {},
                 );
               },
             ),

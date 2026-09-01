@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../tokens/app_colors.dart';
+import '../../tokens/app_spacing.dart';
 import '../../organisms/lessons/lesson_node_models.dart';
 import '../../atoms/progress/fg_progress_bar.dart';
 import '../../atoms/badges/fg_badge.dart';
@@ -177,12 +178,10 @@ class FgLessonTimelineMovementCard extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            const SizedBox(height: 8),
+                            const SizedBox(height: AppSpacing.sm),
                             FgProgressBar(
                               value: node.progress,
-                              height: 4,
-                              backgroundColor: Colors.white.withOpacity(0.1),
-                              color: AppColors.forgeFire,
+                              size: FgProgressBarSize.sm,
                             ),
                           ],
                         ),

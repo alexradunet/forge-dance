@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../../../../design_system/tokens/app_sizes.dart';
+import '../../../../design_system/tokens/app_spacing.dart';
 import '../../model/level_model.dart';
 import 'level_item.dart';
 
@@ -15,14 +17,13 @@ class LevelGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GridView.builder(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppSpacing.xxl),
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 1.0,
+      gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+        maxCrossAxisExtent: AppSizes.squareTileLg,
+        crossAxisSpacing: AppSpacing.lg,
+        mainAxisSpacing: AppSpacing.lg,
       ),
       itemCount: levels.length,
       itemBuilder: (context, index) {
