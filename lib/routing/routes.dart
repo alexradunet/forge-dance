@@ -16,7 +16,6 @@ class Routes {
   static const profile = '/main/profile';
   static const accountInformation = '/accountInformation';
   static const appearances = '/appearances';
-  static const languages = '/languages';
   static const settings = '/settings';
   static const stats = '/stats';
 }
@@ -51,9 +50,9 @@ enum MainTabDestination implements AppDestination {
       context.push<T>(location, extra: extra);
 
   static MainTabDestination fromLocation(String location) => values.firstWhere(
-        (tab) => location.startsWith(tab.location),
-        orElse: () => home,
-      );
+    (tab) => location.startsWith(tab.location),
+    orElse: () => home,
+  );
 }
 
 class ModuleDestination extends AppDestination {

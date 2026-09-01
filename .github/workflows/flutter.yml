@@ -27,3 +27,50 @@ jobs:
 
       - name: Build web release
         run: flutter build web --release --no-pub
+
+  widgetbook:
+    name: Build Widgetbook v4
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: "3.47.2"
+          cache: true
+
+      - name: Install Widgetbook dependencies
+        working-directory: widgetbook
+        run: flutter pub get
+
+      - name: Generate Widgetbook catalogue
+        working-directory: widgetbook
+        run: dart run build_runner build
+
+      - name: Analyze Widgetbook
+        working-directory: widgetbook
+        run: flutter analyze
+
+      - name: Capture Widgetbook scenarios
+        working-directory: widgetbook
+        run: flutter test
+
+      - name: Build Widgetbook web release
+        working-directory: widgetbook
+        run: flutter build web --release --no-pub
+
+      - name: Upload labeled pilot to Widgetbook Cloud
+        if: >-
+          contains(github.event.pull_request.labels.*.name, 'widgetbook-cloud')
+          && env.WIDGETBOOK_API_KEY != ''
+        working-directory: widgetbook
+        env:
+          WIDGETBOOK_API_KEY: ${{ secrets.WIDGETBOOK_API_KEY }}
+        run: |
+          dart pub global activate widgetbook_cli 4.0.0-beta.13
+          widgetbook cloud build push --api-key "$WIDGETBOOK_API_KEY"

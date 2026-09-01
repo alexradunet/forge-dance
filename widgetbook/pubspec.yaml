@@ -1,0 +1,28 @@
+name: widgetbook_workspace
+description: "Widgetbook workspace"
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.13.2
+
+dependencies:
+  accessibility_tools: ^2.8.0
+  easy_localization: ^3.0.8
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^3.4.2
+  forge_dance:
+    path: ..
+  go_router: ^16.2.4
+  shared_preferences: ^2.5.3
+  widgetbook: ^4.0.0-beta.13
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  build_runner: ^2.16.0
+
+flutter:
+  uses-material-design: true

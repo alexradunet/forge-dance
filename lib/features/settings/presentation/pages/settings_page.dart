@@ -63,10 +63,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                       Center(
                         child: Text(
                           'Version $_version',
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                                color: Theme.of(
-                                  context,
-                                ).colorScheme.onSurfaceVariant,
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
                               ),
                         ),
                       ),
@@ -100,11 +101,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               icon: Icons.palette_outlined,
               label: LocaleKeys.appearances.tr(),
               onTap: () => context.push(Routes.appearances),
-            ),
-            ProfileMenuItem(
-              icon: Icons.language,
-              label: LocaleKeys.language.tr(),
-              onTap: () => context.push(Routes.languages),
             ),
           ],
         ),
@@ -185,9 +181,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           }
         } catch (error) {
           if (context.mounted) {
-            context.showErrorSnackBar(
-              LocaleKeys.unexpectedErrorOccurred.tr(),
-            );
+            context.showErrorSnackBar(LocaleKeys.unexpectedErrorOccurred.tr());
           }
         } finally {
           Global.hideLoading();
@@ -214,9 +208,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           }
         } catch (error) {
           if (context.mounted) {
-            context.showErrorSnackBar(
-              LocaleKeys.unexpectedErrorOccurred.tr(),
-            );
+            context.showErrorSnackBar(LocaleKeys.unexpectedErrorOccurred.tr());
           }
         } finally {
           Global.hideLoading();

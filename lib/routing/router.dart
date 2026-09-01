@@ -20,7 +20,6 @@ import '../features/onboarding/ui/splash_screen.dart';
 import '../features/profile/model/profile.dart';
 import '../features/profile/ui/account_info_screen.dart';
 import '../features/profile/ui/appearances_screen.dart';
-import '../features/profile/ui/languages_screen.dart';
 import '../features/settings/presentation/pages/settings_page.dart';
 import '../features/stats/presentation/pages/stats_page.dart';
 import 'app_redirect.dart';
@@ -28,12 +27,7 @@ import 'routes.dart';
 
 part 'router.g.dart';
 
-enum SlideDirection {
-  right,
-  left,
-  up,
-  down,
-}
+enum SlideDirection { right, left, up, down }
 
 extension GoRouterStateExtension on GoRouterState {
   SlideRouteTransition slidePage(
@@ -54,36 +48,33 @@ class SlideRouteTransition extends CustomTransitionPage<void> {
     required super.child,
     SlideDirection direction = SlideDirection.left,
   }) : super(
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            final curve = CurvedAnimation(
-              parent: animation,
-              curve: Curves.easeInOut,
-            );
+         transitionsBuilder: (context, animation, secondaryAnimation, child) {
+           final curve = CurvedAnimation(
+             parent: animation,
+             curve: Curves.easeInOut,
+           );
 
-            Offset begin;
-            switch (direction) {
-              case SlideDirection.right:
-                begin = const Offset(-1.0, 0.0);
-                break;
-              case SlideDirection.left:
-                begin = const Offset(1.0, 0.0);
-                break;
-              case SlideDirection.up:
-                begin = const Offset(0.0, 1.0);
-                break;
-              case SlideDirection.down:
-                begin = const Offset(0.0, -1.0);
-                break;
-            }
-            final tween = Tween(begin: begin, end: Offset.zero);
-            final offsetAnimation = tween.animate(curve);
+           Offset begin;
+           switch (direction) {
+             case SlideDirection.right:
+               begin = const Offset(-1.0, 0.0);
+               break;
+             case SlideDirection.left:
+               begin = const Offset(1.0, 0.0);
+               break;
+             case SlideDirection.up:
+               begin = const Offset(0.0, 1.0);
+               break;
+             case SlideDirection.down:
+               begin = const Offset(0.0, -1.0);
+               break;
+           }
+           final tween = Tween(begin: begin, end: Offset.zero);
+           final offsetAnimation = tween.animate(curve);
 
-            return SlideTransition(
-              position: offsetAnimation,
-              child: child,
-            );
-          },
-        );
+           return SlideTransition(position: offsetAnimation, child: child);
+         },
+       );
 }
 
 /// App router. Navigation guarding is reactive: the router listens to the
@@ -115,107 +106,86 @@ GoRouter router(Ref ref) {
 }
 
 List<RouteBase> _routes(Ref ref) => [
+  GoRoute(
+    path: Routes.splash,
+    pageBuilder: (context, state) => state.slidePage(const SplashScreen()),
+  ),
+  GoRoute(
+    path: Routes.register,
+    pageBuilder: (context, state) => state.slidePage(const RegisterScreen()),
+  ),
+  GoRoute(
+    path: Routes.login,
+    pageBuilder: (context, state) => state.slidePage(const SignInScreen()),
+  ),
+  GoRoute(
+    path: Routes.onboarding,
+    pageBuilder: (context, state) => state.slidePage(const OnboardingScreen()),
+  ),
+  ShellRoute(
+    builder: (context, state, child) =>
+        MainScreen(location: state.uri.path, child: child),
+    routes: [
+      GoRoute(path: Routes.main, redirect: (_, _) => Routes.home),
+      GoRoute(path: Routes.library, builder: (_, _) => const CollectionPage()),
+      GoRoute(path: Routes.explore, builder: (_, _) => const ExplorePage()),
+      GoRoute(path: Routes.home, builder: (_, _) => const HomePage()),
       GoRoute(
-        path: Routes.splash,
-        pageBuilder: (context, state) => state.slidePage(const SplashScreen()),
+        path: Routes.workout,
+        builder: (_, _) => const TrainingSessionPage(),
       ),
+      GoRoute(path: Routes.profile, builder: (_, _) => const ProfilePage()),
       GoRoute(
-        path: Routes.register,
-        pageBuilder: (context, state) =>
-            state.slidePage(const RegisterScreen()),
-      ),
-      GoRoute(
-        path: Routes.login,
-        pageBuilder: (context, state) => state.slidePage(const SignInScreen()),
-      ),
-      GoRoute(
-        path: Routes.onboarding,
-        pageBuilder: (context, state) =>
-            state.slidePage(const OnboardingScreen()),
-      ),
-      ShellRoute(
-        builder: (context, state, child) => MainScreen(
-          location: state.uri.path,
-          child: child,
-        ),
+        path: '${Routes.main}/module/:moduleId',
+        builder: (context, state) {
+          final moduleId = state.pathParameters['moduleId']!;
+          ref.read(learnViewModelProvider.notifier).selectModule(moduleId);
+          return ModuleViewScreen(
+            onBack: () => context.pop(),
+            onLessonNavigate: (lessonId) =>
+                LessonDestination(moduleId, lessonId).push<void>(context),
+          );
+        },
         routes: [
-          GoRoute(path: Routes.main, redirect: (_, _) => Routes.home),
           GoRoute(
-            path: Routes.library,
-            builder: (_, _) => const CollectionPage(),
-          ),
-          GoRoute(
-            path: Routes.explore,
-            builder: (_, _) => const ExplorePage(),
-          ),
-          GoRoute(path: Routes.home, builder: (_, _) => const HomePage()),
-          GoRoute(
-            path: Routes.workout,
-            builder: (_, _) => const TrainingSessionPage(),
-          ),
-          GoRoute(
-              path: Routes.profile, builder: (_, _) => const ProfilePage()),
-          GoRoute(
-            path: '${Routes.main}/module/:moduleId',
+            path: 'lesson/:lessonId',
             builder: (context, state) {
               final moduleId = state.pathParameters['moduleId']!;
+              final lessonId = state.pathParameters['lessonId']!;
               ref.read(learnViewModelProvider.notifier).selectModule(moduleId);
-              return ModuleViewScreen(
+              final learn = ref.read(learnViewModelProvider).value;
+              if (learn == null || !learn.canOpenLesson(lessonId)) {
+                return ModuleViewScreen(onBack: () => context.pop());
+              }
+              return LessonPlayerScreen(
+                lessonId: lessonId,
                 onBack: () => context.pop(),
-                onLessonNavigate: (lessonId) =>
-                    LessonDestination(moduleId, lessonId).push<void>(context),
               );
             },
-            routes: [
-              GoRoute(
-                path: 'lesson/:lessonId',
-                builder: (context, state) {
-                  final moduleId = state.pathParameters['moduleId']!;
-                  final lessonId = state.pathParameters['lessonId']!;
-                  ref
-                      .read(learnViewModelProvider.notifier)
-                      .selectModule(moduleId);
-                  final learn = ref.read(learnViewModelProvider).value;
-                  if (learn == null || !learn.canOpenLesson(lessonId)) {
-                    return ModuleViewScreen(onBack: () => context.pop());
-                  }
-                  return LessonPlayerScreen(
-                    lessonId: lessonId,
-                    onBack: () => context.pop(),
-                  );
-                },
-              ),
-            ],
           ),
         ],
       ),
-      GoRoute(
-        path: Routes.accountInformation,
-        pageBuilder: (context, state) {
-          final profile = state.extra;
-          if (profile is! Profile) return state.slidePage(const ProfilePage());
-          return state.slidePage(AccountInfoScreen(originalProfile: profile));
-        },
-      ),
-      GoRoute(
-        path: Routes.appearances,
-        pageBuilder: (context, state) =>
-            state.slidePage(const AppearancesScreen()),
-      ),
-      GoRoute(
-        path: Routes.languages,
-        pageBuilder: (context, state) =>
-            state.slidePage(const LanguagesScreen()),
-      ),
-      GoRoute(
-        path: Routes.settings,
-        pageBuilder: (context, state) => state.slidePage(
-          const SettingsPage(),
-          direction: SlideDirection.right,
-        ),
-      ),
-      GoRoute(
-        path: Routes.stats,
-        pageBuilder: (context, state) => state.slidePage(const StatsPage()),
-      ),
-    ];
+    ],
+  ),
+  GoRoute(
+    path: Routes.accountInformation,
+    pageBuilder: (context, state) {
+      final profile = state.extra;
+      if (profile is! Profile) return state.slidePage(const ProfilePage());
+      return state.slidePage(AccountInfoScreen(originalProfile: profile));
+    },
+  ),
+  GoRoute(
+    path: Routes.appearances,
+    pageBuilder: (context, state) => state.slidePage(const AppearancesScreen()),
+  ),
+  GoRoute(
+    path: Routes.settings,
+    pageBuilder: (context, state) =>
+        state.slidePage(const SettingsPage(), direction: SlideDirection.right),
+  ),
+  GoRoute(
+    path: Routes.stats,
+    pageBuilder: (context, state) => state.slidePage(const StatsPage()),
+  ),
+];

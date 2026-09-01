@@ -10,6 +10,7 @@ import 'features/common/ui/widgets/offline_container.dart';
 import 'features/firebase/repository/firebase_bootstrap.dart';
 import 'features/session/application/session_coordinator.dart';
 import 'routing/router.dart';
+import 'localization/app_locales.dart';
 import 'utils/provider_observer.dart';
 
 void main() async {
@@ -27,9 +28,9 @@ void main() async {
     ProviderScope(
       observers: kDebugMode ? [AppObserver()] : const [],
       child: EasyLocalization(
-        supportedLocales: const [Locale('en'), Locale('vi')],
+        supportedLocales: AppLocales.supported,
         path: 'assets/translations',
-        fallbackLocale: const Locale('en'),
+        fallbackLocale: AppLocales.fallback,
         useOnlyLangCode: true,
         child: const MainApp(),
       ),
