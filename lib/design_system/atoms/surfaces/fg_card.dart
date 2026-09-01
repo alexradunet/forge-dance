@@ -44,8 +44,8 @@ class FgCard extends StatelessWidget {
         color: isSelected
             ? scheme.primary
             : variant == FgCardVariant.outlined
-                ? scheme.outlineVariant
-                : Colors.transparent,
+            ? scheme.outlineVariant
+            : Colors.transparent,
         width: isSelected ? 2 : 1,
       ),
     );
@@ -64,7 +64,13 @@ class FgCard extends StatelessWidget {
         onTap: effectiveOnTap,
         focusNode: focusNode,
         autofocus: autofocus,
-        child: Padding(padding: padding, child: child),
+        child: Padding(
+          padding: padding,
+          child: ForgeSurfaceScope(
+            surface: ForgeSurface.standard,
+            child: child,
+          ),
+        ),
       ),
     );
 

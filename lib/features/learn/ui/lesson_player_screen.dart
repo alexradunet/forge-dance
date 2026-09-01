@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../../design_system/design_system.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../model/lesson.dart';
@@ -12,11 +13,7 @@ import '../ui/view_model/learn_view_model.dart';
 class LessonPlayerScreen extends ConsumerStatefulWidget {
   final VoidCallback? onBack;
   final String lessonId;
-  const LessonPlayerScreen({
-    required this.lessonId,
-    super.key,
-    this.onBack,
-  });
+  const LessonPlayerScreen({required this.lessonId, super.key, this.onBack});
 
   @override
   ConsumerState<LessonPlayerScreen> createState() => _LessonPlayerScreenState();
@@ -107,10 +104,10 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
               child: FgInteractiveCard(
                 title: step.title,
                 flipSemanticLabel: LocaleKeys.flipCard.tr(),
-                subtitle:
-                    LocaleKeys.stepN.tr(args: ['${index + 1}']).toUpperCase(),
-                backgroundImage:
-                    'https://images.unsplash.com/photo-1535525153412-5a42439a210d?q=80&w=2070&auto=format&fit=crop',
+                subtitle: LocaleKeys.stepN
+                    .tr(args: ['${index + 1}'])
+                    .toUpperCase(),
+                backgroundImage: 'https://images.unsplash.com/photo-1535525153412-5a42439a210d?q=80&w=2070&auto=format&fit=crop',
                 style: lesson.type.label,
                 difficulty: lesson.difficulty,
                 progress: (index + 1) / steps.length,
@@ -123,20 +120,25 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
                       Text(
                         step.description,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color:
-                                  Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                          color: Theme.of(context).forgeColors.onImmersiveMuted,
+                        ),
                       ),
                     const SizedBox(height: AppSpacing.xxl),
                     if (step.focus.isNotEmpty)
                       _buildTechniquePoint(
-                          LocaleKeys.focusLabel.tr(), step.focus),
+                        LocaleKeys.focusLabel.tr(),
+                        step.focus,
+                      ),
                     if (step.breath.isNotEmpty)
                       _buildTechniquePoint(
-                          LocaleKeys.breathLabel.tr(), step.breath),
+                        LocaleKeys.breathLabel.tr(),
+                        step.breath,
+                      ),
                     if (step.energy.isNotEmpty)
                       _buildTechniquePoint(
-                          LocaleKeys.energyLabel.tr(), step.energy),
+                        LocaleKeys.energyLabel.tr(),
+                        step.energy,
+                      ),
                   ],
                 ),
               ),
@@ -164,14 +166,12 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          FgLabel(
-            text: label,
-            tone: FgLabelTone.accent,
-          ),
+          FgLabel(text: label, tone: FgLabelTone.accent),
           const SizedBox(height: AppSpacing.xs),
           Text(
             value,
-            style: Theme.of(context).textTheme.bodySmall,
+            style: Theme.of(context).textTheme.bodySmall
+                ?.copyWith(color: Theme.of(context).forgeColors.onImmersive),
           ),
         ],
       ),

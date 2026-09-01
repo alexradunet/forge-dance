@@ -110,7 +110,6 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
     String levelSubtitle,
   ) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
 
     return Column(
       children: [
@@ -126,6 +125,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         Text(
           profile?.name ?? Constants.defaultName,
           style: theme.textTheme.titleLarge?.copyWith(
+            color: theme.forgeColors.onImmersive,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -133,7 +133,7 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         Text(
           levelSubtitle,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: scheme.onSurfaceVariant,
+            color: theme.forgeColors.onImmersiveMuted,
           ),
         ),
         const SizedBox(height: AppSpacing.xxl),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../theme/forge_theme_extensions.dart';
 import '../../tokens/app_colors.dart';
 
 class FgBackground extends StatelessWidget {
@@ -15,22 +17,27 @@ class FgBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.bgDeep,
-      child: Stack(
-        children: [
-          if (showGradients) _buildBackgroundGradients(),
-          if (showGrid) _buildGridBackground(),
-          if (child != null) child!,
-        ],
+    final forgeColors = Theme.of(context).forgeColors;
+
+    return ForgeSurfaceScope(
+      surface: ForgeSurface.immersive,
+      child: Container(
+        color: forgeColors.immersiveBackground,
+        child: Stack(
+          children: [
+            if (showGradients) _buildBackgroundGradients(),
+            if (showGrid) _buildGridBackground(forgeColors.onImmersive),
+            if (child != null) child!,
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildGridBackground() {
+  Widget _buildGridBackground(Color foreground) {
     return Positioned.fill(
       child: CustomPaint(
-        painter: _GridPainter(color: Colors.white.withOpacity(0.05)),
+        painter: _GridPainter(color: foreground.withValues(alpha: 0.05)),
       ),
     );
   }

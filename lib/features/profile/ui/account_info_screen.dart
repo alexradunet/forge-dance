@@ -107,7 +107,9 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
                   const SizedBox(height: AppSpacing.sm),
                   Text(
                     widget.originalProfile.email.orEmpty(),
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).forgeColors.onImmersive,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xxxl),
                   FgInput(

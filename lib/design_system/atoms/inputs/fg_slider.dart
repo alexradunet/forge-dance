@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/forge_theme_extensions.dart';
+
 import '../../tokens/app_spacing.dart';
 import '../typography/fg_label.dart';
 
@@ -25,9 +27,9 @@ class FgSlider extends StatelessWidget {
     this.semanticFormatterCallback,
     this.focusNode,
     this.autofocus = false,
-  })  : assert(max > min),
-        assert(value >= min && value <= max),
-        assert(divisions == null || divisions > 0);
+  }) : assert(max > min),
+       assert(value >= min && value <= max),
+       assert(divisions == null || divisions > 0);
 
   final double value;
   final String semanticLabel;
@@ -80,7 +82,7 @@ class FgSlider extends StatelessWidget {
                           fontWeight: FontWeight.w700,
                         )
                       : theme.textTheme.labelLarge?.copyWith(
-                          color: scheme.onSurface,
+                          color: context.forgeForeground,
                           fontWeight: FontWeight.w700,
                         ),
                 ),

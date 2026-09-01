@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../theme/forge_theme_extensions.dart';
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
 import '../../tokens/app_border_radius.dart';
@@ -72,28 +74,38 @@ class FgContentCard extends StatelessWidget {
     this.onTap,
     this.height,
     this.action,
-  })  : variant = FgContentCardVariant.hero,
-        rating = null,
-        duration = null,
-        progress = null,
-        footerLabel = null,
-        width = double.infinity;
+  }) : variant = FgContentCardVariant.hero,
+       rating = null,
+       duration = null,
+       progress = null,
+       footerLabel = null,
+       width = double.infinity;
 
   @override
   Widget build(BuildContext context) {
-    switch (variant) {
-      case FgContentCardVariant.compact:
-        // Compact behaves like standard/immersive but with smaller default dimensions
-        return _buildImmersive(context, defaultWidth: 160, defaultHeight: 160);
-      case FgContentCardVariant.hero:
-        return _buildHero(context);
-      case FgContentCardVariant.standard:
-        return _buildImmersive(context, defaultWidth: 280, defaultHeight: 170);
-    }
+    return ForgeSurfaceScope(
+      surface: ForgeSurface.immersive,
+      child: switch (variant) {
+        FgContentCardVariant.compact => _buildImmersive(
+          context,
+          defaultWidth: 160,
+          defaultHeight: 160,
+        ),
+        FgContentCardVariant.hero => _buildHero(context),
+        FgContentCardVariant.standard => _buildImmersive(
+          context,
+          defaultWidth: 280,
+          defaultHeight: 170,
+        ),
+      },
+    );
   }
 
-  Widget _buildImmersive(BuildContext context,
-      {required double defaultWidth, required double defaultHeight}) {
+  Widget _buildImmersive(
+    BuildContext context, {
+    required double defaultWidth,
+    required double defaultHeight,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -119,10 +131,7 @@ class FgContentCard extends StatelessWidget {
               Positioned.fill(
                 child: Opacity(
                   opacity: 0.6,
-                  child: FgImage(
-                    imageUrl: imageUrl!,
-                    fit: BoxFit.cover,
-                  ),
+                  child: FgImage(imageUrl: imageUrl!, fit: BoxFit.cover),
                 ),
               ),
 
@@ -151,8 +160,8 @@ class FgContentCard extends StatelessWidget {
                   color: tags!.first.toLowerCase().contains('mobility')
                       ? FgBadgeColor.warning
                       : (tags!.first.toLowerCase().contains('technique')
-                          ? FgBadgeColor.success
-                          : FgBadgeColor.blue),
+                            ? FgBadgeColor.success
+                            : FgBadgeColor.blue),
                   fontSize: 8, // Requested 8px
                 ),
               ),
@@ -219,10 +228,7 @@ class FgContentCard extends StatelessWidget {
                   ),
                   const SizedBox(height: AppSpacing.sm),
                   if (progress != null)
-                    FgProgressBar(
-                      value: progress!,
-                      size: FgProgressBarSize.sm,
-                    ),
+                    FgProgressBar(value: progress!, size: FgProgressBarSize.sm),
                 ],
               ),
             ),
@@ -257,10 +263,7 @@ class FgContentCard extends StatelessWidget {
               Positioned.fill(
                 child: Opacity(
                   opacity: 0.6,
-                  child: FgImage(
-                    imageUrl: imageUrl!,
-                    fit: BoxFit.cover,
-                  ),
+                  child: FgImage(imageUrl: imageUrl!, fit: BoxFit.cover),
                 ),
               ),
             Positioned.fill(
@@ -289,8 +292,8 @@ class FgContentCard extends StatelessWidget {
                         color: tags!.first.toLowerCase().contains('mobility')
                             ? FgBadgeColor.warning
                             : (tags!.first.toLowerCase().contains('technique')
-                                ? FgBadgeColor.success
-                                : FgBadgeColor.brand),
+                                  ? FgBadgeColor.success
+                                  : FgBadgeColor.brand),
                         fontSize: 10,
                       ),
                     ),

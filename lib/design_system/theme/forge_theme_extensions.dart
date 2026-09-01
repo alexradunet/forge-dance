@@ -173,6 +173,33 @@ class ForgeMotion {
       disableAnimations ? Curves.linear : AppAnimation.easeInOutCubic;
 }
 
+/// The semantic surface surrounding a Forge component.
+///
+/// Components on an immersive background must use the matching Forge
+/// foreground roles rather than Material's ordinary surface roles.
+enum ForgeSurface { standard, immersive }
+
+class ForgeSurfaceScope extends InheritedWidget {
+  const ForgeSurfaceScope({
+    super.key,
+    required this.surface,
+    required super.child,
+  });
+
+  final ForgeSurface surface;
+
+  static ForgeSurface? maybeOf(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<ForgeSurfaceScope>()
+        ?.surface;
+  }
+
+  @override
+  bool updateShouldNotify(ForgeSurfaceScope oldWidget) {
+    return surface != oldWidget.surface;
+  }
+}
+
 extension ForgeThemeDataExtension on ThemeData {
   ForgeColors get forgeColors => extension<ForgeColors>()!;
   ForgeEmphasis get forgeEmphasis => extension<ForgeEmphasis>()!;
@@ -180,4 +207,22 @@ extension ForgeThemeDataExtension on ThemeData {
 
 extension ForgeBuildContextExtension on BuildContext {
   ForgeMotion get forgeMotion => ForgeMotion.of(this);
+
+  ForgeSurface get forgeSurface =>
+      ForgeSurfaceScope.maybeOf(this) ?? ForgeSurface.standard;
+
+  Color get forgeForeground => switch (forgeSurface) {
+    ForgeSurface.standard => Theme.of(this).colorScheme.onSurface,
+    ForgeSurface.immersive => Theme.of(this).forgeColors.onImmersive,
+  };
+
+  Color get forgeMutedForeground => switch (forgeSurface) {
+    ForgeSurface.standard => Theme.of(this).colorScheme.onSurfaceVariant,
+    ForgeSurface.immersive => Theme.of(this).forgeColors.onImmersiveMuted,
+  };
+
+  Color get forgeSurfaceColor => switch (forgeSurface) {
+    ForgeSurface.standard => Theme.of(this).colorScheme.surfaceContainer,
+    ForgeSurface.immersive => Theme.of(this).forgeColors.immersiveSurface,
+  };
 }

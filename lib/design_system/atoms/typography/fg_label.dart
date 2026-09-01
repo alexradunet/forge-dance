@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/forge_theme_extensions.dart';
+
 import '../../tokens/app_sizes.dart';
 import '../../tokens/app_spacing.dart';
 import '../../tokens/app_typography.dart';
@@ -26,7 +28,7 @@ class FgLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final color = _color(scheme);
+    final color = _color(context, scheme);
     final label = uppercase ? text.toUpperCase() : text;
 
     return Semantics(
@@ -61,12 +63,12 @@ class FgLabel extends StatelessWidget {
     );
   }
 
-  Color _color(ColorScheme scheme) {
+  Color _color(BuildContext context, ColorScheme scheme) {
     return switch (tone) {
-      FgLabelTone.neutral => scheme.onSurfaceVariant,
+      FgLabelTone.neutral => context.forgeMutedForeground,
       FgLabelTone.accent => scheme.primary,
       FgLabelTone.error => scheme.error,
-      FgLabelTone.disabled => scheme.onSurface.withValues(alpha: 0.38),
+      FgLabelTone.disabled => context.forgeForeground.withValues(alpha: 0.38),
     };
   }
 }

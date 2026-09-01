@@ -40,8 +40,11 @@ class HomePage extends ConsumerWidget {
   }
 
   Widget _buildContent(BuildContext context, WidgetRef ref, LearnState state) {
-    final profileName =
-        ref.watch(profileViewModelProvider).value?.profile?.name;
+    final profileName = ref
+        .watch(profileViewModelProvider)
+        .value
+        ?.profile
+        ?.name;
     final stats = ref.watch(userStatsProvider).value ?? const UserStats();
 
     return CustomScrollView(
@@ -68,9 +71,7 @@ class HomePage extends ConsumerWidget {
         ),
 
         // Progress Section (streak / level / XP — taps through to stats)
-        SliverToBoxAdapter(
-          child: _buildProgressSection(context, stats),
-        ),
+        SliverToBoxAdapter(child: _buildProgressSection(context, stats)),
 
         // Continue Training — every module the user is partway through
         SliverToBoxAdapter(
@@ -106,9 +107,7 @@ class HomePage extends ConsumerWidget {
 
         // Bottom Spacing for BottomNav
         const SliverToBoxAdapter(
-          child: SizedBox(
-            height: AppSizes.bottomNavHeight + AppSpacing.xxl,
-          ),
+          child: SizedBox(height: AppSizes.bottomNavHeight + AppSpacing.xxl),
         ),
       ],
     );
@@ -124,10 +123,7 @@ class HomePage extends ConsumerWidget {
 
   String _lessonsCompletedLabel(LearnState state, Module module) {
     return LocaleKeys.lessonsCompletedOf.tr(
-      args: [
-        '${state.completedCountIn(module)}',
-        '${module.lessons.length}',
-      ],
+      args: ['${state.completedCountIn(module)}', '${module.lessons.length}'],
     );
   }
 
@@ -155,11 +151,11 @@ class HomePage extends ConsumerWidget {
   }
 
   List<Widget> _interleave(List<Widget> cards) => [
-        for (var i = 0; i < cards.length; i++) ...[
-          if (i > 0) const SizedBox(width: AppSpacing.lg),
-          cards[i],
-        ],
-      ];
+    for (var i = 0; i < cards.length; i++) ...[
+      if (i > 0) const SizedBox(width: AppSpacing.lg),
+      cards[i],
+    ],
+  ];
 
   Widget _buildDailySessionCard(
     BuildContext context,
@@ -284,7 +280,12 @@ class HomePage extends ConsumerWidget {
           child: Row(
             children: [
               Expanded(
-                child: Text(title, style: theme.textTheme.titleLarge),
+                child: Text(
+                  title,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: theme.forgeColors.onImmersive,
+                  ),
+                ),
               ),
               if (showViewAll)
                 FgButton(

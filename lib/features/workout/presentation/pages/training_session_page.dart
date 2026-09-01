@@ -92,10 +92,7 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
     HapticFeedback.lightImpact();
     if (_currentPage < _totalPageCount(wod) - 1) {
       final motion = context.forgeMotion;
-      _pageController.nextPage(
-        duration: motion.slow,
-        curve: motion.enterCurve,
-      );
+      _pageController.nextPage(duration: motion.slow, curve: motion.enterCurve);
     }
   }
 
@@ -135,8 +132,9 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
     if (_completionHandled) return;
     _completionHandled = true;
 
-    final awarded =
-        await ref.read(workoutViewModelProvider.notifier).completeWod();
+    final awarded = await ref
+        .read(workoutViewModelProvider.notifier)
+        .completeWod();
     if (!mounted) return;
     setState(() => _xpAwarded = awarded);
   }
@@ -169,7 +167,7 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
       subtitle: isComplete
           ? LocaleKeys.sessionComplete.tr()
           : '${wod.title} • '
-              '${LocaleKeys.minutesCount.tr(args: ['${wod.estimatedMinutes}'])}',
+                '${LocaleKeys.minutesCount.tr(args: ['${wod.estimatedMinutes}'])}',
       onBack: widget.onClose ?? () => Navigator.of(context).pop(),
       headerLeft: isLocked
           ? FgIconButton(
@@ -286,20 +284,22 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
           Text(
             wod.description,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  height: 1.5,
-                ),
+              color: Theme.of(context).forgeColors.onImmersiveMuted,
+              height: 1.5,
+            ),
           ),
           const SizedBox(height: AppSpacing.xxl),
           _buildInfoRow(
             Icons.fitness_center,
             LocaleKeys.exercisesCount
-                .tr(args: ['${wod.exercises.length}']).toUpperCase(),
+                .tr(args: ['${wod.exercises.length}'])
+                .toUpperCase(),
           ),
           _buildInfoRow(
             Icons.timer,
             LocaleKeys.minutesCount
-                .tr(args: ['${wod.estimatedMinutes}']).toUpperCase(),
+                .tr(args: ['${wod.estimatedMinutes}'])
+                .toUpperCase(),
           ),
           _buildInfoRow(
             Icons.bolt,
@@ -325,8 +325,7 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
       title: LocaleKeys.sessionComplete.tr().toUpperCase(),
       flipSemanticLabel: LocaleKeys.flipCard.tr(),
       subtitle: LocaleKeys.greatWork.tr().toUpperCase(),
-      backgroundImage:
-          'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=2000',
+      backgroundImage: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=2000',
       style: wod.style,
       difficulty: LocaleKeys.statusCompleted.tr(),
       progress: 1.0,
@@ -346,10 +345,11 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
               projectionHealth == ProjectionHealth.pendingRepair
                   ? LocaleKeys.statsSyncing.tr()
                   : _xpAwarded
-                      ? LocaleKeys.youEarnedXp.tr(args: ['${wod.xp}'])
-                      : LocaleKeys.alreadyCompletedToday.tr(),
+                  ? LocaleKeys.youEarnedXp.tr(args: ['${wod.xp}'])
+                  : LocaleKeys.alreadyCompletedToday.tr(),
               textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge
+                  ?.copyWith(color: Theme.of(context).forgeColors.onImmersive),
             ),
             const SizedBox(height: AppSpacing.sm),
             if (streak > 0)
@@ -357,9 +357,8 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
                 LocaleKeys.dayStreakKeepUp.tr(args: ['$streak']),
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color:
-                          Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(context).forgeColors.onImmersiveMuted,
+                ),
               ),
           ],
         ),
@@ -381,12 +380,10 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
     return FgInteractiveCard(
       title: exercise.name,
       flipSemanticLabel: LocaleKeys.flipCard.tr(),
-      subtitle: LocaleKeys.exerciseOf.tr(args: [
-        '${exerciseIndex + 1}',
-        '${wod.exercises.length}',
-      ]).toUpperCase(),
-      backgroundImage:
-          'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=2000',
+      subtitle: LocaleKeys.exerciseOf
+          .tr(args: ['${exerciseIndex + 1}', '${wod.exercises.length}'])
+          .toUpperCase(),
+      backgroundImage: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=2000',
       style: wod.style,
       difficulty: LocaleKeys.statusInProgress.tr(),
       progress: (exerciseIndex + 1) / wod.exercises.length,
@@ -418,7 +415,8 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
           Expanded(
             child: Text(
               text,
-              style: Theme.of(context).textTheme.labelLarge,
+              style: Theme.of(context).textTheme.labelLarge
+                  ?.copyWith(color: Theme.of(context).forgeColors.onImmersive),
             ),
           ),
         ],

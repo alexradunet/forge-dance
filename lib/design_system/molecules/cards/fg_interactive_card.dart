@@ -92,27 +92,30 @@ class _FgInteractiveCardState extends State<FgInteractiveCard>
   Widget build(BuildContext context) {
     final motion = context.forgeMotion;
 
-    return TweenAnimationBuilder<double>(
-      tween: Tween<double>(begin: 0, end: _isFlipped ? 180 : 0),
-      duration: motion.slow,
-      curve: motion.enterCurve,
-      builder: (context, angle, child) {
-        final isBackVisible = angle >= 90;
+    return ForgeSurfaceScope(
+      surface: ForgeSurface.immersive,
+      child: TweenAnimationBuilder<double>(
+        tween: Tween<double>(begin: 0, end: _isFlipped ? 180 : 0),
+        duration: motion.slow,
+        curve: motion.enterCurve,
+        builder: (context, angle, child) {
+          final isBackVisible = angle >= 90;
 
-        return Transform(
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.001) // perspective
-            ..rotateY(angle * pi / 180),
-          alignment: Alignment.center,
-          child: isBackVisible
-              ? Transform(
-                  transform: Matrix4.identity()..rotateY(pi),
-                  alignment: Alignment.center,
-                  child: _buildBack(),
-                )
-              : _buildFront(),
-        );
-      },
+          return Transform(
+            transform: Matrix4.identity()
+              ..setEntry(3, 2, 0.001)
+              ..rotateY(angle * pi / 180),
+            alignment: Alignment.center,
+            child: isBackVisible
+                ? Transform(
+                    transform: Matrix4.identity()..rotateY(pi),
+                    alignment: Alignment.center,
+                    child: _buildBack(),
+                  )
+                : _buildFront(),
+          );
+        },
+      ),
     );
   }
 

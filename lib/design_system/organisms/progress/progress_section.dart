@@ -37,7 +37,14 @@ class FgProgressSection extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(child: Text(title, style: theme.textTheme.titleLarge)),
+            Expanded(
+              child: Text(
+                title,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: context.forgeForeground,
+                ),
+              ),
+            ),
             if (actionLabel != null && onAction != null)
               FgButton(
                 text: actionLabel!,
@@ -56,9 +63,7 @@ class FgProgressSection extends StatelessWidget {
               for (final stat in stats)
                 SizedBox(
                   width: AppSizes.cardCompactWidth,
-                  child: FgCard(
-                    child: _StatContent(stat: stat),
-                  ),
+                  child: FgCard(child: _StatContent(stat: stat)),
                 ),
             ],
           ),

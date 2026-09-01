@@ -145,6 +145,96 @@ void main() {
     expect(button.style?.backgroundColor?.resolve({}), scheme.primary);
     expect(label.style?.color, scheme.onPrimary);
   });
+  testWidgets(
+    'immersive primitives use the foreground paired with FgBackground',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppThemes.light,
+          home: Scaffold(
+            body: FgBackground(
+              child: Column(
+                children: [
+                  FgButton(
+                    text: 'Ghost action',
+                    variant: FgButtonVariant.ghost,
+                    onPressed: () {},
+                  ),
+                  const FgIcon(icon: Icons.notifications_none_rounded),
+                  const FgLabel(text: 'Section'),
+                  const FgEmpty(
+                    icon: Icons.error_outline,
+                    title: 'Unexpected error occurred',
+                    description: 'Try again.',
+                  ),
+                  const FgProgressSection(
+                    title: 'Continue training',
+                    stats: [],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      final forgeColors = AppThemes.light.forgeColors;
+      expect(_textColor(tester, 'Ghost action'), forgeColors.onImmersiveMuted);
+      expect(
+        tester
+            .widget<Icon>(find.byIcon(Icons.notifications_none_rounded))
+            .color,
+        forgeColors.onImmersive,
+      );
+      expect(_textColor(tester, 'SECTION'), forgeColors.onImmersiveMuted);
+      expect(
+        _textColor(tester, 'Unexpected error occurred'),
+        forgeColors.onImmersive,
+      );
+      expect(_textColor(tester, 'Try again.'), forgeColors.onImmersiveMuted);
+      expect(_textColor(tester, 'Continue training'), forgeColors.onImmersive);
+    },
+  );
+
+  testWidgets('FgCard restores standard surface foreground roles', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppThemes.light,
+        home: Scaffold(
+          body: FgBackground(
+            child: FgCard(
+              child: Column(
+                children: [
+                  FgButton(
+                    text: 'Card action',
+                    variant: FgButtonVariant.ghost,
+                    onPressed: () {},
+                  ),
+                  const FgIcon(icon: Icons.info_outline),
+                  const FgLabel(text: 'Card label'),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final scheme = AppThemes.light.colorScheme;
+    expect(_textColor(tester, 'Card action'), scheme.onSurfaceVariant);
+    expect(
+      tester.widget<Icon>(find.byIcon(Icons.info_outline)).color,
+      scheme.onSurface,
+    );
+    expect(_textColor(tester, 'CARD LABEL'), scheme.onSurfaceVariant);
+  });
+}
+
+Color? _textColor(WidgetTester tester, String text) {
+  final widget = tester.widget<Text>(find.text(text));
+  return widget.style?.color ?? widget.textSpan?.style?.color;
 }
 
 double _contrastRatio(Color first, Color second) {

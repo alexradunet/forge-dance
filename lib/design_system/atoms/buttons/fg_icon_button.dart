@@ -47,14 +47,19 @@ class FgIconButton extends StatelessWidget {
     final isInteractive = isEnabled && !isLoading && onPressed != null;
     final targetDimension = _targetDimension;
     final visualDimension = _visualDimension;
-    final foreground = _foregroundColor(scheme, isInteractive);
+    final foreground = _foregroundColor(context, scheme, isInteractive);
 
     Widget visual = AnimatedContainer(
       duration: motion.fast,
       curve: motion.enterCurve,
       width: visualDimension,
       height: visualDimension,
-      decoration: _decoration(scheme, emphasis, isInteractive: isInteractive),
+      decoration: _decoration(
+        context,
+        scheme,
+        emphasis,
+        isInteractive: isInteractive,
+      ),
       alignment: Alignment.center,
       child: isLoading
           ? SizedBox.square(
@@ -114,6 +119,7 @@ class FgIconButton extends StatelessWidget {
   }
 
   BoxDecoration _decoration(
+    BuildContext context,
     ColorScheme scheme,
     ForgeEmphasis emphasis, {
     required bool isInteractive,
@@ -121,7 +127,7 @@ class FgIconButton extends StatelessWidget {
     if (!isInteractive && !isLoading) {
       return BoxDecoration(
         shape: BoxShape.circle,
-        color: scheme.onSurface.withValues(alpha: 0.12),
+        color: context.forgeForeground.withValues(alpha: 0.12),
       );
     }
 
@@ -149,9 +155,13 @@ class FgIconButton extends StatelessWidget {
     };
   }
 
-  Color _foregroundColor(ColorScheme scheme, bool isInteractive) {
+  Color _foregroundColor(
+    BuildContext context,
+    ColorScheme scheme,
+    bool isInteractive,
+  ) {
     if (!isInteractive && !isLoading) {
-      return scheme.onSurface.withValues(alpha: 0.38);
+      return context.forgeForeground.withValues(alpha: 0.38);
     }
     if (isSelected &&
         (variant == FgIconButtonVariant.glass ||
@@ -162,8 +172,8 @@ class FgIconButton extends StatelessWidget {
     return switch (variant) {
       FgIconButtonVariant.primary => scheme.onPrimary,
       FgIconButtonVariant.secondary => scheme.onSecondary,
-      FgIconButtonVariant.glass => scheme.onSurface,
-      FgIconButtonVariant.ghost => scheme.onSurfaceVariant,
+      FgIconButtonVariant.glass => context.forgeForeground,
+      FgIconButtonVariant.ghost => context.forgeMutedForeground,
     };
   }
 

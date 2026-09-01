@@ -66,8 +66,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                           style: Theme.of(context).textTheme.labelSmall
                               ?.copyWith(
                                 color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
+                                    .forgeColors
+                                    .onImmersiveMuted,
                               ),
                         ),
                       ),

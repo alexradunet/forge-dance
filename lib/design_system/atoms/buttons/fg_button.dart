@@ -64,7 +64,7 @@ class FgButton extends StatelessWidget {
     final effectiveShape =
         shape ?? (text == null ? FgButtonShape.circle : _defaultShape);
     final buttonShape = _shapeFor(effectiveShape);
-    final foreground = _foregroundColor(scheme);
+    final foreground = _foregroundColor(context, scheme);
 
     final button = FilledButton(
       focusNode: focusNode,
@@ -87,13 +87,13 @@ class FgButton extends StatelessWidget {
         ),
         backgroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled) && !isLoading) {
-            return scheme.onSurface.withValues(alpha: 0.12);
+            return context.forgeForeground.withValues(alpha: 0.12);
           }
           return _backgroundColor(scheme);
         }),
         foregroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled) && !isLoading) {
-            return scheme.onSurface.withValues(alpha: 0.38);
+            return context.forgeForeground.withValues(alpha: 0.38);
           }
           return foreground;
         }),
@@ -103,9 +103,11 @@ class FgButton extends StatelessWidget {
         side: WidgetStateProperty.resolveWith((states) {
           if (variant != FgButtonVariant.secondary) return BorderSide.none;
           if (states.contains(WidgetState.disabled) && !isLoading) {
-            return BorderSide(color: scheme.onSurface.withValues(alpha: 0.12));
+            return BorderSide(
+              color: context.forgeForeground.withValues(alpha: 0.12),
+            );
           }
-          return BorderSide(color: scheme.outline);
+          return BorderSide(color: context.forgeMutedForeground);
         }),
         shape: WidgetStatePropertyAll(buttonShape),
         textStyle: WidgetStatePropertyAll(_textStyle),
@@ -191,12 +193,12 @@ class FgButton extends StatelessWidget {
     };
   }
 
-  Color _foregroundColor(ColorScheme scheme) {
+  Color _foregroundColor(BuildContext context, ColorScheme scheme) {
     return switch (variant) {
       FgButtonVariant.primary => scheme.onPrimary,
-      FgButtonVariant.secondary => scheme.onSurface,
+      FgButtonVariant.secondary => context.forgeForeground,
       FgButtonVariant.tertiary => scheme.onSurface,
-      FgButtonVariant.ghost => scheme.onSurfaceVariant,
+      FgButtonVariant.ghost => context.forgeMutedForeground,
       FgButtonVariant.destructive => scheme.onError,
     };
   }

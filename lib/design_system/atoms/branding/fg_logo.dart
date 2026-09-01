@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/forge_theme_extensions.dart';
+
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_spacing.dart';
 import '../../tokens/app_typography.dart';
@@ -23,7 +25,7 @@ class FgLogo extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = _resolveColors(Theme.of(context).colorScheme);
+    final colors = _resolveColors(context);
     final mark = _ForgeMark(size: size, color: colors.mark);
     final wordmark = _ForgeWordmark(
       fontSize: size * 0.72,
@@ -35,14 +37,14 @@ class FgLogo extends StatelessWidget {
       FgLogoVariant.iconOnly => mark,
       FgLogoVariant.textOnly => wordmark,
       FgLogoVariant.full => Row(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            mark,
-            const SizedBox(width: AppSpacing.sm),
-            wordmark,
-          ],
-        ),
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          mark,
+          const SizedBox(width: AppSpacing.sm),
+          wordmark,
+        ],
+      ),
     };
 
     return Semantics(
@@ -52,23 +54,23 @@ class FgLogo extends StatelessWidget {
     );
   }
 
-  _LogoColors _resolveColors(ColorScheme colors) {
+  _LogoColors _resolveColors(BuildContext context) {
     return switch (color) {
       FgLogoColor.brand => _LogoColors(
-          mark: AppColors.forgeFire,
-          wordmark: colors.onSurface,
-          accent: AppColors.forgeFire,
-        ),
+        mark: AppColors.forgeFire,
+        wordmark: context.forgeForeground,
+        accent: AppColors.forgeFire,
+      ),
       FgLogoColor.white => const _LogoColors(
-          mark: AppColors.crystalWhite,
-          wordmark: AppColors.crystalWhite,
-          accent: AppColors.crystalWhite,
-        ),
+        mark: AppColors.crystalWhite,
+        wordmark: AppColors.crystalWhite,
+        accent: AppColors.crystalWhite,
+      ),
       FgLogoColor.black => const _LogoColors(
-          mark: AppColors.gray950,
-          wordmark: AppColors.gray950,
-          accent: AppColors.gray950,
-        ),
+        mark: AppColors.gray950,
+        wordmark: AppColors.gray950,
+        accent: AppColors.gray950,
+      ),
     };
   }
 }
@@ -110,8 +112,14 @@ class _ForgeWordmark extends StatelessWidget {
     return Text.rich(
       TextSpan(
         children: [
-          TextSpan(text: 'FORGE', style: style.copyWith(color: primaryColor)),
-          TextSpan(text: '.DANCE', style: style.copyWith(color: accentColor)),
+          TextSpan(
+            text: 'FORGE',
+            style: style.copyWith(color: primaryColor),
+          ),
+          TextSpan(
+            text: '.DANCE',
+            style: style.copyWith(color: accentColor),
+          ),
         ],
       ),
       maxLines: 1,

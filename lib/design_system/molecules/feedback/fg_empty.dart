@@ -33,7 +33,7 @@ class FgEmpty extends StatelessWidget {
     final forgeColors = theme.forgeColors;
     final accent = switch (tone) {
       FgEmptyTone.primary => scheme.primary,
-      FgEmptyTone.neutral => scheme.onSurfaceVariant,
+      FgEmptyTone.neutral => context.forgeMutedForeground,
       FgEmptyTone.error => scheme.error,
       FgEmptyTone.success => forgeColors.success,
       FgEmptyTone.reward => forgeColors.reward,
@@ -50,7 +50,7 @@ class FgEmpty extends StatelessWidget {
               width: AppSizes.squareTileSm,
               height: AppSizes.squareTileSm,
               decoration: BoxDecoration(
-                color: scheme.surfaceContainer,
+                color: context.forgeSurfaceColor,
                 shape: BoxShape.circle,
                 border: Border.all(color: accent.withValues(alpha: 0.32)),
               ),
@@ -61,7 +61,9 @@ class FgEmpty extends StatelessWidget {
           const SizedBox(height: AppSpacing.xxl),
           Text(
             title,
-            style: theme.textTheme.titleLarge,
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: context.forgeForeground,
+            ),
             textAlign: TextAlign.center,
           ),
           if (description != null) ...[
@@ -69,7 +71,7 @@ class FgEmpty extends StatelessWidget {
             Text(
               description!,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
+                color: context.forgeMutedForeground,
               ),
               textAlign: TextAlign.center,
             ),

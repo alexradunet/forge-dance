@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../theme/forge_theme_extensions.dart';
+
 class FgIcon extends StatelessWidget {
   final IconData icon;
   final double size;
@@ -18,10 +20,6 @@ class FgIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     // In Flutter, many icons have 'outlined' and 'rounded' versions in the material icons set.
     // If the user wants a 'filled' effect consistently, we'd use the standard Icon.
-    return Icon(
-      icon,
-      size: size,
-      color: color,
-    );
+    return Icon(icon, size: size, color: color ?? context.forgeForeground);
   }
 }

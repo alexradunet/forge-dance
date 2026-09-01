@@ -57,7 +57,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
           'Breaking',
           'Contemporary',
           'Freestyle',
-          'General'
+          'General',
         ],
         'Type': ['All', 'Drill', 'Dance Step', 'Concept'],
       },
@@ -118,9 +118,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
             horizontal: AppSpacing.xxl,
             vertical: AppSpacing.lg,
           ),
-          sliver: SliverToBoxAdapter(
-            child: _buildSearchBar(),
-          ),
+          sliver: SliverToBoxAdapter(child: _buildSearchBar()),
         ),
         if (nothingMatches)
           SliverToBoxAdapter(
@@ -141,9 +139,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
                 ),
               ),
         const SliverToBoxAdapter(
-          child: SizedBox(
-            height: AppSizes.bottomNavHeight + AppSpacing.lg,
-          ),
+          child: SizedBox(height: AppSizes.bottomNavHeight + AppSpacing.lg),
         ),
       ],
     );
@@ -151,11 +147,13 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
 
   List<Module> _modulesFor(LearnState state, ModuleCategory category) {
     return state.modules
-        .where((module) =>
-            module.category == category &&
-            (_query.isEmpty ||
-                module.title.toLowerCase().contains(_query) ||
-                module.tag.toLowerCase().contains(_query)))
+        .where(
+          (module) =>
+              module.category == category &&
+              (_query.isEmpty ||
+                  module.title.toLowerCase().contains(_query) ||
+                  module.tag.toLowerCase().contains(_query)),
+        )
         .toList();
   }
 
@@ -202,10 +200,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
       imageUrl: module.imageUrl,
       progress: state.moduleProgressOf(module),
       footerLabel: LocaleKeys.lessonsCompletedOf.tr(
-        args: [
-          '${state.completedCountIn(module)}',
-          '${module.lessons.length}',
-        ],
+        args: ['${state.completedCountIn(module)}', '${module.lessons.length}'],
       ),
       width: width,
       onTap: () {
@@ -244,7 +239,9 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
             children: [
               Text(
                 title,
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).forgeColors.onImmersive,
+                ),
               ),
               const SizedBox(width: AppSpacing.lg),
               Expanded(child: FgDivider.horizontal(tone: dividerTone)),
@@ -254,9 +251,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-          child: Row(
-            children: children,
-          ),
+          child: Row(children: children),
         ),
       ],
     );
