@@ -65,6 +65,13 @@ Rules for AI agents and contributors working on Forge Dance.
 - **Firebase MCP safety:** Firebase MCP has no emulator mode and uses the active Firebase CLI account/project. `tool/run_firebase_mcp.sh` allowlists Auth-user, Firestore-document/query, index, Rules-validation, and project-read tools; it excludes deploy, project/app creation, database deletion, backups, messaging, and environment switching. Before a mutating call, confirm the target with `firebase_get_project` and state the intended change to the user.
 - **Figma MCP:** Intentionally excluded. Do not add or configure it unless the project explicitly reverses this decision.
 
+## Live Flutter development
+
+- **Live loop:** When a Flutter debug app is running, or the user asks for hot reload, interactive UI iteration, or visual verification, follow `.agents/skills/flutter-live-development/SKILL.md`.
+- During a live loop, apply each non-documentation change under `lib/` with Dart MCP hot reload or hot restart before evaluating it. Verify visual claims from a current screenshot, not from source or the widget tree alone.
+- Prefer Linux desktop for fast UI-only iteration. Use the fixed-port Web Server target with Auth and Firestore emulators for Firebase flows; never use production Firebase for live agent-driven development.
+- On Omarchy, `tool/capture_flutter_window.sh` captures the visible Forge Dance window under `build/live/` for vision-model review. Web sessions use Chrome DevTools MCP at `http://127.0.0.1:7357`.
+
 ## Required checks
 
 Run before handing off. CI runs the same script, so local green == CI green:

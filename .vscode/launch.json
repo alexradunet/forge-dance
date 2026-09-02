@@ -26,6 +26,19 @@
       "preLaunchTask": "forge: firebase emulators"
     },
     {
+      "name": "Web Server (Agent + Firebase Emulator)",
+      "type": "dart",
+      "request": "launch",
+      "program": "lib/main.dart",
+      "deviceId": "web-server",
+      "toolArgs": [
+        "--web-hostname=127.0.0.1",
+        "--web-port=7357",
+        "--dart-define=USE_FIREBASE_EMULATOR=true"
+      ],
+      "preLaunchTask": "forge: firebase emulators"
+    },
+    {
       "name": "Linux Desktop (Debug)",
       "type": "dart",
       "request": "launch",
