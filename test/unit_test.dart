@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:forge_dance/features/profile/model/profile.dart';
@@ -18,6 +20,24 @@ class FakeProfileRepository extends ProfileRepository {
   @override
   Future<void> update(Profile profile) async {
     savedProfile = profile;
+    this.profile = profile;
+  }
+}
+
+class RacingProfileRepository extends ProfileRepository {
+  RacingProfileRepository() : super(auth: null, firestore: null);
+
+  final firstUpdateGate = Completer<void>();
+  Profile? profile;
+  var updateCount = 0;
+
+  @override
+  Future<Profile?> get() async => profile;
+
+  @override
+  Future<void> update(Profile profile) async {
+    updateCount++;
+    if (updateCount == 1) await firstUpdateGate.future;
     this.profile = profile;
   }
 }
@@ -75,9 +95,7 @@ void main() {
         ),
       );
       final container = ProviderContainer(
-        overrides: [
-          profileRepositoryProvider.overrideWithValue(repository),
-        ],
+        overrides: [profileRepositoryProvider.overrideWithValue(repository)],
       );
       addTearDown(container.dispose);
 
@@ -98,6 +116,35 @@ void main() {
       expect(
         container.read(profileViewModelProvider).value?.profile,
         expectedProfile,
+      );
+    });
+
+    test('a slower auth sync cannot overwrite a newer profile edit', () async {
+      final repository = RacingProfileRepository();
+      final container = ProviderContainer(
+        overrides: [profileRepositoryProvider.overrideWithValue(repository)],
+      );
+      addTearDown(container.dispose);
+      await container.read(profileViewModelProvider.future);
+
+      final notifier = container.read(profileViewModelProvider.notifier);
+      final authSync = notifier.syncAuthentication(
+        id: 'user-1',
+        email: 'dancer@example.com',
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      final profileEdit = notifier.editProfile(name: 'Chosen Name');
+      await Future<void>.delayed(Duration.zero);
+      repository.firstUpdateGate.complete();
+      await Future.wait([authSync, profileEdit]);
+
+      expect(repository.profile?.id, 'user-1');
+      expect(repository.profile?.email, 'dancer@example.com');
+      expect(repository.profile?.name, 'Chosen Name');
+      expect(
+        container.read(profileViewModelProvider).value?.profile?.name,
+        'Chosen Name',
       );
     });
 

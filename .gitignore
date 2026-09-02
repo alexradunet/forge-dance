@@ -36,6 +36,9 @@ migrate_working_dir/
 # FVM (version pin lives in .fvmrc; SDK symlink is local)
 .fvm/
 
+# Node.js
+node_modules/
+
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id

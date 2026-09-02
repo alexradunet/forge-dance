@@ -76,7 +76,7 @@
     {
       "label": "forge: build web (release)",
       "type": "shell",
-      "command": "fvm flutter build web --release",
+      "command": "fvm flutter build web --release --wasm",
       "group": "build",
       "problemMatcher": []
     },
@@ -100,6 +100,42 @@
           "endsPattern": "All emulators ready"
         }
       }
+    },
+    {
+      "label": "forge: test firestore rules",
+      "type": "shell",
+      "command": "bash tool/check_firebase_rules.sh",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "forge: integration test (web + emulators)",
+      "type": "shell",
+      "command": "bash tool/check_integration.sh",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "forge: web quality (Lighthouse + emulators)",
+      "type": "shell",
+      "command": "bash tool/check_web_quality.sh",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "clear": true
+      },
+      "problemMatcher": []
     },
     {
       "label": "forge: deploy firestore rules",

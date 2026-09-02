@@ -8,10 +8,22 @@ part 'home_page.stories.g.dart';
 
 const meta = Meta(HomePagePreview.new);
 
+final $FreshDancer = _Story(
+  name: 'Fresh Dancer',
+  setup: scenarioSemanticsBoundary,
+  args: _Args.fixed(condition: PreviewLearnCondition.freshDancer),
+);
+
 final $Loaded = _Story(
   name: 'Loaded',
   setup: scenarioSemanticsBoundary,
   args: _Args.fixed(condition: PreviewLearnCondition.loaded),
+);
+
+final $ModuleComplete = _Story(
+  name: 'Module Complete',
+  setup: scenarioSemanticsBoundary,
+  args: _Args.fixed(condition: PreviewLearnCondition.moduleComplete),
 );
 
 final $Loading = _Story(

@@ -18,6 +18,7 @@ class Global {
           liveRegion: true,
           scopesRoute: true,
           namesRoute: true,
+          explicitChildNodes: true,
           child: ExcludeSemantics(
             child: Stack(
               children: [

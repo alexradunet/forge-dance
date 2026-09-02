@@ -18,8 +18,8 @@ const Set<String> _authLocations = {
 ///    auth entirely and land on main.
 /// 2. Auth state still resolving → hold pre-auth screens, park everything
 ///    else on splash until resolved.
-/// 3. Signed in → keep out of splash/login (→ main); register redirects to
-///    onboarding (post-registration flow).
+/// 3. Signed in → keep out of splash/login (→ main); a successful registration
+///    redirects register to onboarding, while returning sign-in goes to main.
 /// 4. Signed out → login/register are allowed; everything else goes to
 ///    login (or register when no account ever existed on this device).
 String? computeRedirect({
@@ -41,7 +41,9 @@ String? computeRedirect({
   }
 
   if (state.isLoggedIn) {
-    if (matchedLocation == Routes.register) return Routes.onboarding;
+    if (matchedLocation == Routes.register) {
+      return state.isRegisterSuccessfully ? Routes.onboarding : Routes.main;
+    }
     if (matchedLocation == Routes.splash || matchedLocation == Routes.login) {
       return Routes.main;
     }

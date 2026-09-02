@@ -38,7 +38,7 @@ Never commit generated files.
 
 ## Commands
 
-**One command verifies everything** (codegen → analyze, including Riverpod lints → test). Run it before every hand-off; CI runs exactly the same script, so local green == CI green:
+**One command verifies the fast Flutter gate** (codegen → analyze, including Riverpod lints → unit/widget tests). Run it before every hand-off; CI runs the same script:
 
 ```bash
 bash tool/checks.sh
@@ -57,10 +57,12 @@ Individual commands when you need just one step:
 | Tests | `flutter test` |
 | Run app | `flutter run -d chrome` (or another device) |
 | Run against local emulators | `firebase emulators:start` + `flutter run --dart-define=USE_FIREBASE_EMULATOR=true` |
+| Test Firestore Rules | `bash tool/check_firebase_rules.sh` |
+| Registration integration test | `bash tool/check_integration.sh` |
 | Web release build | `flutter build web --release` |
 | Deploy Firestore rules | `firebase deploy --only firestore:rules` |
 
-CI (`.github/workflows/flutter.yml`, Flutter 3.47.2) runs `tool/checks.sh` + a web release build on every push to `main` — and commits land directly on `main`, so breakage is immediately visible. `riverpod_lint` is registered in `analysis_options.yaml`, so `flutter analyze` runs both Dart and Riverpod diagnostics.
+CI (`.github/workflows/flutter.yml`, Flutter 3.47.2) runs the fast gate, Wasm web release build, Firestore Rules tests, Lighthouse gate, and the headless Web registration/returning-sign-in flow against Auth/Firestore emulators. `riverpod_lint` is registered in `analysis_options.yaml`, so `flutter analyze` runs both Dart and Riverpod diagnostics.
 
 ## Architecture
 
@@ -126,7 +128,7 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
 
 - **Design system only**: colors/typography/spacing/radii/shadows come from `lib/design_system/tokens/` — no ad-hoc values in feature code. If a primitive is missing, add it to the design system first. Components use the `Fg` prefix (design-system code only). Note: `AppTheme` is a legacy typedef alias of `AppTypography`; both appear in code.
 - **Riverpod**: codegen only (`@riverpod` / `@Riverpod(keepAlive: true)`) — no manual `Provider(...)`. Repositories are keepAlive; view models default to autoDispose unless state must outlive the screen (e.g. `ProfileViewModel` is keepAlive).
-- **i18n**: user-facing strings use `LocaleKeys.x.tr()` (easy_localization); add keys to BOTH `assets/translations/en.json` and `vi.json`, then regenerate. Prototype screens still contain hardcoded strings — leave those until each screen is productionized, but newly wired features must be localized.
+- **i18n**: user-facing strings use `LocaleKeys.x.tr()` (easy_localization); add keys to `assets/translations/en.json`, then regenerate. Prototype screens still contain hardcoded strings — leave those until each screen is productionized, but newly wired features must be localized.
 - **Theming**: use `context.isDarkMode` and the semantic colors on `BuildContextExtension` (`primaryBackgroundColor`, `primaryTextColor`, …); theme mode is persisted via `appThemeModeProvider`.
 - **Naming**: clear domain names; no starter-template or sample-person names (per `AGENTS.md`).
 
@@ -137,7 +139,7 @@ Feature shape (per `AGENTS.md`): `features/<feature>/model/` (freezed models), `
   - `users/{userId}` — profile (`id`, `email`, `name`, `job`, `avatar`, `diamond`, `createdAt`, `updatedAt`) plus gamification stats (`xp`, `streakCount`, `lastActivityDate` yyyy-MM-dd); `id` must equal the auth uid, stats fields type-checked when present
   - `users/{userId}/progress/{lessonId}` — lesson progress (`lessonId`, `status`, `progress`, `updatedAt`); doc id must equal `lessonId`, `status` whitelisted to the `LessonStatus` enum names
   - `users/{userId}/sessions/{date}_{workoutId}` — completed workout sessions (`workoutId`, `date` yyyy-MM-dd, `completedAt`); the deterministic doc id (enforced by rules) caps XP at one award per workout per day
-- Rules changes require `firebase deploy --only firestore:rules` — an undeployed rules change is the usual cause of `permission-denied`.
+- Rules changes require `bash tool/check_firebase_rules.sh` before `firebase deploy --only firestore:rules` — an undeployed rules change is the usual cause of `permission-denied`.
 - Firestore access is typed: create one `withConverter` reference per collection inside the repository (see `ProgressRepository._progressRef`). Normalize `Timestamp` → ISO-8601 string before `fromJson`.
 - Profile persistence is local-first: SharedPreferences cache merged with Firestore; local (non-URL) avatar file paths are intentionally NOT synced to Firestore.
 - **Emulator suite**: `firebase emulators:start` then run the app with `--dart-define=USE_FIREBASE_EMULATOR=true` (wiring in `features/firebase/repository/firebase_bootstrap.dart`; ports in `firebase.json`). Use it whenever exercising auth/Firestore behavior locally — never test against production data.

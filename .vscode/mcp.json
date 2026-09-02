@@ -1,0 +1,18 @@
+{
+  "servers": {
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "bash",
+      "args": [
+        "tool/run_chrome_devtools_mcp.sh"
+      ]
+    },
+    "firebase": {
+      "type": "stdio",
+      "command": "bash",
+      "args": [
+        "tool/run_firebase_mcp.sh"
+      ]
+    }
+  }
+}

@@ -9,7 +9,6 @@ import '../../../features/profile/ui/view_model/profile_view_model.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../../routing/routes.dart';
 
-
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -66,6 +65,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                     const SizedBox(height: AppSpacing.xxxl),
                     FgInput(
+                      key: const ValueKey('onboarding.name'),
                       label: LocaleKeys.yourName.tr(),
                       controller: _nameController,
                       isRequired: true,
@@ -74,6 +74,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                     ),
                     const Spacer(),
                     FgButton(
+                      key: const ValueKey('onboarding.continue'),
                       text: LocaleKeys.continueText.tr(),
                       expand: true,
                       onPressed: _isButtonEnabled

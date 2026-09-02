@@ -177,7 +177,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
           Global.showLoading(context);
           await ref.read(sessionCoordinatorProvider).signOut();
           if (context.mounted) {
-            context.pushReplacement(Routes.register);
+            context.pushReplacement(Routes.login);
           }
         } catch (error) {
           if (context.mounted) {

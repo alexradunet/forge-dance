@@ -50,7 +50,8 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
   void _validateForm() {
     setState(() {
-      _isFormValid = isValidEmail(_emailController.text) &&
+      _isFormValid =
+          isValidEmail(_emailController.text) &&
           _passwordController.text.trim().length >= 6;
     });
   }
@@ -58,7 +59,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   void _submit() {
     if (!_isFormValid) return;
     _passwordFocusNode.unfocus();
-    ref.read(sessionCoordinatorProvider).signInWithEmailAndPassword(
+    ref
+        .read(sessionCoordinatorProvider)
+        .signInWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
@@ -112,12 +115,10 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           ),
                         ),
                         const SizedBox(height: AppSpacing.lg),
-                        Text(
-                          LocaleKeys.signIn.tr(),
-                          style: AppTypography.h1,
-                        ),
+                        Text(LocaleKeys.signIn.tr(), style: AppTypography.h1),
                         const SizedBox(height: AppSpacing.xxl),
                         FgInput(
+                          key: const ValueKey('sign-in.email'),
                           label: LocaleKeys.email.tr(),
                           controller: _emailController,
                           focusNode: _emailFocusNode,
@@ -133,20 +134,22 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                         ),
                         const SizedBox(height: AppSpacing.lg),
                         FgInput.password(
+                          key: const ValueKey('sign-in.password'),
                           label: LocaleKeys.password.tr(),
                           controller: _passwordController,
                           focusNode: _passwordFocusNode,
                           textInputAction: TextInputAction.done,
                           autofillHints: const [AutofillHints.password],
                           isRequired: true,
-                          showPasswordSemanticsLabel:
-                              LocaleKeys.showPassword.tr(),
-                          hidePasswordSemanticsLabel:
-                              LocaleKeys.hidePassword.tr(),
+                          showPasswordSemanticsLabel: LocaleKeys.showPassword
+                              .tr(),
+                          hidePasswordSemanticsLabel: LocaleKeys.hidePassword
+                              .tr(),
                           onSubmitted: (_) => _submit(),
                         ),
                         const SizedBox(height: AppSpacing.xxxl),
                         FgButton(
+                          key: const ValueKey('sign-in.submit'),
                           onPressed: _isFormValid ? _submit : null,
                           text: LocaleKeys.signIn.tr(),
                           size: FgButtonSize.lg,

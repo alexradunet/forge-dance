@@ -9,12 +9,14 @@ void main() {
     bool isLoggedIn = false,
     bool hasExistingAccount = false,
     bool isFirebaseConfigured = true,
+    bool isRegisterSuccessfully = false,
   }) {
     return AsyncData(
       AuthenticationState(
         isLoggedIn: isLoggedIn,
         hasExistingAccount: hasExistingAccount,
         isFirebaseConfigured: isFirebaseConfigured,
+        isRegisterSuccessfully: isRegisterSuccessfully,
       ),
     );
   }
@@ -68,8 +70,17 @@ void main() {
       expect(redirect(Routes.login, signedIn), Routes.main);
     });
 
-    test('register hands off to onboarding (post-registration flow)', () {
-      expect(redirect(Routes.register, signedIn), Routes.onboarding);
+    test('successful registration hands off to onboarding', () {
+      final registered = resolved(
+        isLoggedIn: true,
+        hasExistingAccount: true,
+        isRegisterSuccessfully: true,
+      );
+      expect(redirect(Routes.register, registered), Routes.onboarding);
+    });
+
+    test('returning sign-in never re-enters onboarding', () {
+      expect(redirect(Routes.register, signedIn), Routes.main);
     });
 
     test('allows guarded routes', () {

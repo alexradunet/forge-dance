@@ -52,7 +52,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   void _validateForm() {
     setState(() {
-      _isFormValid = isValidEmail(_emailController.text) &&
+      _isFormValid =
+          isValidEmail(_emailController.text) &&
           _passwordController.text.trim().length >= 6;
     });
   }
@@ -60,7 +61,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   void _submit() {
     if (!_isFormValid) return;
     _passwordFocusNode.unfocus();
-    ref.read(sessionCoordinatorProvider).registerWithEmailAndPassword(
+    ref
+        .read(sessionCoordinatorProvider)
+        .registerWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
@@ -122,12 +125,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           ),
                         ),
                         const SizedBox(height: AppSpacing.lg),
-                        Text(
-                          LocaleKeys.register.tr(),
-                          style: AppTypography.h1,
-                        ),
+                        Text(LocaleKeys.register.tr(), style: AppTypography.h1),
                         const SizedBox(height: AppSpacing.xxl),
                         FgInput(
+                          key: const ValueKey('registration.email'),
                           label: LocaleKeys.email.tr(),
                           controller: _emailController,
                           focusNode: _emailFocusNode,
@@ -143,6 +144,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ),
                         const SizedBox(height: AppSpacing.lg),
                         FgInput.password(
+                          key: const ValueKey('registration.password'),
                           label: LocaleKeys.password.tr(),
                           controller: _passwordController,
                           focusNode: _passwordFocusNode,
@@ -150,14 +152,15 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                           textInputAction: TextInputAction.done,
                           autofillHints: const [AutofillHints.newPassword],
                           isRequired: true,
-                          showPasswordSemanticsLabel:
-                              LocaleKeys.showPassword.tr(),
-                          hidePasswordSemanticsLabel:
-                              LocaleKeys.hidePassword.tr(),
+                          showPasswordSemanticsLabel: LocaleKeys.showPassword
+                              .tr(),
+                          hidePasswordSemanticsLabel: LocaleKeys.hidePassword
+                              .tr(),
                           onSubmitted: (_) => _submit(),
                         ),
                         const SizedBox(height: AppSpacing.xxxl),
                         FgButton(
+                          key: const ValueKey('registration.submit'),
                           onPressed: _isFormValid ? _submit : null,
                           text: LocaleKeys.register.tr(),
                           size: FgButtonSize.lg,

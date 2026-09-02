@@ -76,7 +76,7 @@ Wrap in `ProviderScope(overrides: [...])` + `MaterialApp`. Screens using `Locale
 - Every new view model: initial `build()` state, each mutation's happy path, one error path.
 - Repository logic that doesn't need Firebase (merging, normalization, payload building) — instantiate with `auth: null, firestore: null` where the method allows it.
 - New validators/extensions/utils: direct unit tests.
-- Firestore-touching code paths are NOT integration-tested (no emulator setup in this repo) — isolate them behind repository methods so everything around them stays testable.
+- Keep ordinary repository/view-model coverage on hand-written fakes. Firestore Rules run against the emulator through `tool/check_firebase_rules.sh`; registration, profile persistence, logout, and returning sign-in run through `tool/check_integration.sh`. Add expensive emulator coverage only for critical cross-layer behavior.
 
 ## Before handing off
 

@@ -24,6 +24,17 @@ const previewStats = UserStats(
   levelProgress: 0.72,
 );
 
+const previewNewDancerStats = UserStats(xpForLevelSpan: 240, nextLevelXp: 240);
+
+const previewMaxLevelStats = UserStats(
+  totalXp: 2810,
+  streakCount: 48,
+  level: 8,
+  beltName: 'Black',
+  nextLevelXp: null,
+  levelProgress: 1,
+);
+
 const previewProfile = Profile(
   id: 'widgetbook-dancer',
   email: 'dancer@example.com',
@@ -34,7 +45,13 @@ const previewProfile = Profile(
   lastActivityDate: '2026-08-21',
 );
 
-enum PreviewLearnCondition { loaded, loading, error }
+enum PreviewLearnCondition {
+  freshDancer,
+  loaded,
+  moduleComplete,
+  loading,
+  error,
+}
 
 Widget buildHomePreview({
   required Widget child,
@@ -46,13 +63,17 @@ Widget buildHomePreview({
         () => _PreviewLearnViewModel(condition),
       ),
       profileViewModelProvider.overrideWith(_PreviewProfileViewModel.new),
-      userStatsProvider.overrideWith((ref) => previewStats),
+      userStatsProvider.overrideWith(
+        (ref) => condition == PreviewLearnCondition.freshDancer
+            ? previewNewDancerStats
+            : previewStats,
+      ),
     ],
     child: child,
   );
 }
 
-enum PreviewStatsCondition { loaded, loading, error }
+enum PreviewStatsCondition { newDancer, loaded, maxLevel, loading, error }
 
 Widget buildStatsPreview({
   required Widget child,
@@ -62,7 +83,9 @@ Widget buildStatsPreview({
     overrides: [
       userStatsProvider.overrideWith(
         (ref) => switch (condition) {
+          PreviewStatsCondition.newDancer => previewNewDancerStats,
           PreviewStatsCondition.loaded => previewStats,
+          PreviewStatsCondition.maxLevel => previewMaxLevelStats,
           PreviewStatsCondition.loading => Completer<UserStats>().future,
           PreviewStatsCondition.error => Future<UserStats>.error(
             StateError('Widgetbook preview error'),
@@ -82,7 +105,9 @@ class _PreviewLearnViewModel extends LearnViewModel {
   @override
   FutureOr<LearnState> build() {
     return switch (condition) {
+      PreviewLearnCondition.freshDancer => _previewFreshLearnState(),
       PreviewLearnCondition.loaded => _previewLearnState(),
+      PreviewLearnCondition.moduleComplete => _previewCompletedModuleState(),
       PreviewLearnCondition.loading => Completer<LearnState>().future,
       PreviewLearnCondition.error => Future<LearnState>.error(
         StateError('Widgetbook preview error'),
@@ -94,6 +119,28 @@ class _PreviewLearnViewModel extends LearnViewModel {
 class _PreviewProfileViewModel extends ProfileViewModel {
   @override
   FutureOr<ProfileState> build() => const ProfileState(profile: previewProfile);
+}
+
+LearnState _previewFreshLearnState() {
+  final module = allModules.first;
+  return LearnState(modules: allModules, activeModuleId: module.id);
+}
+
+LearnState _previewCompletedModuleState() {
+  final module = allModules.first;
+  return LearnState(
+    modules: allModules,
+    activeModuleId: module.id,
+    progress: {
+      for (final lesson in module.lessons)
+        lesson.id: LessonProgress(
+          lessonId: lesson.id,
+          status: LessonStatus.completed,
+          progress: 1,
+          completedDate: '2026-08-20',
+        ),
+    },
+  );
 }
 
 LearnState _previewLearnState() {

@@ -8,10 +8,22 @@ part 'stats_page.stories.g.dart';
 
 const meta = Meta(StatsPagePreview.new);
 
+final $NewDancer = _Story(
+  name: 'New Dancer',
+  setup: scenarioSemanticsBoundary,
+  args: _Args.fixed(condition: PreviewStatsCondition.newDancer),
+);
+
 final $Loaded = _Story(
   name: 'Loaded',
   setup: scenarioSemanticsBoundary,
   args: _Args.fixed(condition: PreviewStatsCondition.loaded),
+);
+
+final $MaxLevel = _Story(
+  name: 'Max Level',
+  setup: scenarioSemanticsBoundary,
+  args: _Args.fixed(condition: PreviewStatsCondition.maxLevel),
 );
 
 final $Loading = _Story(

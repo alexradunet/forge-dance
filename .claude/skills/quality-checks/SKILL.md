@@ -1,19 +1,25 @@
 ---
 name: quality-checks
-description: Run the full Forge Dance verification pipeline (code generation, analyzer and Riverpod lints, tests, web build) and fix common failures like missing part files, stale generated code, or freezed/riverpod codegen errors. Use before committing or handing off, after pulling changes, or when builds fail with unresolved generated symbols.
+description: Run Forge Dance verification gates (code generation, analysis, tests, emulator checks, and web quality) and fix common generated-code failures. Use before committing or handing off, after pulling changes, or when CI and generated symbols fail.
 ---
 
 # Quality Checks & Codegen Pipeline
 
-**One command, one definition of done:**
+**Fast Flutter gate:**
 
 ```bash
 bash tool/checks.sh
 ```
 
-It runs, fail-fast and in order: `pub get` → localization keygen → `build_runner` → `analyze` (including `riverpod_lint`) → `test`. CI (`.github/workflows/flutter.yml`, Flutter **3.47.2**) runs exactly this script on every push to `main` — and commits land directly on `main` — so local green == CI green. Never hand off without it passing.
+It runs, fail-fast and in order: `pub get` → localization keygen → `build_runner` → `analyze` (including `riverpod_lint`) → unit/widget tests. Never hand off without it passing.
 
-For risky changes, also confirm the release target CI builds: `flutter build web --release`.
+Run the relevant slower gate as well:
+
+- `bash tool/check_firebase_rules.sh` after `firestore.rules` changes.
+- `bash tool/check_integration.sh` after authentication, onboarding, profile persistence, or routing changes.
+- `bash tool/check_web_quality.sh` after web startup, routing, assets, metadata, Firebase bootstrap, or major UI composition changes.
+
+CI runs these gates in separate jobs. The web-quality gate audits a Wasm release build (including its JavaScript fallback) against Firebase emulators, checks Lighthouse score and transfer floors, and rejects console errors or failed HTTP requests; inspect `build/lighthouse/` when it fails.
 
 ## Why this exact pipeline
 
@@ -28,12 +34,13 @@ For risky changes, also confirm the release target CI builds: `flutter build web
 |---|---|
 | `Target of URI hasn't been generated: '*.g.dart'` / missing `part` file | Run build_runner (and the localization generate for `locale_keys.g.dart`) |
 | Build script references removed `build_runner_core` APIs | Remove `.dart_tool/build`, then rerun `dart run build_runner build` |
-| `Undefined name 'LocaleKeys'` or missing key getter | Regenerate LocaleKeys; check the key exists in `assets/translations/en.json` AND `vi.json` |
+| `Undefined name 'LocaleKeys'` or missing key getter | Regenerate LocaleKeys; check the key exists in `assets/translations/en.json` |
 | Freezed: `Missing concrete implementation` / mixin errors | Freezed 4 requires `abstract class X with _$X` for immutable models — the old non-abstract syntax does not compile |
 | Riverpod: provider name not found after adding `@riverpod` | The generated provider is `<functionName>Provider` / `<className>Provider` — rerun build_runner, check the `part '<file>.g.dart';` directive matches the filename |
 | Weird stale-codegen behavior after refactors/renames | `flutter clean && flutter pub get`, then rerun both generators |
 | `permission-denied` from Firestore at runtime | Rules not deployed — `firebase deploy --only firestore:rules` (see firebase-data skill) |
-| CI green locally but failing on web build | Run `flutter build web --release` locally; usually a web-incompatible import (e.g. `dart:io` outside guarded paths) |
+| CI green locally but failing on web build | Run `flutter build web --release --wasm` locally; usually a web-incompatible import or Wasm-unsafe package |
+| Lighthouse score, console, or request regression | Run `bash tool/check_web_quality.sh`, then inspect `build/lighthouse/forge-dance.report.html` |
 
 ## Commit hygiene
 

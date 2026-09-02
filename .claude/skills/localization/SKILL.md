@@ -1,17 +1,15 @@
 ---
 name: localization
-description: Add or change user-facing text in Forge Dance using easy_localization — translation keys in the English and Vietnamese JSON files, LocaleKeys code generation, and .tr() usage. Use when adding UI strings, building screens with text, translating hardcoded strings, or fixing missing-translation issues.
+description: Add or change user-facing text in Forge Dance using easy_localization — translation keys in the English JSON catalogue, LocaleKeys code generation, and .tr() usage. Use when adding UI strings, building screens, translating hardcoded strings, or fixing missing-translation issues.
 ---
 
 # Localization (easy_localization)
 
-Supported locales: `en` (fallback) and `vi`, configured in `main.dart` (`useOnlyLangCode: true`). Users switch language via the profile Languages screen.
+Supported locale: `en` (fallback), configured through `AppLocales` with `useOnlyLangCode: true`.
 
 ## Adding a string — the full loop
 
-1. Add the key to **BOTH** files (they must stay in sync):
-   - `assets/translations/en.json`
-   - `assets/translations/vi.json`
+1. Add the key to `assets/translations/en.json`.
 
    Keys are flat camelCase (`validatorInvalidEmailFormat`, `unexpectedErrorOccurred`) — no nesting.
 
@@ -32,10 +30,6 @@ Supported locales: `en` (fallback) and `vi`, configured in `main.dart` (`useOnly
 
    Placeholders: `"greeting": "Hello {}"` → `LocaleKeys.greeting.tr(args: ['Alex'])`; named: `{name}` + `tr(namedArgs: {'name': ...})`; plurals via `.plural(count)`.
 
-## Vietnamese translations
-
-Provide a real Vietnamese translation — never silently copy the English string into `vi.json`. If unsure about phrasing, add your best translation and flag it in the handoff message for review. A key present in `en.json` but missing in `vi.json` falls back to English at runtime (silent, easy to miss) — keeping the files in lockstep is the rule.
-
 ## Current state & migration policy
 
 - Wired features (authentication, profile, common widgets, validators) use `LocaleKeys` properly.
@@ -47,4 +41,4 @@ Provide a real Vietnamese translation — never silently copy the English string
 - Forgetting step 2 → `Undefined name 'LocaleKeys'` or missing getters at analyze time. CI regenerates before analyzing, so it will pass CI but fail locally (or vice versa if you don't commit the JSON change).
 - `LocaleKeys.x` is a dot-path string; `.tr()` does the lookup — calling `.tr()` on plain literals works but bypasses key generation and should not be used.
 - `context.locale`, `context.supportedLocales`, and `localizationDelegates` come from easy_localization's BuildContext extension (wired in `MainApp`).
-- Adding a *new locale* means: new JSON file, add `Locale(...)` to `supportedLocales` in `main.dart`, add an entry to the `languages` list in `features/profile/ui/languages_screen.dart`, and regenerate.
+- Adding a *new locale* means: add a matching JSON file, register its `Locale(...)` in `lib/localization/app_locales.dart`, add any language-selection UI, and regenerate.

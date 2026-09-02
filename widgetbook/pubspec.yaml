@@ -16,7 +16,7 @@ dependencies:
     path: ..
   go_router: ^16.2.4
   shared_preferences: ^2.5.3
-  widgetbook: ^4.0.0-beta.13
+  widgetbook: 4.0.0-beta.13
 
 dev_dependencies:
   flutter_test:

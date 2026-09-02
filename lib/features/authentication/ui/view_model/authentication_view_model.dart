@@ -10,9 +10,12 @@ import '../../ui/state/authentication_state.dart';
 
 part 'authentication_view_model.g.dart';
 
+enum _AuthenticationIntent { register, signIn }
+
 @riverpod
 class AuthenticationViewModel extends _$AuthenticationViewModel {
   late AuthenticationRepository _repository;
+  _AuthenticationIntent? _intent;
 
   @override
   FutureOr<AuthenticationState> build() async {
@@ -25,6 +28,10 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
       isLoggedIn: authUser != null,
       hasExistingAccount: await _repository.isExistAccount(),
       isFirebaseConfigured: _repository.isFirebaseConfigured,
+      isRegisterSuccessfully:
+          authUser != null && _intent == _AuthenticationIntent.register,
+      isSignInSuccessfully:
+          authUser != null && _intent == _AuthenticationIntent.signIn,
     );
   }
 
@@ -32,6 +39,7 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
     required String email,
     required String password,
   }) async {
+    _intent = _AuthenticationIntent.register;
     state = const AsyncValue.loading();
     final result = await AsyncValue.guard(
       () => _repository.registerWithEmailAndPassword(
@@ -46,6 +54,7 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
     required String email,
     required String password,
   }) async {
+    _intent = _AuthenticationIntent.signIn;
     state = const AsyncValue.loading();
     final result = await AsyncValue.guard(
       () => _repository.signInWithEmailAndPassword(
@@ -57,6 +66,7 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
   }
 
   Future<void> signOut() async {
+    _intent = null;
     state = const AsyncValue.loading();
     final result = await AsyncValue.guard(_repository.signOut);
 
@@ -81,12 +91,14 @@ class AuthenticationViewModel extends _$AuthenticationViewModel {
     );
 
     if (result is AsyncError) {
+      _intent = null;
       state = AsyncError(result.error.toString(), StackTrace.current);
       return;
     }
 
     final authSession = result.value;
     if (authSession == null) {
+      _intent = null;
       state = AsyncError(
         LocaleKeys.unexpectedErrorOccurred.tr(),
         StackTrace.current,

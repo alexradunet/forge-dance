@@ -68,6 +68,10 @@ dart run easy_localization:generate -f keys -o locale_keys.g.dart --source-dir a
 dart run build_runner build
 flutter analyze
 flutter test
+flutter build web --release --wasm
+bash tool/check_firebase_rules.sh
+bash tool/check_integration.sh
+bash tool/check_web_quality.sh
 ```
 
 ## Project structure

@@ -11,6 +11,7 @@ part 'profile_view_model.g.dart';
 @Riverpod(keepAlive: true)
 class ProfileViewModel extends _$ProfileViewModel {
   late ProfileRepository _repository;
+  Future<void> _updateTail = Future<void>.value();
 
   @override
   FutureOr<ProfileState> build() async {
@@ -19,27 +20,30 @@ class ProfileViewModel extends _$ProfileViewModel {
     return ProfileState(profile: profile);
   }
 
-  Future<void> editProfile({
-    String? name,
-    String? job,
-  }) =>
-      _update((profile) => profile.copyWith(
-            name: name ?? profile.name,
-            job: job ?? profile.job,
-          ));
+  Future<void> editProfile({String? name, String? job}) => _enqueueUpdate(
+    (profile) =>
+        profile.copyWith(name: name ?? profile.name, job: job ?? profile.job),
+  );
 
   Future<void> syncAuthentication({
     String? id,
     String? email,
     String? name,
     String? avatar,
-  }) =>
-      _update((profile) => profile.copyWith(
-            id: id ?? profile.id,
-            email: email ?? profile.email,
-            name: profile.name ?? name,
-            avatar: avatar ?? profile.avatar,
-          ));
+  }) => _enqueueUpdate(
+    (profile) => profile.copyWith(
+      id: id ?? profile.id,
+      email: email ?? profile.email,
+      name: profile.name ?? name,
+      avatar: avatar ?? profile.avatar,
+    ),
+  );
+
+  Future<void> _enqueueUpdate(Profile Function(Profile profile) change) {
+    final update = _updateTail.then((_) => _update(change));
+    _updateTail = update;
+    return update;
+  }
 
   Future<void> _update(Profile Function(Profile profile) change) async {
     final previousProfile = state.value?.profile;

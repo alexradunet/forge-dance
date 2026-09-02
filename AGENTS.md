@@ -59,8 +59,11 @@ Rules for AI agents and contributors working on Forge Dance.
   ```
   VS Code picks up `.fvm/flutter_sdk` automatically (`.vscode/settings.json`). Use `fvm flutter …` in a plain terminal, or just `flutter …` inside the VS Code integrated terminal once the Dart extension has switched SDKs.
 - Do not run `flutter upgrade` on this repo without a deliberate version bump.
+- Release Web builds use `flutter build web --wasm`; Flutter also emits the JavaScript fallback used when WasmGC is unavailable. Keep the fallback working for iOS and older browsers.
 - For auth/Firestore locally: `firebase emulators:start`, then `fvm flutter run --dart-define=USE_FIREBASE_EMULATOR=true`.
-- **MCP (AI assistants):** The official Dart & Flutter MCP server is configured for Cursor (`.cursor/mcp.json`) and VS Code (`dart.mcpServer` in `.vscode/settings.json`). Requires `fvm use` so `.fvm/flutter_sdk` exists. Restart the editor after cloning. In Cursor, enable the **dart** server under Settings → MCP.
+- **MCP (AI assistants):** `.mcp.json` configures the official Dart/Flutter server, an isolated Chrome DevTools server, and a constrained Firebase server for shared/Pi clients. Cursor mirrors them in `.cursor/mcp.json`; VS Code registers Dart through `dart.mcpServer` and the others through `.vscode/mcp.json`. Run `fvm use` first, then reload the client. Chrome launches with a temporary profile; keep authenticated browsing in your normal profile.
+- **Firebase MCP safety:** Firebase MCP has no emulator mode and uses the active Firebase CLI account/project. `tool/run_firebase_mcp.sh` allowlists Auth-user, Firestore-document/query, index, Rules-validation, and project-read tools; it excludes deploy, project/app creation, database deletion, backups, messaging, and environment switching. Before a mutating call, confirm the target with `firebase_get_project` and state the intended change to the user.
+- **Figma MCP:** Intentionally excluded. Do not add or configure it unless the project explicitly reverses this decision.
 
 ## Required checks
 
@@ -71,3 +74,35 @@ bash tool/checks.sh
 ```
 
 That runs `flutter pub get`, localization codegen, `build_runner`, `flutter analyze` (including `riverpod_lint` through the analyzer plugin), and `flutter test`.
+
+Firestore Rules have an emulator-backed gate:
+
+```bash
+bash tool/check_firebase_rules.sh
+```
+
+Run it after changing `firestore.rules`; CI runs it in a separate job.
+
+The browser integration gate exercises registration, profile setup, logout,
+returning sign-in, and Home against the Auth and Firestore emulators:
+
+```bash
+bash tool/check_integration.sh
+```
+
+Run it after changing authentication, onboarding, profile persistence, or
+routing. It requires Node.js, Java, and Chrome/Chromium with a matching
+ChromeDriver; the script downloads a matched test browser pair when necessary.
+
+The release-web quality gate runs Lighthouse against the Auth and Firestore
+emulators, checks category score floors, and rejects browser console errors or
+HTTP failures:
+
+```bash
+bash tool/check_web_quality.sh
+```
+
+Run it after changing web startup, routing, assets, metadata, Firebase
+bootstrap, or major UI composition. Reports are written under
+`build/lighthouse/`. The performance and transfer floors protect the current
+cold-start mobile baseline; raise them deliberately as startup improves.
