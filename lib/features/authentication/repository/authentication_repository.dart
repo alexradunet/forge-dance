@@ -9,7 +9,7 @@ import '../model/auth_session.dart';
 
 part 'authentication_repository.g.dart';
 
-@riverpod
+@Riverpod(keepAlive: true)
 AuthenticationRepository authenticationRepository(Ref ref) {
   return AuthenticationRepository(
     auth: ref.watch(firebaseAuthProvider),

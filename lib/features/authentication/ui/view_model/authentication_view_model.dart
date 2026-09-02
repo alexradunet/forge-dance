@@ -12,7 +12,7 @@ part 'authentication_view_model.g.dart';
 
 enum _AuthenticationIntent { register, signIn }
 
-@riverpod
+@Riverpod(keepAlive: true)
 class AuthenticationViewModel extends _$AuthenticationViewModel {
   late AuthenticationRepository _repository;
   _AuthenticationIntent? _intent;
