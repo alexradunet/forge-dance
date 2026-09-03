@@ -55,6 +55,17 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
       );
     }
 
+    if (!state.canOpenLesson(widget.lessonId)) {
+      return Scaffold(
+        body: FgBackground(
+          child: FgEmpty(
+            icon: Icons.lock_outline,
+            title: LocaleKeys.lockedLabel.tr(),
+          ),
+        ),
+      );
+    }
+
     final lesson = state.activeModule.lessons.firstWhere(
       (lesson) => lesson.id == widget.lessonId,
       orElse: () => state.currentLesson ?? state.activeModule.lessons.last,

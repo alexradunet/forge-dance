@@ -1,104 +1,78 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'dart:convert';
 
-import '../../firebase/repository/firebase_providers.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../constants/constants.dart';
 import '../model/workout_session.dart';
 
 part 'session_repository.g.dart';
 
 @Riverpod(keepAlive: true)
-SessionRepository sessionRepository(Ref ref) {
-  return SessionRepository(
-    auth: ref.watch(firebaseAuthProvider),
-    firestore: ref.watch(firebaseFirestoreProvider),
-  );
-}
+SessionRepository sessionRepository(Ref ref) => const SessionRepository();
 
-/// Completed workout sessions at `users/{uid}/sessions/{date}_{workoutId}`.
-/// The deterministic doc id makes completion idempotent: repeating the same
-/// workout on the same day overwrites instead of double-counting XP.
-/// Degrades gracefully when Firebase is unconfigured or signed out.
+/// Local-only completed workout session storage.
+///
+/// The deterministic [WorkoutSession.docKey] keeps daily workout completion
+/// idempotent on this device. Future sync can export/import this same record
+/// map as a transferable file.
 class SessionRepository {
-  const SessionRepository({
-    required this._auth,
-    required this._firestore,
-  });
-
-  final firebase_auth.FirebaseAuth? _auth;
-  final FirebaseFirestore? _firestore;
-
-  bool get isFirebaseConfigured => _auth != null && _firestore != null;
-
-  CollectionReference<WorkoutSession>? _sessionsRef() {
-    final user = _auth?.currentUser;
-    final firestore = _firestore;
-    if (firestore == null || user == null) return null;
-
-    return firestore
-        .collection('users')
-        .doc(user.uid)
-        .collection('sessions')
-        .withConverter<WorkoutSession>(
-          fromFirestore: (snapshot, _) => WorkoutSession.fromJson(
-              _normalizeFirestoreJson(snapshot.data()!)),
-          toFirestore: (session, _) => _firestorePayload(session),
-        );
-  }
+  const SessionRepository();
 
   Future<List<WorkoutSession>> getAll() async {
-    final ref = _sessionsRef();
-    if (ref == null) return const [];
-
-    final snapshot = await ref.get();
-    return [for (final doc in snapshot.docs) doc.data()];
+    final sessions = await _getByKey();
+    return sessions.values.toList(growable: false);
   }
 
   Future<void> complete(WorkoutSession session) async {
-    final ref = _sessionsRef();
-    if (ref == null) return;
-
-    await ref.doc(session.docKey).set(session, SetOptions(merge: true));
+    final all = await _getByKey();
+    await _saveByKey({...all, session.docKey: session});
   }
 
   /// Creates a daily completion once and returns the preserved record.
   Future<({WorkoutSession session, bool created})> completeOnce(
     WorkoutSession completion,
   ) async {
-    final ref = _sessionsRef();
-    if (ref == null) return (session: completion, created: true);
-    final doc = ref.doc(completion.docKey);
-    return _firestore!.runTransaction((transaction) async {
-      final snapshot = await transaction.get(doc);
-      final existing = snapshot.data();
-      if (existing != null) {
-        final backfilled = existing.copyWith(
-          awardedXp: existing.awardedXp ?? completion.awardedXp,
-        );
-        if (backfilled != existing) {
-          transaction.set(doc, backfilled, SetOptions(merge: true));
-        }
-        return (session: backfilled, created: false);
+    final all = await _getByKey();
+    final existing = all[completion.docKey];
+    if (existing != null) {
+      final backfilled = existing.copyWith(
+        awardedXp: existing.awardedXp ?? completion.awardedXp,
+      );
+      if (backfilled != existing) {
+        await _saveByKey({...all, completion.docKey: backfilled});
       }
-      transaction.set(doc, completion, SetOptions(merge: true));
-      return (session: completion, created: true);
-    });
+      return (session: backfilled, created: false);
+    }
+
+    await _saveByKey({...all, completion.docKey: completion});
+    return (session: completion, created: true);
   }
 
-  Map<String, Object?> _firestorePayload(WorkoutSession session) {
-    final payload = session.toJson()
-      ..remove('completedAt')
-      ..['completedAt'] = FieldValue.serverTimestamp();
-    return payload;
+  Future<void> clear() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(Constants.workoutSessionsKey);
   }
 
-  Map<String, Object?> _normalizeFirestoreJson(Map<String, dynamic> data) {
-    return data.map((key, value) {
-      // json_serializable expects ISO-8601 strings for DateTime fields.
-      if (value is Timestamp) {
-        return MapEntry(key, value.toDate().toIso8601String());
-      }
-      return MapEntry(key, value);
-    });
+  Future<Map<String, WorkoutSession>> _getByKey() async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = prefs.getString(Constants.workoutSessionsKey);
+    if (encoded == null) return const {};
+
+    final decoded = jsonDecode(encoded) as Map<String, dynamic>;
+    return decoded.map(
+      (docKey, value) => MapEntry(
+        docKey,
+        WorkoutSession.fromJson((value as Map).cast<String, Object?>()),
+      ),
+    );
+  }
+
+  Future<void> _saveByKey(Map<String, WorkoutSession> sessionsByKey) async {
+    final prefs = await SharedPreferences.getInstance();
+    final encoded = jsonEncode(
+      sessionsByKey.map((docKey, session) => MapEntry(docKey, session.toJson())),
+    );
+    await prefs.setString(Constants.workoutSessionsKey, encoded);
   }
 }

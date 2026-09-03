@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../features/authentication/ui/sign_in_screen.dart';
-import '../features/authentication/ui/register_screen.dart';
-import '../features/authentication/ui/state/authentication_state.dart';
-import '../features/authentication/ui/view_model/authentication_view_model.dart';
 import '../features/main/presentation/pages/main_screen.dart';
 import '../features/home/presentation/pages/home_page.dart';
 import '../features/explore/presentation/pages/explore_page.dart';
@@ -18,6 +14,7 @@ import '../features/learn/ui/view_model/learn_view_model.dart';
 import '../features/onboarding/ui/onboarding_screen.dart';
 import '../features/onboarding/ui/splash_screen.dart';
 import '../features/profile/model/profile.dart';
+import '../features/profile/ui/view_model/profile_view_model.dart';
 import '../features/profile/ui/account_info_screen.dart';
 import '../features/profile/ui/appearances_screen.dart';
 import '../features/settings/presentation/pages/settings_page.dart';
@@ -78,28 +75,25 @@ class SlideRouteTransition extends CustomTransitionPage<void> {
 }
 
 /// App router. Navigation guarding is reactive: the router listens to the
-/// authentication view model and re-evaluates [computeRedirect] on every
-/// auth change (sign-in, sign-out, token revocation), so no screen ever
-/// navigates imperatively based on auth state.
+/// local profile and re-evaluates [computeRedirect] whenever first-run setup
+/// completes.
 @Riverpod(keepAlive: true)
 GoRouter router(Ref ref) {
-  final authState = ValueNotifier<AsyncValue<AuthenticationState>>(
-    const AsyncValue.loading(),
-  );
+  final profileState = ValueNotifier(ref.watch(profileViewModelProvider));
   ref
-    ..onDispose(authState.dispose)
+    ..onDispose(profileState.dispose)
     ..listen(
-      authenticationViewModelProvider,
-      (_, next) => authState.value = next,
+      profileViewModelProvider,
+      (_, next) => profileState.value = next,
       fireImmediately: true,
     );
 
   return GoRouter(
     initialLocation: Routes.splash,
-    refreshListenable: authState,
+    refreshListenable: profileState,
     redirect: (context, state) => computeRedirect(
       matchedLocation: state.matchedLocation,
-      auth: authState.value,
+      profileState: profileState.value,
     ),
     routes: _routes(ref),
   );
@@ -109,14 +103,6 @@ List<RouteBase> _routes(Ref ref) => [
   GoRoute(
     path: Routes.splash,
     pageBuilder: (context, state) => state.slidePage(const SplashScreen()),
-  ),
-  GoRoute(
-    path: Routes.register,
-    pageBuilder: (context, state) => state.slidePage(const RegisterScreen()),
-  ),
-  GoRoute(
-    path: Routes.login,
-    pageBuilder: (context, state) => state.slidePage(const SignInScreen()),
   ),
   GoRoute(
     path: Routes.onboarding,

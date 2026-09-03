@@ -10,10 +10,8 @@ import '../../../../design_system/design_system.dart';
 import '../../../../features/profile/model/profile.dart';
 import '../../../../features/profile/ui/view_model/profile_view_model.dart';
 import '../../../../features/profile/ui/widgets/profile_menu.dart';
-import '../../../../features/session/application/session_coordinator.dart';
 import '../../../../generated/locale_keys.g.dart';
 import '../../../../routing/routes.dart';
-import '../../../../utils/global_loading.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   final Profile? profile;
@@ -125,26 +123,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.xxl),
-        ProfileMenuSection(
-          title: 'Account',
-          items: [
-            ProfileMenuItem(
-              icon: Icons.logout,
-              label: LocaleKeys.logOut.tr(),
-              tone: ProfileMenuTone.destructive,
-              showArrow: false,
-              onTap: () => _signOut(context),
-            ),
-            ProfileMenuItem(
-              icon: Icons.delete_outline,
-              label: LocaleKeys.deleteAccount.tr(),
-              tone: ProfileMenuTone.destructive,
-              showArrow: false,
-              onTap: () => _deleteAccount(context),
-            ),
-          ],
-        ),
       ],
     );
   }
@@ -161,59 +139,5 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             '${Constants.tag} [_SettingsPageState._getPackageInfo] Error: $error',
           );
         });
-  }
-
-  void _signOut(BuildContext context) {
-    ForgeAlertDialog.show(
-      context: context,
-      title: LocaleKeys.logOutTitle.tr(),
-      message: LocaleKeys.logOutMessage.tr(),
-      primaryActionLabel: LocaleKeys.logOut.tr(),
-      secondaryActionLabel: LocaleKeys.cancel.tr(),
-      tone: ForgeAlertTone.destructive,
-      isPrimaryDestructive: true,
-      onPrimaryAction: () async {
-        try {
-          Global.showLoading(context);
-          await ref.read(sessionCoordinatorProvider).signOut();
-          if (context.mounted) {
-            context.pushReplacement(Routes.login);
-          }
-        } catch (error) {
-          if (context.mounted) {
-            context.showErrorSnackBar(LocaleKeys.unexpectedErrorOccurred.tr());
-          }
-        } finally {
-          Global.hideLoading();
-        }
-      },
-    );
-  }
-
-  void _deleteAccount(BuildContext context) {
-    ForgeAlertDialog.show(
-      context: context,
-      title: LocaleKeys.deleteAccountTitle.tr(),
-      message: LocaleKeys.deleteAccountMessage.tr(),
-      primaryActionLabel: LocaleKeys.deleteAccount.tr(),
-      secondaryActionLabel: LocaleKeys.cancel.tr(),
-      tone: ForgeAlertTone.destructive,
-      isPrimaryDestructive: true,
-      onPrimaryAction: () async {
-        try {
-          Global.showLoading(context);
-          await ref.read(sessionCoordinatorProvider).signOut();
-          if (context.mounted) {
-            context.pushReplacement(Routes.register);
-          }
-        } catch (error) {
-          if (context.mounted) {
-            context.showErrorSnackBar(LocaleKeys.unexpectedErrorOccurred.tr());
-          }
-        } finally {
-          Global.hideLoading();
-        }
-      },
-    );
   }
 }

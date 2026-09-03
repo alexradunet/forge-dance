@@ -194,14 +194,27 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
   }
 
   Widget _moduleCard(LearnState state, Module module, {double? width}) {
+    final isLocked = !state.isModuleUnlocked(module);
+    final unmetIds = state.unmetPrerequisiteLessonIds(module);
+    final requirement = unmetIds.isEmpty
+        ? null
+        : state.lessonById(unmetIds.first)?.title;
+
     return FgContentCard(
       title: module.title,
       tags: [module.tag],
       imageUrl: module.imageUrl,
-      progress: state.moduleProgressOf(module),
-      footerLabel: LocaleKeys.lessonsCompletedOf.tr(
-        args: ['${state.completedCountIn(module)}', '${module.lessons.length}'],
-      ),
+      isLocked: isLocked,
+      lockedLabel: LocaleKeys.lockedLabel.tr(),
+      progress: isLocked ? null : state.moduleProgressOf(module),
+      footerLabel: isLocked
+          ? LocaleKeys.requiresLesson.tr(args: [requirement ?? '—'])
+          : LocaleKeys.lessonsCompletedOf.tr(
+              args: [
+                '${state.completedCountIn(module)}',
+                '${module.lessons.length}',
+              ],
+            ),
       width: width,
       onTap: () {
         ref.read(learnViewModelProvider.notifier).selectModule(module.id);

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:forge_dance/features/learn/repository/progress_repository.dart';
 import 'package:forge_dance/features/profile/model/profile.dart';
 import 'package:forge_dance/features/profile/repository/profile_repository.dart';
@@ -12,7 +13,7 @@ import 'package:forge_dance/features/workout/ui/view_model/workout_view_model.da
 class FakeSessionRepository extends SessionRepository {
   FakeSessionRepository([List<WorkoutSession> seed = const []])
       : store = {for (final s in seed) s.docKey: s},
-        super(auth: null, firestore: null);
+        super();
 
   final Map<String, WorkoutSession> store;
 
@@ -36,7 +37,7 @@ class FakeSessionRepository extends SessionRepository {
 }
 
 class FakeProfileRepository extends ProfileRepository {
-  FakeProfileRepository() : super(auth: null, firestore: null);
+  FakeProfileRepository() : super();
 
   Profile? saved;
 
@@ -53,15 +54,15 @@ ProviderContainer containerWith(
   FakeSessionRepository repository, {
   FakeProfileRepository? profileRepository,
 }) {
+  SharedPreferences.setMockInitialValues({});
   final container = ProviderContainer(
     overrides: [
       sessionRepositoryProvider.overrideWithValue(repository),
       profileRepositoryProvider
           .overrideWithValue(profileRepository ?? FakeProfileRepository()),
-      // The stats coordinator also reads lesson progress; keep it off the
-      // Firebase providers in tests via the nullable-deps real class.
+      // The stats coordinator also reads lesson progress; use an empty local repository.
       progressRepositoryProvider.overrideWithValue(
-        const ProgressRepository(auth: null, firestore: null),
+        const ProgressRepository(),
       ),
     ],
   );
@@ -164,15 +165,17 @@ void main() {
     });
   });
 
-  group('SessionRepository (unconfigured Firebase)', () {
-    test('reads empty and writes no-op instead of throwing', () async {
-      const repository = SessionRepository(auth: null, firestore: null);
+  group('SessionRepository (local storage)', () {
+    test('reads empty and persists sessions', () async {
+      SharedPreferences.setMockInitialValues({});
+      const repository = SessionRepository();
 
-      expect(repository.isFirebaseConfigured, isFalse);
       expect(await repository.getAll(), isEmpty);
       await repository.complete(
         const WorkoutSession(workoutId: 'x', date: '2026-07-06'),
       );
+
+      expect(await repository.getAll(), hasLength(1));
     });
   });
 }

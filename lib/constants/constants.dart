@@ -10,8 +10,11 @@ class Constants {
   static const String aboutUs = 'https://forge.dance/about';
   static const String rateUs = 'https://forge.dance';
   static const String facebookPage = 'https://forge.dance';
-  // SharedPreferences key
+  static const String localUserId = 'local-device';
+
+  // SharedPreferences keys
   static const String themeModeKey = 'theme_mode_key';
   static const String profileKey = 'profile_key';
-  static const String isExistAccountKey = 'is_exist_account_key';
+  static const String lessonProgressKey = 'lesson_progress_key';
+  static const String workoutSessionsKey = 'workout_sessions_key';
 }

@@ -35,7 +35,7 @@ class LearnViewModel extends _$LearnViewModel {
   /// Marks a lesson as started (no-op if it is already completed).
   Future<void> startLesson(String lessonId) async {
     final current = state.value;
-    if (current == null) return;
+    if (current == null || !current.canOpenLesson(lessonId)) return;
     if (current.progress[lessonId]?.status == LessonStatus.completed) return;
 
     await _applyProgress(
@@ -48,6 +48,7 @@ class LearnViewModel extends _$LearnViewModel {
   Future<void> completeLesson(String lessonId) async {
     final current = state.value;
     if (current == null) return;
+    if (!current.canOpenLesson(lessonId)) return;
     final lesson = current.modules
         .expand((module) => module.lessons)
         .where((lesson) => lesson.id == lessonId)
@@ -59,10 +60,12 @@ class LearnViewModel extends _$LearnViewModel {
       final result = await ref
           .read(trainingActivityProvider)
           .completeLesson(lesson: lesson);
-      state = AsyncData(current.copyWith(
-        progress: {...current.progress, lessonId: result.record},
-        projectionHealth: result.projection,
-      ));
+      state = AsyncData(
+        current.copyWith(
+          progress: {...current.progress, lessonId: result.record},
+          projectionHealth: result.projection,
+        ),
+      );
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
     }

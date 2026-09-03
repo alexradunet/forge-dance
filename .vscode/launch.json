@@ -9,34 +9,12 @@
       "deviceId": "chrome"
     },
     {
-      "name": "Chrome (Firebase Emulator)",
-      "type": "dart",
-      "request": "launch",
-      "program": "lib/main.dart",
-      "deviceId": "chrome",
-      "toolArgs": ["--dart-define=USE_FIREBASE_EMULATOR=true"]
-    },
-    {
-      "name": "Chrome (Firebase Emulator + Start Emulators)",
-      "type": "dart",
-      "request": "launch",
-      "program": "lib/main.dart",
-      "deviceId": "chrome",
-      "toolArgs": ["--dart-define=USE_FIREBASE_EMULATOR=true"],
-      "preLaunchTask": "forge: firebase emulators"
-    },
-    {
-      "name": "Web Server (Agent + Firebase Emulator)",
+      "name": "Web Server (Agent)",
       "type": "dart",
       "request": "launch",
       "program": "lib/main.dart",
       "deviceId": "web-server",
-      "toolArgs": [
-        "--web-hostname=127.0.0.1",
-        "--web-port=7357",
-        "--dart-define=USE_FIREBASE_EMULATOR=true"
-      ],
-      "preLaunchTask": "forge: firebase emulators"
+      "toolArgs": ["--web-hostname=127.0.0.1", "--web-port=7357"]
     },
     {
       "name": "Linux Desktop (Debug)",
@@ -46,16 +24,11 @@
       "deviceId": "linux"
     },
     {
-      "name": "Android (Firebase Emulator)",
+      "name": "Android (Debug)",
       "type": "dart",
       "request": "launch",
       "program": "lib/main.dart",
-      "deviceId": "android",
-      "toolArgs": [
-        "--dart-define=USE_FIREBASE_EMULATOR=true",
-        "--dart-define=FIREBASE_EMULATOR_HOST=10.0.2.2"
-      ],
-      "preLaunchTask": "forge: firebase emulators"
+      "deviceId": "android"
     },
     {
       "name": "Chrome (Profile)",

@@ -5,17 +5,15 @@ Rules for AI agents and contributors working on Forge Dance.
 ## Target platforms
 
 - Mobile (Android and iOS) and Web are the primary product targets.
-- Linux desktop is a local UI-development target only and skips Firebase initialization because FlutterFire does not support Linux.
+- Linux desktop is a local UI-development target.
 
-## Backend
+## Persistence
 
-- Firebase is the selected backend for the MVP because speed to market is the priority.
-- Keep Firebase usage behind repositories/data sources. Do not call `FirebaseAuth`, `FirebaseFirestore`, or other Firebase SDKs directly from widgets.
-- Current Firebase MVP stack:
-  - Firebase Auth for accounts
-  - Cloud Firestore for user/profile data
-- Do not add another backend-as-a-service dependency unless the project explicitly changes direction.
-- Before using Firebase services in a real environment, run `flutterfire configure` and enable Email/Password sign-in in Firebase Console.
+- Forge Dance is offline-first. There is no registration, login, or Firebase dependency.
+- Persist progress locally behind repositories/data sources; widgets must not call storage APIs directly.
+- Current MVP storage is `SharedPreferences` for profile, lesson progress, workout sessions, and preferences.
+- Keep repository JSON shapes portable so future cloud sync can import/export a transferable file.
+- Do not add a backend-as-a-service dependency unless the project explicitly changes direction.
 
 ## Feature structure
 
@@ -60,17 +58,15 @@ Rules for AI agents and contributors working on Forge Dance.
   VS Code picks up `.fvm/flutter_sdk` automatically (`.vscode/settings.json`). Use `fvm flutter …` in a plain terminal, or just `flutter …` inside the VS Code integrated terminal once the Dart extension has switched SDKs.
 - Do not run `flutter upgrade` on this repo without a deliberate version bump.
 - Release Web builds use `flutter build web --wasm`; Flutter also emits the JavaScript fallback used when WasmGC is unavailable. Keep the fallback working for iOS and older browsers.
-- For auth/Firestore locally: `firebase emulators:start`, then `fvm flutter run --dart-define=USE_FIREBASE_EMULATOR=true`.
-- **MCP (AI assistants):** `.mcp.json` configures the official Dart/Flutter server, an isolated Chrome DevTools server, and a constrained Firebase server for shared/Pi clients. Cursor mirrors them in `.cursor/mcp.json`; VS Code registers Dart through `dart.mcpServer` and the others through `.vscode/mcp.json`. Run `fvm use` first, then reload the client. Chrome launches with a temporary profile; keep authenticated browsing in your normal profile.
-- **Firebase MCP safety:** Firebase MCP has no emulator mode and uses the active Firebase CLI account/project. `tool/run_firebase_mcp.sh` allowlists Auth-user, Firestore-document/query, index, Rules-validation, and project-read tools; it excludes deploy, project/app creation, database deletion, backups, messaging, and environment switching. Before a mutating call, confirm the target with `firebase_get_project` and state the intended change to the user.
+- **MCP (AI assistants):** `.mcp.json` configures the official Dart/Flutter server and an isolated Chrome DevTools server for shared/Pi clients. Cursor mirrors them in `.cursor/mcp.json`; VS Code registers Dart through `dart.mcpServer` and the others through `.vscode/mcp.json`. Run `fvm use` first, then reload the client. Chrome launches with a temporary profile; keep authenticated browsing in your normal profile.
 - **Figma MCP:** Intentionally excluded. Do not add or configure it unless the project explicitly reverses this decision.
 
 ## Live Flutter development
 
 - **Live loop:** When a Flutter debug app is running, or the user asks for hot reload, interactive UI iteration, or visual verification, follow `.agents/skills/flutter-live-development/SKILL.md`.
 - During a live loop, apply each non-documentation change under `lib/` with Dart MCP hot reload or hot restart before evaluating it. Verify visual claims from a current screenshot, not from source or the widget tree alone.
-- Prefer Linux desktop for fast UI-only iteration. Use the fixed-port Web Server target with Auth and Firestore emulators for Firebase flows; never use production Firebase for live agent-driven development.
-- **Orca Android loop:** For Android UI, platform behavior, or device accessibility work in Orca, run `tool/run_orca_android.sh`; it attaches the AVD to Orca's embedded pane and pins Firebase to the local emulators. Drive the device through `orca emulator` and follow the Android branch in the live-development skill.
+- Prefer Linux desktop for fast UI-only iteration. Use the fixed-port Web Server target for browser flows.
+- **Orca Android loop:** For Android UI, platform behavior, or device accessibility work in Orca, run `tool/run_orca_android.sh`; it attaches the AVD to Orca's embedded pane. Drive the device through `orca emulator` and follow the Android branch in the live-development skill.
 - On Omarchy, `tool/capture_flutter_window.sh` captures the visible Forge Dance window under `build/live/` for vision-model review. `tool/capture_android_emulator.sh` captures the Android framebuffer. Web sessions use Chrome DevTools MCP at `http://127.0.0.1:7357`.
 
 ## Required checks
@@ -83,34 +79,20 @@ bash tool/checks.sh
 
 That runs `flutter pub get`, localization codegen, `build_runner`, `flutter analyze` (including `riverpod_lint` through the analyzer plugin), and `flutter test`.
 
-Firestore Rules have an emulator-backed gate:
-
-```bash
-bash tool/check_firebase_rules.sh
-```
-
-Run it after changing `firestore.rules`; CI runs it in a separate job.
-
-The browser integration gate exercises registration, profile setup, logout,
-returning sign-in, and Home against the Auth and Firestore emulators:
+The browser integration gate exercises local profile setup and Home:
 
 ```bash
 bash tool/check_integration.sh
 ```
 
-Run it after changing authentication, onboarding, profile persistence, or
-routing. It requires Node.js, Java, and Chrome/Chromium with a matching
-ChromeDriver; the script downloads a matched test browser pair when necessary.
+Run it after changing onboarding, profile persistence, or routing. It requires Node.js, Java, and Chrome/Chromium with a matching ChromeDriver; the script downloads a matched test browser pair when necessary.
 
-The release-web quality gate runs Lighthouse against the Auth and Firestore
-emulators, checks category score floors, and rejects browser console errors or
-HTTP failures:
+The release-web quality gate runs Lighthouse, checks category score floors, and rejects browser console errors or HTTP failures:
 
 ```bash
 bash tool/check_web_quality.sh
 ```
 
-Run it after changing web startup, routing, assets, metadata, Firebase
-bootstrap, or major UI composition. Reports are written under
+Run it after changing web startup, routing, assets, metadata, or major UI composition. Reports are written under
 `build/lighthouse/`. The performance and transfer floors protect the current
 cold-start mobile baseline; raise them deliberately as startup improves.

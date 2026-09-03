@@ -1,58 +1,37 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../features/authentication/ui/state/authentication_state.dart';
+import '../features/profile/ui/state/profile_state.dart';
 import 'routes.dart';
 
-/// Routes that belong to the pre-auth flow.
-const Set<String> _authLocations = {
+const Set<String> _setupLocations = {
   Routes.splash,
-  Routes.login,
-  Routes.register,
+  Routes.onboarding,
 };
 
-/// Centralized navigation guard — the ONLY place that decides where a user
-/// may be based on auth state. Pure function so it is trivially unit-tested.
+/// Centralized offline navigation guard.
 ///
-/// Rules, in order:
-/// 1. Firebase not configured (e.g. Linux desktop) → local dev mode: skip
-///    auth entirely and land on main.
-/// 2. Auth state still resolving → hold pre-auth screens, park everything
-///    else on splash until resolved.
-/// 3. Signed in → keep out of splash/login (→ main); a successful registration
-///    redirects register to onboarding, while returning sign-in goes to main.
-/// 4. Signed out → login/register are allowed; everything else goes to
-///    login (or register when no account ever existed on this device).
+/// There is no registration or login flow. First launch goes to local profile
+/// setup, and after a dancer has a name the app opens directly to the main
+/// shell. Profile/settings pages remain available offline.
 String? computeRedirect({
   required String matchedLocation,
-  required AsyncValue<AuthenticationState> auth,
+  required AsyncValue<ProfileState> profileState,
 }) {
-  final state = auth.value;
+  final state = profileState.value;
 
   if (state == null) {
-    if (auth.isLoading) {
+    if (profileState.isLoading) {
       return matchedLocation == Routes.splash ? null : Routes.splash;
     }
-    // Auth state errored (rare: prefs failure). Fail towards login.
-    return _authLocations.contains(matchedLocation) ? null : Routes.login;
+    return _setupLocations.contains(matchedLocation) ? null : Routes.onboarding;
   }
 
-  if (!state.isFirebaseConfigured) {
-    return _authLocations.contains(matchedLocation) ? Routes.main : null;
+  final hasCompletedLocalSetup =
+      state.profile?.name?.trim().isNotEmpty ?? false;
+
+  if (hasCompletedLocalSetup) {
+    return _setupLocations.contains(matchedLocation) ? Routes.main : null;
   }
 
-  if (state.isLoggedIn) {
-    if (matchedLocation == Routes.register) {
-      return state.isRegisterSuccessfully ? Routes.onboarding : Routes.main;
-    }
-    if (matchedLocation == Routes.splash || matchedLocation == Routes.login) {
-      return Routes.main;
-    }
-    return null;
-  }
-
-  // Signed out.
-  if (matchedLocation == Routes.login || matchedLocation == Routes.register) {
-    return null;
-  }
-  return state.hasExistingAccount ? Routes.login : Routes.register;
+  return matchedLocation == Routes.onboarding ? null : Routes.onboarding;
 }

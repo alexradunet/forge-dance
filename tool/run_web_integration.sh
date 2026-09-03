@@ -78,7 +78,7 @@ curl --silent --fail http://127.0.0.1:4444/status >/dev/null
 
 "${FLUTTER[@]}" drive \
   --driver=test_driver/integration_test.dart \
-  --target=integration_test/authentication_smoke_test.dart \
+  --target=integration_test/offline_smoke_test.dart \
   --device-id=web-server \
   --browser-name=chrome \
   --chrome-binary="$chrome_binary" \
@@ -86,5 +86,4 @@ curl --silent --fail http://127.0.0.1:4444/status >/dev/null
   --headless \
   --no-pub \
   --no-web-resources-cdn \
-  --dart-define=USE_FIREBASE_EMULATOR=true \
   --timeout=180

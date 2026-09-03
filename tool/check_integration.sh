@@ -20,7 +20,4 @@ fi
   --source-dir assets/translations
 "${DART[@]}" run build_runner build
 
-npx -y firebase-tools@15.28.2 emulators:exec \
-  --project forgedance-52c54 \
-  --only auth,firestore \
-  "bash tool/run_web_integration.sh"
+bash tool/run_web_integration.sh

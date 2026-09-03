@@ -41,7 +41,7 @@ abstract class LessonStep with _$LessonStep {
 }
 
 /// A single lesson inside a module. Lesson *content* ships with the app
-/// (see lesson_catalog.dart); only user progress lives in Firestore.
+/// (see lesson_catalog.dart); only user progress lives in local storage.
 /// Lessons with an empty [steps] list fall back to the type-specific
 /// default steps (lesson_catalog.stepsFor).
 @freezed
@@ -59,7 +59,12 @@ abstract class Lesson with _$Lesson {
 /// Catalog shelf a module belongs to (drives the explore sections).
 enum ModuleCategory { fundamentals, streetStyles, choreography }
 
-/// An ordered path of lessons.
+/// The learning pathway a module develops. Pathways describe curriculum
+/// lineage; [ModuleCategory] remains the presentation shelf used by Explore.
+enum LearningPathway { commonFoundation, streetClubFunk, concertTheatrical }
+
+/// An ordered path of lessons. A module is available only when every lesson
+/// named by [prerequisiteLessonIds] is completed; LearnState owns that policy.
 @freezed
 abstract class Module with _$Module {
   const factory Module({
@@ -67,7 +72,9 @@ abstract class Module with _$Module {
     required String title,
     required String subtitle,
     required ModuleCategory category,
+    required LearningPathway pathway,
     required List<Lesson> lessons,
+    @Default(<String>[]) List<String> prerequisiteLessonIds,
     @Default('') String tag,
     @Default('') String imageUrl,
   }) = _Module;

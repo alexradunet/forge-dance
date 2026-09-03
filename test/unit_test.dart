@@ -9,7 +9,7 @@ import 'package:forge_dance/features/profile/ui/view_model/profile_view_model.da
 import 'package:forge_dance/utils/validator.dart';
 
 class FakeProfileRepository extends ProfileRepository {
-  FakeProfileRepository(this.profile) : super(auth: null, firestore: null);
+  FakeProfileRepository(this.profile) : super();
 
   Profile? profile;
   Profile? savedProfile;
@@ -25,7 +25,7 @@ class FakeProfileRepository extends ProfileRepository {
 }
 
 class RacingProfileRepository extends ProfileRepository {
-  RacingProfileRepository() : super(auth: null, firestore: null);
+  RacingProfileRepository() : super();
 
   final firstUpdateGate = Completer<void>();
   Profile? profile;
@@ -119,7 +119,7 @@ void main() {
       );
     });
 
-    test('a slower auth sync cannot overwrite a newer profile edit', () async {
+    test('a slower local identity sync cannot overwrite a newer profile edit', () async {
       final repository = RacingProfileRepository();
       final container = ProviderContainer(
         overrides: [profileRepositoryProvider.overrideWithValue(repository)],
@@ -128,7 +128,7 @@ void main() {
       await container.read(profileViewModelProvider.future);
 
       final notifier = container.read(profileViewModelProvider.notifier);
-      final authSync = notifier.syncAuthentication(
+      final identitySync = notifier.syncLocalIdentity(
         id: 'user-1',
         email: 'dancer@example.com',
       );
@@ -137,7 +137,7 @@ void main() {
       final profileEdit = notifier.editProfile(name: 'Chosen Name');
       await Future<void>.delayed(Duration.zero);
       repository.firstUpdateGate.complete();
-      await Future.wait([authSync, profileEdit]);
+      await Future.wait([identitySync, profileEdit]);
 
       expect(repository.profile?.id, 'user-1');
       expect(repository.profile?.email, 'dancer@example.com');
@@ -148,7 +148,7 @@ void main() {
       );
     });
 
-    test('authentication sync cannot replace a dancer-edited name', () async {
+    test('identity sync cannot replace a dancer-edited name', () async {
       final repository = FakeProfileRepository(
         const Profile(name: 'Chosen Name'),
       );
@@ -160,10 +160,10 @@ void main() {
 
       await container
           .read(profileViewModelProvider.notifier)
-          .syncAuthentication(
+          .syncLocalIdentity(
             id: 'user-1',
             email: 'dancer@example.com',
-            name: 'Auth Name',
+            name: 'Imported Name',
           );
 
       expect(repository.savedProfile?.id, 'user-1');

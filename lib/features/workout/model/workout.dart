@@ -12,7 +12,7 @@ abstract class WorkoutExercise with _$WorkoutExercise {
 }
 
 /// A daily training session (WOD). Content ships with the app like the
-/// lesson catalog; only completions are persisted to Firestore.
+/// lesson catalog; only completions are persisted locally.
 @freezed
 abstract class Workout with _$Workout {
   const factory Workout({

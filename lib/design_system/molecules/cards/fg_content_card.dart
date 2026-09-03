@@ -31,6 +31,8 @@ class FgContentCard extends StatelessWidget {
   final double? width;
   final double? height;
   final Widget? action;
+  final bool isLocked;
+  final String lockedLabel;
 
   const FgContentCard({
     super.key,
@@ -47,6 +49,8 @@ class FgContentCard extends StatelessWidget {
     this.width,
     this.height,
     this.action,
+    this.isLocked = false,
+    this.lockedLabel = 'Locked',
   });
 
   const FgContentCard.compact({
@@ -63,6 +67,8 @@ class FgContentCard extends StatelessWidget {
     this.width,
     this.height,
     this.action,
+    this.isLocked = false,
+    this.lockedLabel = 'Locked',
   }) : variant = FgContentCardVariant.compact;
 
   const FgContentCard.hero({
@@ -74,6 +80,8 @@ class FgContentCard extends StatelessWidget {
     this.onTap,
     this.height,
     this.action,
+    this.isLocked = false,
+    this.lockedLabel = 'Locked',
   }) : variant = FgContentCardVariant.hero,
        rating = null,
        duration = null,
@@ -130,7 +138,7 @@ class FgContentCard extends StatelessWidget {
             if (imageUrl != null)
               Positioned.fill(
                 child: Opacity(
-                  opacity: 0.6,
+                  opacity: isLocked ? 0.25 : 0.6,
                   child: FgImage(imageUrl: imageUrl!, fit: BoxFit.cover),
                 ),
               ),
@@ -146,6 +154,11 @@ class FgContentCard extends StatelessWidget {
                 stops: const [0.0, 0.4, 1.0],
               ),
             ),
+
+            if (isLocked)
+              Positioned.fill(
+                child: ColoredBox(color: AppColors.gray950.withOpacity(0.35)),
+              ),
 
             // Top Content (Tags)
             if (tags != null && tags!.isNotEmpty)
@@ -166,9 +179,22 @@ class FgContentCard extends StatelessWidget {
                 ),
               ),
 
-            // Resume/Status Badge (Top Right)
-            if (progress != null && progress! > 0 && progress! < 1)
+            // Availability/progress badge (top right).
+            if (isLocked)
               Positioned(
+                top: 12,
+                right: 12,
+                child: FgBadge(
+                  text: lockedLabel,
+                  icon: Icons.lock_outline,
+                  variant: FgBadgeVariant.solid,
+                  color: FgBadgeColor.neutral,
+                  shape: FgBadgeShape.pill,
+                  fontSize: 8,
+                ),
+              )
+            else if (progress != null && progress! > 0 && progress! < 1)
+              const Positioned(
                 top: 12,
                 right: 12,
                 child: FgBadge(
@@ -206,16 +232,20 @@ class FgContentCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       if (footerLabel != null)
-                        Text(
-                          footerLabel!,
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.textMuted,
-                            fontSize: 9, // Requested 9px
-                            fontWeight: FontWeight.w500,
-                            letterSpacing: 0.5,
+                        Flexible(
+                          child: Text(
+                            footerLabel!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: AppColors.textMuted,
+                              fontSize: 9, // Requested 9px
+                              fontWeight: FontWeight.w500,
+                              letterSpacing: 0.5,
+                            ),
                           ),
                         ),
-                      if (progress != null)
+                      if (!isLocked && progress != null)
                         Text(
                           '${(progress! * 100).toInt()}%',
                           style: AppTypography.bodySmall.copyWith(
@@ -227,7 +257,7 @@ class FgContentCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: AppSpacing.sm),
-                  if (progress != null)
+                  if (!isLocked && progress != null)
                     FgProgressBar(value: progress!, size: FgProgressBarSize.sm),
                 ],
               ),

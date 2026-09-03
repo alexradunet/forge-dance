@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'design_system/theme/app_themes.dart';
 import 'features/common/ui/providers/app_theme_mode_provider.dart';
 import 'features/common/ui/widgets/offline_container.dart';
-import 'features/firebase/repository/firebase_bootstrap.dart';
 import 'features/session/application/session_coordinator.dart';
 import 'routing/router.dart';
 import 'localization/app_locales.dart';
@@ -17,7 +16,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await EasyLocalization.ensureInitialized();
-  await initializeFirebase();
 
   LicenseRegistry.addLicense(() async* {
     final license = await rootBundle.loadString('google_fonts/OFL.txt');

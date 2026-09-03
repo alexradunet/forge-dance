@@ -18,7 +18,7 @@ A guided practice made of timed Exercises. Completing a Workout records one Trai
 
 ## Profile
 
-The signed-in dancer's editable name and job together with read-only accumulated statistics. Authentication owns the dancer's identity and email. Device-only presentation data, including a local avatar path, is not part of the Profile.
+The local dancer's editable name and job together with read-only accumulated statistics. Device-only presentation data, including a local avatar path, is part of the offline profile state and can be exported later with progress data.
 
 ## Library
 

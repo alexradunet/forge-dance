@@ -12,7 +12,7 @@ import 'package:forge_dance/features/workout/repository/session_repository.dart'
 import 'package:forge_dance/features/workout/repository/workout_catalog.dart';
 
 class MemoryProgressRepository extends ProgressRepository {
-  MemoryProgressRepository() : super(auth: null, firestore: null);
+  MemoryProgressRepository() : super();
   final records = <String, LessonProgress>{};
 
   @override
@@ -32,7 +32,7 @@ class MemoryProgressRepository extends ProgressRepository {
 }
 
 class MemorySessionRepository extends SessionRepository {
-  MemorySessionRepository() : super(auth: null, firestore: null);
+  MemorySessionRepository() : super();
   final records = <String, WorkoutSession>{};
 
   @override
@@ -50,7 +50,7 @@ class MemorySessionRepository extends SessionRepository {
 }
 
 class MemoryProfileRepository extends ProfileRepository {
-  MemoryProfileRepository() : super(auth: null, firestore: null);
+  MemoryProfileRepository() : super();
   Profile? value;
   bool failWrites = false;
 

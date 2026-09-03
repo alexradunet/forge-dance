@@ -12,12 +12,6 @@
       "args": [
         "tool/run_chrome_devtools_mcp.sh"
       ]
-    },
-    "firebase": {
-      "command": "bash",
-      "args": [
-        "tool/run_firebase_mcp.sh"
-      ]
     }
   }
 }

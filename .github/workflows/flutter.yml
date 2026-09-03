@@ -28,32 +28,8 @@ jobs:
       - name: Build web release
         run: flutter build web --release --wasm --no-pub
 
-  firebase-rules:
-    name: Test Firestore rules
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-          cache: npm
-          cache-dependency-path: firebase-tests/package-lock.json
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-
-      - name: Test rules against the Firestore emulator
-        run: bash tool/check_firebase_rules.sh
-
   integration:
-    name: Authentication smoke test
+    name: Offline smoke test
     needs: checks
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -74,13 +50,7 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-
-      - name: Run authentication flow against Firebase emulators
+      - name: Run offline web flow
         run: bash tool/check_integration.sh
 
   web-quality:
@@ -105,13 +75,7 @@ jobs:
         with:
           node-version: "22"
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-
-      - name: Audit release web build against Firebase emulators
+      - name: Audit release web build
         run: bash tool/check_web_quality.sh
 
       - name: Upload Lighthouse reports

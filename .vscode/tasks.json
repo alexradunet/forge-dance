@@ -5,15 +5,8 @@
       "label": "forge: checks (CI pipeline)",
       "type": "shell",
       "command": "bash tool/checks.sh",
-      "group": {
-        "kind": "test",
-        "isDefault": true
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
+      "group": {"kind": "test", "isDefault": true},
+      "presentation": {"reveal": "always", "panel": "dedicated", "clear": true},
       "problemMatcher": []
     },
     {
@@ -43,20 +36,11 @@
       "command": "fvm dart run build_runner watch",
       "isBackground": true,
       "group": "build",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated"
-      },
+      "presentation": {"reveal": "always", "panel": "dedicated"},
       "problemMatcher": {
         "owner": "dart",
-        "pattern": {
-          "regexp": "^$"
-        },
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": ".",
-          "endsPattern": "Synchronizing|Watching for file changes"
-        }
+        "pattern": {"regexp": "^$"},
+        "background": {"activeOnStart": true, "beginsPattern": ".", "endsPattern": "Synchronizing|Watching for file changes"}
       }
     },
     {
@@ -85,98 +69,30 @@
       "type": "shell",
       "command": "bash tool/run_orca_android.sh",
       "isBackground": true,
-      "dependsOn": ["forge: firebase emulators"],
-      "dependsOrder": "sequence",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated"
-      },
+      "presentation": {"reveal": "always", "panel": "dedicated"},
       "problemMatcher": {
         "owner": "dart",
-        "pattern": {
-          "regexp": "^$"
-        },
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": "Attaching|Starting Forge Dance",
-          "endsPattern": "The Flutter DevTools debugger and profiler"
-        }
+        "pattern": {"regexp": "^$"},
+        "background": {"activeOnStart": true, "beginsPattern": "Attaching|Starting Forge Dance", "endsPattern": "The Flutter DevTools debugger and profiler"}
       }
     },
+    {"label": "forge: capture android", "type": "shell", "command": "bash tool/capture_android_emulator.sh", "problemMatcher": []},
     {
-      "label": "forge: capture android",
-      "type": "shell",
-      "command": "bash tool/capture_android_emulator.sh",
-      "problemMatcher": []
-    },
-    {
-      "label": "forge: firebase emulators",
-      "type": "shell",
-      "command": "firebase emulators:start --only auth,firestore",
-      "isBackground": true,
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated"
-      },
-      "problemMatcher": {
-        "owner": "firebase",
-        "pattern": {
-          "regexp": "^$"
-        },
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": ".",
-          "endsPattern": "All emulators ready"
-        }
-      }
-    },
-    {
-      "label": "forge: test firestore rules",
-      "type": "shell",
-      "command": "bash tool/check_firebase_rules.sh",
-      "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "forge: integration test (web + emulators)",
+      "label": "forge: integration test (web)",
       "type": "shell",
       "command": "bash tool/check_integration.sh",
       "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
+      "presentation": {"reveal": "always", "panel": "dedicated", "clear": true},
       "problemMatcher": []
     },
     {
-      "label": "forge: web quality (Lighthouse + emulators)",
+      "label": "forge: web quality (Lighthouse)",
       "type": "shell",
       "command": "bash tool/check_web_quality.sh",
       "group": "test",
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated",
-        "clear": true
-      },
+      "presentation": {"reveal": "always", "panel": "dedicated", "clear": true},
       "problemMatcher": []
     },
-    {
-      "label": "forge: deploy firestore rules",
-      "type": "shell",
-      "command": "firebase deploy --only firestore:rules",
-      "problemMatcher": []
-    },
-    {
-      "label": "forge: pub get",
-      "type": "shell",
-      "command": "fvm flutter pub get",
-      "problemMatcher": []
-    }
+    {"label": "forge: pub get", "type": "shell", "command": "fvm flutter pub get", "problemMatcher": []}
   ]
 }

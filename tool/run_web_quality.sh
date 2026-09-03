@@ -67,7 +67,6 @@ else
     --release
     --no-pub
     --no-web-resources-cdn
-    --dart-define=USE_FIREBASE_EMULATOR=true
   )
   if [[ "${WEB_BUILD_WASM:-true}" == "true" ]]; then
     build_args+=(--wasm)

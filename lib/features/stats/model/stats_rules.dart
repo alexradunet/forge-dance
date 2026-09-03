@@ -64,10 +64,9 @@ const List<String> beltNames = [
 ];
 
 /// Cumulative XP required to REACH each belt. Calibrated to the catalog:
-/// Yellow ≈ one completed module, Black == every lesson in the catalog
-/// (test/stats_test.dart enforces that the last threshold equals the total
-/// XP available, so catalog changes force a deliberate re-calibration here).
-const List<int> beltThresholds = [0, 240, 550, 900, 1300, 1750, 2250, 2810];
+/// Yellow follows the early common foundation, while Black equals every
+/// lesson in the catalog (test/stats_test.dart enforces that final invariant).
+const List<int> beltThresholds = [0, 240, 550, 900, 1300, 1750, 2250, 3850];
 
 /// 0-based belt index for a given XP total.
 int beltIndexForXp(int xp) {
@@ -144,8 +143,9 @@ UserStats buildUserStats({
   final beltIndex = beltIndexForXp(totalXp);
   final isMax = beltIndex == beltThresholds.length - 1;
   final xpIntoLevel = totalXp - beltThresholds[beltIndex];
-  final span =
-      isMax ? 0 : beltThresholds[beltIndex + 1] - beltThresholds[beltIndex];
+  final span = isMax
+      ? 0
+      : beltThresholds[beltIndex + 1] - beltThresholds[beltIndex];
 
   return UserStats(
     totalXp: totalXp,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../design_system/design_system.dart';
 
-/// Pure branding shown while auth state resolves. Navigation remains owned by
+/// Pure branding shown while local profile state resolves. Navigation remains owned by
 /// the router redirect in `lib/routing/app_redirect.dart`.
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});

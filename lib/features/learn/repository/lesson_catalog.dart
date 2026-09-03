@@ -1,7 +1,367 @@
 import '../model/lesson.dart';
 
+Lesson _commonLesson({
+  required String id,
+  required String title,
+  required LessonType type,
+  required String concept,
+  required String practice,
+  required String variation,
+  required String reflection,
+  required String movementCue,
+  required String adaptation,
+}) {
+  return Lesson(
+    id: id,
+    title: title,
+    type: type,
+    duration: '10 min',
+    steps: [
+      LessonStep(
+        title: 'CONCEPT & CHOICE',
+        description: concept,
+        focus: 'Name the goal and choose standing, seated, or supported work.',
+        breath: 'Notice your natural breath before movement begins.',
+        energy: 'Easy and attentive; prepare rather than perform.',
+      ),
+      LessonStep(
+        title: 'MODEL & PRACTICE',
+        description: practice,
+        focus: movementCue,
+        breath:
+            'Keep breathing continuously; pause if breath becomes strained.',
+        energy: 'Use a comfortable, repeatable effort.',
+      ),
+      LessonStep(
+        title: 'VARY & RECALL',
+        description: variation,
+        focus: adaptation,
+        breath:
+            'Reset with one easy breath before recalling without the model.',
+        energy: 'Choose clarity over speed or range.',
+      ),
+      LessonStep(
+        title: 'CHECK & REFLECT',
+        description: reflection,
+        focus:
+            'Stop for pain, dizziness, unusual breathlessness, or instability.',
+        breath: 'Let your breathing settle and notice your current effort.',
+        energy: 'Finish in control and record one useful observation.',
+      ),
+    ],
+  );
+}
+
+final Module readyBody = Module(
+  id: 'common-ready-body',
+  title: 'Ready Body',
+  subtitle: 'Foundation 1 • Path',
+  category: ModuleCategory.fundamentals,
+  pathway: LearningPathway.commonFoundation,
+  tag: 'Start Here',
+  imageUrl:
+      'https://images.unsplash.com/photo-1768244016871-81cd7a7812fe?w=800&auto=format&fit=crop&q=80',
+  lessons: [
+    _commonLesson(
+      id: 'common-ready-body-space-signals',
+      title: 'Space & Signals',
+      type: LessonType.theory,
+      concept: 'Scan your surface and reach zone, choose support and impact options, and rehearse a clear stop signal.',
+      practice: 'Check around, above, and below you, then travel one small step each way and stop on cue.',
+      variation: 'Repeat with a smaller reach, seated position, or stable support, then name two hazards or options from memory.',
+      reflection: 'Confirm that you can stop immediately and describe the setup that made practice feel usable today.',
+      movementCue:
+          'Keep enough room to stop without touching objects or people.',
+      adaptation:
+          'Camera use is optional; use audio, captions, or your own stop cue.',
+    ),
+    _commonLesson(
+      id: 'common-ready-body-body-map',
+      title: 'Body Map',
+      type: LessonType.movement,
+      concept: 'Explore how one body area can initiate movement while the rest notices and responds.',
+      practice: 'Prompt four comfortable actions using the head, shoulders, ribs, pelvis, arms, or legs one area at a time.',
+      variation: 'Change the size or initiating area, then recall four prompts without following the model.',
+      reflection: 'Name where movement felt clear, where other parts joined, and which range felt sustainable.',
+      movementCue:
+          'Move within available range; isolation does not require rigidity.',
+      adaptation:
+          'Skip any area that is painful and substitute another body part.',
+    ),
+    _commonLesson(
+      id: 'common-ready-body-bases-breath',
+      title: 'Bases & Breath',
+      type: LessonType.boss,
+      concept: 'Your base of support can be wide, narrow, seated, or assisted; continuous breath helps you notice effort.',
+      practice: 'Make three comfortable shapes over different bases, hold briefly, and exit each with control.',
+      variation: 'Change one base or shape while keeping the breath moving, then rebuild the sequence from memory.',
+      reflection: 'Show three controlled shapes and identify the support choice that gave you the most control.',
+      movementCue:
+          'Keep support nearby when reducing your base or changing level.',
+      adaptation:
+          'A stable chair, wall, mobility aid, or seated base all count.',
+    ),
+  ],
+);
+
+final Module timeAndWeight = Module(
+  id: 'common-time-weight',
+  title: 'Time & Weight',
+  subtitle: 'Foundation 2 • Path',
+  category: ModuleCategory.fundamentals,
+  pathway: LearningPathway.commonFoundation,
+  prerequisiteLessonIds: const ['common-ready-body-bases-breath'],
+  tag: 'Timing',
+  imageUrl:
+      'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&q=80',
+  lessons: [
+    _commonLesson(
+      id: 'common-time-weight-find-pulse',
+      title: 'Find Pulse',
+      type: LessonType.movement,
+      concept: 'A pulse is a steady recurring timing cue when one is present; stillness and non-audio cues can also organize time.',
+      practice: 'Tap, step, gesture, or use a visual or haptic cue with three comfortable tempi, starting and stopping cleanly.',
+      variation: 'Choose a different body part or timing cue and maintain the pulse twice without watching the model.',
+      reflection: 'Notice which cue helped you sustain timing and whether slower or faster felt more controllable.',
+      movementCue: 'Keep the action simple enough that timing stays clear.',
+      adaptation:
+          'Use visual flashes, haptics, breath, or silence instead of audio.',
+    ),
+    _commonLesson(
+      id: 'common-time-weight-transfer-weight',
+      title: 'Transfer Weight',
+      type: LessonType.movement,
+      concept: 'A weight transfer changes which support carries you; clear commitment makes the next action available.',
+      practice: 'Shift side, forward, and back within a safe range, then step and return with a controlled pause.',
+      variation: 'Change direction or travel size, then respond to calls without following a continuous model.',
+      reflection: 'Identify the loaded and unloaded side and show one controlled recovery to your chosen base.',
+      movementCue: 'Move your center toward support before freeing another contact point.',
+      adaptation: 'Keep both hands or feet supported and make the transfer partial if needed.',
+    ),
+    _commonLesson(
+      id: 'common-time-weight-rhythm-patterns',
+      title: 'Rhythm Patterns',
+      type: LessonType.boss,
+      concept: 'Rhythm arranges events, durations, accents, and pauses without requiring one meter or counting system.',
+      practice: 'Echo three short two-to-four-event patterns by clapping, stepping, gesturing, or using an assistive input.',
+      variation: 'Change the sound or movement source, then reproduce one pattern after a short quiet delay.',
+      reflection: 'Describe whether duration, accent, or pause made each pattern recognizable.',
+      movementCue:
+          'Preserve the event order before adding speed or complexity.',
+      adaptation:
+          'Feel, see, or create timing cues; producing sound is optional.',
+    ),
+  ],
+);
+
+final Module spaceAndCoordination = Module(
+  id: 'common-space-coordination',
+  title: 'Space & Coordination',
+  subtitle: 'Foundation 3 • Path',
+  category: ModuleCategory.fundamentals,
+  pathway: LearningPathway.commonFoundation,
+  prerequisiteLessonIds: const ['common-time-weight-rhythm-patterns'],
+  tag: 'Space',
+  imageUrl:
+      'https://images.unsplash.com/photo-1518834107812-67b0b7c58434?w=800&q=80',
+  lessons: [
+    _commonLesson(
+      id: 'common-space-coordination-direction-facing',
+      title: 'Direction & Facing',
+      type: LessonType.movement,
+      concept: 'Direction describes travel and facing describes orientation; neither requires a fixed stage front.',
+      practice: 'Move or gesture forward, back, side, and diagonal relative to your chosen reference, resetting between calls.',
+      variation: 'Change the reference point, then answer a mixed set of direction and facing calls from memory.',
+      reflection: 'Name the reference you used and which change required the most preparation.',
+      movementCue:
+          'Look and clear the destination before shifting or traveling.',
+      adaptation: 'Use hand, gaze, chair, or mobility-aid orientation instead of steps.',
+    ),
+    _commonLesson(
+      id: 'common-space-coordination-path-level-size',
+      title: 'Path, Level & Size',
+      type: LessonType.movement,
+      concept: 'A familiar action can transform through pathway, available level, or movement size.',
+      practice: 'Repeat one action on straight and curved paths, then at two comfortable levels and sizes.',
+      variation: 'Choose two spatial changes and apply them without replaying the model.',
+      reflection: 'Identify which spatial choice changed the action most while remaining controlled.',
+      movementCue: 'Prepare each level change and keep the route within your cleared space.',
+      adaptation:
+          'Levels may be created with gaze, arms, torso, or whole-body height.',
+    ),
+    _commonLesson(
+      id: 'common-space-coordination-parts-together',
+      title: 'Parts Together',
+      type: LessonType.boss,
+      concept: 'Coordination grows by learning parts clearly, then combining same-side, opposite-side, or independent actions.',
+      practice: 'Learn a four-event lower-body or base pattern, add one upper-body pattern, and connect them slowly.',
+      variation: 'Swap the upper action or relationship between sides, then perform the combination without the model.',
+      reflection: 'Show one coordinated phrase and explain which layer you simplified to keep it clear.',
+      movementCue: 'Reduce range or tempo before sacrificing control.',
+      adaptation: 'Coordinate two available regions; upper/lower labels are suggestions, not requirements.',
+    ),
+  ],
+);
+
+final Module qualityAndPhrase = Module(
+  id: 'common-quality-phrase',
+  title: 'Quality & Phrase',
+  subtitle: 'Foundation 4 • Path',
+  category: ModuleCategory.fundamentals,
+  pathway: LearningPathway.commonFoundation,
+  prerequisiteLessonIds: const ['common-space-coordination-parts-together'],
+  tag: 'Expression',
+  imageUrl:
+      'https://images.unsplash.com/photo-1547153760-18fc86324498?w=800&q=80',
+  lessons: [
+    _commonLesson(
+      id: 'common-quality-phrase-dynamic-contrasts',
+      title: 'Dynamic Contrasts',
+      type: LessonType.theory,
+      concept: 'Dynamics describe how movement changes through time, force, flow, texture, initiation, or continuity.',
+      practice: 'Perform one short known action in two contrasting ways, such as sustained and quick or light and strong.',
+      variation: 'Choose a different contrast and make two versions distinct without relying only on movement size.',
+      reflection: 'Name the changed dimension and describe visible or felt evidence without ranking either version.',
+      movementCue: 'Change one quality at a time so its effect stays legible.',
+      adaptation: 'Contrast timing, focus, or tension when forceful movement is unsuitable.',
+    ),
+    _commonLesson(
+      id: 'common-quality-phrase-learn-phrase',
+      title: 'Learn a Phrase',
+      type: LessonType.movement,
+      concept: 'Observation, small chunks, and clear connections make a sequence easier to learn than continuous copying.',
+      practice: 'Watch a short phrase, learn its first and second halves separately, then connect four to eight events.',
+      variation: 'Practice the transition that needs attention, then perform the sequence without the continuous model.',
+      reflection: 'Recall the phrase in order and identify the chunk or cue that supported memory.',
+      movementCue:
+          'Pause between chunks and preserve order before adding detail.',
+      adaptation:
+          'Use fewer events, captions, verbal labels, or audio description.',
+    ),
+    _commonLesson(
+      id: 'common-quality-phrase-recall-adapt',
+      title: 'Recall & Adapt',
+      type: LessonType.boss,
+      concept: 'Learning shows up when you can retrieve a phrase later and adapt one condition without losing its identity.',
+      practice: 'Recall the learned phrase after a break, then rebuild any missing transition using your own cue.',
+      variation: 'Change facing, timing, pathway, or size within a safe range and perform the adapted phrase independently.',
+      reflection: 'Record what you recalled, what changed, and one cue to test again in a later session.',
+      movementCue: 'Change only one condition and keep recovery available.',
+      adaptation:
+          'Choose the novel condition that is safest and clearest for you.',
+    ),
+  ],
+);
+
+final Module makeAndCommunicate = Module(
+  id: 'common-make-communicate',
+  title: 'Make & Communicate',
+  subtitle: 'Foundation 5 • Path',
+  category: ModuleCategory.fundamentals,
+  pathway: LearningPathway.commonFoundation,
+  prerequisiteLessonIds: const ['common-quality-phrase-recall-adapt'],
+  tag: 'Create',
+  imageUrl:
+      'https://images.unsplash.com/photo-1504609813442-a8924e83f76e?w=800&q=80',
+  lessons: [
+    _commonLesson(
+      id: 'common-make-communicate-prompted-improvisation',
+      title: 'Prompted Improvisation',
+      type: LessonType.experiment,
+      concept: 'A constraint can focus improvisation while leaving room for personal movement choices.',
+      practice: 'Explore for a short interval using two chosen body areas and two available levels or sizes.',
+      variation: 'Keep one constraint, replace another, and begin again without planning every event.',
+      reflection: 'Name one choice that surprised you and one constraint you satisfied.',
+      movementCue: 'Keep moving or pausing intentionally; neither needs to look like the model.',
+      adaptation: 'Choose body areas and spatial options available today.',
+    ),
+    _commonLesson(
+      id: 'common-make-communicate-compose-a-b',
+      title: 'Compose A–B',
+      type: LessonType.movement,
+      concept: 'Composition organizes selected movement through order, repetition, contrast, and revision.',
+      practice: 'Create two short motifs, label them A and B, and perform them in a chosen repeatable order.',
+      variation: 'Reorder, repeat, or contrast one motif, then reproduce the revised structure from memory.',
+      reflection:
+          'Perform your chosen structure and explain one ordering decision.',
+      movementCue: 'Make each motif short enough to repeat clearly.',
+      adaptation: 'A motif may use gesture, locomotion, stillness, or assisted movement.',
+    ),
+    _commonLesson(
+      id: 'common-make-communicate-focus-intent',
+      title: 'Focus & Intent',
+      type: LessonType.boss,
+      concept: 'Focus, timing, dynamics, and relationship to space can communicate an intention without fixed emotion gestures.',
+      practice: 'Choose an intention and perform one motif while changing gaze, orientation, timing, or energy to support it.',
+      variation: 'Create a contrasting version, then perform both without announcing which is which.',
+      reflection: 'Use specific movement evidence to explain what made the versions communicate differently.',
+      movementCue: 'Commit to one readable choice rather than adding every expressive tool.',
+      adaptation: 'Use timing, orientation, or sound when gaze-based focus is unavailable.',
+    ),
+  ],
+);
+
+final Module relateAndConnect = Module(
+  id: 'common-relate-connect',
+  title: 'Relate & Connect',
+  subtitle: 'Foundation 6 • Path',
+  category: ModuleCategory.fundamentals,
+  pathway: LearningPathway.commonFoundation,
+  prerequisiteLessonIds: const ['common-make-communicate-focus-intent'],
+  tag: 'Connect',
+  imageUrl:
+      'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800&q=80',
+  lessons: [
+    _commonLesson(
+      id: 'common-relate-connect-observe-respond',
+      title: 'Observe & Respond',
+      type: LessonType.theory,
+      concept: 'Responsive viewing describes body, space, time, dynamics, relationship, and context before judging unfamiliar work.',
+      practice: 'Observe two short examples and record two concrete movement details plus their known source or setting.',
+      variation: 'Revisit one example and offer an interpretation supported by evidence rather than a universal style rule.',
+      reflection: 'Separate what you observed, what you inferred, and what context you still need.',
+      movementCue: 'Let attention move between details and the whole work.',
+      adaptation: 'Use audio description, captions, transcript, or tactile information when provided.',
+    ),
+    _commonLesson(
+      id: 'common-relate-connect-mirror-lead-follow',
+      title: 'Mirror, Lead & Follow',
+      type: LessonType.experiment,
+      concept: 'Leading and following are switchable attention roles built on consent, spacing, adaptation, and a shared stop signal.',
+      practice: 'Mirror an avatar or optional partner without touch, switch roles, and respond immediately to the stop cue.',
+      variation: 'Change tempo or use contrast instead of exact copying while maintaining agreed spacing.',
+      reflection: 'Confirm both roles, the stop response, and the no-touch or touch boundary selected for practice.',
+      movementCue:
+          'Keep movements readable and leave the other dancer time to respond.',
+      adaptation: 'Solo avatar, shadow, seated, and no-touch modes are complete versions.',
+    ),
+    _commonLesson(
+      id: 'common-relate-connect-capstone-pathway',
+      title: 'Capstone & Pathway',
+      type: LessonType.boss,
+      concept: 'The capstone combines safe setup, timing, weight, space, recall, transformation, personal choice, and context.',
+      practice: 'Learn and recall a short phrase, transform one element, add two personal events, and recover forward from errors.',
+      variation: 'Repeat on another day or with one modest new condition, then compare evidence rather than appearance.',
+      reflection: 'Record access needs, current strengths, context questions, and the style pathway you want to explore next.',
+      movementCue:
+          'Use the safest versions that still show your choices clearly.',
+      adaptation: 'Choose timing cues, range, base, and review format that make the rubric accessible.',
+    ),
+  ],
+);
+
+/// The six-module, 18-lesson common foundation in prerequisite order.
+final List<Module> commonFoundationModules = [
+  readyBody,
+  timeAndWeight,
+  spaceAndCoordination,
+  qualityAndPhrase,
+  makeAndCommunicate,
+  relateAndConnect,
+];
+
 /// Static lesson content. Content ships with the app on purpose — only user
-/// progress is persisted to Firestore. If content ever needs to change
+/// progress is persisted locally. If content ever needs to change
 /// independently of app releases, revisit this decision (documented in the
 /// best-practices research report).
 ///
@@ -14,11 +374,12 @@ import '../model/lesson.dart';
 const Module hipHopFoundations = Module(
   id: 'hip-hop-foundations',
   title: 'Hip Hop Foundations',
-  subtitle: 'Module 1 • Path',
-  category: ModuleCategory.fundamentals,
+  subtitle: 'Module 7 • Path',
+  category: ModuleCategory.streetStyles,
+  pathway: LearningPathway.streetClubFunk,
+  prerequisiteLessonIds: ['common-time-weight-rhythm-patterns'],
   tag: 'Hip Hop',
-  imageUrl:
-      'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
+  imageUrl: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
   lessons: [
     Lesson(
       id: 'history-of-hip-hop',
@@ -28,32 +389,28 @@ const Module hipHopFoundations = Module(
       steps: [
         LessonStep(
           title: 'THE FOUR ELEMENTS',
-          description:
-              'Hip hop is a culture, not just a dance: DJing, MCing, graffiti, and breaking.',
+          description: 'Hip hop is a culture, not just a dance: DJing, MCing, graffiti, and breaking.',
           focus: 'Name all four elements and how dance fits among them.',
           breath: 'Relaxed nasal breathing — this step is for the mind.',
           energy: 'Low and curious; absorb before you move.',
         ),
         LessonStep(
           title: 'BIRTH OF BREAKING',
-          description:
-              'From Bronx block parties to the cypher: where the dance was born.',
+          description: 'From Bronx block parties to the cypher: where the dance was born.',
           focus: 'Notice how the break in the music created the dancer.',
           breath: 'Steady four-count rhythm while you watch.',
           energy: 'Light marking — sketch what you see at half speed.',
         ),
         LessonStep(
           title: 'THE GROOVE LINEAGE',
-          description:
-              'Social dances feed hip hop: the bounce and rock live in everything.',
+          description: 'Social dances feed hip hop: the bounce and rock live in everything.',
           focus: 'Spot the shared bounce across the eras shown.',
           breath: 'Let the music set your breathing pace.',
           energy: 'Sway along — feel the lineage in your body.',
         ),
         LessonStep(
           title: 'YOUR PLACE IN IT',
-          description:
-              'Every dancer adds to the culture. Set your intention before the first move.',
+          description: 'Every dancer adds to the culture. Set your intention before the first move.',
           focus: 'Say out loud what you want your dance to feel like.',
           breath: 'One deep reset breath to close the theory.',
           energy: 'Alert and ready — the movement starts next lesson.',
@@ -75,8 +432,7 @@ const Module hipHopFoundations = Module(
         ),
         LessonStep(
           title: 'BOUNCE TECHNIQUE',
-          description:
-              'Follow the rhythm and stay loose. This fundamental movement is key to your flow.',
+          description: 'Follow the rhythm and stay loose. This fundamental movement is key to your flow.',
           focus: 'Keep your knees slightly bent and relaxed.',
           breath: 'Exhale on the downbeat.',
           energy: 'Direct your power from the core.',
@@ -183,7 +539,8 @@ const Module hipHopFoundations = Module(
         ),
         LessonStep(
           title: 'RUN THE GAUNTLET',
-          description: 'Beat, bounce, rock, and freestyle — full sequence, no stopping.',
+          description:
+              'Beat, bounce, rock, and freestyle — full sequence, no stopping.',
           focus: 'Recover forward; mistakes stay in the past.',
           breath: 'Steady through transitions, sharp exhale on accents.',
           energy: 'Performance level.',
@@ -210,8 +567,10 @@ const Module hipHopFoundations = Module(
 const Module bodyControl1 = Module(
   id: 'body-control-1',
   title: 'Body Control I',
-  subtitle: 'Module 2 • Path',
+  subtitle: 'Module 8 • Path',
   category: ModuleCategory.fundamentals,
+  pathway: LearningPathway.streetClubFunk,
+  prerequisiteLessonIds: ['common-space-coordination-parts-together'],
   tag: 'Rhythm',
   imageUrl:
       'https://images.unsplash.com/photo-1550525811-e5869dd03032?w=800&q=80',
@@ -224,8 +583,10 @@ const Module bodyControl1 = Module(
       steps: [
         LessonStep(
           title: 'FIND YOUR CENTER',
-          description: 'All isolation starts from a stable center — locate yours.',
-          focus: 'Stand tall and feel where your weight settles below the navel.',
+          description:
+              'All isolation starts from a stable center — locate yours.',
+          focus:
+              'Stand tall and feel where your weight settles below the navel.',
           breath: 'Breathe into the belly, not the chest, to sense the center.',
           energy: 'Still and grounded — this is a listening step.',
         ),
@@ -238,9 +599,11 @@ const Module bodyControl1 = Module(
         ),
         LessonStep(
           title: 'ANCHOR VS MOVER',
-          description: 'Every isolation has one part that moves and parts that anchor.',
+          description:
+              'Every isolation has one part that moves and parts that anchor.',
           focus: 'Name the anchor before you move anything.',
-          breath: 'Keep breath even — anchors fail when you brace and hold air.',
+          breath:
+              'Keep breath even — anchors fail when you brace and hold air.',
           energy: 'Minimal — tiny test movements only.',
         ),
         LessonStep(
@@ -347,7 +710,8 @@ const Module bodyControl1 = Module(
         LessonStep(
           title: 'ROLLS UNDER PRESSURE',
           description: 'Double-time rolls without losing the shape.',
-          focus: 'Shape survives speed — shrink the range before you break form.',
+          focus:
+              'Shape survives speed — shrink the range before you break form.',
           breath: 'Quick rhythmic exhales, never held.',
           energy: 'Short hard bursts with rest between.',
         ),
@@ -509,67 +873,166 @@ const Module bodyControl1 = Module(
 const Module isolationsMaster = Module(
   id: 'isolations-master',
   title: 'Isolations Master',
-  subtitle: 'Module 3 • Path',
-  category: ModuleCategory.fundamentals,
+  subtitle: 'Module 9 • Path',
+  category: ModuleCategory.streetStyles,
+  pathway: LearningPathway.streetClubFunk,
+  prerequisiteLessonIds: ['common-quality-phrase-recall-adapt'],
   tag: 'Tech',
   imageUrl:
       'https://images.unsplash.com/photo-1547153760-18fc86324498?w=800&q=80',
   lessons: [
-    Lesson(id: 'isolations-master-theory', title: 'Isolation Theory', type: LessonType.theory, duration: '5 min'),
-    Lesson(id: 'isolations-master-arm-waves', title: 'Arm Waves', type: LessonType.movement, duration: '12 min'),
-    Lesson(id: 'isolations-master-leg-isolations', title: 'Leg Isolations', type: LessonType.drill, duration: '10 min'),
-    Lesson(id: 'isolations-master-full-body-flow', title: 'Full-Body Flow', type: LessonType.experiment, duration: '15 min'),
-    Lesson(id: 'isolations-master-boss', title: 'Isolation Boss', type: LessonType.boss),
+    Lesson(
+      id: 'isolations-master-theory',
+      title: 'Isolation Theory',
+      type: LessonType.theory,
+      duration: '5 min',
+    ),
+    Lesson(
+      id: 'isolations-master-arm-waves',
+      title: 'Arm Waves',
+      type: LessonType.movement,
+      duration: '12 min',
+    ),
+    Lesson(
+      id: 'isolations-master-leg-isolations',
+      title: 'Leg Isolations',
+      type: LessonType.drill,
+      duration: '10 min',
+    ),
+    Lesson(
+      id: 'isolations-master-full-body-flow',
+      title: 'Full-Body Flow',
+      type: LessonType.experiment,
+      duration: '15 min',
+    ),
+    Lesson(
+      id: 'isolations-master-boss',
+      title: 'Isolation Boss',
+      type: LessonType.boss,
+    ),
   ],
 );
 
 const Module footworkFundamentals = Module(
   id: 'footwork-fundamentals',
   title: 'Footwork Fundamentals',
-  subtitle: 'Module 4 • Path',
+  subtitle: 'Module 10 • Path',
   category: ModuleCategory.fundamentals,
+  pathway: LearningPathway.streetClubFunk,
+  prerequisiteLessonIds: ['common-space-coordination-parts-together'],
   tag: 'Technique',
-  imageUrl:
-      'https://images.unsplash.com/photo-1716996642138-e655f2a8dcd5?w=800&auto=format&fit=crop&q=80',
+  imageUrl: 'https://images.unsplash.com/photo-1716996642138-e655f2a8dcd5?w=800&auto=format&fit=crop&q=80',
   lessons: [
-    Lesson(id: 'footwork-fundamentals-weight-transfer', title: 'Weight Transfer', type: LessonType.theory, duration: '5 min'),
-    Lesson(id: 'footwork-fundamentals-step-touch', title: 'Step Touch Patterns', type: LessonType.movement, duration: '10 min'),
-    Lesson(id: 'footwork-fundamentals-kick-ball-change', title: 'Kick Ball Change', type: LessonType.movement, duration: '10 min'),
-    Lesson(id: 'footwork-fundamentals-speed-ladders', title: 'Speed Ladders', type: LessonType.drill, duration: '8 min'),
-    Lesson(id: 'footwork-fundamentals-freestyle', title: 'Footwork Freestyle', type: LessonType.experiment, duration: '12 min'),
-    Lesson(id: 'footwork-fundamentals-boss', title: 'Footwork Boss', type: LessonType.boss),
+    Lesson(
+      id: 'footwork-fundamentals-weight-transfer',
+      title: 'Weight Transfer',
+      type: LessonType.theory,
+      duration: '5 min',
+    ),
+    Lesson(
+      id: 'footwork-fundamentals-step-touch',
+      title: 'Step Touch Patterns',
+      type: LessonType.movement,
+      duration: '10 min',
+    ),
+    Lesson(
+      id: 'footwork-fundamentals-kick-ball-change',
+      title: 'Kick Ball Change',
+      type: LessonType.movement,
+      duration: '10 min',
+    ),
+    Lesson(
+      id: 'footwork-fundamentals-speed-ladders',
+      title: 'Speed Ladders',
+      type: LessonType.drill,
+      duration: '8 min',
+    ),
+    Lesson(
+      id: 'footwork-fundamentals-freestyle',
+      title: 'Footwork Freestyle',
+      type: LessonType.experiment,
+      duration: '12 min',
+    ),
+    Lesson(
+      id: 'footwork-fundamentals-boss',
+      title: 'Footwork Boss',
+      type: LessonType.boss,
+    ),
   ],
 );
 
 const Module topRock = Module(
   id: 'top-rock',
   title: 'Top Rock',
-  subtitle: 'Module 5 • Path',
+  subtitle: 'Module 11 • Path',
   category: ModuleCategory.streetStyles,
+  pathway: LearningPathway.streetClubFunk,
+  prerequisiteLessonIds: ['common-quality-phrase-recall-adapt'],
   tag: 'Breaking',
   imageUrl:
       'https://images.unsplash.com/photo-1535525153412-5a42439a210d?w=800&q=80',
   lessons: [
-    Lesson(id: 'top-rock-history', title: 'Top Rock History', type: LessonType.theory, duration: '5 min'),
-    Lesson(id: 'top-rock-indian-step', title: 'Indian Step', type: LessonType.movement, duration: '12 min'),
-    Lesson(id: 'top-rock-side-step', title: 'Side Step', type: LessonType.movement, duration: '10 min'),
-    Lesson(id: 'top-rock-cross-step-drills', title: 'Cross Step Drills', type: LessonType.drill, duration: '10 min'),
-    Lesson(id: 'top-rock-cypher-entry', title: 'Cypher Entry', type: LessonType.boss),
+    Lesson(
+      id: 'top-rock-history',
+      title: 'Top Rock History',
+      type: LessonType.theory,
+      duration: '5 min',
+    ),
+    Lesson(
+      id: 'top-rock-indian-step',
+      title: 'Indian Step',
+      type: LessonType.movement,
+      duration: '12 min',
+    ),
+    Lesson(
+      id: 'top-rock-side-step',
+      title: 'Side Step',
+      type: LessonType.movement,
+      duration: '10 min',
+    ),
+    Lesson(
+      id: 'top-rock-cross-step-drills',
+      title: 'Cross Step Drills',
+      type: LessonType.drill,
+      duration: '10 min',
+    ),
+    Lesson(
+      id: 'top-rock-cypher-entry',
+      title: 'Cypher Entry',
+      type: LessonType.boss,
+    ),
   ],
 );
 
 const Module boogaloo = Module(
   id: 'boogaloo',
   title: 'Boogaloo',
-  subtitle: 'Module 6 • Path',
+  subtitle: 'Module 12 • Path',
   category: ModuleCategory.streetStyles,
+  pathway: LearningPathway.streetClubFunk,
+  prerequisiteLessonIds: ['common-quality-phrase-recall-adapt'],
   tag: 'Popping',
   imageUrl:
       'https://images.unsplash.com/photo-1547481887-a26e2cacb2f2?w=800&q=80',
   lessons: [
-    Lesson(id: 'boogaloo-roots', title: 'Boogaloo Roots', type: LessonType.theory, duration: '5 min'),
-    Lesson(id: 'boogaloo-rolls-twists', title: 'Rolls & Twists', type: LessonType.movement, duration: '12 min'),
-    Lesson(id: 'boogaloo-old-man-groove', title: 'Old Man Groove', type: LessonType.drill, duration: '10 min'),
+    Lesson(
+      id: 'boogaloo-roots',
+      title: 'Boogaloo Roots',
+      type: LessonType.theory,
+      duration: '5 min',
+    ),
+    Lesson(
+      id: 'boogaloo-rolls-twists',
+      title: 'Rolls & Twists',
+      type: LessonType.movement,
+      duration: '12 min',
+    ),
+    Lesson(
+      id: 'boogaloo-old-man-groove',
+      title: 'Old Man Groove',
+      type: LessonType.drill,
+      duration: '10 min',
+    ),
     Lesson(id: 'boogaloo-jam', title: 'Boogaloo Jam', type: LessonType.boss),
   ],
 );
@@ -577,82 +1040,226 @@ const Module boogaloo = Module(
 const Module house = Module(
   id: 'house',
   title: 'House',
-  subtitle: 'Module 7 • Path',
+  subtitle: 'Module 13 • Path',
   category: ModuleCategory.streetStyles,
+  pathway: LearningPathway.streetClubFunk,
+  prerequisiteLessonIds: ['common-quality-phrase-recall-adapt'],
   tag: 'House',
   imageUrl:
       'https://images.unsplash.com/photo-1504609813442-a8924e83f76e?w=800&q=80',
   lessons: [
-    Lesson(id: 'house-culture', title: 'House Culture', type: LessonType.theory, duration: '5 min'),
-    Lesson(id: 'house-jack-basics', title: 'Jack Basics', type: LessonType.movement, duration: '10 min'),
-    Lesson(id: 'house-farmer-loose-legs', title: 'Farmer & Loose Legs', type: LessonType.movement, duration: '12 min'),
-    Lesson(id: 'house-skating-drills', title: 'Skating Drills', type: LessonType.drill, duration: '10 min'),
-    Lesson(id: 'house-lofting-freestyle', title: 'Lofting Freestyle', type: LessonType.experiment, duration: '15 min'),
-    Lesson(id: 'house-club-floor-boss', title: 'Club Floor Boss', type: LessonType.boss),
+    Lesson(
+      id: 'house-culture',
+      title: 'House Culture',
+      type: LessonType.theory,
+      duration: '5 min',
+    ),
+    Lesson(
+      id: 'house-jack-basics',
+      title: 'Jack Basics',
+      type: LessonType.movement,
+      duration: '10 min',
+    ),
+    Lesson(
+      id: 'house-farmer-loose-legs',
+      title: 'Farmer & Loose Legs',
+      type: LessonType.movement,
+      duration: '12 min',
+    ),
+    Lesson(
+      id: 'house-skating-drills',
+      title: 'Skating Drills',
+      type: LessonType.drill,
+      duration: '10 min',
+    ),
+    Lesson(
+      id: 'house-lofting-freestyle',
+      title: 'Lofting Freestyle',
+      type: LessonType.experiment,
+      duration: '15 min',
+    ),
+    Lesson(
+      id: 'house-club-floor-boss',
+      title: 'Club Floor Boss',
+      type: LessonType.boss,
+    ),
   ],
 );
 
 const Module breakingBasics = Module(
   id: 'breaking-basics',
   title: 'Breaking Basics',
-  subtitle: 'Module 8 • Path',
+  subtitle: 'Module 14 • Path',
   category: ModuleCategory.streetStyles,
+  pathway: LearningPathway.streetClubFunk,
+  prerequisiteLessonIds: ['common-quality-phrase-recall-adapt'],
   tag: 'Power Moves',
-  imageUrl:
-      'https://images.unsplash.com/photo-1506411393232-79727bc447af?w=800&auto=format&fit=crop&q=80',
+  imageUrl: 'https://images.unsplash.com/photo-1506411393232-79727bc447af?w=800&auto=format&fit=crop&q=80',
   lessons: [
-    Lesson(id: 'breaking-basics-101', title: 'Breaking 101', type: LessonType.theory, duration: '5 min'),
-    Lesson(id: 'breaking-basics-six-step', title: 'Six Step', type: LessonType.movement, duration: '12 min'),
-    Lesson(id: 'breaking-basics-three-step', title: 'Three Step', type: LessonType.movement, duration: '10 min'),
-    Lesson(id: 'breaking-basics-freeze-basics', title: 'Freeze Basics', type: LessonType.movement, duration: '12 min'),
-    Lesson(id: 'breaking-basics-power-prep', title: 'Power Prep Drills', type: LessonType.drill, duration: '10 min'),
-    Lesson(id: 'breaking-basics-downrock-combos', title: 'Downrock Combos', type: LessonType.experiment, duration: '15 min'),
-    Lesson(id: 'breaking-basics-first-cypher', title: 'First Cypher', type: LessonType.boss),
+    Lesson(
+      id: 'breaking-basics-101',
+      title: 'Breaking 101',
+      type: LessonType.theory,
+      duration: '5 min',
+    ),
+    Lesson(
+      id: 'breaking-basics-six-step',
+      title: 'Six Step',
+      type: LessonType.movement,
+      duration: '12 min',
+    ),
+    Lesson(
+      id: 'breaking-basics-three-step',
+      title: 'Three Step',
+      type: LessonType.movement,
+      duration: '10 min',
+    ),
+    Lesson(
+      id: 'breaking-basics-freeze-basics',
+      title: 'Freeze Basics',
+      type: LessonType.movement,
+      duration: '12 min',
+    ),
+    Lesson(
+      id: 'breaking-basics-power-prep',
+      title: 'Power Prep Drills',
+      type: LessonType.drill,
+      duration: '10 min',
+    ),
+    Lesson(
+      id: 'breaking-basics-downrock-combos',
+      title: 'Downrock Combos',
+      type: LessonType.experiment,
+      duration: '15 min',
+    ),
+    Lesson(
+      id: 'breaking-basics-first-cypher',
+      title: 'First Cypher',
+      type: LessonType.boss,
+    ),
   ],
 );
 
 const Module urbanFlow = Module(
   id: 'urban-flow',
   title: 'Urban Flow',
-  subtitle: 'Module 9 • Path',
+  subtitle: 'Module 15 • Path',
   category: ModuleCategory.choreography,
+  pathway: LearningPathway.concertTheatrical,
+  prerequisiteLessonIds: ['common-quality-phrase-recall-adapt'],
   tag: 'New Arrival',
   imageUrl:
       'https://images.unsplash.com/photo-1508700115892-45ecd05ae2ad?w=800&q=80',
   lessons: [
-    Lesson(id: 'urban-flow-musicality', title: 'Musicality Basics', type: LessonType.theory, duration: '6 min'),
-    Lesson(id: 'urban-flow-eight-count-blocks', title: 'Eight-Count Blocks', type: LessonType.movement, duration: '12 min'),
-    Lesson(id: 'urban-flow-texture-dynamics', title: 'Texture & Dynamics', type: LessonType.movement, duration: '12 min'),
-    Lesson(id: 'urban-flow-transition-drills', title: 'Transition Drills', type: LessonType.drill, duration: '10 min'),
-    Lesson(id: 'urban-flow-combo-a', title: 'Combo A', type: LessonType.movement, duration: '15 min'),
-    Lesson(id: 'urban-flow-combo-b', title: 'Combo B', type: LessonType.movement, duration: '15 min'),
-    Lesson(id: 'urban-flow-freestyle-bridge', title: 'Freestyle Bridge', type: LessonType.experiment, duration: '12 min'),
-    Lesson(id: 'urban-flow-full-routine', title: 'Full Routine', type: LessonType.boss),
+    Lesson(
+      id: 'urban-flow-musicality',
+      title: 'Musicality Basics',
+      type: LessonType.theory,
+      duration: '6 min',
+    ),
+    Lesson(
+      id: 'urban-flow-eight-count-blocks',
+      title: 'Eight-Count Blocks',
+      type: LessonType.movement,
+      duration: '12 min',
+    ),
+    Lesson(
+      id: 'urban-flow-texture-dynamics',
+      title: 'Texture & Dynamics',
+      type: LessonType.movement,
+      duration: '12 min',
+    ),
+    Lesson(
+      id: 'urban-flow-transition-drills',
+      title: 'Transition Drills',
+      type: LessonType.drill,
+      duration: '10 min',
+    ),
+    Lesson(
+      id: 'urban-flow-combo-a',
+      title: 'Combo A',
+      type: LessonType.movement,
+      duration: '15 min',
+    ),
+    Lesson(
+      id: 'urban-flow-combo-b',
+      title: 'Combo B',
+      type: LessonType.movement,
+      duration: '15 min',
+    ),
+    Lesson(
+      id: 'urban-flow-freestyle-bridge',
+      title: 'Freestyle Bridge',
+      type: LessonType.experiment,
+      duration: '12 min',
+    ),
+    Lesson(
+      id: 'urban-flow-full-routine',
+      title: 'Full Routine',
+      type: LessonType.boss,
+    ),
   ],
 );
 
 const Module contemporaryFusion = Module(
   id: 'contemporary-fusion',
   title: 'Contemporary Fusion',
-  subtitle: 'Module 10 • Path',
+  subtitle: 'Module 16 • Path',
   category: ModuleCategory.choreography,
+  pathway: LearningPathway.concertTheatrical,
+  prerequisiteLessonIds: ['common-quality-phrase-recall-adapt'],
   tag: 'Advanced',
   imageUrl:
       'https://images.unsplash.com/photo-1518834107812-67b0b7c58434?w=800&q=80',
   lessons: [
-    Lesson(id: 'contemporary-fusion-concepts', title: 'Fusion Concepts', type: LessonType.theory, duration: '6 min'),
-    Lesson(id: 'contemporary-fusion-floor-work', title: 'Floor Work Basics', type: LessonType.movement, duration: '12 min'),
-    Lesson(id: 'contemporary-fusion-momentum-release', title: 'Momentum & Release', type: LessonType.movement, duration: '12 min'),
-    Lesson(id: 'contemporary-fusion-balance-drills', title: 'Balance Drills', type: LessonType.drill, duration: '10 min'),
-    Lesson(id: 'contemporary-fusion-contact-improv', title: 'Contact Improv', type: LessonType.experiment, duration: '15 min'),
-    Lesson(id: 'contemporary-fusion-phrase-building', title: 'Phrase Building', type: LessonType.movement, duration: '15 min'),
-    Lesson(id: 'contemporary-fusion-showcase', title: 'Fusion Showcase', type: LessonType.boss),
+    Lesson(
+      id: 'contemporary-fusion-concepts',
+      title: 'Fusion Concepts',
+      type: LessonType.theory,
+      duration: '6 min',
+    ),
+    Lesson(
+      id: 'contemporary-fusion-floor-work',
+      title: 'Floor Work Basics',
+      type: LessonType.movement,
+      duration: '12 min',
+    ),
+    Lesson(
+      id: 'contemporary-fusion-momentum-release',
+      title: 'Momentum & Release',
+      type: LessonType.movement,
+      duration: '12 min',
+    ),
+    Lesson(
+      id: 'contemporary-fusion-balance-drills',
+      title: 'Balance Drills',
+      type: LessonType.drill,
+      duration: '10 min',
+    ),
+    Lesson(
+      id: 'contemporary-fusion-contact-improv',
+      title: 'Contact Improv',
+      type: LessonType.experiment,
+      duration: '15 min',
+    ),
+    Lesson(
+      id: 'contemporary-fusion-phrase-building',
+      title: 'Phrase Building',
+      type: LessonType.movement,
+      duration: '15 min',
+    ),
+    Lesson(
+      id: 'contemporary-fusion-showcase',
+      title: 'Fusion Showcase',
+      type: LessonType.boss,
+    ),
   ],
 );
 
 /// The full catalog, in display order. The first module is the default
 /// active module for new users.
-const List<Module> allModules = [
+final List<Module> allModules = [
+  ...commonFoundationModules,
   hipHopFoundations,
   bodyControl1,
   isolationsMaster,

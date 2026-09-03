@@ -25,7 +25,7 @@ class ProfileViewModel extends _$ProfileViewModel {
         profile.copyWith(name: name ?? profile.name, job: job ?? profile.job),
   );
 
-  Future<void> syncAuthentication({
+  Future<void> syncLocalIdentity({
     String? id,
     String? email,
     String? name,
@@ -71,7 +71,8 @@ class ProfileViewModel extends _$ProfileViewModel {
     }
   }
 
-  void clearProfile() {
-    state = AsyncData(ProfileState(profile: null));
+  Future<void> clearProfile() async {
+    await _repository.clear();
+    state = const AsyncData(ProfileState(profile: null));
   }
 }

@@ -10,16 +10,12 @@ import '../ui/state/learn_state.dart';
 import '../ui/view_model/learn_view_model.dart';
 
 /// Module View Screen (Lesson Path) — renders the lesson catalog combined
-/// with the signed-in user's Firestore progress.
+/// with the dancer's locally persisted progress.
 class ModuleViewScreen extends ConsumerWidget {
   final VoidCallback? onBack;
   final Function(String)? onLessonNavigate;
 
-  const ModuleViewScreen({
-    super.key,
-    this.onBack,
-    this.onLessonNavigate,
-  });
+  const ModuleViewScreen({super.key, this.onBack, this.onLessonNavigate});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -43,12 +39,8 @@ class ModuleViewScreen extends ConsumerWidget {
   Widget _buildPath(BuildContext context, WidgetRef ref, LearnState state) {
     return CustomScrollView(
       slivers: [
-        SliverToBoxAdapter(
-          child: _buildHeader(context, state),
-        ),
-        const SliverToBoxAdapter(
-          child: SizedBox(height: AppSpacing.xxl),
-        ),
+        SliverToBoxAdapter(child: _buildHeader(context, state)),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
@@ -67,9 +59,7 @@ class ModuleViewScreen extends ConsumerWidget {
           ),
         ),
         const SliverToBoxAdapter(
-          child: SizedBox(
-            height: AppSizes.bottomNavHeight + AppSpacing.lg,
-          ),
+          child: SizedBox(height: AppSizes.bottomNavHeight + AppSpacing.lg),
         ),
       ],
     );
@@ -113,15 +103,13 @@ class ModuleViewScreen extends ConsumerWidget {
     }
   }
 
-  LessonNodeState _nodeState(
-    LearnState state,
-    Lesson lesson,
-    Lesson? current,
-  ) {
+  LessonNodeState _nodeState(LearnState state, Lesson lesson, Lesson? current) {
     if (state.statusOf(lesson) == LessonStatus.completed) {
       return LessonNodeState.completed;
     }
-    if (lesson.id == current?.id) return LessonNodeState.current;
+    if (lesson.id == current?.id && state.canOpenLesson(lesson.id)) {
+      return LessonNodeState.current;
+    }
     return LessonNodeState.locked;
   }
 }

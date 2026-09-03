@@ -52,7 +52,7 @@ class _ForgePreviewApp extends StatefulWidget {
 class _ForgePreviewAppState extends State<_ForgePreviewApp> {
   late final GoRouter _router = GoRouter(
     routes: [
-      for (final path in ['/', '/login', '/register', '/onboarding', '/main'])
+      for (final path in ['/', '/onboarding', '/main'])
         GoRoute(
           path: path,
           pageBuilder: (context, state) =>
