@@ -1,14 +1,13 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../constants/assets.dart';
 import '../../../constants/constants.dart';
 import '../../../design_system/design_system.dart';
 import '../../../extensions/build_context_extension.dart';
 import '../../../features/authentication/ui/view_model/authentication_view_model.dart';
+import '../../../features/authentication/ui/widgets/auth_brand_hero.dart';
 import '../../../features/authentication/ui/widgets/sign_in_agreement.dart';
 import '../../../features/session/application/session_coordinator.dart';
 import '../../../generated/locale_keys.g.dart';
@@ -111,84 +110,88 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   padding: AppSpacing.screen,
-                  child: AutofillGroup(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(
-                          height: AppSizes.squareTileLg,
-                          child: SvgPicture.asset(
-                            Assets.welcome,
-                            fit: BoxFit.contain,
-                            alignment: Alignment.center,
-                            semanticsLabel: LocaleKeys.welcome.tr(),
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        Text(LocaleKeys.register.tr(), style: AppTypography.h1),
-                        const SizedBox(height: AppSpacing.xxl),
-                        FgInput(
-                          key: const ValueKey('registration.email'),
-                          label: LocaleKeys.email.tr(),
-                          controller: _emailController,
-                          focusNode: _emailFocusNode,
-                          prefixIcon: Icons.mail_outline_rounded,
-                          keyboardType: TextInputType.emailAddress,
-                          textInputAction: TextInputAction.next,
-                          autofillHints: const [
-                            AutofillHints.username,
-                            AutofillHints.email,
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 560),
+                      child: AutofillGroup(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AuthBrandHero(message: LocaleKeys.welcome.tr()),
+                            const SizedBox(height: AppSpacing.xxxl),
+                            Text(
+                              LocaleKeys.register.tr(),
+                              style: AppTypography.h1,
+                            ),
+                            const SizedBox(height: AppSpacing.xxl),
+                            FgInput(
+                              key: const ValueKey('registration.email'),
+                              label: LocaleKeys.email.tr(),
+                              controller: _emailController,
+                              focusNode: _emailFocusNode,
+                              prefixIcon: Icons.mail_outline_rounded,
+                              keyboardType: TextInputType.emailAddress,
+                              textInputAction: TextInputAction.next,
+                              autofillHints: const [
+                                AutofillHints.username,
+                                AutofillHints.email,
+                              ],
+                              isRequired: true,
+                              onSubmitted: (_) =>
+                                  _passwordFocusNode.requestFocus(),
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            FgInput.password(
+                              key: const ValueKey('registration.password'),
+                              label: LocaleKeys.password.tr(),
+                              controller: _passwordController,
+                              focusNode: _passwordFocusNode,
+                              helperText: LocaleKeys.passwordRequirement.tr(),
+                              textInputAction: TextInputAction.done,
+                              autofillHints: const [AutofillHints.newPassword],
+                              isRequired: true,
+                              showPasswordSemanticsLabel: LocaleKeys
+                                  .showPassword
+                                  .tr(),
+                              hidePasswordSemanticsLabel: LocaleKeys
+                                  .hidePassword
+                                  .tr(),
+                              onSubmitted: (_) => _submit(),
+                            ),
+                            const SizedBox(height: AppSpacing.xxxl),
+                            FgButton(
+                              key: const ValueKey('registration.submit'),
+                              onPressed: _isFormValid ? _submit : null,
+                              text: LocaleKeys.register.tr(),
+                              size: FgButtonSize.lg,
+                              expand: true,
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Center(
+                              child: Wrap(
+                                alignment: WrapAlignment.center,
+                                crossAxisAlignment: WrapCrossAlignment.center,
+                                children: [
+                                  Text(
+                                    LocaleKeys.alreadyHaveAccount.tr(),
+                                    style: AppTypography.bodySmall,
+                                  ),
+                                  FgButton(
+                                    text: LocaleKeys.signIn.tr(),
+                                    variant: FgButtonVariant.ghost,
+                                    size: FgButtonSize.sm,
+                                    onPressed: () => context.push(Routes.login),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            const SignInAgreement(),
+                            const SizedBox(height: AppSpacing.xxxl),
                           ],
-                          isRequired: true,
-                          onSubmitted: (_) => _passwordFocusNode.requestFocus(),
                         ),
-                        const SizedBox(height: AppSpacing.lg),
-                        FgInput.password(
-                          key: const ValueKey('registration.password'),
-                          label: LocaleKeys.password.tr(),
-                          controller: _passwordController,
-                          focusNode: _passwordFocusNode,
-                          helperText: LocaleKeys.passwordRequirement.tr(),
-                          textInputAction: TextInputAction.done,
-                          autofillHints: const [AutofillHints.newPassword],
-                          isRequired: true,
-                          showPasswordSemanticsLabel: LocaleKeys.showPassword
-                              .tr(),
-                          hidePasswordSemanticsLabel: LocaleKeys.hidePassword
-                              .tr(),
-                          onSubmitted: (_) => _submit(),
-                        ),
-                        const SizedBox(height: AppSpacing.xxxl),
-                        FgButton(
-                          key: const ValueKey('registration.submit'),
-                          onPressed: _isFormValid ? _submit : null,
-                          text: LocaleKeys.register.tr(),
-                          size: FgButtonSize.lg,
-                          expand: true,
-                        ),
-                        const SizedBox(height: AppSpacing.sm),
-                        Center(
-                          child: Wrap(
-                            alignment: WrapAlignment.center,
-                            crossAxisAlignment: WrapCrossAlignment.center,
-                            children: [
-                              Text(
-                                LocaleKeys.alreadyHaveAccount.tr(),
-                                style: AppTypography.bodySmall,
-                              ),
-                              FgButton(
-                                text: LocaleKeys.signIn.tr(),
-                                variant: FgButtonVariant.ghost,
-                                size: FgButtonSize.sm,
-                                onPressed: () => context.push(Routes.login),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.lg),
-                        const SignInAgreement(),
-                        const SizedBox(height: AppSpacing.xxxl),
-                      ],
+                      ),
                     ),
                   ),
                 ),
