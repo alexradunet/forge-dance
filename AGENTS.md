@@ -70,7 +70,8 @@ Rules for AI agents and contributors working on Forge Dance.
 - **Live loop:** When a Flutter debug app is running, or the user asks for hot reload, interactive UI iteration, or visual verification, follow `.agents/skills/flutter-live-development/SKILL.md`.
 - During a live loop, apply each non-documentation change under `lib/` with Dart MCP hot reload or hot restart before evaluating it. Verify visual claims from a current screenshot, not from source or the widget tree alone.
 - Prefer Linux desktop for fast UI-only iteration. Use the fixed-port Web Server target with Auth and Firestore emulators for Firebase flows; never use production Firebase for live agent-driven development.
-- On Omarchy, `tool/capture_flutter_window.sh` captures the visible Forge Dance window under `build/live/` for vision-model review. Web sessions use Chrome DevTools MCP at `http://127.0.0.1:7357`.
+- **Orca Android loop:** For Android UI, platform behavior, or device accessibility work in Orca, run `tool/run_orca_android.sh`; it attaches the AVD to Orca's embedded pane and pins Firebase to the local emulators. Drive the device through `orca emulator` and follow the Android branch in the live-development skill.
+- On Omarchy, `tool/capture_flutter_window.sh` captures the visible Forge Dance window under `build/live/` for vision-model review. `tool/capture_android_emulator.sh` captures the Android framebuffer. Web sessions use Chrome DevTools MCP at `http://127.0.0.1:7357`.
 
 ## Required checks
 

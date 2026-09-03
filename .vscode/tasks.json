@@ -81,6 +81,35 @@
       "problemMatcher": []
     },
     {
+      "label": "forge: android in Orca",
+      "type": "shell",
+      "command": "bash tool/run_orca_android.sh",
+      "isBackground": true,
+      "dependsOn": ["forge: firebase emulators"],
+      "dependsOrder": "sequence",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": {
+        "owner": "dart",
+        "pattern": {
+          "regexp": "^$"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "Attaching|Starting Forge Dance",
+          "endsPattern": "The Flutter DevTools debugger and profiler"
+        }
+      }
+    },
+    {
+      "label": "forge: capture android",
+      "type": "shell",
+      "command": "bash tool/capture_android_emulator.sh",
+      "problemMatcher": []
+    },
+    {
       "label": "forge: firebase emulators",
       "type": "shell",
       "command": "firebase emulators:start --only auth,firestore",

@@ -16,6 +16,10 @@ visual verification.
 - Use **Web Server + Firebase emulators** for authentication, profile, routing,
   or persisted-data work. This exposes a stable browser URL for Chrome DevTools
   MCP while Dart MCP owns hot reload.
+- Use **Orca Android + Firebase emulators** for Android rendering, system UI,
+  platform behavior, touch, or device accessibility. The embedded pane is the
+  human's live view; Orca CLI controls and the framebuffer capture are the
+  agent's observation surfaces.
 - Use only debug mode. Profile and release builds cannot hot reload.
 
 Start from a dedicated terminal or the matching VS Code launch configuration:
@@ -23,16 +27,30 @@ Start from a dedicated terminal or the matching VS Code launch configuration:
 ```bash
 bash tool/run_live_flutter.sh linux
 bash tool/run_live_flutter.sh web
+bash tool/run_orca_android.sh
 ```
 
-The web command requires Auth and Firestore emulators. Start them first with:
+The web and Android commands require Auth and Firestore emulators. Start them first with:
 
 ```bash
 firebase emulators:start --only auth,firestore
 ```
 
-The web app is served at `http://127.0.0.1:7357` by default and is always built
-with `USE_FIREBASE_EMULATOR=true`.
+The web app is served at `http://127.0.0.1:7357` by default. The Android command
+attaches a booted device or AVD to the current Orca worktree and reveals its
+embedded pane. Both targets are built with `USE_FIREBASE_EMULATOR=true`; Android
+uses `10.0.2.2` to reach the host. Completion criterion: the selected surface is
+visible and the Flutter process prints a VM-service URI.
+
+For Android, load Orca's version-matched command reference before device work:
+
+```bash
+orca skills get orca-emulator-android
+orca emulator devices --json
+```
+
+Inside Orca use `orca`. In an unmanaged Linux shell use `orca-ide`; do not use
+bare `orca` there because it is commonly the GNOME screen reader.
 
 ## 2. Connect Dart MCP
 
@@ -78,6 +96,12 @@ For each coherent Dart change under `lib/`:
      snapshots for interaction, screenshots for visual inspection, and inspect
      console messages after each iteration. Exercise mobile and desktop viewport
      sizes for responsive changes.
+   - **Orca Android:** use `orca emulator ax --device <serial> --json` for the
+     semantic tree and normalized controls such as `tap`, `type`, `gesture`, and
+     `button`. Use `orca emulator logcat --lines 200 --device <serial> --json`
+     for platform logs. Run `bash tool/capture_android_emulator.sh`, then inspect
+     `build/live/android-emulator.png` for the current rendered pixels. Prefer
+     `tap` for single taps; coordinates are normalized from 0 to 1.
 9. Compare the result with the requested behavior and repeat if needed.
 
 A visual claim requires an inspected screenshot from the current post-reload

@@ -39,6 +39,36 @@ flutterfire configure --project=forgedance-52c54
 firebase deploy --only firestore:rules
 ```
 
+## Android development in Orca
+
+The Orca-native loop boots or reuses an Android AVD, opens its embedded H.264
+pane for this worktree, and starts Flutter against the local Firebase Auth and
+Firestore emulators:
+
+```bash
+firebase emulators:start --only auth,firestore
+bash tool/run_orca_android.sh
+```
+
+The recommended AVD is `Forge_Dance_API_35`. Override the selected booted device
+with `FORGE_ANDROID_DEVICE=<adb-serial>`. The app uses `10.0.2.2` to reach the
+host's Firebase emulators, so this path never uses production Firebase.
+
+While the app is running, agents can inspect and operate the same device shown
+in Orca:
+
+```bash
+orca emulator devices --json
+orca emulator ax --device emulator-5554 --json
+orca emulator tap 0.5 0.7 --device emulator-5554 --json
+orca emulator logcat --lines 200 --device emulator-5554 --json
+bash tool/capture_android_emulator.sh
+```
+
+Inside an Orca terminal use `orca`; on unmanaged Linux shells use `orca-ide`.
+The capture command writes `build/live/android-emulator.png` for visual review.
+Flutter remains attached for hot reload through Dart MCP.
+
 ## Widgetbook
 
 Use the integrated workbench to develop Forge Dance foundations, components, and screens in isolation:

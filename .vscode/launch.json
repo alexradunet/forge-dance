@@ -46,11 +46,16 @@
       "deviceId": "linux"
     },
     {
-      "name": "Android (Debug)",
+      "name": "Android (Firebase Emulator)",
       "type": "dart",
       "request": "launch",
       "program": "lib/main.dart",
-      "deviceId": "android"
+      "deviceId": "android",
+      "toolArgs": [
+        "--dart-define=USE_FIREBASE_EMULATOR=true",
+        "--dart-define=FIREBASE_EMULATOR_HOST=10.0.2.2"
+      ],
+      "preLaunchTask": "forge: firebase emulators"
     },
     {
       "name": "Chrome (Profile)",
