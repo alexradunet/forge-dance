@@ -182,12 +182,14 @@ void main() {
       expect(find.text(wod.exercises[1].name), findsWidgets);
     });
 
-    testWidgets('short narrow scrolling collapses media and restores it', (
+    testWidgets('narrow scrolling hides media and restore brings it back', (
       tester,
     ) async {
-      await pumpTraining(tester, size: const Size(390, 560));
+      await pumpTraining(tester, size: const Size(390, 760));
       await tester.tap(find.text('startTraining'));
       await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('workout-media-shell')), findsOneWidget);
 
       await tester.drag(
         find.byKey(const ValueKey('workout-content-scroll')),
@@ -195,11 +197,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      expect(find.byKey(const ValueKey('workout-media-shell')), findsNothing);
       expect(find.text('restoreLessonMedia'), findsOneWidget);
 
       await tester.tap(find.text('restoreLessonMedia'));
       await tester.pumpAndSettle();
 
+      expect(find.byKey(const ValueKey('workout-media-shell')), findsOneWidget);
       expect(find.text('restoreLessonMedia'), findsNothing);
     });
 

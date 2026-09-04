@@ -114,9 +114,11 @@ void main() {
     );
 
     testWidgets(
-      'short narrow content scroll collapses media and restore expands it',
+      'narrow content scroll hides media and restore brings it back',
       (tester) async {
-        await pumpLesson(tester, size: const Size(390, 560));
+        await pumpLesson(tester, size: const Size(390, 760));
+
+        expect(find.byKey(const ValueKey('lesson-media-shell')), findsOneWidget);
 
         await tester.drag(
           find.byKey(const ValueKey('lesson-content-scroll')),
@@ -124,12 +126,14 @@ void main() {
         );
         await tester.pumpAndSettle();
 
+        expect(find.byKey(const ValueKey('lesson-media-shell')), findsNothing);
         expect(find.text('restoreLessonMedia'), findsOneWidget);
         expect(find.text('lessonStepOf'), findsOneWidget);
 
         await tester.tap(find.text('restoreLessonMedia'));
         await tester.pumpAndSettle();
 
+        expect(find.byKey(const ValueKey('lesson-media-shell')), findsOneWidget);
         expect(find.text('restoreLessonMedia'), findsNothing);
       },
     );

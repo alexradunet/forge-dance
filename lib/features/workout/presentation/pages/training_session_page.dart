@@ -30,8 +30,6 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
   static const _contentMaxWidth = 520.0;
   static const _collapsedMediaHeight = 88.0;
   static const _expandedMediaMaxHeight = 320.0;
-  static const _shortScreenHeight = 620.0;
-
   int _currentPage = 0;
   bool _isTimerRunning = false;
   int _timeLeft = 0;
@@ -60,9 +58,7 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
 
   void _handleScroll() {
     if (!_contentScrollController.hasClients || _mediaCollapsed) return;
-    final screenHeight = MediaQuery.sizeOf(context).height;
-    if (screenHeight <= _shortScreenHeight &&
-        _contentScrollController.offset > 24) {
+    if (_contentScrollController.offset > 24) {
       setState(() => _mediaCollapsed = true);
     }
   }
@@ -609,9 +605,8 @@ class _NarrowWorkoutLayout extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Column(
         children: [
-          media,
+          if (!mediaCollapsed) media,
           if (mediaCollapsed) ...[
-            const SizedBox(height: AppSpacing.sm),
             Align(
               alignment: Alignment.centerRight,
               child: FgButton(

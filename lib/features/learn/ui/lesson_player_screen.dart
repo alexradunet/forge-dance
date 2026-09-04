@@ -26,8 +26,6 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
   static const _contentMaxWidth = 520.0;
   static const _collapsedMediaHeight = 88.0;
   static const _expandedMediaMaxHeight = 320.0;
-  static const _shortScreenHeight = 620.0;
-
   int _currentStep = 0;
   bool _completing = false;
   bool _techniqueExpanded = false;
@@ -53,9 +51,7 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
 
   void _handleScroll() {
     if (!_contentScrollController.hasClients || _mediaCollapsed) return;
-    final screenHeight = MediaQuery.sizeOf(context).height;
-    if (screenHeight <= _shortScreenHeight &&
-        _contentScrollController.offset > 24) {
+    if (_contentScrollController.offset > 24) {
       setState(() => _mediaCollapsed = true);
     }
   }
@@ -320,6 +316,21 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
   Future<void> _goToStep(int index) async {
     if (index == _currentStep || index < 0) return;
     final clamped = index.clamp(0, _currentStepCount - 1);
+
+    if (_mediaCollapsed || !_mediaPageController.hasClients) {
+      setState(() {
+        _currentStep = clamped;
+        _mediaCollapsed = false;
+        _techniqueExpanded = false;
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _mediaPageController.hasClients) {
+          _mediaPageController.jumpToPage(clamped);
+        }
+      });
+      return;
+    }
+
     _resetStepUi();
     await _mediaPageController.animateToPage(
       clamped,
@@ -494,9 +505,8 @@ class _NarrowLessonLayout extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 0),
       child: Column(
         children: [
-          media,
+          if (!mediaCollapsed) media,
           if (mediaCollapsed) ...[
-            const SizedBox(height: AppSpacing.sm),
             Align(
               alignment: Alignment.centerRight,
               child: FgButton(
