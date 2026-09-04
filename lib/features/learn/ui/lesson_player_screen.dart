@@ -109,11 +109,6 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
                     ),
                     onBack: widget.onBack ?? () => Navigator.of(context).pop(),
                   ),
-                  _LessonProgressHeader(
-                    currentStep: _currentStep,
-                    stepCount: steps.length,
-                    onStepSelected: (index) => _goToStep(index),
-                  ),
                   Expanded(
                     child: isWide
                         ? _WideLessonLayout(
@@ -169,45 +164,29 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
       duration: motion.standard,
       curve: motion.enterCurve,
       constraints: BoxConstraints(minHeight: minHeight, maxHeight: maxHeight),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppBorderRadius.xl),
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            PageView.builder(
-              key: const ValueKey('lesson-media-page-view'),
-              controller: _mediaPageController,
-              onPageChanged: _setCurrentStep,
-              itemCount: steps.length,
-              itemBuilder: (context, index) => _LessonMedia(step: steps[index]),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          PageView.builder(
+            key: const ValueKey('lesson-media-page-view'),
+            controller: _mediaPageController,
+            onPageChanged: _setCurrentStep,
+            itemCount: steps.length,
+            itemBuilder: (context, index) => _LessonMedia(step: steps[index]),
+          ),
+          Positioned(
+            left: AppSpacing.lg,
+            right: AppSpacing.lg,
+            bottom: AppSpacing.lg,
+            child: Text(
+              steps[_currentStep].title,
+              maxLines: expanded ? 2 : 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(color: Theme.of(context).forgeColors.onImmersive),
             ),
-            Positioned(
-              left: AppSpacing.lg,
-              right: AppSpacing.lg,
-              bottom: AppSpacing.lg,
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.56),
-                  borderRadius: BorderRadius.circular(AppBorderRadius.lg),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                    vertical: AppSpacing.md,
-                  ),
-                  child: Text(
-                    steps[_currentStep].title,
-                    maxLines: expanded ? 2 : 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Theme.of(context).forgeColors.onImmersive,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -259,63 +238,55 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
       ),
     );
 
-    return Material(
-      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.92),
-      borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
-      clipBehavior: Clip.antiAlias,
-      elevation: 0,
-      child: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              key: const ValueKey('lesson-content-scroll'),
-              controller: isWide ? null : _contentScrollController,
-              padding: EdgeInsets.all(isWide ? AppSpacing.xxl : AppSpacing.lg),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: _contentMaxWidth),
-                child: content,
-              ),
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            key: const ValueKey('lesson-content-scroll'),
+            controller: isWide ? null : _contentScrollController,
+            padding: EdgeInsets.all(isWide ? AppSpacing.xxl : AppSpacing.lg),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: _contentMaxWidth),
+              child: content,
             ),
           ),
-          if (isWide)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppSpacing.xxl,
-                0,
-                AppSpacing.xxl,
-                AppSpacing.xxl,
-              ),
-              child: _NavigationControls(
-                currentStep: _currentStep,
-                stepCount: steps.length,
-                isLastStep: isLastStep,
-                completing: _completing,
-                onPrevious: _currentStep == 0 ? null : _previousStep,
-                onNext: isLastStep ? () => _completeLesson(lesson) : _nextStep,
-                prominentNext: false,
-              ),
-            )
-          else
-            SafeArea(
-              top: false,
-              minimum: const EdgeInsets.fromLTRB(
-                AppSpacing.lg,
-                0,
-                AppSpacing.lg,
-                AppSpacing.sm,
-              ),
-              child: _NavigationControls(
-                currentStep: _currentStep,
-                stepCount: steps.length,
-                isLastStep: isLastStep,
-                completing: _completing,
-                onPrevious: _currentStep == 0 ? null : _previousStep,
-                onNext: isLastStep ? () => _completeLesson(lesson) : _nextStep,
-                prominentNext: true,
-              ),
+        ),
+        if (isWide)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xxl,
+              0,
+              AppSpacing.xxl,
+              AppSpacing.xxl,
             ),
-        ],
-      ),
+            child: _NavigationControls(
+              currentStep: _currentStep,
+              stepCount: steps.length,
+              isLastStep: isLastStep,
+              completing: _completing,
+              onPrevious: _currentStep == 0 ? null : _previousStep,
+              onNext: isLastStep ? () => _completeLesson(lesson) : _nextStep,
+            ),
+          )
+        else
+          SafeArea(
+            top: false,
+            minimum: const EdgeInsets.fromLTRB(
+              AppSpacing.lg,
+              0,
+              AppSpacing.lg,
+              AppSpacing.sm,
+            ),
+            child: _NavigationControls(
+              currentStep: _currentStep,
+              stepCount: steps.length,
+              isLastStep: isLastStep,
+              completing: _completing,
+              onPrevious: _currentStep == 0 ? null : _previousStep,
+              onNext: isLastStep ? () => _completeLesson(lesson) : _nextStep,
+            ),
+          ),
+      ],
     );
   }
 
@@ -389,82 +360,6 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
   }
 }
 
-class _LessonProgressHeader extends StatelessWidget {
-  const _LessonProgressHeader({
-    required this.currentStep,
-    required this.stepCount,
-    required this.onStepSelected,
-  });
-
-  final int currentStep;
-  final int stepCount;
-  final ValueChanged<int> onStepSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final stepText = LocaleKeys.lessonStepOf.tr(
-      args: ['${currentStep + 1}', '$stepCount'],
-    );
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.xxl,
-        AppSpacing.sm,
-        AppSpacing.xxl,
-        AppSpacing.lg,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: FgProgressBar(
-                  value: (currentStep + 1) / stepCount,
-                  semanticLabel: stepText,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.lg),
-              Text(
-                stepText,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).forgeColors.onImmersive,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                for (var index = 0; index < stepCount; index++) ...[
-                  if (index > 0) const SizedBox(width: AppSpacing.sm),
-                  Semantics(
-                    selected: index == currentStep,
-                    button: true,
-                    label: LocaleKeys.goToLessonStep.tr(args: ['${index + 1}']),
-                    child: ExcludeSemantics(
-                      child: FgButton(
-                        text: '${index + 1}',
-                        variant: index == currentStep
-                            ? FgButtonVariant.primary
-                            : FgButtonVariant.secondary,
-                        size: FgButtonSize.sm,
-                        shape: FgButtonShape.circle,
-                        onPressed: () => onStepSelected(index),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _WideLessonLayout extends StatelessWidget {
   const _WideLessonLayout({required this.media, required this.content});
 
@@ -533,34 +428,28 @@ class _LessonMedia extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Theme.of(context).forgeColors.immersiveSurface,
-        borderRadius: BorderRadius.circular(AppBorderRadius.xl),
-      ),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          FgImage(
-            imageUrl: 'https://images.unsplash.com/photo-1535525153412-5a42439a210d?q=80&w=2070&auto=format&fit=crop',
-            fit: BoxFit.contain,
-            placeholder: const _MediaFallbackIcon(),
-            errorWidget: const _MediaFallbackIcon(),
-          ),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  Colors.black.withValues(alpha: 0.36),
-                ],
-              ),
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        FgImage(
+          imageUrl: 'https://images.unsplash.com/photo-1535525153412-5a42439a210d?q=80&w=2070&auto=format&fit=crop',
+          fit: BoxFit.contain,
+          placeholder: const _MediaFallbackIcon(),
+          errorWidget: const _MediaFallbackIcon(),
+        ),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Colors.transparent,
+                Colors.black.withValues(alpha: 0.36),
+              ],
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -602,14 +491,19 @@ class _LessonStepContent extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(step.title, style: textTheme.headlineSmall),
+        Text(
+          step.title,
+          style: textTheme.headlineSmall?.copyWith(
+            color: context.forgeForeground,
+          ),
+        ),
         const SizedBox(height: AppSpacing.md),
         Text(
           step.description.isEmpty
               ? LocaleKeys.lessonSummaryFallback.tr()
               : step.description,
           style: textTheme.bodyLarge?.copyWith(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            color: context.forgeMutedForeground,
           ),
         ),
         const SizedBox(height: AppSpacing.xxl),
@@ -621,8 +515,20 @@ class _LessonStepContent extends StatelessWidget {
             onExpansionChanged: onTechniqueChanged,
             tilePadding: EdgeInsets.zero,
             childrenPadding: const EdgeInsets.only(bottom: AppSpacing.lg),
-            title: Text(LocaleKeys.techniqueDetails.tr()),
-            subtitle: Text(LocaleKeys.techniqueDetailsHint.tr()),
+            backgroundColor: Colors.transparent,
+            collapsedBackgroundColor: Colors.transparent,
+            shape: const Border(),
+            collapsedShape: const Border(),
+            iconColor: context.forgeMutedForeground,
+            collapsedIconColor: context.forgeMutedForeground,
+            title: Text(
+              LocaleKeys.techniqueDetails.tr(),
+              style: TextStyle(color: context.forgeForeground),
+            ),
+            subtitle: Text(
+              LocaleKeys.techniqueDetailsHint.tr(),
+              style: TextStyle(color: context.forgeMutedForeground),
+            ),
             children: [
               if (step.description.isNotEmpty)
                 _TechniquePoint(
@@ -667,7 +573,11 @@ class _TechniquePoint extends StatelessWidget {
         children: [
           FgLabel(text: label, tone: FgLabelTone.accent),
           const SizedBox(height: AppSpacing.xs),
-          Text(value, style: Theme.of(context).textTheme.bodyMedium),
+          Text(
+            value,
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(color: context.forgeForeground),
+          ),
         ],
       ),
     );
@@ -682,7 +592,6 @@ class _NavigationControls extends StatelessWidget {
     required this.completing,
     required this.onPrevious,
     required this.onNext,
-    required this.prominentNext,
   });
 
   final int currentStep;
@@ -691,33 +600,11 @@ class _NavigationControls extends StatelessWidget {
   final bool completing;
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
-  final bool prominentNext;
 
   @override
   Widget build(BuildContext context) {
-    final nextLabel = isLastStep
-        ? LocaleKeys.completeLesson.tr()
-        : LocaleKeys.nextStep.tr();
-    final previous = FgButton(
-      text: LocaleKeys.previousStep.tr(),
-      variant: FgButtonVariant.secondary,
-      onPressed: onPrevious,
-      semanticLabel: LocaleKeys.previousStepSemantic.tr(
-        args: ['${currentStep + 1}', '$stepCount'],
-      ),
-    );
-    final next = FgButton(
-      text: nextLabel,
-      variant: FgButtonVariant.primary,
-      size: prominentNext ? FgButtonSize.xl : FgButtonSize.md,
-      expand: true,
-      isLoading: completing,
-      onPressed: onNext,
-      semanticLabel: isLastStep
-          ? LocaleKeys.completeLesson.tr()
-          : LocaleKeys.nextStepSemantic.tr(
-              args: ['${currentStep + 1}', '$stepCount'],
-            ),
+    final stepLabel = LocaleKeys.lessonStepOf.tr(
+      args: ['${currentStep + 1}', '$stepCount'],
     );
 
     return Shortcuts(
@@ -740,12 +627,21 @@ class _NavigationControls extends StatelessWidget {
             },
           ),
         },
-        child: Row(
-          children: [
-            Flexible(flex: prominentNext ? 1 : 2, child: previous),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(flex: prominentNext ? 2 : 2, child: next),
-          ],
+        child: FgStepNavigation(
+          currentStep: currentStep,
+          stepCount: stepCount,
+          stepLabel: stepLabel,
+          previousSemanticLabel: LocaleKeys.previousStepSemantic.tr(
+            args: ['${currentStep + 1}', '$stepCount'],
+          ),
+          nextSemanticLabel: isLastStep
+              ? LocaleKeys.completeLesson.tr()
+              : LocaleKeys.nextStepSemantic.tr(
+                  args: ['${currentStep + 1}', '$stepCount'],
+                ),
+          onPrevious: onPrevious,
+          onNext: onNext,
+          nextLoading: completing,
         ),
       ),
     );

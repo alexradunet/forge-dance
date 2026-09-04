@@ -95,12 +95,32 @@ void main() {
         await pumpLesson(tester, size: const Size(390, 760));
         final firstStep = readyBody.lessons.first.steps.first;
 
-        expect(find.text('lessonStepOf'), findsOneWidget);
+        expect(find.text('lessonStepOf'), findsNothing);
+        expect(find.bySemanticsLabel('lessonStepOf'), findsOneWidget);
         expect(find.text(firstStep.title), findsWidgets);
         expect(find.text(firstStep.description), findsOneWidget);
         expect(find.text(firstStep.focus), findsNothing);
-        expect(find.text('nextStep'), findsOneWidget);
-        expect(find.text('previousStep'), findsOneWidget);
+        expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+        expect(find.byIcon(Icons.arrow_forward_rounded), findsOneWidget);
+        expect(find.text('nextStep'), findsNothing);
+        expect(find.text('previousStep'), findsNothing);
+        expect(find.bySemanticsLabel('goToLessonStep'), findsNothing);
+        final previousButton = find.bySemanticsLabel('previousStepSemantic');
+        final nextButton = find.bySemanticsLabel('nextStepSemantic');
+        expect(tester.getSize(previousButton), tester.getSize(nextButton));
+        expect(
+          tester.getCenter(previousButton).dx,
+          lessThan(tester.getCenter(find.byType(FgProgressBar)).dx),
+        );
+        expect(
+          tester.getCenter(find.byType(FgProgressBar)).dx,
+          lessThan(tester.getCenter(nextButton).dx),
+        );
+        final progressBar = tester.widget<FgProgressBar>(
+          find.byType(FgProgressBar),
+        );
+        expect(progressBar.segments, readyBody.lessons.first.steps.length);
+        expect(progressBar.value, 0.25);
 
         await tester.ensureVisible(find.text('techniqueDetails'));
         await tester.pumpAndSettle();
@@ -149,7 +169,8 @@ void main() {
           const Offset(-320, 0),
         );
         await tester.pumpAndSettle();
-        expect(find.text('lessonStepOf'), findsOneWidget);
+        expect(find.text('lessonStepOf'), findsNothing);
+        expect(find.bySemanticsLabel('lessonStepOf'), findsOneWidget);
         expect(find.text(firstStep.title), findsWidgets);
 
         await tester.drag(
@@ -158,7 +179,8 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('lessonStepOf'), findsOneWidget);
+        expect(find.text('lessonStepOf'), findsNothing);
+        expect(find.bySemanticsLabel('lessonStepOf'), findsOneWidget);
         expect(find.text(secondStep.title), findsWidgets);
       },
     );
@@ -178,10 +200,11 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byKey(const ValueKey('lesson-media-dock')), findsOneWidget);
 
-        await tester.tap(find.text('nextStep'));
+        await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
         await tester.pumpAndSettle();
 
-        expect(find.text('lessonStepOf'), findsOneWidget);
+        expect(find.text('lessonStepOf'), findsNothing);
+        expect(find.bySemanticsLabel('lessonStepOf'), findsOneWidget);
         expect(find.byKey(const ValueKey('lesson-media-dock')), findsNothing);
         expect(find.text(secondStep.focus), findsNothing);
       },
@@ -198,10 +221,10 @@ void main() {
         );
 
         for (var index = 0; index < 3; index++) {
-          await tester.tap(find.text('nextStep'));
+          await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
           await tester.pumpAndSettle();
         }
-        await tester.tap(find.text('completeLesson'));
+        await tester.tap(find.bySemanticsLabel('completeLesson'));
         await tester.pumpAndSettle();
 
         expect(

@@ -95,9 +95,30 @@ void main() {
       expect(find.text('exercisesCount'), findsOneWidget);
       expect(find.text('minutesCount'), findsWidgets);
       expect(find.text('xpReward'), findsOneWidget);
-      expect(find.text('startTraining'), findsOneWidget);
+      expect(find.text('startTraining'), findsNothing);
+      expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.arrow_forward_rounded), findsOneWidget);
+      expect(find.bySemanticsLabel('goToExerciseStep'), findsNothing);
+      final previousButton = find.bySemanticsLabel('previousStepSemantic');
+      final nextButton = find.bySemanticsLabel('nextStepSemantic');
+      expect(tester.getSize(previousButton), tester.getSize(nextButton));
+      expect(
+        tester.getCenter(previousButton).dx,
+        lessThan(tester.getCenter(find.byType(FgProgressBar)).dx),
+      );
+      expect(
+        tester.getCenter(find.byType(FgProgressBar)).dx,
+        lessThan(tester.getCenter(nextButton).dx),
+      );
+      expect(find.text('workoutStepOf'), findsNothing);
+      expect(find.bySemanticsLabel('workoutStepOf'), findsOneWidget);
+      final progressBar = tester.widget<FgProgressBar>(
+        find.byType(FgProgressBar),
+      );
+      expect(progressBar.segments, wod.exercises.length + 2);
+      expect(progressBar.value, closeTo(1 / (wod.exercises.length + 2), 0.001));
 
-      await tester.tap(find.text('startTraining'));
+      await tester.tap(nextButton);
       await tester.pumpAndSettle();
 
       expect(find.text(wod.exercises.first.name), findsWidgets);
@@ -109,10 +130,10 @@ void main() {
     ) async {
       await pumpTraining(tester, size: const Size(390, 760));
       final wod = wodFor(DateTime.now());
-      await tester.tap(find.text('startTraining'));
+      await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('nextStep'));
+      await tester.tap(find.bySemanticsLabel('nextLockedSemantic'));
       await tester.pumpAndSettle();
 
       expect(find.text('completeTimerToContinue'), findsOneWidget);
@@ -130,7 +151,7 @@ void main() {
       (tester) async {
         await pumpTraining(tester, size: const Size(1000, 430));
         final wod = wodFor(DateTime.now());
-        await tester.tap(find.text('startTraining'));
+        await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
         await tester.pumpAndSettle();
 
         await tester.drag(
@@ -167,7 +188,7 @@ void main() {
       await pumpTraining(tester, size: const Size(390, 760));
       final wod = wodFor(DateTime.now());
       final first = wod.exercises.first;
-      await tester.tap(find.text('startTraining'));
+      await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('${first.seconds}s'));
@@ -176,7 +197,7 @@ void main() {
       }
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('nextStep'));
+      await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
       await tester.pumpAndSettle();
 
       expect(find.text(wod.exercises[1].name), findsWidgets);
@@ -185,8 +206,8 @@ void main() {
     testWidgets('narrow scrolling docks media and expand brings it back', (
       tester,
     ) async {
-      await pumpTraining(tester, size: const Size(390, 760));
-      await tester.tap(find.text('startTraining'));
+      await pumpTraining(tester, size: const Size(390, 560));
+      await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('workout-media-shell')), findsOneWidget);
@@ -223,7 +244,7 @@ void main() {
         onClose: () => closed = true,
       );
       final wod = wodFor(DateTime.now());
-      await tester.tap(find.text('startTraining'));
+      await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
       await tester.pumpAndSettle();
 
       for (var index = 0; index < wod.exercises.length; index++) {
@@ -235,7 +256,7 @@ void main() {
       expect(find.text('youEarnedXp'), findsOneWidget);
       expect(repository.store, hasLength(1));
 
-      await tester.tap(find.text('finish'));
+      await tester.tap(find.bySemanticsLabel('finish'));
       await tester.pumpAndSettle();
 
       expect(closed, isTrue);

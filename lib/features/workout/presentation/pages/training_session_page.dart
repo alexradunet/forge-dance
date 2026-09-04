@@ -82,7 +82,6 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
 
     final wod = state.wod;
     _initializeTimerIfNeeded(wod);
-    final totalPages = _totalPageCount(wod);
     final isComplete = _isComplete(wod);
 
     return Scaffold(
@@ -102,12 +101,6 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
                         ? LocaleKeys.sessionComplete.tr()
                         : '${wod.title} • ${LocaleKeys.minutesCount.tr(args: ['${wod.estimatedMinutes}'])}',
                     onBack: widget.onClose ?? () => Navigator.of(context).pop(),
-                  ),
-                  _WorkoutProgressHeader(
-                    currentPage: _currentPage,
-                    totalPages: totalPages,
-                    exerciseCount: wod.exercises.length,
-                    onStepSelected: (index) => _goToPage(index + 1, wod),
                   ),
                   Expanded(
                     child: isWide
@@ -164,51 +157,48 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
       duration: motion.standard,
       curve: motion.enterCurve,
       constraints: BoxConstraints(minHeight: minHeight, maxHeight: maxHeight),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppBorderRadius.xl),
-        child: GestureDetector(
-          key: const ValueKey('workout-media-swipe-zone'),
-          behavior: HitTestBehavior.opaque,
-          onHorizontalDragEnd: (details) {
-            final velocity = details.primaryVelocity ?? 0;
-            if (velocity < 0) {
-              _nextPage(wod);
-            } else if (velocity > 0) {
-              _previousPage();
-            }
-          },
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              _WorkoutMediaVisual(isExercise: _isExercise(wod)),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withValues(alpha: 0.08),
-                      Colors.black.withValues(alpha: 0.48),
-                    ],
-                  ),
+      child: GestureDetector(
+        key: const ValueKey('workout-media-swipe-zone'),
+        behavior: HitTestBehavior.opaque,
+        onHorizontalDragEnd: (details) {
+          final velocity = details.primaryVelocity ?? 0;
+          if (velocity < 0) {
+            _nextPage(wod);
+          } else if (velocity > 0) {
+            _previousPage();
+          }
+        },
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            _WorkoutMediaVisual(isExercise: _isExercise(wod)),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.08),
+                    Colors.black.withValues(alpha: 0.48),
+                  ],
                 ),
               ),
-              if (_isExercise(wod)) _buildTimerOverlay(wod),
-              Positioned(
-                left: AppSpacing.lg,
-                right: AppSpacing.lg,
-                bottom: AppSpacing.lg,
-                child: Text(
-                  _mediaTitle(wod),
-                  maxLines: expanded ? 2 : 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    color: Theme.of(context).forgeColors.onImmersive,
-                  ),
+            ),
+            if (_isExercise(wod)) _buildTimerOverlay(wod),
+            Positioned(
+              left: AppSpacing.lg,
+              right: AppSpacing.lg,
+              bottom: AppSpacing.lg,
+              child: Text(
+                _mediaTitle(wod),
+                maxLines: expanded ? 2 : 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Theme.of(context).forgeColors.onImmersive,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -297,47 +287,40 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
       ),
     );
 
-    return Material(
-      color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.92),
-      borderRadius: BorderRadius.circular(AppBorderRadius.xxl),
-      clipBehavior: Clip.antiAlias,
-      elevation: 0,
-      child: Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              key: const ValueKey('workout-content-scroll'),
-              controller: isWide ? null : _contentScrollController,
-              padding: EdgeInsets.all(isWide ? AppSpacing.xxl : AppSpacing.lg),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: _contentMaxWidth),
-                child: content,
-              ),
+    return Column(
+      children: [
+        Expanded(
+          child: SingleChildScrollView(
+            key: const ValueKey('workout-content-scroll'),
+            controller: isWide ? null : _contentScrollController,
+            padding: EdgeInsets.all(isWide ? AppSpacing.xxl : AppSpacing.lg),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: _contentMaxWidth),
+              child: content,
             ),
           ),
-          SafeArea(
-            top: false,
-            minimum: EdgeInsets.fromLTRB(
-              isWide ? AppSpacing.xxl : AppSpacing.lg,
-              0,
-              isWide ? AppSpacing.xxl : AppSpacing.lg,
-              isWide ? AppSpacing.xxl : AppSpacing.sm,
-            ),
-            child: _NavigationControls(
-              currentPage: _currentPage,
-              totalPages: _totalPageCount(wod),
-              isComplete: _isComplete(wod),
-              nextLocked: _isLocked(wod),
-              completing: false,
-              onPrevious: _currentPage == 0 ? null : _previousPage,
-              onNext: _isComplete(wod)
-                  ? widget.onClose ?? () => Navigator.of(context).pop()
-                  : () => _nextPage(wod),
-              prominentNext: !isWide,
-            ),
+        ),
+        SafeArea(
+          top: false,
+          minimum: EdgeInsets.fromLTRB(
+            isWide ? AppSpacing.xxl : AppSpacing.lg,
+            0,
+            isWide ? AppSpacing.xxl : AppSpacing.lg,
+            isWide ? AppSpacing.xxl : AppSpacing.sm,
           ),
-        ],
-      ),
+          child: _NavigationControls(
+            currentPage: _currentPage,
+            totalPages: _totalPageCount(wod),
+            isComplete: _isComplete(wod),
+            nextLocked: _isLocked(wod),
+            completing: false,
+            onPrevious: _currentPage == 0 ? null : _previousPage,
+            onNext: _isComplete(wod)
+                ? widget.onClose ?? () => Navigator.of(context).pop()
+                : () => _nextPage(wod),
+          ),
+        ),
+      ],
     );
   }
 
@@ -504,86 +487,6 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
   }
 }
 
-class _WorkoutProgressHeader extends StatelessWidget {
-  const _WorkoutProgressHeader({
-    required this.currentPage,
-    required this.totalPages,
-    required this.exerciseCount,
-    required this.onStepSelected,
-  });
-
-  final int currentPage;
-  final int totalPages;
-  final int exerciseCount;
-  final ValueChanged<int> onStepSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final stepText = LocaleKeys.workoutStepOf.tr(
-      args: ['${currentPage + 1}', '$totalPages'],
-    );
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.xxl,
-        AppSpacing.sm,
-        AppSpacing.xxl,
-        AppSpacing.lg,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: FgProgressBar(
-                  value: (currentPage + 1) / totalPages,
-                  semanticLabel: stepText,
-                ),
-              ),
-              const SizedBox(width: AppSpacing.lg),
-              Text(
-                stepText,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Theme.of(context).forgeColors.onImmersive,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                for (var index = 0; index < exerciseCount; index++) ...[
-                  if (index > 0) const SizedBox(width: AppSpacing.sm),
-                  Semantics(
-                    button: true,
-                    selected: currentPage == index + 1,
-                    label: LocaleKeys.goToExerciseStep.tr(
-                      args: ['${index + 1}'],
-                    ),
-                    child: ExcludeSemantics(
-                      child: FgButton(
-                        text: '${index + 1}',
-                        variant: currentPage == index + 1
-                            ? FgButtonVariant.primary
-                            : FgButtonVariant.secondary,
-                        size: FgButtonSize.sm,
-                        shape: FgButtonShape.circle,
-                        onPressed: () => onStepSelected(index),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _WideWorkoutLayout extends StatelessWidget {
   const _WideWorkoutLayout({required this.media, required this.content});
 
@@ -652,18 +555,13 @@ class _WorkoutMediaVisual extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: Theme.of(context).forgeColors.immersiveSurface,
-      ),
-      child: FgImage(
-        imageUrl: isExercise
-            ? 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=2000'
-            : 'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=2000',
-        fit: isExercise ? BoxFit.contain : BoxFit.cover,
-        placeholder: const _MediaFallbackIcon(),
-        errorWidget: const _MediaFallbackIcon(),
-      ),
+    return FgImage(
+      imageUrl: isExercise
+          ? 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&q=80&w=2000'
+          : 'https://images.unsplash.com/photo-1518611012118-696072aa579a?auto=format&fit=crop&q=80&w=2000',
+      fit: isExercise ? BoxFit.contain : BoxFit.cover,
+      placeholder: const _MediaFallbackIcon(),
+      errorWidget: const _MediaFallbackIcon(),
     );
   }
 }
@@ -697,12 +595,16 @@ class _WorkoutOverview extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(wod.title, style: Theme.of(context).textTheme.headlineSmall),
+        Text(
+          wod.title,
+          style: Theme.of(context).textTheme.headlineSmall
+              ?.copyWith(color: context.forgeForeground),
+        ),
         const SizedBox(height: AppSpacing.md),
         Text(
           wod.description,
           style: Theme.of(context).textTheme.bodyLarge
-              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ?.copyWith(color: context.forgeMutedForeground),
         ),
         const SizedBox(height: AppSpacing.xxl),
         _InfoRow(
@@ -751,7 +653,11 @@ class _ExerciseContent extends StatelessWidget {
           tone: FgLabelTone.accent,
         ),
         const SizedBox(height: AppSpacing.md),
-        Text(exercise.name, style: Theme.of(context).textTheme.headlineSmall),
+        Text(
+          exercise.name,
+          style: Theme.of(context).textTheme.headlineSmall
+              ?.copyWith(color: context.forgeForeground),
+        ),
         const SizedBox(height: AppSpacing.md),
         Text(
           isTimerComplete
@@ -760,7 +666,7 @@ class _ExerciseContent extends StatelessWidget {
                     : LocaleKeys.exerciseTimerComplete.tr())
               : LocaleKeys.exerciseTimerInstruction.tr(),
           style: Theme.of(context).textTheme.bodyLarge
-              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
+              ?.copyWith(color: context.forgeMutedForeground),
         ),
         const SizedBox(height: AppSpacing.xxl),
         FgButton(
@@ -808,22 +714,23 @@ class _WorkoutComplete extends StatelessWidget {
         Text(
           LocaleKeys.sessionComplete.tr(),
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.headlineSmall,
+          style: Theme.of(context).textTheme.headlineSmall
+              ?.copyWith(color: context.forgeForeground),
         ),
         const SizedBox(height: AppSpacing.md),
         Text(
           rewardText,
           textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleLarge,
+          style: Theme.of(context).textTheme.titleLarge
+              ?.copyWith(color: context.forgeForeground),
         ),
         const SizedBox(height: AppSpacing.sm),
         if (streak > 0)
           Text(
             LocaleKeys.dayStreakKeepUp.tr(args: ['$streak']),
             textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
+            style: Theme.of(context).textTheme.bodyMedium
+                ?.copyWith(color: context.forgeMutedForeground),
           ),
       ],
     );
@@ -849,7 +756,11 @@ class _InfoRow extends StatelessWidget {
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
-            child: Text(text, style: Theme.of(context).textTheme.labelLarge),
+            child: Text(
+              text,
+              style: Theme.of(context).textTheme.labelLarge
+                  ?.copyWith(color: context.forgeForeground),
+            ),
           ),
         ],
       ),
@@ -866,7 +777,6 @@ class _NavigationControls extends StatelessWidget {
     required this.completing,
     required this.onPrevious,
     required this.onNext,
-    required this.prominentNext,
   });
 
   final int currentPage;
@@ -876,15 +786,12 @@ class _NavigationControls extends StatelessWidget {
   final bool completing;
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
-  final bool prominentNext;
 
   @override
   Widget build(BuildContext context) {
-    final nextLabel = isComplete
-        ? LocaleKeys.finish.tr()
-        : currentPage == 0
-        ? LocaleKeys.startTraining.tr()
-        : LocaleKeys.nextStep.tr();
+    final stepLabel = LocaleKeys.workoutStepOf.tr(
+      args: ['${currentPage + 1}', '$totalPages'],
+    );
     return Shortcuts(
       shortcuts: const {
         SingleActivator(LogicalKeyboardKey.arrowLeft):
@@ -908,38 +815,23 @@ class _NavigationControls extends StatelessWidget {
             },
           ),
         },
-        child: Row(
-          children: [
-            Flexible(
-              child: FgButton(
-                text: LocaleKeys.previousStep.tr(),
-                variant: FgButtonVariant.secondary,
-                onPressed: onPrevious,
-                semanticLabel: LocaleKeys.previousStepSemantic.tr(
+        child: FgStepNavigation(
+          currentStep: currentPage,
+          stepCount: totalPages,
+          stepLabel: stepLabel,
+          previousSemanticLabel: LocaleKeys.previousStepSemantic.tr(
+            args: ['${currentPage + 1}', '$totalPages'],
+          ),
+          nextSemanticLabel: nextLocked
+              ? LocaleKeys.nextLockedSemantic.tr()
+              : isComplete
+              ? LocaleKeys.finish.tr()
+              : LocaleKeys.nextStepSemantic.tr(
                   args: ['${currentPage + 1}', '$totalPages'],
                 ),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            Expanded(
-              flex: prominentNext ? 2 : 1,
-              child: FgButton(
-                text: nextLabel,
-                variant: FgButtonVariant.primary,
-                size: prominentNext ? FgButtonSize.xl : FgButtonSize.md,
-                expand: true,
-                isLoading: completing,
-                onPressed: onNext,
-                semanticLabel: nextLocked
-                    ? LocaleKeys.nextLockedSemantic.tr()
-                    : isComplete
-                    ? LocaleKeys.finish.tr()
-                    : LocaleKeys.nextStepSemantic.tr(
-                        args: ['${currentPage + 1}', '$totalPages'],
-                      ),
-              ),
-            ),
-          ],
+          onPrevious: onPrevious,
+          onNext: onNext,
+          nextLoading: completing,
         ),
       ),
     );

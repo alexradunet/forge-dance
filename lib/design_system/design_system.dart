@@ -82,6 +82,7 @@ export 'molecules/feedback/fg_snack_bar.dart';
 
 // Navigation
 export 'molecules/navigation/fg_app_nav_button.dart';
+export 'molecules/navigation/fg_step_navigation.dart';
 
 // Media
 export 'molecules/media/fg_media_dock.dart';
