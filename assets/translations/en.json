@@ -154,5 +154,14 @@
   "previousStep": "Previous",
   "nextStep": "Next",
   "previousStepSemantic": "Previous step. Currently step {} of {}",
-  "nextStepSemantic": "Next step. Currently step {} of {}"
+  "nextStepSemantic": "Next step. Currently step {} of {}",
+  "workoutTimerToggleSemantic": "Workout timer, {} seconds remaining. Double tap to start or pause.",
+  "workoutStepOf": "Step {} of {}",
+  "goToExerciseStep": "Go to exercise {}",
+  "startWorkoutSemantic": "Start workout",
+  "exerciseSkippedReady": "Skipped. Move to the next exercise when ready.",
+  "exerciseTimerComplete": "Timer complete. Move to the next exercise when ready.",
+  "exerciseTimerInstruction": "Start the timer, watch the movement, and practice until time is complete.",
+  "skipExerciseSemantic": "Skip exercise {} of {}",
+  "nextLockedSemantic": "Next step locked until the timer completes. Activate for skip option."
 }
