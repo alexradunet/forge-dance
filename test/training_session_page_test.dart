@@ -128,7 +128,7 @@ void main() {
     testWidgets(
       'media swipe is gated forward but still supports backward navigation',
       (tester) async {
-        await pumpTraining(tester, size: const Size(1000, 700));
+        await pumpTraining(tester, size: const Size(1000, 430));
         final wod = wodFor(DateTime.now());
         await tester.tap(find.text('startTraining'));
         await tester.pumpAndSettle();
@@ -182,7 +182,7 @@ void main() {
       expect(find.text(wod.exercises[1].name), findsWidgets);
     });
 
-    testWidgets('narrow scrolling hides media and restore brings it back', (
+    testWidgets('narrow scrolling docks media and expand brings it back', (
       tester,
     ) async {
       await pumpTraining(tester, size: const Size(390, 760));
@@ -198,13 +198,19 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('workout-media-shell')), findsNothing);
-      expect(find.text('restoreLessonMedia'), findsOneWidget);
+      expect(find.byKey(const ValueKey('workout-media-dock')), findsOneWidget);
+      final timerSeconds = wodFor(DateTime.now()).exercises.first.seconds;
+      expect(find.text('${timerSeconds}s'), findsOneWidget);
 
-      await tester.tap(find.text('restoreLessonMedia'));
+      await tester.tap(find.text('${timerSeconds}s'));
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.text('${timerSeconds - 1}s'), findsOneWidget);
+
+      await tester.tap(find.byIcon(Icons.expand_less_rounded));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('workout-media-shell')), findsOneWidget);
-      expect(find.text('restoreLessonMedia'), findsNothing);
+      expect(find.byKey(const ValueKey('workout-media-dock')), findsNothing);
     });
 
     testWidgets('completion records session reward and finish closes', (

@@ -8,6 +8,18 @@ A completed learning or practice event that contributes to a dancer's progress. 
 
 Structured learning content within a Learning Module. A Lesson can be not started, in progress, or completed. Its first completion preserves the local calendar date on which it became a Training Activity; replay does not replace that date.
 
+## Lesson Step
+
+The smallest navigable part of a Lesson, pairing Guidance with a Demonstration around one learning objective.
+
+## Guidance
+
+Text that explains what a dancer should understand, notice, or embody during a Lesson Step or Exercise.
+
+## Demonstration
+
+Visual media that models the movement for a Lesson Step or Exercise. It complements Guidance rather than replacing it.
+
 ## Learning Module
 
 An ordered collection of Lessons within the learning path.
@@ -15,6 +27,10 @@ An ordered collection of Lessons within the learning path.
 ## Workout
 
 A guided practice made of timed Exercises. Completing a Workout records one Training Activity for that Workout on the dancer's local calendar day.
+
+## Exercise
+
+A timed movement task within a Workout, pairing Guidance with a Demonstration and a completion gate.
 
 ## Profile
 

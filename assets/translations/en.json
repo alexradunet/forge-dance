@@ -147,6 +147,7 @@
   "goToLessonStep": "Go to lesson step {}",
   "restoreLessonMedia": "Show media",
   "restoreLessonMediaSemantic": "Show lesson media",
+  "expandDemonstrationSemantic": "Expand demonstration",
   "lessonSummaryFallback": "Watch the movement, then copy it at a comfortable pace.",
   "techniqueDetails": "Technique details",
   "techniqueDetailsHint": "Description, focus, breath, and energy guidance",

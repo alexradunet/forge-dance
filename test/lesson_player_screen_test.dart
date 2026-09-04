@@ -113,35 +113,34 @@ void main() {
       },
     );
 
-    testWidgets(
-      'narrow content scroll hides media and restore brings it back',
-      (tester) async {
-        await pumpLesson(tester, size: const Size(390, 760));
+    testWidgets('narrow content scroll docks media and expand brings it back', (
+      tester,
+    ) async {
+      await pumpLesson(tester, size: const Size(390, 760));
 
-        expect(find.byKey(const ValueKey('lesson-media-shell')), findsOneWidget);
+      expect(find.byKey(const ValueKey('lesson-media-shell')), findsOneWidget);
 
-        await tester.drag(
-          find.byKey(const ValueKey('lesson-content-scroll')),
-          const Offset(0, -220),
-        );
-        await tester.pumpAndSettle();
+      await tester.drag(
+        find.byKey(const ValueKey('lesson-content-scroll')),
+        const Offset(0, -220),
+      );
+      await tester.pumpAndSettle();
 
-        expect(find.byKey(const ValueKey('lesson-media-shell')), findsNothing);
-        expect(find.text('restoreLessonMedia'), findsOneWidget);
-        expect(find.text('lessonStepOf'), findsOneWidget);
+      expect(find.byKey(const ValueKey('lesson-media-shell')), findsNothing);
+      expect(find.byKey(const ValueKey('lesson-media-dock')), findsOneWidget);
+      expect(find.text('lessonStepOf'), findsWidgets);
 
-        await tester.tap(find.text('restoreLessonMedia'));
-        await tester.pumpAndSettle();
+      await tester.tap(find.byIcon(Icons.expand_less_rounded));
+      await tester.pumpAndSettle();
 
-        expect(find.byKey(const ValueKey('lesson-media-shell')), findsOneWidget);
-        expect(find.text('restoreLessonMedia'), findsNothing);
-      },
-    );
+      expect(find.byKey(const ValueKey('lesson-media-shell')), findsOneWidget);
+      expect(find.byKey(const ValueKey('lesson-media-dock')), findsNothing);
+    });
 
     testWidgets(
       'wide lessons place navigation in the content panel and swipe only on media',
       (tester) async {
-        await pumpLesson(tester, size: const Size(1000, 700));
+        await pumpLesson(tester, size: const Size(1000, 430));
         final firstStep = readyBody.lessons.first.steps.first;
         final secondStep = readyBody.lessons.first.steps[1];
 
@@ -177,13 +176,13 @@ void main() {
           const Offset(0, -220),
         );
         await tester.pumpAndSettle();
-        expect(find.text('restoreLessonMedia'), findsOneWidget);
+        expect(find.byKey(const ValueKey('lesson-media-dock')), findsOneWidget);
 
         await tester.tap(find.text('nextStep'));
         await tester.pumpAndSettle();
 
         expect(find.text('lessonStepOf'), findsOneWidget);
-        expect(find.text('restoreLessonMedia'), findsNothing);
+        expect(find.byKey(const ValueKey('lesson-media-dock')), findsNothing);
         expect(find.text(secondStep.focus), findsNothing);
       },
     );

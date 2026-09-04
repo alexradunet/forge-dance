@@ -22,9 +22,7 @@ class LessonPlayerScreen extends ConsumerStatefulWidget {
 
 class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
   static const _wideMinWidth = 760.0;
-  static const _wideMinHeight = 480.0;
   static const _contentMaxWidth = 520.0;
-  static const _collapsedMediaHeight = 88.0;
   static const _expandedMediaMaxHeight = 320.0;
   int _currentStep = 0;
   bool _completing = false;
@@ -101,9 +99,7 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
           bottom: false,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final isWide =
-                  constraints.maxWidth >= _wideMinWidth &&
-                  constraints.maxHeight >= _wideMinHeight;
+              final isWide = constraints.maxWidth >= _wideMinWidth;
               return Column(
                 children: [
                   AppHeader(
@@ -124,7 +120,7 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
                             media: _buildMediaPane(
                               steps,
                               expanded: true,
-                              minHeight: 220,
+                              minHeight: 160,
                               maxHeight: _expandedMediaMaxHeight,
                             ),
                             content: _buildContentPanel(
@@ -137,19 +133,14 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
                             mediaCollapsed: _mediaCollapsed,
                             media: _buildMediaPane(
                               steps,
-                              expanded: !_mediaCollapsed,
-                              minHeight: _mediaCollapsed
-                                  ? _collapsedMediaHeight
-                                  : 104,
-                              maxHeight: _mediaCollapsed
-                                  ? _collapsedMediaHeight
-                                  : (constraints.maxHeight * 0.34).clamp(
-                                      112.0,
-                                      _expandedMediaMaxHeight,
-                                    ),
+                              expanded: true,
+                              minHeight: 104,
+                              maxHeight: (constraints.maxHeight * 0.34).clamp(
+                                112.0,
+                                _expandedMediaMaxHeight,
+                              ),
                             ),
-                            onRestoreMedia: () =>
-                                setState(() => _mediaCollapsed = false),
+                            mediaDock: _buildMediaDock(steps),
                             content: _buildContentPanel(
                               lesson,
                               steps,
@@ -221,6 +212,20 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
     );
   }
 
+  Widget _buildMediaDock(List<LessonStep> steps) {
+    final step = steps[_currentStep];
+    return FgMediaDock(
+      key: const ValueKey('lesson-media-dock'),
+      thumbnail: _LessonMedia(step: step),
+      title: step.title,
+      subtitle: LocaleKeys.lessonStepOf.tr(
+        args: ['${_currentStep + 1}', '${steps.length}'],
+      ),
+      onExpand: () => setState(() => _mediaCollapsed = false),
+      expandSemanticLabel: LocaleKeys.expandDemonstrationSemantic.tr(),
+    );
+  }
+
   Widget _buildContentPanel(
     Lesson lesson,
     List<LessonStep> steps, {
@@ -248,6 +253,7 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
         step: step,
         techniqueExpanded: _techniqueExpanded,
         onTechniqueChanged: (expanded) {
+          if (_techniqueExpanded == expanded) return;
           setState(() => _techniqueExpanded = expanded);
         },
       ),
@@ -490,35 +496,28 @@ class _NarrowLessonLayout extends StatelessWidget {
   const _NarrowLessonLayout({
     required this.mediaCollapsed,
     required this.media,
-    required this.onRestoreMedia,
+    required this.mediaDock,
     required this.content,
   });
 
   final bool mediaCollapsed;
   final Widget media;
-  final VoidCallback onRestoreMedia;
+  final Widget mediaDock;
   final Widget content;
 
   @override
   Widget build(BuildContext context) {
+    final motion = context.forgeMotion;
     return Padding(
       padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, 0),
       child: Column(
         children: [
-          if (!mediaCollapsed) media,
-          if (mediaCollapsed) ...[
-            Align(
-              alignment: Alignment.centerRight,
-              child: FgButton(
-                text: LocaleKeys.restoreLessonMedia.tr(),
-                icon: const Icon(Icons.expand_less_rounded),
-                variant: FgButtonVariant.secondary,
-                size: FgButtonSize.sm,
-                onPressed: onRestoreMedia,
-                semanticLabel: LocaleKeys.restoreLessonMediaSemantic.tr(),
-              ),
-            ),
-          ],
+          AnimatedSwitcher(
+            duration: motion.standard,
+            switchInCurve: motion.enterCurve,
+            switchOutCurve: motion.exitCurve,
+            child: mediaCollapsed ? mediaDock : media,
+          ),
           const SizedBox(height: AppSpacing.lg),
           Expanded(child: content),
         ],

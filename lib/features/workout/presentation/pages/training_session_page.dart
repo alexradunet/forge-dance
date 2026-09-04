@@ -26,9 +26,7 @@ class TrainingSessionPage extends ConsumerStatefulWidget {
 
 class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
   static const _wideMinWidth = 760.0;
-  static const _wideMinHeight = 480.0;
   static const _contentMaxWidth = 520.0;
-  static const _collapsedMediaHeight = 88.0;
   static const _expandedMediaMaxHeight = 320.0;
   int _currentPage = 0;
   bool _isTimerRunning = false;
@@ -95,9 +93,7 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
           bottom: false,
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final isWide =
-                  constraints.maxWidth >= _wideMinWidth &&
-                  constraints.maxHeight >= _wideMinHeight;
+              final isWide = constraints.maxWidth >= _wideMinWidth;
               return Column(
                 children: [
                   AppHeader(
@@ -119,7 +115,7 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
                             media: _buildMediaPane(
                               wod,
                               expanded: true,
-                              minHeight: 220,
+                              minHeight: 160,
                               maxHeight: _expandedMediaMaxHeight,
                             ),
                             content: _buildContentPanel(
@@ -132,19 +128,14 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
                             mediaCollapsed: _mediaCollapsed,
                             media: _buildMediaPane(
                               wod,
-                              expanded: !_mediaCollapsed,
-                              minHeight: _mediaCollapsed
-                                  ? _collapsedMediaHeight
-                                  : 104,
-                              maxHeight: _mediaCollapsed
-                                  ? _collapsedMediaHeight
-                                  : (constraints.maxHeight * 0.34).clamp(
-                                      112.0,
-                                      _expandedMediaMaxHeight,
-                                    ),
+                              expanded: true,
+                              minHeight: 104,
+                              maxHeight: (constraints.maxHeight * 0.34).clamp(
+                                112.0,
+                                _expandedMediaMaxHeight,
+                              ),
                             ),
-                            onRestoreMedia: () =>
-                                setState(() => _mediaCollapsed = false),
+                            mediaDock: _buildMediaDock(wod),
                             content: _buildContentPanel(
                               wod,
                               projectionHealth: state.projectionHealth,
@@ -243,6 +234,40 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildMediaDock(Workout wod) {
+    final isExercise = _isExercise(wod);
+    final subtitle = isExercise
+        ? LocaleKeys.exerciseOf.tr(
+            args: ['${_activeExerciseIndex + 1}', '${wod.exercises.length}'],
+          )
+        : _isComplete(wod)
+        ? LocaleKeys.sessionComplete.tr()
+        : LocaleKeys.workoutOverview.tr();
+
+    return FgMediaDock(
+      key: const ValueKey('workout-media-dock'),
+      thumbnail: _WorkoutMediaVisual(isExercise: isExercise),
+      title: _mediaTitle(wod),
+      subtitle: subtitle,
+      onExpand: () => setState(() => _mediaCollapsed = false),
+      expandSemanticLabel: LocaleKeys.expandDemonstrationSemantic.tr(),
+      action: isExercise
+          ? FgButton(
+              text: '${_timeLeft}s',
+              semanticLabel: LocaleKeys.workoutTimerToggleSemantic.tr(
+                args: ['$_timeLeft'],
+              ),
+              shape: FgButtonShape.pill,
+              size: FgButtonSize.sm,
+              variant: _isTimerRunning || !_isLocked(wod)
+                  ? FgButtonVariant.primary
+                  : FgButtonVariant.tertiary,
+              onPressed: _toggleTimer,
+            )
+          : null,
     );
   }
 
@@ -590,35 +615,28 @@ class _NarrowWorkoutLayout extends StatelessWidget {
   const _NarrowWorkoutLayout({
     required this.mediaCollapsed,
     required this.media,
-    required this.onRestoreMedia,
+    required this.mediaDock,
     required this.content,
   });
 
   final bool mediaCollapsed;
   final Widget media;
-  final VoidCallback onRestoreMedia;
+  final Widget mediaDock;
   final Widget content;
 
   @override
   Widget build(BuildContext context) {
+    final motion = context.forgeMotion;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
       child: Column(
         children: [
-          if (!mediaCollapsed) media,
-          if (mediaCollapsed) ...[
-            Align(
-              alignment: Alignment.centerRight,
-              child: FgButton(
-                text: LocaleKeys.restoreLessonMedia.tr(),
-                icon: const Icon(Icons.expand_less_rounded),
-                variant: FgButtonVariant.secondary,
-                size: FgButtonSize.sm,
-                onPressed: onRestoreMedia,
-                semanticLabel: LocaleKeys.restoreLessonMediaSemantic.tr(),
-              ),
-            ),
-          ],
+          AnimatedSwitcher(
+            duration: motion.standard,
+            switchInCurve: motion.enterCurve,
+            switchOutCurve: motion.exitCurve,
+            child: mediaCollapsed ? mediaDock : media,
+          ),
           const SizedBox(height: AppSpacing.lg),
           Expanded(child: content),
         ],
