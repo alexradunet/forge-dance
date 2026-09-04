@@ -101,6 +101,7 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
       backgroundColor: Colors.transparent,
       body: FgBackground(
         child: SafeArea(
+          top: false,
           bottom: false,
           child: LayoutBuilder(
             builder: (context, constraints) {
@@ -406,7 +407,12 @@ class _LessonProgressHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.lg),
-              Text(stepText, style: Theme.of(context).textTheme.labelLarge),
+              Text(
+                stepText,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Theme.of(context).forgeColors.onImmersive,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),

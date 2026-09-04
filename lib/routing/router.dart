@@ -118,7 +118,9 @@ List<RouteBase> _routes(Ref ref) => [
       GoRoute(path: Routes.home, builder: (_, _) => const HomePage()),
       GoRoute(
         path: Routes.workout,
-        builder: (_, _) => const TrainingSessionPage(),
+        builder: (context, _) => TrainingSessionPage(
+          onClose: () => context.go(Routes.home),
+        ),
       ),
       GoRoute(path: Routes.profile, builder: (_, _) => const ProfilePage()),
       GoRoute(
