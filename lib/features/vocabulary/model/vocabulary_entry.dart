@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 
+import '../../method/model/forge_method.dart';
+
 enum VocabularyKind { move, concept }
 
 /// Reference content is independent of lesson completion and always browsable.
@@ -16,6 +18,10 @@ class VocabularyEntry {
     required this.practice,
     required this.moduleId,
     required this.lessonId,
+    required this.context,
+    required this.easierPractice,
+    required this.harderPractice,
+    required this.category,
     this.aliases = const [],
     this.relatedIds = const [],
   });
@@ -30,6 +36,10 @@ class VocabularyEntry {
   final String practice;
   final String moduleId;
   final String lessonId;
+  final String context;
+  final String easierPractice;
+  final String harderPractice;
+  final ForgeCategory category;
   final List<String> aliases;
   final List<String> relatedIds;
 }

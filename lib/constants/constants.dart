@@ -17,4 +17,8 @@ class Constants {
   static const String profileKey = 'profile_key';
   static const String lessonProgressKey = 'lesson_progress_key';
   static const String workoutSessionsKey = 'workout_sessions_key';
+  static const String methodProgressKey = 'forge_method_progress_v1';
+  static const String practiceRecordsKey = 'practice_records_v1';
+  static const String practicePreferencesKey = 'practice_preferences_v1';
+  static const String programmeEnrolmentsKey = 'programme_enrolments_v1';
 }

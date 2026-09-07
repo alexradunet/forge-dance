@@ -7,6 +7,8 @@ import '../../../../constants/constants.dart';
 import '../../../../routing/routes.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../generated/locale_keys.g.dart';
+import '../../../method/model/forge_method.dart';
+import '../../../method/ui/method_view_model.dart';
 import '../../../stats/model/user_stats.dart';
 import '../../../stats/ui/view_model/user_stats_provider.dart';
 import '../../model/profile.dart';
@@ -55,7 +57,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Widget _buildMainContent(Profile? profile, UserStats stats) {
-    final levels = DanceLevel.buildAll(totalXp: stats.totalXp);
+    final mastery =
+        ref.watch(methodViewModelProvider).value ?? MethodProgress();
+    final levels = DanceLevel.buildAll(progress: mastery);
     final levelSubtitle = LocaleKeys.levelBeltSubtitle.tr(
       args: ['${stats.level}', stats.beltName],
     );
@@ -89,18 +93,19 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   icon: Icons.local_fire_department_rounded,
                 ),
                 FgStatData(
-                  label: LocaleKeys.levelLabel.tr(args: ['${stats.level}']),
+                  label: LocaleKeys.totalXpLabel.tr(),
                   value: LocaleKeys.xpValue.tr(args: ['${stats.totalXp}']),
                   icon: Icons.workspace_premium_rounded,
                 ),
               ],
               levelProgress: FgProgressData(
                 label: levelSubtitle,
-                current: stats.totalXp.toDouble(),
-                target: (stats.nextLevelXp ?? stats.totalXp).toDouble(),
-                valueLabel: stats.nextLevelXp == null
+                current: stats.levelProgress,
+                target: 1,
+                valueLabel: stats.nextBeltName == null
                     ? LocaleKeys.maxLevelReached.tr()
-                    : LocaleKeys.nextLevelXp.tr(args: ['${stats.nextLevelXp}']),
+                    : LocaleKeys.forgeNextBelt.tr(args: [stats.nextBeltName!]),
+                message: LocaleKeys.forgeXpSeparate.tr(),
               ),
               onProgressTap: () => _openLevelProgression(context, levels),
             ),
@@ -120,6 +125,16 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
               variant: FgButtonVariant.ghost,
               expand: true,
               onPressed: () => _openLevelProgression(context, levels),
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: AppSpacing.horizontalXXL,
+          sliver: SliverToBoxAdapter(
+            child: FgButton(
+              text: LocaleKeys.forgeAssessments.tr(),
+              expand: true,
+              onPressed: () => context.push(Routes.method),
             ),
           ),
         ),

@@ -195,6 +195,86 @@ void main() {
       expect(_textColor(tester, 'Continue training'), forgeColors.onImmersive);
     },
   );
+  testWidgets(
+    'standard form backgrounds keep default text readable in both themes',
+    (tester) async {
+      for (final theme in [AppThemes.light, AppThemes.dark]) {
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: theme,
+            home: const Scaffold(
+              body: FgBackground(
+                surface: ForgeSurface.standard,
+                child: Text('Assessment instructions'),
+              ),
+            ),
+          ),
+        );
+        final background = tester
+            .widget<ColoredBox>(
+              find
+                  .descendant(
+                    of: find.byType(FgBackground),
+                    matching: find.byType(ColoredBox),
+                  )
+                  .first,
+            )
+            .color;
+        final foreground = tester
+            .widget<RichText>(
+              find.descendant(
+                of: find.text('Assessment instructions'),
+                matching: find.byType(RichText),
+              ),
+            )
+            .text
+            .style!
+            .color!;
+        expect(
+          _contrastRatio(background, foreground),
+          greaterThanOrEqualTo(4.5),
+        );
+      }
+    },
+  );
+  testWidgets('immersive cards preserve readable unstyled instructional text', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppThemes.light,
+        home: const Scaffold(
+          body: FgBackground(
+            child: FgCard(
+              immersive: true,
+              child: Text('Next practice session'),
+            ),
+          ),
+        ),
+      ),
+    );
+    final background = tester
+        .widget<Material>(
+          find
+              .descendant(
+                of: find.byType(FgCard),
+                matching: find.byType(Material),
+              )
+              .first,
+        )
+        .color!;
+    final foreground = tester
+        .widget<RichText>(
+          find.descendant(
+            of: find.text('Next practice session'),
+            matching: find.byType(RichText),
+          ),
+        )
+        .text
+        .style!
+        .color!;
+    expect(_contrastRatio(background, foreground), greaterThanOrEqualTo(4.5));
+  });
 
   testWidgets('FgCard restores standard surface foreground roles', (
     tester,

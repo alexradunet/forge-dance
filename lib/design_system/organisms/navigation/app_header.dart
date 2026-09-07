@@ -30,6 +30,12 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).forgeColors;
+    final foreground = isTransparent
+        ? context.forgeForeground
+        : colors.onImmersive;
+    final mutedForeground = isTransparent
+        ? context.forgeMutedForeground
+        : colors.onImmersiveMuted;
     return ColoredBox(
       color: isTransparent ? Colors.transparent : colors.immersiveBackground,
       child: SafeArea(
@@ -42,7 +48,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
           child: Row(
             children: [
               if (onBack != null) ...[
-                BackButton(color: colors.onImmersive, onPressed: onBack),
+                BackButton(color: foreground, onPressed: onBack),
                 const SizedBox(width: AppSpacing.sm),
               ],
               if (leftSlot != null) ...[
@@ -59,7 +65,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                       maxLines: compact ? 2 : null,
                       overflow: compact ? TextOverflow.ellipsis : null,
                       style: (compact ? AppTypography.h4 : AppTypography.h2)
-                          .copyWith(color: colors.onImmersive),
+                          .copyWith(color: foreground),
                     ),
                     if (subtitle != null) ...[
                       const SizedBox(height: AppSpacing.xs),
@@ -68,7 +74,7 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
                         maxLines: compact ? 1 : null,
                         overflow: compact ? TextOverflow.ellipsis : null,
                         style: AppTypography.bodySmall.copyWith(
-                          color: colors.onImmersiveMuted,
+                          color: mutedForeground,
                         ),
                       ),
                     ],

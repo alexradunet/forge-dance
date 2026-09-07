@@ -7,26 +7,36 @@ class FgBackground extends StatelessWidget {
   final Widget? child;
   final bool showGrid;
   final bool showGradients;
+  final ForgeSurface surface;
 
   const FgBackground({
     super.key,
     this.child,
     this.showGrid = false,
     this.showGradients = true,
+    this.surface = ForgeSurface.immersive,
   });
 
   @override
   Widget build(BuildContext context) {
     final forgeColors = Theme.of(context).forgeColors;
+    final immersive = surface == ForgeSurface.immersive;
 
     return ForgeSurfaceScope(
-      surface: ForgeSurface.immersive,
+      surface: surface,
       child: Container(
-        color: forgeColors.immersiveBackground,
+        color: immersive
+            ? forgeColors.immersiveBackground
+            : Theme.of(context).colorScheme.surface,
         child: Stack(
           children: [
-            if (showGradients) _buildBackgroundGradients(),
-            if (showGrid) _buildGridBackground(forgeColors.onImmersive),
+            if (showGradients && immersive) _buildBackgroundGradients(),
+            if (showGrid)
+              _buildGridBackground(
+                immersive
+                    ? forgeColors.onImmersive
+                    : Theme.of(context).colorScheme.onSurface,
+              ),
             if (child != null) child!,
           ],
         ),

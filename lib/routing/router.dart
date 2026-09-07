@@ -23,6 +23,11 @@ import '../features/profile/ui/appearances_screen.dart';
 import '../features/settings/presentation/pages/settings_page.dart';
 import '../features/stats/presentation/pages/stats_page.dart';
 import 'app_redirect.dart';
+import '../features/method/ui/method_page.dart';
+import '../features/practice/ui/practice_page.dart';
+import '../features/practice/ui/practice_log_page.dart';
+import '../features/programmes/ui/programmes_page.dart';
+import '../features/settings/presentation/pages/data_transfer_page.dart';
 import 'routes.dart';
 
 part 'router.g.dart';
@@ -82,7 +87,8 @@ class SlideRouteTransition extends CustomTransitionPage<void> {
 /// completes.
 @Riverpod(keepAlive: true)
 GoRouter router(Ref ref) {
-  final profileState = ValueNotifier(ref.watch(profileViewModelProvider));
+  // The listener refreshes redirects without replacing navigation history.
+  final profileState = ValueNotifier(ref.read(profileViewModelProvider));
   ref
     ..onDispose(profileState.dispose)
     ..listen(
@@ -151,6 +157,18 @@ List<RouteBase> _routes(Ref ref) => [
         ],
       ),
       GoRoute(path: Routes.home, builder: (_, _) => const HomePage()),
+      GoRoute(path: Routes.method, builder: (_, _) => const MethodPage()),
+      GoRoute(
+        path: Routes.practice,
+        builder: (_, _) => const PracticePage(),
+        routes: [
+          GoRoute(path: 'log', builder: (_, _) => const PracticeLogPage()),
+        ],
+      ),
+      GoRoute(
+        path: Routes.programmes,
+        builder: (_, _) => const ProgrammesPage(),
+      ),
       GoRoute(
         path: Routes.workout,
         builder: (context, _) => TrainingSessionPage(
@@ -224,5 +242,9 @@ List<RouteBase> _routes(Ref ref) => [
   GoRoute(
     path: Routes.stats,
     pageBuilder: (context, state) => state.slidePage(const StatsPage()),
+  ),
+  GoRoute(
+    path: Routes.dataTransfer,
+    pageBuilder: (context, state) => state.slidePage(const DataTransferPage()),
   ),
 ];

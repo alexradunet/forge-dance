@@ -2,10 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'user_stats.freezed.dart';
 
-/// Display model for the gamification stats surfaces (home progress card,
-/// stats page, level progression). Built by stats_rules.buildUserStats —
-/// XP is derived from lesson progress, the streak from the persisted
-/// profile fields.
+/// Participation and mastery remain separate: XP comes from activity while
+/// belt identity and promotion progress come from FORGE assessment evidence.
 @freezed
 abstract class UserStats with _$UserStats {
   const factory UserStats({
@@ -13,9 +11,7 @@ abstract class UserStats with _$UserStats {
     @Default(0) int streakCount,
     @Default(1) int level,
     @Default('White') String beltName,
-    @Default(0) int xpIntoLevel,
-    @Default(0) int xpForLevelSpan,
-    int? nextLevelXp,
+    String? nextBeltName,
     @Default(0.0) double levelProgress,
   }) = _UserStats;
 }

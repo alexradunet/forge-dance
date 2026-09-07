@@ -62,7 +62,6 @@ class ProfileViewModel extends _$ProfileViewModel {
   }
 
   Future<void> refreshProfile() async {
-    state = const AsyncValue.loading();
     try {
       final profile = await _repository.get();
       state = AsyncData(ProfileState(profile: profile));

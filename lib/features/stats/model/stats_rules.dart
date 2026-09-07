@@ -1,3 +1,5 @@
+import '../../method/model/forge_method.dart';
+import '../../method/repository/method_catalog.dart';
 import '../../learn/model/lesson.dart';
 import '../../learn/model/lesson_progress.dart';
 import '../../workout/model/workout.dart';
@@ -48,33 +50,6 @@ int workoutXpFrom(List<Workout> workouts, Iterable<WorkoutSession> sessions) {
     total += session.awardedXp ?? byId[session.workoutId]?.xp ?? 0;
   }
   return total;
-}
-
-/// Belt names, in order. Content vocabulary (like lesson titles) — not
-/// translated. Colors live in the profile feature's DanceLevel model.
-const List<String> beltNames = [
-  'White',
-  'Yellow',
-  'Orange',
-  'Blue',
-  'Violet',
-  'Red',
-  'Brown',
-  'Black',
-];
-
-/// Cumulative XP required to REACH each belt. Calibrated to the catalog:
-/// Yellow follows the early common foundation, while Black equals every
-/// lesson in the catalog (test/stats_test.dart enforces that final invariant).
-const List<int> beltThresholds = [0, 240, 550, 900, 1300, 1750, 2250, 3850];
-
-/// 0-based belt index for a given XP total.
-int beltIndexForXp(int xp) {
-  var index = 0;
-  for (var i = 0; i < beltThresholds.length; i++) {
-    if (xp >= beltThresholds[i]) index = i;
-  }
-  return index;
 }
 
 /// yyyy-MM-dd in local time — the persisted activity-date format.
@@ -137,28 +112,48 @@ UserStats buildUserStats({
   required DateTime now,
   int workoutXp = 0,
   int minimumXp = 0,
+  MethodProgress? method,
+  Iterable<String> practiceDates = const [],
 }) {
   final derivedXp = totalXpFrom(modules, progress) + workoutXp;
   final totalXp = derivedXp > minimumXp ? derivedXp : minimumXp;
-  final beltIndex = beltIndexForXp(totalXp);
-  final isMax = beltIndex == beltThresholds.length - 1;
-  final xpIntoLevel = totalXp - beltThresholds[beltIndex];
-  final span = isMax
-      ? 0
-      : beltThresholds[beltIndex + 1] - beltThresholds[beltIndex];
+  final mastery = method ?? MethodProgress();
+  final beltIndex = mastery.earnedBeltIndex;
+  final isMax = beltIndex == forgeBelts.length - 1;
+  var activityStreak = persistedStreak;
+  var activityDate = lastActivityDate;
+  final today = dateKey(now);
+  final newPracticeDates =
+      practiceDates
+          .where(
+            (date) =>
+                date.compareTo(today) <= 0 &&
+                (lastActivityDate == null ||
+                    date.compareTo(lastActivityDate) > 0),
+          )
+          .toSet()
+          .toList()
+        ..sort();
+  for (final date in newPracticeDates) {
+    final next = nextStreak(
+      currentStreak: activityStreak,
+      lastActivityDate: activityDate,
+      now: DateTime.parse(date),
+    );
+    activityStreak = next.streak;
+    activityDate = next.activityDate;
+  }
 
   return UserStats(
     totalXp: totalXp,
     streakCount: displayStreak(
-      persistedStreak: persistedStreak,
-      lastActivityDate: lastActivityDate,
+      persistedStreak: activityStreak,
+      lastActivityDate: activityDate,
       now: now,
     ),
     level: beltIndex + 1,
-    beltName: beltNames[beltIndex],
-    xpIntoLevel: xpIntoLevel,
-    xpForLevelSpan: span,
-    nextLevelXp: isMax ? null : beltThresholds[beltIndex + 1],
-    levelProgress: span == 0 ? 1.0 : xpIntoLevel / span,
+    beltName: forgeBelts[beltIndex].name,
+    nextBeltName: isMax ? null : forgeBelts[beltIndex + 1].name,
+    levelProgress: mastery.nextBeltProgress,
   );
 }

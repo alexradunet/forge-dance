@@ -16,9 +16,7 @@ import '../../../learn/ui/state/learn_state.dart';
 import '../../../learn/ui/view_model/learn_view_model.dart';
 import '../../../profile/ui/view_model/profile_view_model.dart';
 
-/// Home dashboard. Header, daily session hero, progress card, and the
-/// continue-training rail derive from real data (profile + lesson progress).
-/// The recommended rail is still mock discovery content.
+/// Home combines assessed mastery, daily practice, and the existing curriculum.
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
@@ -57,6 +55,55 @@ class HomePage extends ConsumerWidget {
           child: AppHeader(
             title: _dancerHandle(profileName),
             subtitle: LocaleKeys.welcomeBack.tr(),
+          ),
+        ),
+        SliverPadding(
+          padding: AppSpacing.allXXL,
+          sliver: SliverToBoxAdapter(
+            child: FgCard(
+              immersive: true,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    LocaleKeys.forgeCoreTitle.tr(),
+                    style: AppTypography.h2.copyWith(
+                      color: Theme.of(context).forgeColors.onImmersive,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(LocaleKeys.forgeCoreSubtitle.tr()),
+                  const SizedBox(height: AppSpacing.lg),
+                  FgButton(
+                    text: LocaleKeys.forgeTodayPractice.tr(),
+                    expand: true,
+                    onPressed: () => context.push(Routes.practice),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      FgButton(
+                        text: LocaleKeys.forgeAssessments.tr(),
+                        variant: FgButtonVariant.secondary,
+                        onPressed: () => context.push(Routes.method),
+                      ),
+                      FgButton(
+                        text: LocaleKeys.forgeProgrammes.tr(),
+                        variant: FgButtonVariant.secondary,
+                        onPressed: () => context.push(Routes.programmes),
+                      ),
+                      FgButton(
+                        text: LocaleKeys.forgeLogbook.tr(),
+                        variant: FgButtonVariant.ghost,
+                        onPressed: () => context.push(Routes.practiceLog),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
 
@@ -192,7 +239,7 @@ class HomePage extends ConsumerWidget {
       imageAspectRatio: 5 / 2,
       title: lesson.title.toUpperCase(),
       subtitle: subtitle,
-      label: LocaleKeys.todaysSession.tr().toUpperCase(),
+      label: LocaleKeys.continueTraining.tr().toUpperCase(),
       imageUrl: state.activeModule.imageUrl,
       action: FgButton(
         text: state.statusOf(lesson) == LessonStatus.inProgress
@@ -216,8 +263,6 @@ class HomePage extends ConsumerWidget {
   }
 
   Widget _buildProgressSection(BuildContext context, UserStats stats) {
-    final nextLevelTarget = stats.nextLevelXp?.toDouble();
-
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xxl),
       child: FgProgressSection(
@@ -228,18 +273,16 @@ class HomePage extends ConsumerWidget {
           label:
               '${LocaleKeys.levelLabel.tr(args: ['${stats.level}'])} • '
               '${LocaleKeys.beltNameLabel.tr(args: [stats.beltName])}',
-          current: stats.totalXp.toDouble(),
-          target: nextLevelTarget ?? stats.totalXp.toDouble(),
-          valueLabel: nextLevelTarget == null
+          current: stats.levelProgress,
+          target: 1,
+          valueLabel: stats.nextBeltName == null
               ? LocaleKeys.maxLevelReached.tr()
-              : LocaleKeys.xpProgress.tr(
-                  args: ['${stats.totalXp}', '${stats.nextLevelXp}'],
-                ),
+              : LocaleKeys.forgeNextBelt.tr(args: [stats.nextBeltName!]),
           message:
               '${LocaleKeys.currentStreak.tr()}: '
               '${LocaleKeys.dayN.tr(args: ['${stats.streakCount}'])}',
         ),
-        onProgressTap: () => context.push(Routes.stats),
+        onProgressTap: () => context.push(Routes.method),
       ),
     );
   }

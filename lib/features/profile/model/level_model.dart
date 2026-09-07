@@ -1,28 +1,18 @@
-import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
-import '../../../generated/locale_keys.g.dart';
-import '../../stats/model/stats_rules.dart';
+import '../../method/model/forge_method.dart';
+import '../../method/repository/method_catalog.dart';
 
-enum LevelStatus {
-  locked,
-  current,
-  completed,
-}
+enum LevelStatus { locked, current, completed }
 
 class LevelRequirement {
   final String description;
   final bool isMet;
 
-  const LevelRequirement({
-    required this.description,
-    this.isMet = false,
-  });
+  const LevelRequirement({required this.description, this.isMet = false});
 }
 
-/// A belt on the mastery ladder. Statuses and progress are derived from the
-/// user's real XP (see features/stats/model/stats_rules.dart) — there is no
-/// mock level data anymore.
+/// A display projection of an evidence-earned FORGE belt.
 class DanceLevel {
   final int id;
   final String name;
@@ -33,9 +23,6 @@ class DanceLevel {
   /// 0.0–1.0 progress towards the NEXT belt (1.0 once passed).
   final double progress;
 
-  /// Cumulative XP needed to reach this belt.
-  final int xpThreshold;
-
   const DanceLevel({
     required this.id,
     required this.name,
@@ -43,7 +30,6 @@ class DanceLevel {
     required this.status,
     required this.requirements,
     this.progress = 0.0,
-    this.xpThreshold = 0,
   });
 
   bool get isLocked => status == LevelStatus.locked;
@@ -61,41 +47,37 @@ class DanceLevel {
     Color(0xFF000000), // Black
   ];
 
-  /// Builds the full belt ladder for a user with [totalXp].
-  static List<DanceLevel> buildAll({required int totalXp}) {
-    final currentIndex = beltIndexForXp(totalXp);
-
+  static List<DanceLevel> buildAll({required MethodProgress progress}) {
+    final currentIndex = progress.earnedBeltIndex;
     return [
-      for (var i = 0; i < beltNames.length; i++)
+      for (final belt in forgeBelts)
         DanceLevel(
-          id: i + 1,
-          name: beltNames[i],
-          color: _beltColors[i],
-          status: i < currentIndex
+          id: belt.index + 1,
+          name: belt.name,
+          color: _beltColors[belt.index],
+          status: belt.index < currentIndex
               ? LevelStatus.completed
-              : i == currentIndex
-                  ? LevelStatus.current
-                  : LevelStatus.locked,
-          progress: _progressTowardsNext(totalXp, i, currentIndex),
-          xpThreshold: beltThresholds[i],
+              : belt.index == currentIndex
+              ? LevelStatus.current
+              : LevelStatus.locked,
+          progress: belt.index <= currentIndex
+              ? 1
+              : _requirementProgress(progress, belt.index),
           requirements: [
-            LevelRequirement(
-              description: LocaleKeys.reachXpRequirement
-                  .tr(args: ['${beltThresholds[i]}']),
-              isMet: totalXp >= beltThresholds[i],
-            ),
+            for (final requirement in progress.requirementsForBelt(belt.index))
+              LevelRequirement(
+                description: requirement.description,
+                isMet: requirement.isMet,
+              ),
           ],
         ),
     ];
   }
 
-  static double _progressTowardsNext(int totalXp, int index, int currentIndex) {
-    if (index < currentIndex) return 1.0;
-    if (index > currentIndex) return 0.0;
-    if (index == beltThresholds.length - 1) return 1.0; // max belt
-
-    final span = beltThresholds[index + 1] - beltThresholds[index];
-    if (span <= 0) return 1.0;
-    return (totalXp - beltThresholds[index]) / span;
+  static double _requirementProgress(MethodProgress progress, int index) {
+    final requirements = progress.requirementsForBelt(index);
+    if (requirements.isEmpty) return 0;
+    return requirements.where((requirement) => requirement.isMet).length /
+        requirements.length;
   }
 }

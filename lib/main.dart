@@ -8,12 +8,14 @@ import 'design_system/theme/app_themes.dart';
 import 'features/common/ui/providers/app_theme_mode_provider.dart';
 import 'features/common/ui/widgets/offline_container.dart';
 import 'features/session/application/session_coordinator.dart';
+import 'features/media/media_bootstrap.dart';
 import 'routing/router.dart';
 import 'localization/app_locales.dart';
 import 'utils/provider_observer.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  initializeLocalMedia();
 
   await EasyLocalization.ensureInitialized();
 

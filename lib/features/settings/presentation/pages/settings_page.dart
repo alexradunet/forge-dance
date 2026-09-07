@@ -85,7 +85,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     return Column(
       children: [
         ProfileMenuSection(
-          title: 'General',
+          title: LocaleKeys.general.tr(),
           items: [
             ProfileMenuItem(
               icon: Icons.person_outline,
@@ -100,11 +100,16 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
               label: LocaleKeys.appearances.tr(),
               onTap: () => context.push(Routes.appearances),
             ),
+            ProfileMenuItem(
+              icon: Icons.save_alt_rounded,
+              label: LocaleKeys.forgeTransferTitle.tr(),
+              onTap: () => context.push(Routes.dataTransfer),
+            ),
           ],
         ),
         const SizedBox(height: AppSpacing.xxl),
         ProfileMenuSection(
-          title: 'Support',
+          title: LocaleKeys.forgeSupport.tr(),
           items: [
             ProfileMenuItem(
               icon: Icons.article_outlined,

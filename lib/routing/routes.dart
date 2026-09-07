@@ -19,6 +19,11 @@ class Routes {
   static const appearances = '/appearances';
   static const settings = '/settings';
   static const stats = '/stats';
+  static const method = '$main/method';
+  static const practice = '$main/practice';
+  static const practiceLog = '$practice/log';
+  static const programmes = '$main/programmes';
+  static const dataTransfer = '$settings/data';
 }
 
 sealed class AppDestination {
@@ -34,7 +39,7 @@ enum MainTabDestination implements AppDestination {
   vocabulary(Routes.vocabulary, 0),
   explore(Routes.explore, 1),
   home(Routes.home, 2),
-  workout(Routes.workout, 3),
+  workout(Routes.practice, 3),
   profile(Routes.profile, 4);
 
   const MainTabDestination(this.location, this.tabIndex);
@@ -53,6 +58,9 @@ enum MainTabDestination implements AppDestination {
   static MainTabDestination fromLocation(String location) {
     if (location == Routes.library) return vocabulary;
     if (location.startsWith('${Routes.main}/module/')) return explore;
+    if (location.startsWith(Routes.workout)) return workout;
+    if (location.startsWith(Routes.method)) return profile;
+    if (location.startsWith(Routes.programmes)) return explore;
     return values.firstWhere(
       (tab) =>
           location == tab.location || location.startsWith('${tab.location}/'),

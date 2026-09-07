@@ -73,7 +73,14 @@ class FgCard extends StatelessWidget {
           padding: padding,
           child: ForgeSurfaceScope(
             surface: immersive ? ForgeSurface.immersive : ForgeSurface.standard,
-            child: child,
+            child: DefaultTextStyle.merge(
+              style: TextStyle(
+                color: immersive
+                    ? theme.forgeColors.onImmersive
+                    : scheme.onSurface,
+              ),
+              child: child,
+            ),
           ),
         ),
       ),

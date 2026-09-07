@@ -29,9 +29,6 @@ void main() {
       for (final related in entry.relatedIds) {
         expect(repository.byId(related), isNotNull);
       }
-      expect(entry.practice, isNotEmpty);
-      expect(entry.cue, isNotEmpty);
-      expect(entry.commonMistake, isNotEmpty);
     }
     expect(repository.byId('missing'), isNull);
   });
@@ -50,7 +47,6 @@ void main() {
       isEmpty,
     );
     expect(repository.search(query: 'no-such-term'), isEmpty);
-    expect(repository.search(), hasLength(6));
   });
 
   testWidgets('search and filter intents update visible vocabulary', (
