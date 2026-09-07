@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  cached_network_image: ^3.4.1
+  cached_network_image: ^4.0.0
   connectivity_plus: ^7.0.0
   cupertino_icons: ^1.0.6
   easy_localization: ^3.0.7
