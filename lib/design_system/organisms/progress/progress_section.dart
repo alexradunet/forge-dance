@@ -19,9 +19,11 @@ class FgProgressSection extends StatelessWidget {
     this.onAction,
     this.levelProgress,
     this.onProgressTap,
+    this.immersive = false,
   });
 
   final String title;
+  final bool immersive;
   final String? actionLabel;
   final VoidCallback? onAction;
   final List<FgStatData> stats;
@@ -63,7 +65,10 @@ class FgProgressSection extends StatelessWidget {
               for (final stat in stats)
                 SizedBox(
                   width: AppSizes.cardCompactWidth,
-                  child: FgCard(child: _StatContent(stat: stat)),
+                  child: FgCard(
+                    immersive: immersive,
+                    child: _StatContent(stat: stat),
+                  ),
                 ),
             ],
           ),
@@ -71,7 +76,8 @@ class FgProgressSection extends StatelessWidget {
         if (levelProgress != null) ...[
           const SizedBox(height: AppSpacing.md),
           FgCard(
-            variant: FgCardVariant.elevated,
+            variant: immersive ? FgCardVariant.opaque : FgCardVariant.elevated,
+            immersive: immersive,
             onTap: onProgressTap,
             child: _ProgressContent(progress: levelProgress!),
           ),
@@ -109,6 +115,7 @@ class _StatContent extends StatelessWidget {
         Text(
           '${stat.value}${stat.unit ?? ''}',
           style: theme.textTheme.titleLarge?.copyWith(
+            color: context.forgeForeground,
             fontWeight: FontWeight.w700,
             fontFeatures: const [FontFeature.tabularFigures()],
           ),
@@ -117,7 +124,7 @@ class _StatContent extends StatelessWidget {
         Text(
           stat.label,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: scheme.onSurfaceVariant,
+            color: context.forgeMutedForeground,
           ),
         ),
       ],
@@ -133,7 +140,6 @@ class _ProgressContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final ratio = progress.target <= 0
         ? 0.0
         : (progress.current / progress.target).clamp(0.0, 1.0);
@@ -146,11 +152,16 @@ class _ProgressContent extends StatelessWidget {
           spacing: AppSpacing.lg,
           runSpacing: AppSpacing.xs,
           children: [
-            Text(progress.label, style: theme.textTheme.titleMedium),
+            Text(
+              progress.label,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: context.forgeForeground,
+              ),
+            ),
             Text(
               progress.valueLabel,
               style: theme.textTheme.labelLarge?.copyWith(
-                color: scheme.onSurfaceVariant,
+                color: context.forgeMutedForeground,
                 fontFeatures: const [FontFeature.tabularFigures()],
               ),
             ),
@@ -163,7 +174,7 @@ class _ProgressContent extends StatelessWidget {
           Text(
             progress.message!,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: scheme.onSurfaceVariant,
+              color: context.forgeMutedForeground,
             ),
           ),
         ],

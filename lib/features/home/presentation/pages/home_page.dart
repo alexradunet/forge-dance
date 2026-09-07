@@ -8,6 +8,7 @@ import '../../../../routing/routes.dart';
 import '../../../stats/model/user_stats.dart';
 import '../../../stats/ui/view_model/user_stats_provider.dart';
 import '../../../../design_system/design_system.dart';
+import '../../../../design_system/molecules/cards/fg_session_card.dart';
 import '../../../../generated/locale_keys.g.dart';
 import '../../../learn/model/lesson.dart';
 import '../../../learn/ui/state/learn_state.dart';
@@ -166,13 +167,11 @@ class HomePage extends ConsumerWidget {
 
     if (lesson == null) {
       // Every lesson completed — celebrate and offer replay.
-      return FgContentCard.hero(
+      return FgSessionCard(
         title: LocaleKeys.moduleComplete.tr().toUpperCase(),
         subtitle: LocaleKeys.moduleCompleteSubtitle.tr(),
-        tags: [state.activeModule.title.toUpperCase()],
+        label: state.activeModule.title.toUpperCase(),
         imageUrl: state.activeModule.imageUrl,
-        onTap: () =>
-            ModuleDestination(state.activeModule.id).push<void>(context),
         action: FgButton(
           text: LocaleKeys.replayLessons.tr(),
           variant: FgButtonVariant.primary,
@@ -187,15 +186,11 @@ class HomePage extends ConsumerWidget {
         ? state.activeModule.title
         : '${state.activeModule.title} • ${lesson.duration}';
 
-    return FgContentCard.hero(
+    return FgSessionCard(
       title: lesson.title.toUpperCase(),
       subtitle: subtitle,
-      tags: [
-        LocaleKeys.todaysSession.tr().toUpperCase(),
-        lesson.type.label.toUpperCase(),
-      ],
+      label: LocaleKeys.todaysSession.tr().toUpperCase(),
       imageUrl: state.activeModule.imageUrl,
-      onTap: () => _startCurrentLesson(context, ref, state, lesson),
       action: FgButton(
         text: LocaleKeys.startLesson.tr(),
         variant: FgButtonVariant.primary,
@@ -230,6 +225,7 @@ class HomePage extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.all(AppSpacing.xxl),
       child: FgProgressSection(
+        immersive: true,
         title: LocaleKeys.myProgress.tr().toUpperCase(),
         stats: [
           FgStatData(

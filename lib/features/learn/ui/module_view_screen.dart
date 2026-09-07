@@ -3,6 +3,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../design_system/design_system.dart';
+import '../../../design_system/molecules/cards/fg_session_card.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../model/lesson.dart';
 import '../model/lesson_progress.dart';
@@ -40,7 +41,25 @@ class ModuleViewScreen extends ConsumerWidget {
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(child: _buildHeader(context, state)),
-        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
+        SliverToBoxAdapter(
+          child: Padding(
+            padding: AppSpacing.screen,
+            child: FgSessionCard(
+              title: state.activeModule.title.toUpperCase(),
+              subtitle: state.activeModule.subtitle,
+              imageUrl: state.activeModule.imageUrl,
+              label: LocaleKeys.lessonsCompletedOf.tr(
+                args: [
+                  '${state.completedCountIn(state.activeModule)}',
+                  '${state.activeModule.lessons.length}',
+                ],
+              ),
+              action: FgProgressBar(
+                value: state.moduleProgressOf(state.activeModule),
+              ),
+            ),
+          ),
+        ),
         SliverToBoxAdapter(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),

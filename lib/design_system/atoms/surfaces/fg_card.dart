@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../theme/forge_theme_extensions.dart';
 import '../../tokens/app_border_radius.dart';
+import '../../tokens/app_colors.dart';
 import '../../tokens/app_sizes.dart';
 import '../../tokens/app_spacing.dart';
 
@@ -20,9 +21,11 @@ class FgCard extends StatelessWidget {
     this.semanticLabel,
     this.focusNode,
     this.autofocus = false,
+    this.immersive = false,
   });
 
   final Widget child;
+  final bool immersive;
   final FgCardVariant variant;
   final EdgeInsetsGeometry padding;
   final VoidCallback? onTap;
@@ -39,7 +42,9 @@ class FgCard extends StatelessWidget {
     final emphasis = theme.forgeEmphasis;
     final effectiveOnTap = isEnabled ? onTap : null;
     final shape = RoundedRectangleBorder(
-      borderRadius: AppBorderRadius.defaultRadius,
+      borderRadius: immersive
+          ? AppBorderRadius.xxLarge
+          : AppBorderRadius.defaultRadius,
       side: BorderSide(
         color: isSelected
             ? scheme.primary
@@ -56,7 +61,7 @@ class FgCard extends StatelessWidget {
     };
 
     Widget card = Material(
-      color: color,
+      color: immersive ? AppColors.surfaceCard : color,
       shape: shape,
       clipBehavior: Clip.antiAlias,
       elevation: 0,
@@ -67,7 +72,7 @@ class FgCard extends StatelessWidget {
         child: Padding(
           padding: padding,
           child: ForgeSurfaceScope(
-            surface: ForgeSurface.standard,
+            surface: immersive ? ForgeSurface.immersive : ForgeSurface.standard,
             child: child,
           ),
         ),

@@ -78,6 +78,36 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
         ),
         SliverToBoxAdapter(
           child: Padding(
+            padding: AppSpacing.screen,
+            child: FgProgressSection(
+              immersive: true,
+              title: LocaleKeys.myProgress.tr().toUpperCase(),
+              stats: [
+                FgStatData(
+                  label: LocaleKeys.currentStreak.tr(),
+                  value: LocaleKeys.dayN.tr(args: ['${stats.streakCount}']),
+                  icon: Icons.local_fire_department_rounded,
+                ),
+                FgStatData(
+                  label: LocaleKeys.levelLabel.tr(args: ['${stats.level}']),
+                  value: LocaleKeys.xpValue.tr(args: ['${stats.totalXp}']),
+                  icon: Icons.workspace_premium_rounded,
+                ),
+              ],
+              levelProgress: FgProgressData(
+                label: levelSubtitle,
+                current: stats.totalXp.toDouble(),
+                target: (stats.nextLevelXp ?? stats.totalXp).toDouble(),
+                valueLabel: stats.nextLevelXp == null
+                    ? LocaleKeys.maxLevelReached.tr()
+                    : LocaleKeys.nextLevelXp.tr(args: ['${stats.nextLevelXp}']),
+              ),
+              onProgressTap: () => _openLevelProgression(context, levels),
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(
+          child: Padding(
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.xxl,
               AppSpacing.xxl,
@@ -100,6 +130,9 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 _openLevelProgression(context, levels, levelId: level.id),
           ),
         ),
+        const SliverToBoxAdapter(
+          child: SizedBox(height: AppSizes.bottomNavHeight + AppSpacing.xxl),
+        ),
       ],
     );
   }
@@ -111,33 +144,41 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   ) {
     final theme = Theme.of(context);
 
-    return Column(
-      children: [
-        const SizedBox(height: AppSpacing.xxl),
-        FgAvatar.large(
-          imageUrl: profile?.avatar,
-          initials: profile?.name,
-          level: stats.level,
-          tone: FgAvatarTone.reward,
-          semanticLabel: profile?.name ?? Constants.defaultName,
-        ),
-        const SizedBox(height: AppSpacing.xl),
-        Text(
-          profile?.name ?? Constants.defaultName,
-          style: theme.textTheme.titleLarge?.copyWith(
-            color: theme.forgeColors.onImmersive,
-            fontWeight: FontWeight.w700,
+    return Padding(
+      padding: AppSpacing.horizontalXXL,
+      child: Row(
+        children: [
+          FgAvatar.large(
+            imageUrl: profile?.avatar,
+            initials: profile?.name,
+            level: stats.level,
+            tone: FgAvatarTone.reward,
+            semanticLabel: profile?.name ?? Constants.defaultName,
           ),
-        ),
-        const SizedBox(height: AppSpacing.xs),
-        Text(
-          levelSubtitle,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: theme.forgeColors.onImmersiveMuted,
+          const SizedBox(width: AppSpacing.xl),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  profile?.name ?? Constants.defaultName,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    color: theme.forgeColors.onImmersive,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  levelSubtitle,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: theme.forgeColors.onImmersiveMuted,
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: AppSpacing.xxl),
-      ],
+        ],
+      ),
     );
   }
 }
