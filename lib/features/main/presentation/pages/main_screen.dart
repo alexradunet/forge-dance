@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../design_system/organisms/navigation/app_bottom_nav.dart';
+import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../routing/routes.dart';
 
 const _immersiveRoutePrefixes = [Routes.workout];
@@ -19,24 +21,19 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final showBottomNav = !_usesImmersiveSessionShell(location);
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          child,
-          if (showBottomNav)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: AppBottomNav(
-                currentIndex: MainTabDestination.fromLocation(
-                  location,
-                ).tabIndex,
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        backgroundColor: AppColors.bgDeep,
+        body: child,
+        bottomNavigationBar: showBottomNav
+            ? AppBottomNav(
+                currentIndex: MainTabDestination.fromLocation(location)
+                    .tabIndex,
                 onTabChange: (index) =>
                     MainTabDestination.values[index].go(context),
-              ),
-            ),
-        ],
+              )
+            : null,
       ),
     );
   }

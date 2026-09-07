@@ -12,6 +12,7 @@ class FgSessionCard extends StatelessWidget {
     required this.imageUrl,
     required this.label,
     required this.action,
+    this.imageAspectRatio = 4 / 3,
   });
 
   final String title;
@@ -19,6 +20,7 @@ class FgSessionCard extends StatelessWidget {
   final String imageUrl;
   final String label;
   final Widget action;
+  final double imageAspectRatio;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +37,7 @@ class FgSessionCard extends StatelessWidget {
               Stack(
                 children: [
                   AspectRatio(
-                    aspectRatio: 4 / 3,
+                    aspectRatio: imageAspectRatio,
                     child: FgImage(imageUrl: imageUrl, fit: BoxFit.cover),
                   ),
                   Positioned(

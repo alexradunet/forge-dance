@@ -58,19 +58,42 @@ class FgProgressSection extends StatelessWidget {
         ),
         if (stats.isNotEmpty) ...[
           const SizedBox(height: AppSpacing.md),
-          Wrap(
-            spacing: AppSpacing.md,
-            runSpacing: AppSpacing.md,
-            children: [
-              for (final stat in stats)
-                SizedBox(
-                  width: AppSizes.cardCompactWidth,
-                  child: FgCard(
-                    immersive: immersive,
-                    child: _StatContent(stat: stat),
-                  ),
-                ),
-            ],
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns =
+                  ((constraints.maxWidth + AppSpacing.md) /
+                          (AppSizes.cardCompactWidth + AppSpacing.md))
+                      .floor()
+                      .clamp(1, 3);
+              return Column(
+                children: [
+                  for (var row = 0; row < stats.length; row += columns) ...[
+                    if (row > 0) const SizedBox(height: AppSpacing.md),
+                    IntrinsicHeight(
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          for (var column = 0; column < columns; column++) ...[
+                            if (column > 0)
+                              const SizedBox(width: AppSpacing.md),
+                            Expanded(
+                              child: row + column < stats.length
+                                  ? FgCard(
+                                      immersive: immersive,
+                                      child: _StatContent(
+                                        stat: stats[row + column],
+                                      ),
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ],
+              );
+            },
           ),
         ],
         if (levelProgress != null) ...[

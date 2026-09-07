@@ -85,7 +85,7 @@ const List<Workout> allWorkouts = [
     style: 'Technique',
     difficulty: 'Intermediate',
     imageUrl:
-        'https://images.unsplash.com/photo-1716996642138-e655f2a8dcd5?w=400&auto=format&fit=crop&q=80',
+        'https://images.unsplash.com/photo-1535525153412-5a42439a210d?w=800&auto=format&fit=crop&q=80',
     xp: 40,
     estimatedMinutes: 25,
     exercises: [

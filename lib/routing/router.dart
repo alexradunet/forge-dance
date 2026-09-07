@@ -118,9 +118,8 @@ List<RouteBase> _routes(Ref ref) => [
       GoRoute(path: Routes.home, builder: (_, _) => const HomePage()),
       GoRoute(
         path: Routes.workout,
-        builder: (context, _) => TrainingSessionPage(
-          onClose: () => context.go(Routes.home),
-        ),
+        builder: (context, _) =>
+            TrainingSessionPage(onClose: () => context.go(Routes.home)),
       ),
       GoRoute(path: Routes.profile, builder: (_, _) => const ProfilePage()),
       GoRoute(
@@ -129,6 +128,7 @@ List<RouteBase> _routes(Ref ref) => [
           final moduleId = state.pathParameters['moduleId']!;
           ref.read(learnViewModelProvider.notifier).selectModule(moduleId);
           return ModuleViewScreen(
+            moduleId: moduleId,
             onBack: () => context.pop(),
             onLessonNavigate: (lessonId) =>
                 LessonDestination(moduleId, lessonId).push<void>(context),
@@ -143,7 +143,10 @@ List<RouteBase> _routes(Ref ref) => [
               ref.read(learnViewModelProvider.notifier).selectModule(moduleId);
               final learn = ref.read(learnViewModelProvider).value;
               if (learn == null || !learn.canOpenLesson(lessonId)) {
-                return ModuleViewScreen(onBack: () => context.pop());
+                return ModuleViewScreen(
+                  moduleId: moduleId,
+                  onBack: () => context.pop(),
+                );
               }
               return LessonPlayerScreen(
                 lessonId: lessonId,

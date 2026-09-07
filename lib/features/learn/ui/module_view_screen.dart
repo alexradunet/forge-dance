@@ -13,10 +13,16 @@ import '../ui/view_model/learn_view_model.dart';
 /// Module View Screen (Lesson Path) — renders the lesson catalog combined
 /// with the dancer's locally persisted progress.
 class ModuleViewScreen extends ConsumerWidget {
+  final String? moduleId;
   final VoidCallback? onBack;
   final Function(String)? onLessonNavigate;
 
-  const ModuleViewScreen({super.key, this.onBack, this.onLessonNavigate});
+  const ModuleViewScreen({
+    super.key,
+    this.moduleId,
+    this.onBack,
+    this.onLessonNavigate,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,13 +37,23 @@ class ModuleViewScreen extends ConsumerWidget {
             title: LocaleKeys.unexpectedErrorOccurred.tr(),
             tone: FgEmptyTone.error,
           ),
-          data: (state) => _buildPath(context, ref, state),
+          data: (state) => _buildPath(
+            context,
+            ref,
+            moduleId == null
+                ? state
+                : state.copyWith(activeModuleId: moduleId!),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildPath(BuildContext context, WidgetRef ref, LearnState state) {
+    final current = state.currentLesson;
+    final canContinue = current != null && state.canOpenLesson(current.id);
+    final unmet = state.unmetPrerequisiteLessonIds(state.activeModule);
+    final requirement = unmet.isEmpty ? null : state.lessonById(unmet.first);
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(child: _buildHeader(context, state)),
@@ -45,6 +61,7 @@ class ModuleViewScreen extends ConsumerWidget {
           child: Padding(
             padding: AppSpacing.screen,
             child: FgSessionCard(
+              imageAspectRatio: 16 / 9,
               title: state.activeModule.title.toUpperCase(),
               subtitle: state.activeModule.subtitle,
               imageUrl: state.activeModule.imageUrl,
@@ -54,29 +71,67 @@ class ModuleViewScreen extends ConsumerWidget {
                   '${state.activeModule.lessons.length}',
                 ],
               ),
-              action: FgProgressBar(
-                value: state.moduleProgressOf(state.activeModule),
+              action: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  FgProgressBar(value: state.moduleProgress),
+                  const SizedBox(height: AppSpacing.lg),
+                  if (!state.isModuleUnlocked(state.activeModule))
+                    Text(
+                      LocaleKeys.requiresLesson.tr(
+                        args: [requirement?.title ?? '—'],
+                      ),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).forgeColors.onImmersiveMuted,
+                      ),
+                    )
+                  else if (current == null)
+                    Text(
+                      LocaleKeys.moduleComplete.tr(),
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context).forgeColors.onImmersive,
+                      ),
+                    )
+                  else
+                    FgButton(
+                      text: state.hasStartedModule(state.activeModule)
+                          ? LocaleKeys.continueText.tr()
+                          : LocaleKeys.startLesson.tr(),
+                      expand: true,
+                      onPressed: canContinue && onLessonNavigate != null
+                          ? () {
+                              ref
+                                  .read(learnViewModelProvider.notifier)
+                                  .startLesson(current.id);
+                              onLessonNavigate?.call(current.id);
+                            }
+                          : null,
+                    ),
+                ],
               ),
             ),
           ),
         ),
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-            child: LessonPathTimeline(
-              nodes: _buildNodes(state),
-              onNavigate: (tab) {
-                if (tab != 'ignite') return;
-                final current = state.currentLesson;
-                if (current == null) return;
-                ref
-                    .read(learnViewModelProvider.notifier)
-                    .startLesson(current.id);
-                onLessonNavigate?.call(current.id);
-              },
+        if (state.isModuleUnlocked(state.activeModule))
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+              child: LessonPathTimeline(
+                nodes: _buildNodes(state),
+                onNavigate: (tab) {
+                  if (tab != 'ignite') return;
+                  final current = state.currentLesson;
+                  if (current == null || !state.canOpenLesson(current.id)) {
+                    return;
+                  }
+                  ref
+                      .read(learnViewModelProvider.notifier)
+                      .startLesson(current.id);
+                  onLessonNavigate?.call(current.id);
+                },
+              ),
             ),
           ),
-        ),
         const SliverToBoxAdapter(
           child: SizedBox(height: AppSizes.bottomNavHeight + AppSpacing.lg),
         ),
@@ -86,8 +141,7 @@ class ModuleViewScreen extends ConsumerWidget {
 
   Widget _buildHeader(BuildContext context, LearnState state) {
     return AppHeader(
-      title: state.activeModule.title,
-      subtitle: state.activeModule.subtitle,
+      title: LocaleKeys.exploreTitle.tr(),
       onBack: onBack ?? () => Navigator.of(context).pop(),
     );
   }

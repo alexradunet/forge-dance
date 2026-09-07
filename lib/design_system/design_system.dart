@@ -86,6 +86,7 @@ export 'molecules/navigation/fg_step_navigation.dart';
 
 // Media
 export 'molecules/media/fg_media_dock.dart';
+export 'molecules/media/fg_timer_control.dart';
 
 // Lessons
 export 'molecules/lessons/fg_lesson_timeline_boss_node.dart';

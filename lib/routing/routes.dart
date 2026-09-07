@@ -47,10 +47,14 @@ enum MainTabDestination implements AppDestination {
   Future<T?> push<T>(BuildContext context, {Object? extra}) =>
       context.push<T>(location, extra: extra);
 
-  static MainTabDestination fromLocation(String location) => values.firstWhere(
-    (tab) => location.startsWith(tab.location),
-    orElse: () => home,
-  );
+  static MainTabDestination fromLocation(String location) {
+    if (location.startsWith('${Routes.main}/module/')) return explore;
+    return values.firstWhere(
+      (tab) =>
+          location == tab.location || location.startsWith('${tab.location}/'),
+      orElse: () => home,
+    );
+  }
 }
 
 class ModuleDestination extends AppDestination {

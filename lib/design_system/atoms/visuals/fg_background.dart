@@ -58,14 +58,15 @@ class FgBackground extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AppColors.forgeFire.withOpacity(0.5),
+                      AppColors.forgeFire.withValues(alpha: 0.12),
                       Colors.transparent,
                     ],
                   ),
                 ),
               ),
             ),
-            // Bottom Left - Electric Blue
+            // A faint warm wash keeps the background cohesive without competing
+            // with photography or progress accents.
             Positioned(
               bottom: -50,
               left: -250,
@@ -76,7 +77,7 @@ class FgBackground extends StatelessWidget {
                   shape: BoxShape.circle,
                   gradient: RadialGradient(
                     colors: [
-                      AppColors.electricBlue.withOpacity(0.4),
+                      AppColors.forgeFire.withValues(alpha: 0.03),
                       Colors.transparent,
                     ],
                   ),

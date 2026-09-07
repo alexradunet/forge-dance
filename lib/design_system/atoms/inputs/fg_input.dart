@@ -293,6 +293,36 @@ class _FgInputState extends State<FgInput> {
 
   @override
   Widget build(BuildContext context) {
+    if (context.forgeSurface != ForgeSurface.immersive) {
+      return _buildField(context);
+    }
+    final theme = Theme.of(context);
+    final colors = theme.forgeColors;
+    final mutedStyle = theme.textTheme.bodyMedium?.copyWith(
+      color: colors.onImmersiveMuted,
+    );
+    return Theme(
+      data: theme.copyWith(
+        colorScheme: theme.colorScheme.copyWith(
+          onSurface: colors.onImmersive,
+          onSurfaceVariant: colors.onImmersiveMuted,
+          surfaceContainerHigh: colors.immersiveSurface,
+        ),
+        inputDecorationTheme: theme.inputDecorationTheme.copyWith(
+          fillColor: colors.immersiveSurface,
+          hintStyle: mutedStyle,
+          helperStyle: theme.textTheme.bodySmall?.copyWith(
+            color: colors.onImmersiveMuted,
+          ),
+          prefixIconColor: colors.onImmersiveMuted,
+          suffixIconColor: colors.onImmersiveMuted,
+        ),
+      ),
+      child: Builder(builder: _buildField),
+    );
+  }
+
+  Widget _buildField(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final motion = context.forgeMotion;

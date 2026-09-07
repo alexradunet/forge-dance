@@ -162,7 +162,11 @@
   "startWorkoutSemantic": "Start workout",
   "exerciseSkippedReady": "Skipped. Move to the next exercise when ready.",
   "exerciseTimerComplete": "Timer complete. Move to the next exercise when ready.",
-  "exerciseTimerInstruction": "Start the timer, watch the movement, and practice until time is complete.",
+  "exerciseTimerInstruction": "Start the timer and practice at your own pace. You can pause whenever you need a break.",
+  "secondsCount": "{} sec",
+  "startTimer": "Start timer",
+  "pauseTimer": "Pause timer",
+  "timerComplete": "Complete",
   "skipExerciseSemantic": "Skip exercise {} of {}",
   "nextLockedSemantic": "Next step locked until the timer completes. Activate for skip option."
 }

@@ -103,6 +103,7 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
               return Column(
                 children: [
                   AppHeader(
+                    compact: true,
                     title: lesson.title,
                     subtitle: LocaleKeys.lessonNumberType.tr(
                       args: ['$lessonNumber', lesson.type.label],
@@ -130,7 +131,7 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
                               steps,
                               expanded: true,
                               minHeight: 104,
-                              maxHeight: (constraints.maxHeight * 0.34).clamp(
+                              maxHeight: (constraints.maxHeight * 0.26).clamp(
                                 112.0,
                                 _expandedMediaMaxHeight,
                               ),
@@ -164,29 +165,21 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
       duration: motion.standard,
       curve: motion.enterCurve,
       constraints: BoxConstraints(minHeight: minHeight, maxHeight: maxHeight),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          PageView.builder(
-            key: const ValueKey('lesson-media-page-view'),
-            controller: _mediaPageController,
-            onPageChanged: _setCurrentStep,
-            itemCount: steps.length,
-            itemBuilder: (context, index) => _LessonMedia(step: steps[index]),
-          ),
-          Positioned(
-            left: AppSpacing.lg,
-            right: AppSpacing.lg,
-            bottom: AppSpacing.lg,
-            child: Text(
-              steps[_currentStep].title,
-              maxLines: expanded ? 2 : 1,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.titleMedium
-                  ?.copyWith(color: Theme.of(context).forgeColors.onImmersive),
+      child: FgCard(
+        immersive: true,
+        padding: EdgeInsets.zero,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            PageView.builder(
+              key: const ValueKey('lesson-media-page-view'),
+              controller: _mediaPageController,
+              onPageChanged: _setCurrentStep,
+              itemCount: steps.length,
+              itemBuilder: (context, index) => _LessonMedia(step: steps[index]),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -227,14 +220,17 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
           child: FadeTransition(opacity: animation, child: child),
         );
       },
-      child: _LessonStepContent(
+      child: FgCard(
         key: ValueKey(step.title),
-        step: step,
-        techniqueExpanded: _techniqueExpanded,
-        onTechniqueChanged: (expanded) {
-          if (_techniqueExpanded == expanded) return;
-          setState(() => _techniqueExpanded = expanded);
-        },
+        immersive: true,
+        child: _LessonStepContent(
+          step: step,
+          techniqueExpanded: _techniqueExpanded,
+          onTechniqueChanged: (expanded) {
+            if (_techniqueExpanded == expanded) return;
+            setState(() => _techniqueExpanded = expanded);
+          },
+        ),
       ),
     );
 
@@ -293,6 +289,9 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
   Future<void> _goToStep(int index) async {
     if (index == _currentStep || index < 0) return;
     final clamped = index.clamp(0, _currentStepCount - 1);
+    if (_contentScrollController.hasClients) {
+      _contentScrollController.jumpTo(0);
+    }
 
     if (_mediaCollapsed || !_mediaPageController.hasClients) {
       setState(() {
@@ -334,6 +333,11 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
   void _nextStep() => _goToStep(_currentStep + 1);
 
   void _setCurrentStep(int index) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _contentScrollController.hasClients) {
+        _contentScrollController.jumpTo(0);
+      }
+    });
     setState(() {
       _currentStep = index;
       _mediaCollapsed = false;
@@ -475,7 +479,6 @@ class _MediaFallbackIcon extends StatelessWidget {
 
 class _LessonStepContent extends StatelessWidget {
   const _LessonStepContent({
-    super.key,
     required this.step,
     required this.techniqueExpanded,
     required this.onTechniqueChanged,
@@ -530,11 +533,6 @@ class _LessonStepContent extends StatelessWidget {
               style: TextStyle(color: context.forgeMutedForeground),
             ),
             children: [
-              if (step.description.isNotEmpty)
-                _TechniquePoint(
-                  label: LocaleKeys.descriptionLabel.tr(),
-                  value: step.description,
-                ),
               if (step.focus.isNotEmpty)
                 _TechniquePoint(
                   label: LocaleKeys.focusLabel.tr(),
@@ -631,6 +629,9 @@ class _NavigationControls extends StatelessWidget {
           currentStep: currentStep,
           stepCount: stepCount,
           stepLabel: stepLabel,
+          nextLabel:
+              (isLastStep ? LocaleKeys.completeLesson : LocaleKeys.nextStep)
+                  .tr(),
           previousSemanticLabel: LocaleKeys.previousStepSemantic.tr(
             args: ['${currentStep + 1}', '$stepCount'],
           ),

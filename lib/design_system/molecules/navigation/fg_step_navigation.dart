@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../atoms/buttons/fg_button.dart';
 import '../../atoms/progress/fg_progress_bar.dart';
 import '../../tokens/app_spacing.dart';
+import '../../theme/forge_theme_extensions.dart';
 
 /// Previous/next navigation arranged around a compact progress readout.
 class FgStepNavigation extends StatelessWidget {
@@ -16,6 +17,7 @@ class FgStepNavigation extends StatelessWidget {
     required this.onNext,
     super.key,
     this.nextLoading = false,
+    this.nextLabel,
   });
 
   final int currentStep;
@@ -26,36 +28,50 @@ class FgStepNavigation extends StatelessWidget {
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
   final bool nextLoading;
+  final String? nextLabel;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        FgButton(
-          icon: const Icon(Icons.arrow_back_rounded),
-          variant: FgButtonVariant.primary,
-          shape: FgButtonShape.circle,
-          onPressed: onPrevious,
-          semanticLabel: previousSemanticLabel,
-        ),
-        const SizedBox(width: AppSpacing.lg),
-        Expanded(
-          child: FgProgressBar.segmented(
-            total: stepCount,
-            current: currentStep,
-            size: FgProgressBarSize.sm,
-            semanticLabel: stepLabel,
+        ExcludeSemantics(
+          child: Text(
+            stepLabel,
+            style: Theme.of(context).textTheme.labelMedium
+                ?.copyWith(color: context.forgeMutedForeground),
           ),
         ),
-        const SizedBox(width: AppSpacing.lg),
-        FgButton(
-          icon: const Icon(Icons.arrow_forward_rounded),
-          variant: FgButtonVariant.primary,
-          shape: FgButtonShape.circle,
-          isLoading: nextLoading,
-          onPressed: onNext,
-          semanticLabel: nextSemanticLabel,
+        const SizedBox(height: AppSpacing.sm),
+        FgProgressBar.segmented(
+          total: stepCount,
+          current: currentStep,
+          size: FgProgressBarSize.sm,
+          semanticLabel: stepLabel,
+        ),
+        const SizedBox(height: AppSpacing.lg),
+        Row(
+          children: [
+            FgButton(
+              icon: const Icon(Icons.arrow_back_rounded),
+              variant: FgButtonVariant.secondary,
+              shape: FgButtonShape.circle,
+              onPressed: onPrevious,
+              semanticLabel: previousSemanticLabel,
+            ),
+            const SizedBox(width: AppSpacing.lg),
+            Expanded(
+              child: FgButton(
+                text: nextLabel ?? nextSemanticLabel,
+                icon: const Icon(Icons.arrow_forward_rounded),
+                variant: FgButtonVariant.primary,
+                isLoading: nextLoading,
+                onPressed: onNext,
+                semanticLabel: nextSemanticLabel,
+              ),
+            ),
+          ],
         ),
       ],
     );

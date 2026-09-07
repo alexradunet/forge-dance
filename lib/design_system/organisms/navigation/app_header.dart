@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
 
-import '../../tokens/app_colors.dart';
+import '../../theme/forge_theme_extensions.dart';
+import '../../tokens/app_sizes.dart';
+import '../../tokens/app_spacing.dart';
 import '../../tokens/app_typography.dart';
 
+/// Compact editorial header. Slots participate in layout rather than
+/// overlapping the title, including at larger accessibility text sizes.
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
-  final String? subtitle;
-  final Widget? leftSlot;
-  final Widget? rightSlot;
-  final bool isTransparent;
-  final VoidCallback? onBack;
-
   const AppHeader({
     super.key,
     required this.title,
@@ -19,106 +16,77 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
     this.rightSlot,
     this.isTransparent = true,
     this.onBack,
+    this.compact = false,
   });
+
+  final String title;
+  final String? subtitle;
+  final Widget? leftSlot;
+  final Widget? rightSlot;
+  final bool isTransparent;
+  final VoidCallback? onBack;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        24,
-        MediaQuery.of(context).padding.top + 24,
-        24,
-        24,
-      ),
-      decoration: BoxDecoration(
-        color: isTransparent ? null : AppColors.bgDeep,
-        gradient: isTransparent
-            ? LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  AppColors.bgDeep,
-                  AppColors.bgDeep.withOpacity(0.95),
-                  Colors.transparent,
-                ],
-              )
-            : null,
-        border: isTransparent
-            ? null
-            : Border(bottom: BorderSide(color: Colors.white.withOpacity(0.05))),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Left Slot (Back button + Custom Left)
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (onBack != null) ...[
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back, // Standard arrow
-                        color: Colors.white,
-                        size: 24),
-                    onPressed: onBack,
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                  ),
-                  const SizedBox(width: 16),
-                ],
-                if (leftSlot != null) leftSlot!,
-              ],
-            ),
+    final colors = Theme.of(context).forgeColors;
+    return ColoredBox(
+      color: isTransparent ? Colors.transparent : colors.immersiveBackground,
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xxl,
+            vertical: AppSpacing.lg,
           ),
-
-          // Center Title
-          Column(
-            mainAxisSize: MainAxisSize.min,
+          child: Row(
             children: [
-              Text(
-                title.toUpperCase(),
-                style: AppTypography.h2.copyWith(
-                  color: AppColors.textMain,
-                  fontSize: 24, // Slightly smaller to fit center
-                  letterSpacing: 2,
-                  shadows: [
-                    Shadow(
-                      color: Colors.black.withOpacity(0.5),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
+              if (onBack != null) ...[
+                BackButton(color: colors.onImmersive, onPressed: onBack),
+                const SizedBox(width: AppSpacing.sm),
+              ],
+              if (leftSlot != null) ...[
+                leftSlot!,
+                const SizedBox(width: AppSpacing.md),
+              ],
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title.toUpperCase(),
+                      maxLines: compact ? 2 : null,
+                      overflow: compact ? TextOverflow.ellipsis : null,
+                      style: (compact ? AppTypography.h4 : AppTypography.h2)
+                          .copyWith(color: colors.onImmersive),
                     ),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        subtitle!,
+                        maxLines: compact ? 1 : null,
+                        overflow: compact ? TextOverflow.ellipsis : null,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: colors.onImmersiveMuted,
+                        ),
+                      ),
+                    ],
                   ],
                 ),
-                textAlign: TextAlign.center,
               ),
-              if (subtitle != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(
-                    subtitle!.toUpperCase(),
-                    style: AppTypography.label.copyWith(
-                      color: AppColors.forgeFire,
-                      fontSize: 10,
-                      letterSpacing: 2,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
+              if (rightSlot != null) ...[
+                const SizedBox(width: AppSpacing.md),
+                rightSlot!,
+              ],
             ],
           ),
-
-          // Right Slot
-          if (rightSlot != null)
-            Align(
-              alignment: Alignment.centerRight,
-              child: rightSlot!,
-            ),
-        ],
+        ),
       ),
     );
   }
 
   @override
-  Size get preferredSize => const Size.fromHeight(100);
+  Size get preferredSize =>
+      const Size.fromHeight(AppSizes.appBarHeight + AppSpacing.lg);
 }

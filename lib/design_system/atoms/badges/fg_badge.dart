@@ -4,16 +4,9 @@ import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
 import '../../tokens/app_border_radius.dart';
 
-enum FgBadgeVariant {
-  solid,
-  outline,
-  subtle,
-}
+enum FgBadgeVariant { solid, outline, subtle }
 
-enum FgBadgeShape {
-  standard,
-  pill,
-}
+enum FgBadgeShape { standard, pill }
 
 enum FgBadgeColor {
   brand,
@@ -61,13 +54,15 @@ class FgBadge extends StatelessWidget {
           Icon(icon, size: 12, color: colors.foreground),
           const SizedBox(width: 4),
         ],
-        Text(
-          text.toUpperCase(),
-          style: AppTypography.label.copyWith(
-            color: colors.foreground,
-            fontWeight: FontWeight.w700,
-            fontSize: fontSize,
-            letterSpacing: 0.5,
+        Flexible(
+          child: Text(
+            text.toUpperCase(),
+            style: AppTypography.label.copyWith(
+              color: colors.foreground,
+              fontWeight: FontWeight.w700,
+              fontSize: fontSize,
+              letterSpacing: 0.5,
+            ),
           ),
         ),
       ],

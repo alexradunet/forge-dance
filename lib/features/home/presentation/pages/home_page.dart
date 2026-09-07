@@ -107,9 +107,7 @@ class HomePage extends ConsumerWidget {
           ),
 
         // Bottom Spacing for BottomNav
-        const SliverToBoxAdapter(
-          child: SizedBox(height: AppSizes.bottomNavHeight + AppSpacing.xxl),
-        ),
+        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
       ],
     );
   }
@@ -168,6 +166,7 @@ class HomePage extends ConsumerWidget {
     if (lesson == null) {
       // Every lesson completed — celebrate and offer replay.
       return FgSessionCard(
+        imageAspectRatio: 16 / 9,
         title: LocaleKeys.moduleComplete.tr().toUpperCase(),
         subtitle: LocaleKeys.moduleCompleteSubtitle.tr(),
         label: state.activeModule.title.toUpperCase(),
@@ -187,6 +186,7 @@ class HomePage extends ConsumerWidget {
         : '${state.activeModule.title} • ${lesson.duration}';
 
     return FgSessionCard(
+      imageAspectRatio: 16 / 9,
       title: lesson.title.toUpperCase(),
       subtitle: subtitle,
       label: LocaleKeys.todaysSession.tr().toUpperCase(),

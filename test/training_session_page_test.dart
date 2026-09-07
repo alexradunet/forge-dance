@@ -57,6 +57,7 @@ void main() {
   Future<_FakeSessionRepository> pumpTraining(
     WidgetTester tester, {
     required Size size,
+    double textScale = 1,
     VoidCallback? onClose,
   }) async {
     SharedPreferences.setMockInitialValues({});
@@ -75,13 +76,29 @@ void main() {
         ],
         child: MaterialApp(
           theme: AppThemes.dark,
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: TextScaler.linear(textScale)),
+            child: child!,
+          ),
           home: TrainingSessionPage(onClose: onClose),
         ),
       ),
     );
-    await tester.pumpAndSettle();
+    // The overview photo has an animated loading placeholder.
+    for (var frame = 0; frame < 8; frame++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
     return repository;
   }
+
+  testWidgets('small screen supports doubled player text', (tester) async {
+    await pumpTraining(tester, size: const Size(320, 640), textScale: 2);
+    await tester.tap(find.bySemanticsLabel('startWorkoutSemantic'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    expect(find.byType(FgStepNavigation), findsOneWidget);
+  });
 
   group('adaptive workout training flow', () {
     testWidgets('overview presents workout purpose and starts training', (
@@ -92,45 +109,75 @@ void main() {
 
       expect(find.text(wod.title), findsWidgets);
       expect(find.text(wod.description), findsOneWidget);
-      expect(find.text('exercisesCount'), findsOneWidget);
-      expect(find.text('minutesCount'), findsWidgets);
-      expect(find.text('xpReward'), findsOneWidget);
-      expect(find.text('startTraining'), findsNothing);
-      expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
-      expect(find.byIcon(Icons.arrow_forward_rounded), findsOneWidget);
-      expect(find.bySemanticsLabel('goToExerciseStep'), findsNothing);
-      final previousButton = find.bySemanticsLabel('previousStepSemantic');
-      final nextButton = find.bySemanticsLabel('nextStepSemantic');
-      expect(tester.getSize(previousButton), tester.getSize(nextButton));
-      expect(
-        tester.getCenter(previousButton).dx,
-        lessThan(tester.getCenter(find.byType(FgProgressBar)).dx),
-      );
-      expect(
-        tester.getCenter(find.byType(FgProgressBar)).dx,
-        lessThan(tester.getCenter(nextButton).dx),
-      );
-      expect(find.text('workoutStepOf'), findsNothing);
-      expect(find.bySemanticsLabel('workoutStepOf'), findsOneWidget);
-      final progressBar = tester.widget<FgProgressBar>(
-        find.byType(FgProgressBar),
-      );
-      expect(progressBar.segments, wod.exercises.length + 2);
-      expect(progressBar.value, closeTo(1 / (wod.exercises.length + 2), 0.001));
+      expect(find.text('EXERCISESCOUNT'), findsOneWidget);
+      expect(find.text('MINUTESCOUNT'), findsWidgets);
+      expect(find.text('XPREWARD'), findsOneWidget);
+      expect(find.byType(FgStepNavigation), findsNothing);
+      expect(find.byType(FgTimerControl), findsNothing);
+      expect(find.bySemanticsLabel('startWorkoutSemantic'), findsOneWidget);
+      expect(find.text(wod.exercises.first.name), findsOneWidget);
 
-      await tester.tap(nextButton);
+      await tester.tap(find.bySemanticsLabel('startWorkoutSemantic'));
       await tester.pumpAndSettle();
 
       expect(find.text(wod.exercises.first.name), findsWidgets);
       expect(find.text('${wod.exercises.first.seconds}s'), findsOneWidget);
     });
 
+    testWidgets('start is explicit and skipping resets the next countdown', (
+      tester,
+    ) async {
+      await pumpTraining(tester, size: const Size(390, 760));
+      final wod = wodFor(DateTime.now());
+      await tester.tap(find.bySemanticsLabel('startWorkoutSemantic'));
+      await tester.pumpAndSettle();
+      final firstSeconds = wod.exercises.first.seconds;
+      await tester.pump(const Duration(seconds: 5));
+      expect(find.text('${firstSeconds}s'), findsOneWidget);
+      await tester.tap(find.text('${firstSeconds}s'));
+      for (var tick = 0; tick < 3; tick++) {
+        await tester.pump(const Duration(seconds: 1));
+      }
+      expect(find.text('${firstSeconds - 3}s'), findsOneWidget);
+      await tester.ensureVisible(find.text('skip'));
+      await tester.pump();
+      await tester.tap(find.text('skip'));
+      await tester.pumpAndSettle();
+      expect(find.text('${wod.exercises[1].seconds}s'), findsOneWidget);
+      expect(find.text(wod.exercises[1].name), findsOneWidget);
+    });
+
+    testWidgets(
+      'old skip feedback cannot change another step or disposed player',
+      (tester) async {
+        await pumpTraining(tester, size: const Size(390, 760));
+        final wod = wodFor(DateTime.now());
+        await tester.tap(find.bySemanticsLabel('startWorkoutSemantic'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.bySemanticsLabel('nextLockedSemantic'));
+        await tester.pumpAndSettle();
+        final oldAction = tester
+            .widget<SnackBarAction>(find.byType(SnackBarAction))
+            .onPressed;
+        await tester.ensureVisible(find.text('skip'));
+        await tester.pump();
+        await tester.tap(find.text('skip'));
+        await tester.pumpAndSettle();
+        oldAction();
+        await tester.pumpAndSettle();
+        expect(find.text(wod.exercises[1].name), findsOneWidget);
+        await tester.pumpWidget(const SizedBox.shrink());
+        oldAction();
+        expect(tester.takeException(), isNull);
+      },
+    );
+
     testWidgets('locked forward progression shows feedback and explicit skip', (
       tester,
     ) async {
       await pumpTraining(tester, size: const Size(390, 760));
       final wod = wodFor(DateTime.now());
-      await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
+      await tester.tap(find.bySemanticsLabel('startWorkoutSemantic'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.bySemanticsLabel('nextLockedSemantic'));
@@ -151,7 +198,7 @@ void main() {
       (tester) async {
         await pumpTraining(tester, size: const Size(1000, 430));
         final wod = wodFor(DateTime.now());
-        await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
+        await tester.tap(find.bySemanticsLabel('startWorkoutSemantic'));
         await tester.pumpAndSettle();
 
         await tester.drag(
@@ -188,7 +235,7 @@ void main() {
       await pumpTraining(tester, size: const Size(390, 760));
       final wod = wodFor(DateTime.now());
       final first = wod.exercises.first;
-      await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
+      await tester.tap(find.bySemanticsLabel('startWorkoutSemantic'));
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('${first.seconds}s'));
@@ -207,7 +254,7 @@ void main() {
       tester,
     ) async {
       await pumpTraining(tester, size: const Size(390, 560));
-      await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
+      await tester.tap(find.bySemanticsLabel('startWorkoutSemantic'));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('workout-media-shell')), findsOneWidget);
@@ -244,7 +291,7 @@ void main() {
         onClose: () => closed = true,
       );
       final wod = wodFor(DateTime.now());
-      await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
+      await tester.tap(find.bySemanticsLabel('startWorkoutSemantic'));
       await tester.pumpAndSettle();
 
       for (var index = 0; index < wod.exercises.length; index++) {
