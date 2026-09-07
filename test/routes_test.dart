@@ -16,7 +16,7 @@ void main() {
   test('main tab classification keeps module flows on Learn', () {
     expect(
       MainTabDestination.fromLocation(Routes.library),
-      MainTabDestination.library,
+      MainTabDestination.vocabulary,
     );
     expect(
       MainTabDestination.fromLocation('/main/module/body-control'),

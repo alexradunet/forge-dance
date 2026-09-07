@@ -5,7 +5,7 @@ import '../../../../design_system/organisms/navigation/app_bottom_nav.dart';
 import '../../../../design_system/tokens/app_colors.dart';
 import '../../../../routing/routes.dart';
 
-const _immersiveRoutePrefixes = [Routes.workout];
+const _immersiveRoutePrefixes = [Routes.workoutSession];
 
 bool _usesImmersiveSessionShell(String location) =>
     location.contains('/lesson/') ||
@@ -21,19 +21,27 @@ class MainScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final showBottomNav = !_usesImmersiveSessionShell(location);
 
-    return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle.light,
-      child: Scaffold(
-        backgroundColor: AppColors.bgDeep,
-        body: child,
-        bottomNavigationBar: showBottomNav
-            ? AppBottomNav(
-                currentIndex: MainTabDestination.fromLocation(location)
-                    .tabIndex,
-                onTabChange: (index) =>
-                    MainTabDestination.values[index].go(context),
-              )
-            : null,
+    return PopScope(
+      canPop: location != Routes.workout,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && location == Routes.workout) {
+          MainTabDestination.home.go(context);
+        }
+      },
+      child: AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: Scaffold(
+          backgroundColor: AppColors.bgDeep,
+          body: child,
+          bottomNavigationBar: showBottomNav
+              ? AppBottomNav(
+                  currentIndex: MainTabDestination.fromLocation(location)
+                      .tabIndex,
+                  onTabChange: (index) =>
+                      MainTabDestination.values[index].go(context),
+                )
+              : null,
+        ),
       ),
     );
   }

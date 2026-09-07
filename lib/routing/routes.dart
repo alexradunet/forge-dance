@@ -7,10 +7,13 @@ class Routes {
   static const splash = '/';
   static const onboarding = '/onboarding';
   static const main = '/main';
-  static const library = '/main/library';
+  static const library = '/main/library'; // Legacy collection links.
+  static const vocabulary = '/main/vocabulary';
+  static const lessonHistory = '$explore/history';
   static const explore = '/main/explore';
   static const home = '/main/home';
   static const workout = '/main/workout';
+  static const workoutSession = '$workout/session';
   static const profile = '/main/profile';
   static const accountInformation = '/accountInformation';
   static const appearances = '/appearances';
@@ -28,7 +31,7 @@ sealed class AppDestination {
 }
 
 enum MainTabDestination implements AppDestination {
-  library(Routes.library, 0),
+  vocabulary(Routes.vocabulary, 0),
   explore(Routes.explore, 1),
   home(Routes.home, 2),
   workout(Routes.workout, 3),
@@ -48,6 +51,7 @@ enum MainTabDestination implements AppDestination {
       context.push<T>(location, extra: extra);
 
   static MainTabDestination fromLocation(String location) {
+    if (location == Routes.library) return vocabulary;
     if (location.startsWith('${Routes.main}/module/')) return explore;
     return values.firstWhere(
       (tab) =>
@@ -55,6 +59,14 @@ enum MainTabDestination implements AppDestination {
       orElse: () => home,
     );
   }
+}
+
+class VocabularyDestination extends AppDestination {
+  const VocabularyDestination(this.entryId);
+  final String entryId;
+
+  @override
+  String get location => '${Routes.vocabulary}/$entryId';
 }
 
 class ModuleDestination extends AppDestination {

@@ -13,6 +13,7 @@ class FgSessionCard extends StatelessWidget {
     required this.label,
     required this.action,
     this.imageAspectRatio = 4 / 3,
+    this.compact = false,
   });
 
   final String title;
@@ -21,6 +22,7 @@ class FgSessionCard extends StatelessWidget {
   final String label;
   final Widget action;
   final double imageAspectRatio;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -82,9 +84,8 @@ class FgSessionCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: AppTypography.h1.copyWith(
-                        color: colors.onImmersive,
-                      ),
+                      style: (compact ? AppTypography.h2 : AppTypography.h1)
+                          .copyWith(color: colors.onImmersive),
                     ),
                     const SizedBox(height: AppSpacing.sm),
                     Text(
@@ -93,7 +94,7 @@ class FgSessionCard extends StatelessWidget {
                         color: colors.onImmersiveMuted,
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.xl),
+                    SizedBox(height: compact ? AppSpacing.md : AppSpacing.xl),
                     action,
                   ],
                 ),

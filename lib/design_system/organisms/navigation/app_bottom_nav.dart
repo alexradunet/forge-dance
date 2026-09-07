@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+
+import '../../../generated/locale_keys.g.dart';
 
 import '../../tokens/app_colors.dart';
 import '../../molecules/navigation/fg_app_nav_button.dart';
@@ -18,7 +21,11 @@ class AppBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: EdgeInsets.fromLTRB(
-          24, 8, 24, 16 + MediaQuery.of(context).padding.bottom),
+        24,
+        8,
+        24,
+        16 + MediaQuery.of(context).padding.bottom,
+      ),
       child: FgGlassContainer(
         height: 72,
         borderRadius: 24,
@@ -37,7 +44,11 @@ class AppBottomNav extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildBatItem(0, Icons.favorite_outline, 'Collection'),
+            _buildBatItem(
+              0,
+              Icons.menu_book_outlined,
+              LocaleKeys.vocabularyTitle.tr(),
+            ),
             _buildBatItem(1, Icons.school_outlined, 'Learn'),
             _buildBatItem(2, Icons.home_outlined, 'Home'),
             _buildBatItem(3, Icons.fitness_center, 'Workout'),

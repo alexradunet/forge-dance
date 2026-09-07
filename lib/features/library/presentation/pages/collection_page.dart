@@ -4,17 +4,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../generated/locale_keys.g.dart';
-import '../../../learn/model/lesson.dart';
+import '../../../../routing/routes.dart';
 import '../../../learn/model/lesson_progress.dart';
 import '../../../learn/model/library_projection.dart';
 import '../../../learn/ui/state/learn_state.dart';
 import '../../../learn/ui/view_model/learn_view_model.dart';
 
 /// Collection — the user's library: every lesson they have started or
-/// completed, straight from users/{uid}/progress. Empty until real training
+/// completed, from locally persisted lesson progress. Empty until real training
 /// happens; searchable by lesson or module title.
 class CollectionPage extends ConsumerStatefulWidget {
-  const CollectionPage({super.key});
+  const CollectionPage({super.key, this.onBack});
+  final VoidCallback? onBack;
 
   @override
   ConsumerState<CollectionPage> createState() => _CollectionPageState();
@@ -112,8 +113,9 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
         // Header
         SliverToBoxAdapter(
           child: AppHeader(
-            title: LocaleKeys.collectionTitle.tr().toUpperCase(),
-            subtitle: LocaleKeys.collectionSubtitle.tr(),
+            title: LocaleKeys.lessonHistory.tr().toUpperCase(),
+            subtitle: LocaleKeys.lessonHistorySubtitle.tr(),
+            onBack: widget.onBack,
             rightSlot: _buildColumnToggle(),
           ),
         ),
@@ -173,36 +175,17 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
-        return FgInteractiveCardThumbnail(
+        return FgContentCard.compact(
           title: item.lesson.title.toUpperCase(),
-          level: _statusLabel(item.status).toUpperCase(),
-          flipSemanticLabel: LocaleKeys.flipCard.tr(),
-          backgroundImage: item.module.imageUrl,
-          backTitle: item.module.title.toUpperCase(),
-          backSubtitle: item.lesson.type.label,
-          onTap: (isFlipped) => _showCardPopup(context, item, isFlipped),
+          subtitle: item.module.title,
+          footerLabel: _statusLabel(item.status),
+          imageUrl: item.module.imageUrl,
+          onTap: () => LessonDestination(
+            item.module.id,
+            item.lesson.id,
+          ).push<void>(context),
         );
       },
-    );
-  }
-
-  void _showCardPopup(BuildContext context, LibraryEntry item, bool isFlipped) {
-    ForgeBottomSheet.show<void>(
-      context: context,
-      title: item.lesson.title,
-      child: FgAspectRatio.portrait(
-        child: FgInteractiveCard(
-          title: item.lesson.title.toUpperCase(),
-          flipSemanticLabel: LocaleKeys.flipCard.tr(),
-          subtitle: item.module.title,
-          backgroundImage: item.module.imageUrl,
-          level: _statusLabel(item.status).toUpperCase(),
-          style: item.module.tag,
-          difficulty: item.lesson.difficulty,
-          isFavorited: false,
-          initialFlipped: isFlipped,
-        ),
-      ),
     );
   }
 

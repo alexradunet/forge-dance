@@ -17,8 +17,15 @@ import 'workout_overview.dart';
 /// steps with a timer/skip gate → purpose-built completion reward.
 class TrainingSessionPage extends ConsumerStatefulWidget {
   final VoidCallback? onClose;
+  final VoidCallback? onStart;
+  final bool startImmediately;
 
-  const TrainingSessionPage({super.key, this.onClose});
+  const TrainingSessionPage({
+    super.key,
+    this.onClose,
+    this.onStart,
+    this.startImmediately = false,
+  });
 
   @override
   ConsumerState<TrainingSessionPage> createState() =>
@@ -42,6 +49,7 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
   @override
   void initState() {
     super.initState();
+    _currentPage = widget.startImmediately ? 1 : 0;
     _contentScrollController = ScrollController()..addListener(_handleScroll);
   }
 
@@ -84,7 +92,7 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
     if (_isIntro) {
       return WorkoutOverview(
         workout: wod,
-        onStart: () => _nextPage(wod),
+        onStart: widget.onStart ?? () => _nextPage(wod),
         onClose: widget.onClose ?? () => Navigator.of(context).pop(),
       );
     }
@@ -209,7 +217,10 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
   }
 
   Widget _buildTimerOverlay(Workout wod) {
-    return Center(
+    return Positioned(
+      left: AppSpacing.lg,
+      right: AppSpacing.lg,
+      bottom: AppSpacing.lg,
       child: FgTimerControl(
         remaining: _timeLeft,
         total: wod.exercises[_activeExerciseIndex].seconds,
@@ -385,6 +396,10 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
       _mediaCollapsed = false;
       _isTimerRunning = false;
     });
+    if (_isIntro && widget.startImmediately) {
+      (widget.onClose ?? () => Navigator.of(context).pop())();
+      return;
+    }
     _initializeTimerIfNeeded(ref.read(workoutViewModelProvider).value!.wod);
   }
 

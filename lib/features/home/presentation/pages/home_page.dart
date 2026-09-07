@@ -11,6 +11,7 @@ import '../../../../design_system/design_system.dart';
 import '../../../../design_system/molecules/cards/fg_session_card.dart';
 import '../../../../generated/locale_keys.g.dart';
 import '../../../learn/model/lesson.dart';
+import '../../../learn/model/lesson_progress.dart';
 import '../../../learn/ui/state/learn_state.dart';
 import '../../../learn/ui/view_model/learn_view_model.dart';
 import '../../../profile/ui/view_model/profile_view_model.dart';
@@ -56,7 +57,6 @@ class HomePage extends ConsumerWidget {
           child: AppHeader(
             title: _dancerHandle(profileName),
             subtitle: LocaleKeys.welcomeBack.tr(),
-            rightSlot: _buildNotificationToggle(),
           ),
         ),
 
@@ -75,16 +75,17 @@ class HomePage extends ConsumerWidget {
         SliverToBoxAdapter(child: _buildProgressSection(context, stats)),
 
         // Continue Training — every module the user is partway through
-        SliverToBoxAdapter(
-          child: _buildHorizontalSection(
-            context: context,
-            title: LocaleKeys.continueTraining.tr().toUpperCase(),
-            children: _interleave([
-              for (final module in state.inProgressModules)
-                _moduleCard(context, ref, state, module),
-            ]),
+        if (state.inProgressModules.isNotEmpty)
+          SliverToBoxAdapter(
+            child: _buildHorizontalSection(
+              context: context,
+              title: LocaleKeys.continueTraining.tr().toUpperCase(),
+              children: _interleave([
+                for (final module in state.inProgressModules)
+                  _moduleCard(context, ref, state, module),
+              ]),
+            ),
           ),
-        ),
 
         // Recommended — untouched modules from the catalog
         if (state.recommendedModules.isNotEmpty)
@@ -166,7 +167,8 @@ class HomePage extends ConsumerWidget {
     if (lesson == null) {
       // Every lesson completed — celebrate and offer replay.
       return FgSessionCard(
-        imageAspectRatio: 16 / 9,
+        compact: true,
+        imageAspectRatio: 5 / 2,
         title: LocaleKeys.moduleComplete.tr().toUpperCase(),
         subtitle: LocaleKeys.moduleCompleteSubtitle.tr(),
         label: state.activeModule.title.toUpperCase(),
@@ -186,13 +188,16 @@ class HomePage extends ConsumerWidget {
         : '${state.activeModule.title} • ${lesson.duration}';
 
     return FgSessionCard(
-      imageAspectRatio: 16 / 9,
+      compact: true,
+      imageAspectRatio: 5 / 2,
       title: lesson.title.toUpperCase(),
       subtitle: subtitle,
       label: LocaleKeys.todaysSession.tr().toUpperCase(),
       imageUrl: state.activeModule.imageUrl,
       action: FgButton(
-        text: LocaleKeys.startLesson.tr(),
+        text: state.statusOf(lesson) == LessonStatus.inProgress
+            ? LocaleKeys.continueLesson.tr()
+            : LocaleKeys.startLesson.tr(),
         variant: FgButtonVariant.primary,
         size: FgButtonSize.lg,
         onPressed: () => _startCurrentLesson(context, ref, state, lesson),
@@ -210,15 +215,6 @@ class HomePage extends ConsumerWidget {
     LessonDestination(state.activeModule.id, lesson.id).push<void>(context);
   }
 
-  Widget _buildNotificationToggle() {
-    return const ExcludeSemantics(
-      child: FgIcon(
-        icon: Icons.notifications_none_rounded,
-        size: AppSizes.iconLg,
-      ),
-    );
-  }
-
   Widget _buildProgressSection(BuildContext context, UserStats stats) {
     final nextLevelTarget = stats.nextLevelXp?.toDouble();
 
@@ -227,30 +223,21 @@ class HomePage extends ConsumerWidget {
       child: FgProgressSection(
         immersive: true,
         title: LocaleKeys.myProgress.tr().toUpperCase(),
-        stats: [
-          FgStatData(
-            label: LocaleKeys.currentStreak.tr().toUpperCase(),
-            value: LocaleKeys.dayN.tr(args: ['${stats.streakCount}']),
-            icon: Icons.local_fire_department_rounded,
-            tone: FgStatTone.primary,
-          ),
-          FgStatData(
-            label: LocaleKeys.beltNameLabel
-                .tr(args: [stats.beltName])
-                .toUpperCase(),
-            value: LocaleKeys.levelLabel.tr(args: ['${stats.level}']),
-            icon: Icons.workspace_premium_rounded,
-            tone: FgStatTone.reward,
-          ),
-        ],
+        stats: const [],
         levelProgress: FgProgressData(
-          label: LocaleKeys.beltNameLabel.tr(args: [stats.beltName]),
+          label:
+              '${LocaleKeys.levelLabel.tr(args: ['${stats.level}'])} • '
+              '${LocaleKeys.beltNameLabel.tr(args: [stats.beltName])}',
           current: stats.totalXp.toDouble(),
           target: nextLevelTarget ?? stats.totalXp.toDouble(),
           valueLabel: nextLevelTarget == null
               ? LocaleKeys.maxLevelReached.tr()
-              : LocaleKeys.nextLevelXp.tr(args: ['${stats.nextLevelXp}']),
-          message: LocaleKeys.xpValue.tr(args: ['${stats.totalXp}']),
+              : LocaleKeys.xpProgress.tr(
+                  args: ['${stats.totalXp}', '${stats.nextLevelXp}'],
+                ),
+          message:
+              '${LocaleKeys.currentStreak.tr()}: '
+              '${LocaleKeys.dayN.tr(args: ['${stats.streakCount}'])}',
         ),
         onProgressTap: () => context.push(Routes.stats),
       ),

@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../design_system/design_system.dart';
 import '../../../../design_system/molecules/cards/fg_program_card.dart';
@@ -87,6 +88,17 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
               onClear: _searchController.clear,
               clearSemanticsLabel: LocaleKeys.clearSearch.tr(),
               showFilter: false,
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+          sliver: SliverToBoxAdapter(
+            child: FgButton(
+              text: LocaleKeys.lessonHistory.tr(),
+              icon: const Icon(Icons.history),
+              variant: FgButtonVariant.secondary,
+              onPressed: () => context.push(Routes.lessonHistory),
             ),
           ),
         ),

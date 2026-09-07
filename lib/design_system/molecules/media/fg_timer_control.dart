@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/forge_theme_extensions.dart';
+import '../../tokens/app_border_radius.dart';
 import '../../tokens/app_sizes.dart';
 import '../../tokens/app_spacing.dart';
 import '../../tokens/app_typography.dart';
 
-/// Determinate countdown with an explicit, keyboard-accessible play/pause action.
-/// The caller owns the clock; rebuilding this control never starts a timer.
+/// Compact countdown panel. The caller owns the clock and its transitions.
 class FgTimerControl extends StatelessWidget {
   const FgTimerControl({
     super.key,
@@ -26,7 +26,8 @@ class FgTimerControl extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = Theme.of(context).forgeColors;
+    final theme = Theme.of(context);
+    final colors = theme.forgeColors;
     return Semantics(
       label: semanticLabel,
       button: true,
@@ -34,78 +35,74 @@ class FgTimerControl extends StatelessWidget {
       child: ExcludeSemantics(
         child: Material(
           color: colors.immersiveSurface,
-          shape: const StadiumBorder(),
+          shape: RoundedRectangleBorder(
+            borderRadius: AppBorderRadius.extraLarge,
+            side: BorderSide(color: colors.onImmersive.withValues(alpha: 0.12)),
+          ),
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onToggle,
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.xxl,
-                vertical: AppSpacing.md,
-              ),
+              padding: AppSpacing.allLG,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Flexible(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(
-                        maxWidth: AppSizes.squareTileMd,
-                        maxHeight: AppSizes.squareTileMd,
-                      ),
-                      child: AspectRatio(
-                        aspectRatio: 1,
-                        child: Stack(
-                          fit: StackFit.expand,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            CircularProgressIndicator(
-                              value: total <= 0
-                                  ? 1
-                                  : (1 - remaining / total).clamp(0, 1),
-                              color: Theme.of(context).colorScheme.primary,
-                              backgroundColor: colors.onImmersiveMuted
-                                  .withValues(alpha: 0.2),
-                              strokeWidth: AppSpacing.xs,
+                            Text(
+                              '${remaining}s',
+                              style: AppTypography.h4.copyWith(
+                                color: colors.onImmersive,
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
+                              ),
                             ),
-                            Center(
-                              child: FittedBox(
-                                fit: BoxFit.scaleDown,
-                                child: Text(
-                                  '${remaining}s',
-                                  style: AppTypography.h2.copyWith(
-                                    color: colors.onImmersive,
-                                  ),
-                                ),
+                            const SizedBox(height: AppSpacing.xs),
+                            Text(
+                              actionLabel,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: colors.onImmersiveMuted,
                               ),
                             ),
                           ],
                         ),
                       ),
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        remaining == 0
-                            ? Icons.check_rounded
-                            : running
-                            ? Icons.pause_rounded
-                            : Icons.play_arrow_rounded,
-                        color: colors.onImmersive,
-                        size: AppSizes.iconMd,
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Flexible(
-                        child: Text(
-                          actionLabel,
-                          textAlign: TextAlign.center,
-                          style: AppTypography.label.copyWith(
-                            color: colors.onImmersive,
-                          ),
+                      const SizedBox(width: AppSpacing.lg),
+                      Container(
+                        width: AppSizes.comfortableTouchTarget,
+                        height: AppSizes.comfortableTouchTarget,
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.primary,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          remaining == 0
+                              ? Icons.check_rounded
+                              : running
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
+                          color: theme.colorScheme.onPrimary,
+                          size: AppSizes.iconLg,
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  LinearProgressIndicator(
+                    value: total <= 0 ? 1 : (1 - remaining / total).clamp(0, 1),
+                    minHeight: AppSpacing.xs,
+                    borderRadius: AppBorderRadius.large,
+                    color: theme.colorScheme.primary,
+                    backgroundColor: colors.onImmersiveMuted.withValues(
+                      alpha: 0.18,
+                    ),
                   ),
                 ],
               ),

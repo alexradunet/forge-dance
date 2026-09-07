@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../tokens/app_sizes.dart';
+import '../../theme/forge_theme_extensions.dart';
 
 @immutable
 class FgMenuItem<T> {
@@ -43,7 +44,13 @@ class FgMenuButton<T> extends StatelessWidget {
         enabled: isEnabled,
         child: PopupMenuButton<T>(
           icon: ExcludeSemantics(
-            child: Icon(icon, size: AppSizes.iconLg),
+            child: Icon(
+              icon,
+              size: AppSizes.iconLg,
+              color: isEnabled
+                  ? context.forgeForeground
+                  : context.forgeMutedForeground,
+            ),
           ),
           enabled: isEnabled,
           onSelected: onSelected,

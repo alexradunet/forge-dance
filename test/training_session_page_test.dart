@@ -59,6 +59,8 @@ void main() {
     required Size size,
     double textScale = 1,
     VoidCallback? onClose,
+    VoidCallback? onStart,
+    bool startImmediately = false,
   }) async {
     SharedPreferences.setMockInitialValues({});
     final repository = _FakeSessionRepository();
@@ -81,7 +83,11 @@ void main() {
                 .copyWith(textScaler: TextScaler.linear(textScale)),
             child: child!,
           ),
-          home: TrainingSessionPage(onClose: onClose),
+          home: TrainingSessionPage(
+            onClose: onClose,
+            onStart: onStart,
+            startImmediately: startImmediately,
+          ),
         ),
       ),
     );
@@ -91,6 +97,40 @@ void main() {
     }
     return repository;
   }
+
+  testWidgets('preview delegates start without entering the player', (
+    tester,
+  ) async {
+    var starts = 0;
+    await pumpTraining(
+      tester,
+      size: const Size(390, 760),
+      onStart: () => starts++,
+    );
+    await tester.tap(find.bySemanticsLabel('startWorkoutSemantic'));
+    await tester.pump();
+    expect(starts, 1);
+    expect(find.byType(FgStepNavigation), findsNothing);
+  });
+
+  testWidgets('direct session starts at exercise one and previous closes it', (
+    tester,
+  ) async {
+    var closes = 0;
+    await pumpTraining(
+      tester,
+      size: const Size(390, 760),
+      startImmediately: true,
+      onClose: () => closes++,
+    );
+    final navigation = tester.widget<FgStepNavigation>(
+      find.byType(FgStepNavigation),
+    );
+    navigation.onPrevious!();
+    await tester.pump();
+    expect(closes, 1);
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets('small screen supports doubled player text', (tester) async {
     await pumpTraining(tester, size: const Size(320, 640), textScale: 2);

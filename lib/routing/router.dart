@@ -8,6 +8,9 @@ import '../features/explore/presentation/pages/explore_page.dart';
 import '../features/library/presentation/pages/collection_page.dart';
 import '../features/profile/presentation/pages/profile_page.dart';
 import '../features/workout/presentation/pages/training_session_page.dart';
+import '../features/vocabulary/repository/vocabulary_repository.dart';
+import '../features/vocabulary/ui/vocabulary_page.dart';
+import '../features/vocabulary/ui/vocabulary_entry_page.dart';
 import '../features/learn/ui/module_view_screen.dart';
 import '../features/learn/ui/lesson_player_screen.dart';
 import '../features/learn/ui/view_model/learn_view_model.dart';
@@ -113,13 +116,56 @@ List<RouteBase> _routes(Ref ref) => [
         MainScreen(location: state.uri.path, child: child),
     routes: [
       GoRoute(path: Routes.main, redirect: (_, _) => Routes.home),
-      GoRoute(path: Routes.library, builder: (_, _) => const CollectionPage()),
-      GoRoute(path: Routes.explore, builder: (_, _) => const ExplorePage()),
+      GoRoute(path: Routes.library, redirect: (_, _) => Routes.vocabulary),
+      GoRoute(
+        path: Routes.vocabulary,
+        builder: (_, _) => const VocabularyPage(),
+        routes: [
+          GoRoute(
+            path: ':entryId',
+            redirect: (_, state) =>
+                const VocabularyRepository().byId(
+                      state.pathParameters['entryId']!,
+                    ) ==
+                    null
+                ? Routes.vocabulary
+                : null,
+            builder: (context, state) => VocabularyEntryPage(
+              entry: const VocabularyRepository().byId(
+                state.pathParameters['entryId']!,
+              )!,
+              onBack: () => context.pop(),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: Routes.explore,
+        builder: (_, _) => const ExplorePage(),
+        routes: [
+          GoRoute(
+            path: 'history',
+            builder: (context, _) =>
+                CollectionPage(onBack: () => context.pop()),
+          ),
+        ],
+      ),
       GoRoute(path: Routes.home, builder: (_, _) => const HomePage()),
       GoRoute(
         path: Routes.workout,
-        builder: (context, _) =>
-            TrainingSessionPage(onClose: () => context.go(Routes.home)),
+        builder: (context, _) => TrainingSessionPage(
+          onClose: () => context.go(Routes.home),
+          onStart: () => context.push(Routes.workoutSession),
+        ),
+        routes: [
+          GoRoute(
+            path: 'session',
+            builder: (context, _) => TrainingSessionPage(
+              startImmediately: true,
+              onClose: () => context.pop(),
+            ),
+          ),
+        ],
       ),
       GoRoute(path: Routes.profile, builder: (_, _) => const ProfilePage()),
       GoRoute(
