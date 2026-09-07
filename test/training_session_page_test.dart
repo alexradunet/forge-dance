@@ -100,6 +100,26 @@ void main() {
     expect(find.byType(FgStepNavigation), findsOneWidget);
   });
 
+  for (final size in [const Size(390, 760), const Size(1000, 600)]) {
+    testWidgets('media and coaching cards share a width at $size', (
+      tester,
+    ) async {
+      await pumpTraining(tester, size: size);
+      await tester.tap(find.bySemanticsLabel('startWorkoutSemantic'));
+      await tester.pumpAndSettle();
+      final mediaRect = tester.getRect(
+        find.byKey(const ValueKey('workout-media-shell')),
+      );
+      final textRect = tester.getRect(find.byType(FgInstructionCard));
+      expect(textRect.width, closeTo(mediaRect.width, 0.01));
+      if (size.width < 760) {
+        expect(textRect.left, closeTo(mediaRect.left, 0.01));
+        expect(textRect.right, closeTo(mediaRect.right, 0.01));
+      }
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   group('adaptive workout training flow', () {
     testWidgets('overview presents workout purpose and starts training', (
       tester,
@@ -295,6 +315,8 @@ void main() {
       await tester.pumpAndSettle();
 
       for (var index = 0; index < wod.exercises.length; index++) {
+        await tester.ensureVisible(find.text('skip'));
+        await tester.pumpAndSettle();
         await tester.tap(find.text('skip'));
         await tester.pumpAndSettle();
       }

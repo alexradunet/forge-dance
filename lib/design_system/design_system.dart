@@ -69,6 +69,7 @@ export 'atoms/icons/fg_icon.dart';
 
 // Cards
 export 'molecules/cards/fg_content_card.dart';
+export 'molecules/cards/fg_instruction_card.dart';
 export 'molecules/cards/fg_interactive_card.dart';
 export 'molecules/cards/fg_interactive_card_thumbnail.dart';
 

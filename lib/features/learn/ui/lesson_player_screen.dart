@@ -22,7 +22,6 @@ class LessonPlayerScreen extends ConsumerStatefulWidget {
 
 class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
   static const _wideMinWidth = 760.0;
-  static const _contentMaxWidth = 520.0;
   static const _expandedMediaMaxHeight = 320.0;
   int _currentStep = 0;
   bool _completing = false;
@@ -220,9 +219,8 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
           child: FadeTransition(opacity: animation, child: child),
         );
       },
-      child: FgCard(
+      child: KeyedSubtree(
         key: ValueKey(step.title),
-        immersive: true,
         child: _LessonStepContent(
           step: step,
           techniqueExpanded: _techniqueExpanded,
@@ -240,21 +238,13 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
           child: SingleChildScrollView(
             key: const ValueKey('lesson-content-scroll'),
             controller: isWide ? null : _contentScrollController,
-            padding: EdgeInsets.all(isWide ? AppSpacing.xxl : AppSpacing.lg),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: _contentMaxWidth),
-              child: content,
-            ),
+            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+            child: SizedBox(width: double.infinity, child: content),
           ),
         ),
         if (isWide)
           Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.xxl,
-              0,
-              AppSpacing.xxl,
-              AppSpacing.xxl,
-            ),
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, AppSpacing.xxl),
             child: _NavigationControls(
               currentStep: _currentStep,
               stepCount: steps.length,
@@ -267,12 +257,7 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
         else
           SafeArea(
             top: false,
-            minimum: const EdgeInsets.fromLTRB(
-              AppSpacing.lg,
-              0,
-              AppSpacing.lg,
-              AppSpacing.sm,
-            ),
+            minimum: const EdgeInsets.fromLTRB(0, 0, 0, AppSpacing.sm),
             child: _NavigationControls(
               currentStep: _currentStep,
               stepCount: steps.length,
@@ -382,9 +367,9 @@ class _WideLessonLayout extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(flex: 3, child: Center(child: media)),
+          Expanded(child: Center(child: media)),
           const SizedBox(width: AppSpacing.xxl),
-          Expanded(flex: 2, child: content),
+          Expanded(child: content),
         ],
       ),
     );
@@ -490,93 +475,56 @@ class _LessonStepContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          step.title,
-          style: textTheme.headlineSmall?.copyWith(
-            color: context.forgeForeground,
+    return FgInstructionCard(
+      eyebrow: LocaleKeys.practiceCue.tr(),
+      icon: Icons.directions_run_rounded,
+      title: step.title,
+      description: step.description.isEmpty
+          ? LocaleKeys.lessonSummaryFallback.tr()
+          : step.description,
+      details: Semantics(
+        expanded: techniqueExpanded,
+        child: ExpansionTile(
+          key: PageStorageKey('technique-${step.title}'),
+          initiallyExpanded: techniqueExpanded,
+          onExpansionChanged: onTechniqueChanged,
+          tilePadding: EdgeInsets.zero,
+          childrenPadding: const EdgeInsets.only(bottom: AppSpacing.lg),
+          backgroundColor: Colors.transparent,
+          collapsedBackgroundColor: Colors.transparent,
+          shape: const Border(),
+          collapsedShape: const Border(),
+          iconColor: context.forgeMutedForeground,
+          collapsedIconColor: context.forgeMutedForeground,
+          title: Text(
+            LocaleKeys.techniqueDetails.tr(),
+            style: TextStyle(color: context.forgeForeground),
           ),
+          subtitle: Text(
+            LocaleKeys.techniqueDetailsHint.tr(),
+            style: TextStyle(color: context.forgeMutedForeground),
+          ),
+          children: [
+            if (step.focus.isNotEmpty)
+              FgCoachingCue(
+                icon: Icons.center_focus_strong_rounded,
+                label: LocaleKeys.focusLabel.tr(),
+                value: step.focus,
+              ),
+            if (step.breath.isNotEmpty)
+              FgCoachingCue(
+                icon: Icons.air_rounded,
+                label: LocaleKeys.breathLabel.tr(),
+                value: step.breath,
+              ),
+            if (step.energy.isNotEmpty)
+              FgCoachingCue(
+                icon: Icons.bolt_rounded,
+                label: LocaleKeys.energyLabel.tr(),
+                value: step.energy,
+              ),
+          ],
         ),
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          step.description.isEmpty
-              ? LocaleKeys.lessonSummaryFallback.tr()
-              : step.description,
-          style: textTheme.bodyLarge?.copyWith(
-            color: context.forgeMutedForeground,
-          ),
-        ),
-        const SizedBox(height: AppSpacing.xxl),
-        Semantics(
-          expanded: techniqueExpanded,
-          child: ExpansionTile(
-            key: PageStorageKey('technique-${step.title}'),
-            initiallyExpanded: techniqueExpanded,
-            onExpansionChanged: onTechniqueChanged,
-            tilePadding: EdgeInsets.zero,
-            childrenPadding: const EdgeInsets.only(bottom: AppSpacing.lg),
-            backgroundColor: Colors.transparent,
-            collapsedBackgroundColor: Colors.transparent,
-            shape: const Border(),
-            collapsedShape: const Border(),
-            iconColor: context.forgeMutedForeground,
-            collapsedIconColor: context.forgeMutedForeground,
-            title: Text(
-              LocaleKeys.techniqueDetails.tr(),
-              style: TextStyle(color: context.forgeForeground),
-            ),
-            subtitle: Text(
-              LocaleKeys.techniqueDetailsHint.tr(),
-              style: TextStyle(color: context.forgeMutedForeground),
-            ),
-            children: [
-              if (step.focus.isNotEmpty)
-                _TechniquePoint(
-                  label: LocaleKeys.focusLabel.tr(),
-                  value: step.focus,
-                ),
-              if (step.breath.isNotEmpty)
-                _TechniquePoint(
-                  label: LocaleKeys.breathLabel.tr(),
-                  value: step.breath,
-                ),
-              if (step.energy.isNotEmpty)
-                _TechniquePoint(
-                  label: LocaleKeys.energyLabel.tr(),
-                  value: step.energy,
-                ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _TechniquePoint extends StatelessWidget {
-  const _TechniquePoint({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: AppSpacing.lg),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          FgLabel(text: label, tone: FgLabelTone.accent),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.bodyMedium
-                ?.copyWith(color: context.forgeForeground),
-          ),
-        ],
       ),
     );
   }

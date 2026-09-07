@@ -27,7 +27,6 @@ class TrainingSessionPage extends ConsumerStatefulWidget {
 
 class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
   static const _wideMinWidth = 760.0;
-  static const _contentMaxWidth = 520.0;
   static const _expandedMediaMaxHeight = 320.0;
   int _currentPage = 0;
   bool _isTimerRunning = false;
@@ -296,19 +295,16 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
           child: SingleChildScrollView(
             key: const ValueKey('workout-content-scroll'),
             controller: isWide ? null : _contentScrollController,
-            padding: EdgeInsets.all(isWide ? AppSpacing.xxl : AppSpacing.lg),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: _contentMaxWidth),
-              child: content,
-            ),
+            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+            child: SizedBox(width: double.infinity, child: content),
           ),
         ),
         SafeArea(
           top: false,
           minimum: EdgeInsets.fromLTRB(
-            isWide ? AppSpacing.xxl : AppSpacing.lg,
             0,
-            isWide ? AppSpacing.xxl : AppSpacing.lg,
+            0,
+            0,
             isWide ? AppSpacing.xxl : AppSpacing.sm,
           ),
           child: _NavigationControls(
@@ -338,16 +334,13 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
       );
     }
     final exercise = wod.exercises[_activeExerciseIndex];
-    return FgCard(
-      immersive: true,
-      child: _ExerciseContent(
-        exercise: exercise,
-        exerciseNumber: _activeExerciseIndex + 1,
-        exerciseCount: wod.exercises.length,
-        isTimerComplete: !_isLocked(wod),
-        wasSkipped: _skippedExercises.contains(_activeExerciseIndex),
-        onSkip: () => _skipCurrentExercise(wod),
-      ),
+    return _ExerciseContent(
+      exercise: exercise,
+      exerciseNumber: _activeExerciseIndex + 1,
+      exerciseCount: wod.exercises.length,
+      isTimerComplete: !_isLocked(wod),
+      wasSkipped: _skippedExercises.contains(_activeExerciseIndex),
+      onSkip: () => _skipCurrentExercise(wod),
     );
   }
 
@@ -518,9 +511,9 @@ class _WideWorkoutLayout extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Expanded(flex: 3, child: Center(child: media)),
+          Expanded(child: Center(child: media)),
           const SizedBox(width: AppSpacing.xxl),
-          Expanded(flex: 2, child: content),
+          Expanded(child: content),
         ],
       ),
     );
@@ -615,41 +608,40 @@ class _ExerciseContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        FgLabel(
-          text: LocaleKeys.exerciseOf.tr(
-            args: ['$exerciseNumber', '$exerciseCount'],
+    return FgInstructionCard(
+      eyebrow: LocaleKeys.exerciseOf.tr(
+        args: ['$exerciseNumber', '$exerciseCount'],
+      ),
+      icon: isTimerComplete
+          ? Icons.check_circle_outline_rounded
+          : Icons.timer_outlined,
+      title: exercise.name,
+      description: isTimerComplete
+          ? (wasSkipped
+                ? LocaleKeys.exerciseSkippedReady.tr()
+                : LocaleKeys.exerciseTimerComplete.tr())
+          : LocaleKeys.exerciseTimerInstruction.tr(),
+      details: Row(
+        children: [
+          Expanded(
+            child: Text(
+              LocaleKeys.secondsCount.tr(args: ['${exercise.seconds}']),
+              style: AppTypography.bodySmall.copyWith(
+                color: context.forgeMutedForeground,
+              ),
+            ),
           ),
-          tone: FgLabelTone.accent,
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          exercise.name,
-          style: Theme.of(context).textTheme.headlineSmall
-              ?.copyWith(color: context.forgeForeground),
-        ),
-        const SizedBox(height: AppSpacing.md),
-        Text(
-          isTimerComplete
-              ? (wasSkipped
-                    ? LocaleKeys.exerciseSkippedReady.tr()
-                    : LocaleKeys.exerciseTimerComplete.tr())
-              : LocaleKeys.exerciseTimerInstruction.tr(),
-          style: Theme.of(context).textTheme.bodyLarge
-              ?.copyWith(color: context.forgeMutedForeground),
-        ),
-        const SizedBox(height: AppSpacing.xxl),
-        FgButton(
-          text: LocaleKeys.skip.tr(),
-          variant: FgButtonVariant.secondary,
-          onPressed: isTimerComplete ? null : onSkip,
-          semanticLabel: LocaleKeys.skipExerciseSemantic.tr(
-            args: ['$exerciseNumber', '$exerciseCount'],
+          const SizedBox(width: AppSpacing.md),
+          FgButton(
+            text: LocaleKeys.skip.tr(),
+            variant: FgButtonVariant.secondary,
+            onPressed: isTimerComplete ? null : onSkip,
+            semanticLabel: LocaleKeys.skipExerciseSemantic.tr(
+              args: ['$exerciseNumber', '$exerciseCount'],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
