@@ -1,0 +1,14 @@
+appId: dance.forge.app
+---
+# Destructive: use only on a disposable test device.
+- launchApp:
+    clearState: true
+- assertVisible: "Set up your profile"
+- assertVisible:
+    text: "Continue"
+    enabled: false
+- tapOn: "Your Name"
+- inputText: "Maestro Dancer"
+- hideKeyboard
+- tapOn: "Continue"
+- assertVisible: "MAESTRO_DANCER"

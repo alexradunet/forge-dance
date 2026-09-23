@@ -1,0 +1,11 @@
+appId: dance.forge.app
+name: Navigate from Home to Profile and back
+tags:
+  - smoke
+---
+- runFlow: ../helpers/create-profile.yaml
+- tapOn: "Profile"
+- assertVisible: "Maestro Dancer"
+- takeScreenshot: profile
+- tapOn: "Home"
+- assertVisible: "MAESTRO_DANCER"

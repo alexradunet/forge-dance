@@ -1,0 +1,3 @@
+# Discover only independent scenarios, not reusable setup flows.
+flows:
+  - "flows/*.yaml"

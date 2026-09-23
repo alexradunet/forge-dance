@@ -1,0 +1,17 @@
+appId: dance.forge.app
+name: Vocabulary search shows empty results and recovers
+tags:
+  - smoke
+---
+- runFlow: ../helpers/create-profile.yaml
+- tapOn: "Vocabulary"
+- assertVisible: "Moves, foundations & concepts"
+- tapOn: "Search moves & concepts"
+- inputText: "zzznomatchingmove"
+- hideKeyboard
+- assertVisible: "Try another name or broaden your filters."
+- takeScreenshot: vocabulary-empty-search
+- tapOn: "Clear search"
+- assertNotVisible: "Try another name or broaden your filters."
+- assertVisible: "Search moves & concepts"
+- takeScreenshot: vocabulary-search-cleared

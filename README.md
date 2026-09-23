@@ -46,6 +46,20 @@ bash tool/capture_android_emulator.sh
 
 Inside an Orca terminal use `orca`; on unmanaged Linux shells use `orca-ide`. The capture command writes `build/live/android-emulator.png` for visual review. Flutter remains attached for hot reload through Dart MCP.
 
+## Android end-to-end scenarios (Maestro)
+
+Maestro scenarios cover profile setup, restart persistence, and Home/Profile
+navigation on an Android emulator. They **erase app data**; use a disposable test
+AVD, not your live development device.
+
+```bash
+FORGE_ANDROID_DEVICE=emulator-5556 FORGE_MAESTRO_ALLOW_CLEAR=1 \
+  bash tool/check_maestro.sh
+```
+
+See [Maestro setup and scenario guide](.maestro/README.md) for installation,
+single-scenario runs, and reports under `build/maestro-*`.
+
 ## Widgetbook
 
 Use the integrated workbench to develop Forge Dance foundations, components, and screens in isolation:

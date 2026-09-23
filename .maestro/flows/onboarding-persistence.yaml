@@ -1,0 +1,12 @@
+appId: dance.forge.app
+name: Profile setup survives an app restart
+tags:
+  - smoke
+---
+- runFlow: ../helpers/create-profile.yaml
+- stopApp
+# No clearState: this must read the profile saved by the previous launch.
+- launchApp
+- assertVisible: "MAESTRO_DANCER"
+- assertNotVisible: "Set up your profile"
+- takeScreenshot: onboarding-persistence
