@@ -12,8 +12,9 @@ final $Poster = _Story(
     image: Arg.fixed(
       const AssetImage('packages/forge_dance/assets/images/cypher-dancer.webp'),
     ),
+    imageLabel: StringArg('Preview photo'),
     eyebrow: StringArg('YOUR FLOOR. YOUR PACE.'),
-    title: StringArg('MAKE YOUR\nNEXT MOVE.'),
+    title: StringArg('FIND YOUR\nFLOW.'),
     subtitle: StringArg(
       'Build your foundations. Find your groove. Bring your own style.',
     ),
@@ -22,6 +23,23 @@ final $Poster = _Story(
     ),
   ),
   scenarios: [
+    _Scenario(
+      name: 'Workout poster',
+      args: _Args(
+        image: Arg.fixed(
+          const AssetImage(
+            'packages/forge_dance/assets/images/studio-dancer-preview.webp',
+          ),
+        ),
+        compact: Arg.fixed(true),
+        eyebrow: StringArg('Today’s workout'),
+        title: StringArg('Clear Initiations'),
+        subtitle: StringArg('White FORGE · 20 min'),
+        action: Arg.fixed(
+          FgButton(text: 'Start first round', onPressed: () {}),
+        ),
+      ),
+    ),
     _Scenario(
       name: 'Unavailable image',
       args: _Args(

@@ -17,13 +17,17 @@ This updates the visual direction of [the foundation refresh plan](design-system
 
 | Module | Contract | Adopted in |
 |---|---|---|
-| `FgDanceHero` | Bundled/decorative image, opaque copy area, adaptive split layout, content-sized headline, explicit action, image failure fallback | Home |
+| `FgDanceHero` | Full-bleed decorative image, tested minimum-contrast copy scrim (opaque in high contrast), content-sized headline, explicit action, image failure fallback | Home, daily workout |
 | `FgSectionHeading` | Eyebrow/title/subtitle hierarchy, semantic heading, unlimited wrapping | Home, Learn discovery, daily practice, motion lab |
 | `FgProgramCard` / `FgProgramCardLayout` | Optional photo, complete route summary, progress/lock/enrolment status, one native keyboard action, responsive content-sized grid | Learn modules, programme discovery |
 | `FgCardShape.editorial` | Crisp corners without replacing existing utility-card defaults | Module and programme previews |
 | `FgShimmer` | Stops for reduced motion or disabled ticker scope; resumes when allowed | Existing image-loading placeholders |
 | `FgRoundPanel` | Numbered or active content region, semantic colors, visible cue/safety slot | Home current lesson, practice blocks, active practice player |
 | `FgMovementStage` | Bounded quiet viewport and accessible description; controls live outside it | Motion lab |
+| `FgPracticeMeter` | Elapsed time, target progress, accessible status and a wrapping eight-count strip; no decorative animation | Active practice player |
+| `FgReferenceCard` | Stable index number, complete definition and real study status; one native keyboard destination | Vocabulary index |
+| `FgPhoto` / `FgPhotoHeading` | Decorative image with a fallback; labelled thumbnail beside wrapping text, stacking at narrow widths/large text | Home current lesson, workout rounds |
+| `FgPhotoTile` / `FgPhotoTileLayout` | One native destination action per image card; two-up discovery becomes stacked at large text | Home Learn/Programme links |
 | `FgButton` | Crisp rounded default; long labels wrap; native focus/keyboard/disabled/loading behavior; pill/circle still explicit choices | Existing application callers |
 | `FgBackground` | Matte immersive default; decorative gradients opt-in | Existing immersive flows |
 
@@ -31,11 +35,11 @@ Keep feature-owned copy/localization and view-model intents outside the design s
 
 Home and Learn now use `FgImmersiveScaffold` and its builder context, including under a light host. No appearance preference is changed. Existing profile, curriculum, daily scheduling, safety, unsaved-session protection, and persistence behavior are retained.
 
-The hero photo is bundled (~148 KB) so it does not depend on a first-run network request. See [asset provenance](../assets/images/CREDITS.md). Other catalogue thumbnails remain the existing cached network images. No new video autoplay or renderer dependency is added to startup.
+Home and the Workout tab use bundled editorial preview photos: the existing ~148 KB hero plus two additional WebPs (~340 KB total). These are explicitly placeholder/inspiration images, not adjacent movement demonstrations or instructor identities; no activity or progress is fabricated. See [asset provenance](../assets/images/CREDITS.md). Learn catalogue thumbnails remain cached network images. No video autoplay or renderer dependency is added to startup.
 
 ## Motion lab: executable interaction experiment
 
-Run `bash tool/run_live_flutter.sh linux`, `bash tool/run_live_flutter.sh web`, or `bash tool/run_orca_android.sh`. In a **debug** build, Home → **Preview 3D motion lab** (below “How it works”). There is no production route/link. No storage, lesson assessment, practice time, or rewards are affected.
+Run `bash tool/run_live_flutter.sh linux`, `bash tool/run_live_flutter.sh web`, or `bash tool/run_orca_android.sh`. In a **debug** build, Home → expand **How it works** → **Preview 3D motion lab**. There is no production route/link. No storage, lesson assessment, practice time, or rewards are affected.
 
 Code: `lib/features/movement_teacher/prototype/`.
 
@@ -59,7 +63,7 @@ The delegated renderer-research lane was stopped because the worker's advertised
 
 ## Remaining rollout
 
-- Continue the editorial hierarchy into module/lesson detail and vocabulary after reviewing each screen's purpose. Home, Explore and programme discovery establish the shared patterns; don't put a promotional hero on forms or active exercise pages.
+- Continue the editorial hierarchy into module/lesson detail after reviewing each screen's purpose. Home, Explore, programme discovery and Vocabulary establish the shared patterns; don't put a promotional hero on forms or active exercise pages.
 - Audit legacy badge foregrounds and small type, remaining card semantics, shimmer palette defaults, and raw-palette usage outside the adopted slice. Shimmer motion is now covered, but these remaining inconsistencies are not solved by a token rename.
 - Commission battle/cypher imagery with consistent crops and explicit rights. Add only purpose-driven, opt-in instructional video.
 - Keep real light-host, expanded disclosure, large-text and root-dialog tests alongside every migrated screen. Component stories alone are not acceptance.
@@ -88,3 +92,22 @@ Local visual captures and logs are under ignored `build/design-refresh/`; they a
 - Release Web Wasm + JS fallback build and quality gate passed: performance 53, accessibility 100, best practices 81, SEO 100; 8.11 MiB transferred, zero console errors and failed requests. The same non-fatal Lantern `NO_LCP` diagnostic remains; this is not a production 3D benchmark.
 - Current Android screenshots cover Learn and Programme discovery, collapsed/expanded programme guidance, 2× system text, and landscape Learn. Runtime error check was empty. Emulator font scale was restored to 1.0 and orientation to portrait.
 - No new media dependency, persistence shape, instructional content, or production renderer was introduced.
+
+### Home / Workout photo preview (2026-09-23)
+
+- Responding to feedback that the screens felt too plain: Home now has a full-bleed poster, a photo-led current lesson, and two image destinations for Learn and Programmes. Utility links and the debug lab sit below discovery; complete explanatory copy remains available.
+- The **Workout tab is `PracticePage`**, not the legacy fitness-circuit overview. It now has a photographic daily header, an explicit first-round action, and labelled round thumbnails. Starting still opens the real first block paused; the active player has no new decorative photographs.
+- Photos are bundled placeholders with documented provenance, not fabricated lesson content. Existing scheduling, progress, preferences, unsaved-record handling, lesson locks, adaptations and safety copy are retained.
+- Core gate: analyzer clean, **251 tests passed**. Browser integration and Widgetbook generation/analysis passed. Component coverage includes keyboard activation, missing-image recovery, scrim contrast over white, light hosts and large text. Screen coverage includes real photo-tile routes, full disclosures, and first-round navigation.
+- Release Web Wasm/JS-fallback quality gate passed: performance 51, accessibility 100, best practices 81, SEO 100; 8.11 MiB startup transfer, zero console errors/failed requests. The existing non-fatal Lantern `NO_LCP` diagnostic remains; startup scores are not a benchmark of every photo-bearing screen.
+- Current Android normal/2×-text, collapsed/expanded Home and Workout screenshots are under ignored `build/photo-refresh/`. Font scale restored to 1.0; no appearance preference or training record was changed.
+
+### Active workout / Vocabulary continuation (2026-09-23)
+
+- The active workout is `PracticePlayerPage`, reached from **Start first round**. Its new readout shows real active time, suggested target progress and the current count. Start/pause and save precede changing cues so cue length cannot move the pause target. Written instruction and safety remain outside disclosures; no decorative image or unverified teacher is added.
+- Tempo, phrase and independent-mode controls are grouped under **Tempo, counts & guidance**. Optional notes/effort retain their values when collapsed; media selection still pauses practice. Clock, count-in, lifecycle pause, audio, record creation and caller-owned persistence are unchanged.
+- Vocabulary now uses an immersive, constrained index, offline preview header, numbered reference cards and a responsive two-column layout. Alias search, combined kind/style filters, clearing/reset, full definitions and real study status are preserved. Reference pages expose the technique cue, comfort guidance, lesson/practice access and complete contextual/evidence disclosures without relaxing prerequisite gates.
+- Disabled `FgButton` content now uses the same muted foreground as its disabled Material state, rather than retaining a primary button's black foreground on a dark disabled fill.
+- Core gate: clean analyzer, **263 tests passed**. Coverage includes real screens under a light host, 320px/1040px at 2× text, expanded disclosures, draft notes, muted start/background pause, dark phrase popup selection, real reference navigation and locked/unlocked practice. Reference keyboard actions and meter high-contrast/reduced-motion states have focused component tests and Widgetbook stories; Widgetbook generation/analysis passed.
+- Release Web Wasm/JS-fallback quality gate passed: performance **54**, accessibility **100**, best practices **81**, SEO **100**; **8.11 MiB**, zero console errors or failed requests. The existing non-fatal Lantern `NO_LCP` diagnostic remains. Routing, onboarding and persistence schemas were not changed.
+- Live Android normal/2×-text and collapsed/expanded screenshots are under ignored `build/session-vocabulary-refresh/`. Muted playback, count-in, active counts and pause were exercised without saving a training record. Runtime errors were empty; font scale was restored to 1.0 and the player reopened ready at 00:00. No new asset, backend or renderer dependency was introduced.

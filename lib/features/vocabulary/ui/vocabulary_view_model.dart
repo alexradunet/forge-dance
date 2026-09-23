@@ -21,6 +21,8 @@ class VocabularyViewModel extends _$VocabularyViewModel {
   @override
   VocabularyFilters build() => const VocabularyFilters();
 
+  void reset() => state = const VocabularyFilters();
+
   void search(String query) => state = VocabularyFilters(
     query: query,
     kind: state.kind,

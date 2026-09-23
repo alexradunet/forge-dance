@@ -21,6 +21,18 @@ final $Preview = _Story(
   ),
   scenarios: [
     _Scenario(
+      name: 'Bundled preview photo',
+      args: _Args.fixed(
+        onTap: () {},
+        title: 'Ready Body',
+        label: 'Start here • Preview photo',
+        image: AssetImage(
+          'packages/forge_dance/assets/images/studio-dancer-preview.webp',
+        ),
+        details: '0 of 3 lessons',
+      ),
+    ),
+    _Scenario(
       name: 'Locked module',
       args: _Args.fixed(
         onTap: () {},

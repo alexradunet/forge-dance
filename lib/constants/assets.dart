@@ -8,4 +8,13 @@ class Assets {
   static const welcome = 'assets/images/welcome.svg';
   static const avatar = 'assets/images/avatar.webp';
   static const cypherDancer = 'assets/images/cypher-dancer.webp';
+  static const danceFloorPreview = 'assets/images/dance-floor-preview.webp';
+  static const studioDancerPreview = 'assets/images/studio-dancer-preview.webp';
+
+  /// Editorial placeholders, never demonstrations of the adjacent exercise.
+  static const practicePreviewPhotos = [
+    studioDancerPreview,
+    cypherDancer,
+    danceFloorPreview,
+  ];
 }

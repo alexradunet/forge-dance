@@ -80,6 +80,12 @@ class AppSizes {
   static const double readingContentMax = 760;
   static const double posterImageAspectRatio = 16 / 9;
   static const double movementStageHeight = 320;
+  static const double rhythmCountWidth = 28;
+  static const double photoReveal = 96;
+  static const double photoRevealCompact = 48;
+  static const double photoThumbnail = 96;
+  static const double photoTileAspectRatio = 4 / 3;
+  static const double photoPairBreakpoint = 340;
 
   /// Compact card width (2-col grid)
   static const double cardCompactWidth = 160.0;

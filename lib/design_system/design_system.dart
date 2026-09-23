@@ -54,6 +54,7 @@ export 'atoms/visuals/fg_shimmer.dart';
 export 'atoms/visuals/fg_tooltip.dart';
 export 'atoms/visuals/fg_aspect_ratio.dart';
 export 'atoms/visuals/fg_image.dart';
+export 'atoms/visuals/fg_photo.dart';
 export 'atoms/visuals/fg_rating.dart';
 export 'atoms/visuals/fg_icon_label.dart';
 export 'atoms/visuals/fg_lesson_timeline_track.dart';
@@ -70,7 +71,9 @@ export 'atoms/icons/fg_icon.dart';
 // Cards
 export 'molecules/cards/fg_content_card.dart';
 export 'molecules/cards/fg_round_panel.dart';
+export 'molecules/cards/fg_reference_card.dart';
 export 'molecules/cards/fg_program_card.dart';
+export 'molecules/cards/fg_photo_tile.dart';
 export 'molecules/typography/fg_section_heading.dart';
 export 'molecules/cards/fg_instruction_card.dart';
 export 'molecules/cards/fg_interactive_card.dart';
@@ -92,8 +95,10 @@ export 'molecules/navigation/fg_step_navigation.dart';
 // Media
 export 'molecules/media/fg_media_dock.dart';
 export 'molecules/media/fg_dance_hero.dart';
+export 'molecules/media/fg_photo_heading.dart';
 export 'molecules/media/fg_movement_stage.dart';
 export 'molecules/media/fg_timer_control.dart';
+export 'molecules/media/fg_practice_meter.dart';
 
 // Lessons
 export 'molecules/lessons/fg_lesson_timeline_boss_node.dart';

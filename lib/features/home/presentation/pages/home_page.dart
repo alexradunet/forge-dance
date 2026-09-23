@@ -18,14 +18,19 @@ import '../../../learn/ui/state/learn_state.dart';
 import '../../../learn/ui/view_model/learn_view_model.dart';
 import '../../../profile/ui/view_model/profile_view_model.dart';
 
-/// Home combines assessed mastery, daily practice, and the existing curriculum.
+/// Photo-led discovery with real learning/progress, never fabricated activity.
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final learnState = ref.watch(learnViewModelProvider);
-
+    final profileName = ref
+        .watch(profileViewModelProvider)
+        .value
+        ?.profile
+        ?.name;
+    final stats = ref.watch(userStatsProvider).value ?? const UserStats();
     return FgImmersiveScaffold(
       bodyBuilder: (context) => Center(
         child: ConstrainedBox(
@@ -39,25 +44,28 @@ class HomePage extends ConsumerWidget {
               title: LocaleKeys.unexpectedErrorOccurred.tr(),
               tone: FgEmptyTone.error,
             ),
-            data: (state) => _buildContent(context, ref, state),
+            data: (state) =>
+                _buildContent(context, ref, state, profileName, stats),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref, LearnState state) {
-    final profileName = ref
-        .watch(profileViewModelProvider)
-        .value
-        ?.profile
-        ?.name;
-    final stats = ref.watch(userStatsProvider).value ?? const UserStats();
-
+  Widget _buildContent(
+    BuildContext context,
+    WidgetRef ref,
+    LearnState state,
+    String? profileName,
+    UserStats stats,
+  ) {
+    // The active module already has the prominent continue card below.
+    final otherInProgress = state.inProgressModules
+        .where((module) => module.id != state.activeModule.id)
+        .toList();
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
-        // Header
         SliverToBoxAdapter(
           child: AppHeader(
             title: _dancerHandle(profileName),
@@ -69,14 +77,15 @@ class HomePage extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           sliver: SliverToBoxAdapter(
             child: FgDanceHero(
+              key: const ValueKey('home-photo-hero'),
               image: const AssetImage(Assets.cypherDancer),
+              imageLabel: LocaleKeys.photoPreviewLabel.tr(),
               eyebrow: LocaleKeys.cypherEyebrow.tr(),
-              title: LocaleKeys.cypherHeadline.tr(),
-              subtitle: LocaleKeys.cypherInvitation.tr(),
+              title: LocaleKeys.photoHomeHeadline.tr(),
+              subtitle: LocaleKeys.photoHomeInvitation.tr(),
               action: FgButton(
                 text: LocaleKeys.forgeTodayPractice.tr(),
                 icon: const Icon(Icons.north_east),
-                size: FgButtonSize.lg,
                 expand: true,
                 onPressed: () => context.push(Routes.practice),
               ),
@@ -86,8 +95,65 @@ class HomePage extends ConsumerWidget {
         SliverPadding(
           padding: AppSpacing.allLG,
           sliver: SliverToBoxAdapter(
+            child: _buildDailySessionCard(context, ref, state),
+          ),
+        ),
+        SliverPadding(
+          padding: AppSpacing.allLG,
+          sliver: SliverToBoxAdapter(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FgSectionHeading(title: LocaleKeys.photoDiscoverHeading.tr()),
+                const SizedBox(height: AppSpacing.lg),
+                FgPhotoTileLayout(
+                  children: [
+                    FgPhotoTile(
+                      key: const ValueKey('home-learn-photo'),
+                      image: const AssetImage(Assets.studioDancerPreview),
+                      label: LocaleKeys.exploreTitle.tr(),
+                      title: LocaleKeys.photoLearnTitle.tr(),
+                      onTap: () => MainTabDestination.explore.go(context),
+                    ),
+                    FgPhotoTile(
+                      key: const ValueKey('home-programmes-photo'),
+                      image: const AssetImage(Assets.danceFloorPreview),
+                      label: LocaleKeys.forgeProgrammes.tr(),
+                      title: LocaleKeys.photoProgrammesTitle.tr(),
+                      onTap: () => context.push(Routes.programmes),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        SliverToBoxAdapter(child: _buildProgressSection(context, stats)),
+        if (otherInProgress.isNotEmpty)
+          SliverToBoxAdapter(
+            child: _buildModuleSection(
+              context,
+              ref,
+              state,
+              LocaleKeys.continueTraining.tr(),
+              otherInProgress,
+            ),
+          ),
+        if (state.recommendedModules.isNotEmpty)
+          SliverToBoxAdapter(
+            child: _buildModuleSection(
+              context,
+              ref,
+              state,
+              LocaleKeys.recommendedForYou.tr(),
+              state.recommendedModules,
+            ),
+          ),
+        SliverPadding(
+          padding: AppSpacing.allLG,
+          sliver: SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Wrap(
                   spacing: AppSpacing.sm,
@@ -97,11 +163,6 @@ class HomePage extends ConsumerWidget {
                       text: LocaleKeys.forgeAssessments.tr(),
                       variant: FgButtonVariant.ghost,
                       onPressed: () => context.push(Routes.method),
-                    ),
-                    FgButton(
-                      text: LocaleKeys.forgeProgrammes.tr(),
-                      variant: FgButtonVariant.ghost,
-                      onPressed: () => context.push(Routes.programmes),
                     ),
                     FgButton(
                       text: LocaleKeys.forgeLogbook.tr(),
@@ -114,79 +175,43 @@ class HomePage extends ConsumerWidget {
                 FgDetails(
                   key: const ValueKey('home-forge-explanation'),
                   title: LocaleKeys.detailsLearnMore.tr(),
-                  child: Text(LocaleKeys.forgeCoreSubtitle.tr()),
-                ),
-                if (kDebugMode)
-                  FgButton(
-                    text: LocaleKeys.motionLabOpen.tr(),
-                    icon: const Icon(Icons.view_in_ar),
-                    variant: FgButtonVariant.secondary,
-                    onPressed: () =>
-                        Navigator.of(context, rootNavigator: true).push<void>(
-                          MaterialPageRoute(
-                            builder: (_) => const MotionLabPage(),
-                          ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(LocaleKeys.cypherInvitation.tr()),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(LocaleKeys.forgeCoreSubtitle.tr()),
+                      if (kDebugMode)
+                        FgButton(
+                          text: LocaleKeys.motionLabOpen.tr(),
+                          icon: const Icon(Icons.view_in_ar),
+                          variant: FgButtonVariant.secondary,
+                          onPressed: () =>
+                              Navigator.of(
+                                context,
+                                rootNavigator: true,
+                              ).push<void>(
+                                MaterialPageRoute(
+                                  builder: (_) => const MotionLabPage(),
+                                ),
+                              ),
                         ),
+                    ],
                   ),
+                ),
+                FgDetails(
+                  title: LocaleKeys.photoAboutTitle.tr(),
+                  child: Text(LocaleKeys.photoAboutBody.tr()),
+                ),
               ],
             ),
           ),
         ),
-
-        // Daily session hero — the user's current lesson on the path
-        SliverToBoxAdapter(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xxl,
-              vertical: AppSpacing.sm,
-            ),
-            child: _buildDailySessionCard(context, ref, state),
-          ),
-        ),
-
-        // Progress Section (streak / level / XP — taps through to stats)
-        SliverToBoxAdapter(child: _buildProgressSection(context, stats)),
-
-        // Continue Training — every module the user is partway through
-        if (state.inProgressModules.isNotEmpty)
-          SliverToBoxAdapter(
-            child: _buildHorizontalSection(
-              context: context,
-              title: LocaleKeys.continueTraining.tr().toUpperCase(),
-              children: _interleave([
-                for (final module in state.inProgressModules)
-                  _moduleCard(context, ref, state, module),
-              ]),
-            ),
-          ),
-
-        // Recommended — untouched modules from the catalog
-        if (state.recommendedModules.isNotEmpty)
-          SliverToBoxAdapter(
-            child: _buildHorizontalSection(
-              context: context,
-              title: LocaleKeys.recommendedForYou.tr().toUpperCase(),
-              showViewAll: true,
-              children: _interleave([
-                for (final module in state.recommendedModules)
-                  _moduleCard(
-                    context,
-                    ref,
-                    state,
-                    module,
-                    width: AppSizes.cardCompactWidth,
-                  ),
-              ]),
-            ),
-          ),
-
-        // Bottom Spacing for BottomNav
         const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
       ],
     );
   }
 
-  /// FORGE_DANCER-style handle derived from the profile name.
   String _dancerHandle(String? name) {
     final source = (name == null || name.trim().isEmpty)
         ? Constants.defaultName
@@ -194,64 +219,26 @@ class HomePage extends ConsumerWidget {
     return source.toUpperCase().replaceAll(RegExp(r'\s+'), '_');
   }
 
-  String _lessonsCompletedLabel(LearnState state, Module module) {
-    return LocaleKeys.lessonsCompletedOf.tr(
-      args: ['${state.completedCountIn(module)}', '${module.lessons.length}'],
-    );
-  }
-
-  Widget _moduleCard(
-    BuildContext context,
-    WidgetRef ref,
-    LearnState state,
-    Module module, {
-    double? width,
-  }) {
-    return FgContentCard(
-      title: module.title,
-      tags: [module.tag.toUpperCase()],
-      imageUrl: module.imageUrl,
-      progress: state.moduleProgressOf(module),
-      footerLabel: _lessonsCompletedLabel(state, module),
-      width: width,
-      onTap: () => _openModule(context, ref, module),
-    );
-  }
-
-  void _openModule(BuildContext context, WidgetRef ref, Module module) {
-    ref.read(learnViewModelProvider.notifier).selectModule(module.id);
-    ModuleDestination(module.id).push<void>(context);
-  }
-
-  List<Widget> _interleave(List<Widget> cards) => [
-    for (var i = 0; i < cards.length; i++) ...[
-      if (i > 0) const SizedBox(width: AppSpacing.lg),
-      cards[i],
-    ],
-  ];
-
   Widget _buildDailySessionCard(
     BuildContext context,
     WidgetRef ref,
     LearnState state,
   ) {
     final lesson = state.currentLesson;
-
     final subtitle = lesson == null
         ? LocaleKeys.moduleCompleteSubtitle.tr()
         : lesson.duration.isEmpty
         ? state.activeModule.title
         : '${state.activeModule.title} • ${lesson.duration}';
-
     return FgRoundPanel(
       label: LocaleKeys.continueTraining.tr().toUpperCase(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          FgSectionHeading(
-            title:
-                lesson?.title.toUpperCase() ??
-                LocaleKeys.moduleComplete.tr().toUpperCase(),
+          FgPhotoHeading(
+            image: const AssetImage(Assets.studioDancerPreview),
+            imageLabel: LocaleKeys.photoPreviewLabel.tr(),
+            title: lesson?.title ?? LocaleKeys.moduleComplete.tr(),
             subtitle: subtitle,
           ),
           const SizedBox(height: AppSpacing.lg),
@@ -283,65 +270,71 @@ class HomePage extends ConsumerWidget {
     LessonDestination(state.activeModule.id, lesson.id).push<void>(context);
   }
 
-  Widget _buildProgressSection(BuildContext context, UserStats stats) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.xxl),
-      child: FgProgressSection(
-        immersive: true,
-        title: LocaleKeys.myProgress.tr().toUpperCase(),
-        stats: const [],
-        levelProgress: FgProgressData(
-          label:
-              '${LocaleKeys.levelLabel.tr(args: ['${stats.level}'])} • '
-              '${LocaleKeys.beltNameLabel.tr(args: [stats.beltName])}',
-          current: stats.levelProgress,
-          target: 1,
-          valueLabel: stats.nextBeltName == null
-              ? LocaleKeys.maxLevelReached.tr()
-              : LocaleKeys.forgeNextBelt.tr(args: [stats.nextBeltName!]),
-          message:
-              '${LocaleKeys.currentStreak.tr()}: '
-              '${LocaleKeys.dayN.tr(args: ['${stats.streakCount}'])}',
-        ),
-        onProgressTap: () => context.push(Routes.method),
-      ),
-    );
-  }
-
-  Widget _buildHorizontalSection({
-    required BuildContext context,
-    required String title,
-    required List<Widget> children,
-    bool showViewAll = false,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildModuleSection(
+    BuildContext context,
+    WidgetRef ref,
+    LearnState state,
+    String title,
+    List<Module> modules,
+  ) => Padding(
+    padding: AppSpacing.allLG,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xxl,
-            vertical: AppSpacing.lg,
-          ),
-          child: Row(
-            children: [
-              Expanded(child: FgSectionHeading(title: title)),
-              if (showViewAll)
-                FgButton(
-                  text: LocaleKeys.viewAll.tr().toUpperCase(),
-                  variant: FgButtonVariant.ghost,
-                  size: FgButtonSize.sm,
-                  onPressed: () => MainTabDestination.explore.go(context),
+        FgSectionHeading(title: title),
+        const SizedBox(height: AppSpacing.lg),
+        FgProgramCardLayout(
+          children: [
+            for (final module in modules)
+              FgProgramCard(
+                title: module.title,
+                label: '${module.tag} • ${LocaleKeys.photoPreviewLabel.tr()}',
+                image: AssetImage(
+                  Assets.practicePreviewPhotos[module.category.index %
+                      Assets.practicePreviewPhotos.length],
                 ),
-            ],
-          ),
-        ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
-          physics: const BouncingScrollPhysics(),
-          child: Row(children: children),
+                progress: state.moduleProgressOf(module),
+                details: LocaleKeys.lessonsCompletedOf.tr(
+                  args: [
+                    '${state.completedCountIn(module)}',
+                    '${module.lessons.length}',
+                  ],
+                ),
+                actionLabel: LocaleKeys.vocabularyViewPath.tr(),
+                onTap: () {
+                  ref
+                      .read(learnViewModelProvider.notifier)
+                      .selectModule(module.id);
+                  ModuleDestination(module.id).push<void>(context);
+                },
+              ),
+          ],
         ),
       ],
-    );
-  }
+    ),
+  );
+
+  Widget _buildProgressSection(
+    BuildContext context,
+    UserStats stats,
+  ) => Padding(
+    padding: AppSpacing.allLG,
+    child: FgProgressSection(
+      immersive: true,
+      title: LocaleKeys.myProgress.tr().toUpperCase(),
+      stats: const [],
+      levelProgress: FgProgressData(
+        label:
+            '${LocaleKeys.levelLabel.tr(args: ['${stats.level}'])} • ${LocaleKeys.beltNameLabel.tr(args: [stats.beltName])}',
+        current: stats.levelProgress,
+        target: 1,
+        valueLabel: stats.nextBeltName == null
+            ? LocaleKeys.maxLevelReached.tr()
+            : LocaleKeys.forgeNextBelt.tr(args: [stats.nextBeltName!]),
+        message:
+            '${LocaleKeys.currentStreak.tr()}: ${LocaleKeys.dayN.tr(args: ['${stats.streakCount}'])}',
+      ),
+      onProgressTap: () => context.push(Routes.method),
+    ),
+  );
 }

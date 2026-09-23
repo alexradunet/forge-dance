@@ -11,6 +11,7 @@ class FgProgramCard extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.imageUrl,
+    this.image,
     this.summary,
     this.details,
     this.actionLabel,
@@ -19,10 +20,11 @@ class FgProgramCard extends StatelessWidget {
     this.isSelected = false,
     this.focusNode,
     this.autofocus = false,
-  });
+  }) : assert(image == null || imageUrl == null, 'Choose one image source.');
 
   final String title;
   final String? imageUrl;
+  final ImageProvider? image;
   final String label;
   final String? summary;
   final String? details;
@@ -48,11 +50,13 @@ class FgProgramCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (imageUrl != null)
+          if (image != null || imageUrl != null)
             ExcludeSemantics(
               child: SizedBox(
                 height: AppSizes.squareTileLg,
-                child: FgImage(imageUrl: imageUrl!, fit: BoxFit.cover),
+                child: image != null
+                    ? FgPhoto(image: image!)
+                    : FgImage(imageUrl: imageUrl!, fit: BoxFit.cover),
               ),
             ),
           Padding(

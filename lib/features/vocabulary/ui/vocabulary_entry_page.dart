@@ -132,289 +132,330 @@ class _VocabularyEntryPageState extends ConsumerState<VocabularyEntryPage> {
               ),
           ],
         );
-        return ListView(
-          children: [
-            AppHeader(
-              title: entry.name,
-              subtitle: '${vocabularyKindLabel(entry.kind)} • ${entry.style}',
-              onBack: widget.onBack,
+        return Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: AppSizes.readingContentMax,
             ),
-            Padding(
-              padding: AppSpacing.screen,
-              child: DefaultTextStyle(
-                style: theme.textTheme.bodyMedium!.copyWith(
-                  color: theme.forgeColors.onImmersive,
+            child: ListView(
+              children: [
+                AppHeader(
+                  title: LocaleKeys.vocabularyTitle.tr(),
+                  onBack: widget.onBack,
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      entry.definition,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: theme.forgeColors.onImmersive,
-                      ),
+                Padding(
+                  padding: AppSpacing.allLG,
+                  child: DefaultTextStyle(
+                    style: theme.textTheme.bodyMedium!.copyWith(
+                      color: theme.forgeColors.onImmersive,
                     ),
-                    const SizedBox(height: AppSpacing.lg),
-                    _section(context, LocaleKeys.vocabularyCue.tr(), entry.cue),
-                    Text(LocaleKeys.vocabularyComfort.tr()),
-                    const SizedBox(height: AppSpacing.lg),
-                    FgButton(
-                      text: canOpenLesson
-                          ? LocaleKeys.vocabularyViewLesson.tr()
-                          : LocaleKeys.vocabularyViewPath.tr(),
-                      onPressed: () {
-                        if (canOpenLesson) {
-                          LessonDestination(
-                            entry.moduleId,
-                            entry.lessonId,
-                          ).push<void>(context);
-                        } else {
-                          ModuleDestination(entry.moduleId).push<void>(context);
-                        }
-                      },
-                    ),
-                    if (!canOpenLesson) ...[
-                      Text(LocaleKeys.vocabularyPathHint.tr()),
-                      const SizedBox(height: AppSpacing.lg),
-                      Text(
-                        LocaleKeys.programmesPrerequisites.tr(),
-                        style: theme.textTheme.titleMedium,
-                      ),
-                      prerequisiteLinks,
-                    ],
-                    const SizedBox(height: AppSpacing.lg),
-                    FgButton(
-                      text: LocaleKeys.vocabularyStartEasier.tr(),
-                      isEnabled: canOpenLesson,
-                      onPressed: () => _practice(harder: false),
-                    ),
-                    FgButton(
-                      text: LocaleKeys.vocabularyStartHarder.tr(),
-                      variant: FgButtonVariant.secondary,
-                      isEnabled: canOpenLesson,
-                      onPressed: () => _practice(harder: true),
-                    ),
-                    FgDetails(
-                      key: ValueKey('vocabulary-technique-${entry.id}'),
-                      title: LocaleKeys.detailsMovement.tr(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          if (entry.aliases.isNotEmpty)
-                            Text(
-                              LocaleKeys.vocabularyAlsoKnown.tr(
-                                args: [entry.aliases.join(', ')],
-                              ),
-                            ),
-                          _section(
-                            context,
-                            LocaleKeys.vocabularyContext.tr(),
-                            entry.context,
-                          ),
-                          _section(
-                            context,
-                            LocaleKeys.vocabularyMistake.tr(),
-                            entry.commonMistake,
-                          ),
-                          _section(
-                            context,
-                            LocaleKeys.vocabularyPractice.tr(),
-                            entry.practice,
-                          ),
-                          _section(
-                            context,
-                            LocaleKeys.vocabularyEasier.tr(),
-                            entry.easierPractice,
-                          ),
-                          _section(
-                            context,
-                            LocaleKeys.vocabularyHarder.tr(),
-                            entry.harderPractice,
-                          ),
-                        ],
-                      ),
-                    ),
-                    if (canOpenLesson)
-                      FgDetails(
-                        key: ValueKey('vocabulary-prerequisites-${entry.id}'),
-                        title: LocaleKeys.programmesPrerequisites.tr(),
-                        child: prerequisiteLinks,
-                      ),
-                    const SizedBox(height: AppSpacing.xl),
-                    Text(
-                      LocaleKeys.vocabularyLearningEvidence.tr(),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: theme.forgeColors.onImmersive,
-                      ),
-                    ),
-                    if (learning.isLoading ||
-                        method.isLoading ||
-                        practice.isLoading)
-                      const Center(child: FgSpinner()),
-                    if (learning.hasError ||
-                        method.hasError ||
-                        practice.hasError)
-                      FgButton(
-                        text: LocaleKeys.programmesRetry.tr(),
-                        onPressed: () {
-                          ref.invalidate(learnViewModelProvider);
-                          ref.invalidate(methodViewModelProvider);
-                          ref.invalidate(practiceViewModelProvider);
-                        },
-                      ),
-                    if (status != null) ...[
-                      Text(
-                        status.studied
-                            ? LocaleKeys.programmesStudied.tr()
-                            : LocaleKeys.programmesNotStudied.tr(),
-                      ),
-                      Text(
-                        status.categoryLevel > 0
-                            ? LocaleKeys.vocabularyCategoryDemonstrated.tr(
-                                args: [
-                                  entry.category.label,
-                                  '${status.categoryLevel}',
-                                ],
-                              )
-                            : LocaleKeys.vocabularyCategoryNotDemonstrated.tr(
-                                args: [entry.category.label],
-                              ),
-                      ),
-                    ],
-                    FgButton(
-                      text: LocaleKeys.vocabularyAssessCategory.tr(
-                        args: [entry.category.label],
-                      ),
-                      isEnabled:
-                          learn?.canOpenLesson(assessment.linkedLessonId) ??
-                          false,
-                      onPressed: () => Navigator.of(context).push<void>(
-                        MaterialPageRoute(
-                          builder: (_) => MethodPage(
-                            initialCategory: entry.category,
-                            initialAssessmentId: assessment.id,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        FgSectionHeading(
+                          eyebrow:
+                              '${LocaleKeys.vocabularyEntryIndex.tr(args: ['${const VocabularyRepository().entries.indexOf(entry) + 1}'.padLeft(2, '0')])} · ${vocabularyKindLabel(entry.kind)} · ${entry.style}',
+                          title: entry.name.toUpperCase(),
+                          subtitle: entry.definition,
+                        ),
+                        const SizedBox(height: AppSpacing.xxl),
+                        FgRoundPanel(
+                          label: LocaleKeys.vocabularyCue.tr().toUpperCase(),
+                          child: Text(
+                            entry.cue,
+                            style: theme.textTheme.bodyLarge,
                           ),
                         ),
-                      ),
-                    ),
-                    if (learn != null &&
-                        !learn.canOpenLesson(assessment.linkedLessonId)) ...[
-                      Text(LocaleKeys.compactAssessmentLocked.tr()),
-                      FgButton(
-                        text: LocaleKeys.vocabularyViewPath.tr(),
-                        variant: FgButtonVariant.secondary,
-                        onPressed: () {
-                          final module = learn.modules.firstWhere(
-                            (module) => module.lessons.any(
-                              (lesson) =>
-                                  lesson.id == assessment.linkedLessonId,
-                            ),
-                          );
-                          ModuleDestination(module.id).push<void>(context);
-                        },
-                      ),
-                    ],
-                    FgDetails(
-                      key: ValueKey('vocabulary-progress-${entry.id}'),
-                      title: LocaleKeys.detailsProgress.tr(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(LocaleKeys.programmesCompletionNotMastery.tr()),
-                          if (status != null) ...[
-                            Text(
-                              LocaleKeys.vocabularyCategoryEvidenceHint.tr(),
-                            ),
-                            for (final attempt in status.categoryAttempts) ...[
-                              const SizedBox(height: AppSpacing.md),
-                              Text(
-                                '${DateFormat.yMMMd().add_Hm().format(attempt.performedAt.toLocal())} • ${attempt.assessment.title}',
-                              ),
-                              Text(
-                                attempt.passed
-                                    ? LocaleKeys.vocabularyCriteriaMet.tr()
-                                    : LocaleKeys.vocabularyCriteriaNotMet.tr(),
-                              ),
-                              if (attempt.notes.isNotEmpty) Text(attempt.notes),
-                              if (attempt.evidenceId case final evidenceId?)
-                                FgButton(
-                                  text: LocaleKeys.vocabularyViewEvidence.tr(),
-                                  variant: FgButtonVariant.secondary,
-                                  onPressed: () =>
-                                      Navigator.of(
-                                        context,
-                                        rootNavigator: true,
-                                      ).push<void>(
-                                        MaterialPageRoute(
-                                          builder: (_) => EvidenceViewer(
-                                            evidenceId: evidenceId,
-                                          ),
-                                        ),
-                                      ),
-                                ),
-                            ],
-                            const SizedBox(height: AppSpacing.lg),
-                            Text(
-                              LocaleKeys.vocabularyPracticeHistory.tr(
-                                args: ['${status.practiceHistory.length}'],
-                              ),
-                            ),
-                            if (status.practiceHistory.isEmpty)
-                              Text(LocaleKeys.vocabularyNoPractice.tr()),
-                            for (final record in status.practiceHistory.take(3))
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  top: AppSpacing.sm,
-                                ),
-                                child: Text(
-                                  LocaleKeys.vocabularyPracticeSummary.tr(
-                                    args: [
-                                      DateFormat.yMMMd().add_Hm().format(
-                                        record.performedAt.toLocal(),
-                                      ),
-                                      '${record.durationSeconds}',
-                                      '${record.bpm}',
-                                      '${record.difficulty}',
-                                    ],
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          LocaleKeys.vocabularyComfort.tr(),
+                          style: theme.textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: AppSpacing.xxl),
+                        FgSectionHeading(
+                          title: LocaleKeys.vocabularyNextStep.tr(),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        FgButton(
+                          text: canOpenLesson
+                              ? LocaleKeys.vocabularyViewLesson.tr()
+                              : LocaleKeys.vocabularyViewPath.tr(),
+                          variant: canOpenLesson
+                              ? FgButtonVariant.secondary
+                              : FgButtonVariant.primary,
+                          icon: const Icon(Icons.arrow_forward),
+                          onPressed: () {
+                            if (canOpenLesson) {
+                              LessonDestination(
+                                entry.moduleId,
+                                entry.lessonId,
+                              ).push<void>(context);
+                            } else {
+                              ModuleDestination(entry.moduleId)
+                                  .push<void>(context);
+                            }
+                          },
+                        ),
+                        if (!canOpenLesson) ...[
+                          Text(LocaleKeys.vocabularyPathHint.tr()),
+                          const SizedBox(height: AppSpacing.lg),
+                          Text(
+                            LocaleKeys.programmesPrerequisites.tr(),
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          prerequisiteLinks,
+                        ],
+                        const SizedBox(height: AppSpacing.lg),
+                        FgButton(
+                          text: LocaleKeys.vocabularyStartEasier.tr(),
+                          isEnabled: canOpenLesson,
+                          onPressed: () => _practice(harder: false),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        FgButton(
+                          text: LocaleKeys.vocabularyStartHarder.tr(),
+                          variant: FgButtonVariant.secondary,
+                          isEnabled: canOpenLesson,
+                          onPressed: () => _practice(harder: true),
+                        ),
+                        FgDetails(
+                          key: ValueKey('vocabulary-technique-${entry.id}'),
+                          title: LocaleKeys.detailsMovement.tr(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              if (entry.aliases.isNotEmpty)
+                                Text(
+                                  LocaleKeys.vocabularyAlsoKnown.tr(
+                                    args: [entry.aliases.join(', ')],
                                   ),
                                 ),
+                              _section(
+                                context,
+                                LocaleKeys.vocabularyContext.tr(),
+                                entry.context,
                               ),
-                          ],
+                              _section(
+                                context,
+                                LocaleKeys.vocabularyMistake.tr(),
+                                entry.commonMistake,
+                              ),
+                              _section(
+                                context,
+                                LocaleKeys.vocabularyPractice.tr(),
+                                entry.practice,
+                              ),
+                              _section(
+                                context,
+                                LocaleKeys.vocabularyEasier.tr(),
+                                entry.easierPractice,
+                              ),
+                              _section(
+                                context,
+                                LocaleKeys.vocabularyHarder.tr(),
+                                entry.harderPractice,
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (canOpenLesson)
+                          FgDetails(
+                            key: ValueKey(
+                              'vocabulary-prerequisites-${entry.id}',
+                            ),
+                            title: LocaleKeys.programmesPrerequisites.tr(),
+                            child: prerequisiteLinks,
+                          ),
+                        const SizedBox(height: AppSpacing.xl),
+                        FgSectionHeading(
+                          title: LocaleKeys.vocabularyLearningEvidence
+                              .tr()
+                              .toUpperCase(),
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        if (learning.isLoading ||
+                            method.isLoading ||
+                            practice.isLoading)
+                          const Center(child: FgSpinner()),
+                        if (learning.hasError ||
+                            method.hasError ||
+                            practice.hasError)
                           FgButton(
-                            text: LocaleKeys.vocabularyOpenHistory.tr(),
-                            variant: FgButtonVariant.secondary,
-                            onPressed: () => Navigator.of(context).push<void>(
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    PracticeLogPage(vocabularyId: entry.id),
+                            text: LocaleKeys.programmesRetry.tr(),
+                            onPressed: () {
+                              ref.invalidate(learnViewModelProvider);
+                              ref.invalidate(methodViewModelProvider);
+                              ref.invalidate(practiceViewModelProvider);
+                            },
+                          ),
+                        if (status != null) ...[
+                          Text(
+                            status.studied
+                                ? LocaleKeys.programmesStudied.tr()
+                                : LocaleKeys.programmesNotStudied.tr(),
+                          ),
+                          Text(
+                            status.categoryLevel > 0
+                                ? LocaleKeys.vocabularyCategoryDemonstrated.tr(
+                                    args: [
+                                      entry.category.label,
+                                      '${status.categoryLevel}',
+                                    ],
+                                  )
+                                : LocaleKeys.vocabularyCategoryNotDemonstrated
+                                      .tr(args: [entry.category.label]),
+                          ),
+                        ],
+                        FgButton(
+                          text: LocaleKeys.vocabularyAssessCategory.tr(
+                            args: [entry.category.label],
+                          ),
+                          isEnabled:
+                              learn?.canOpenLesson(assessment.linkedLessonId) ??
+                              false,
+                          onPressed: () => Navigator.of(context).push<void>(
+                            MaterialPageRoute(
+                              builder: (_) => MethodPage(
+                                initialCategory: entry.category,
+                                initialAssessmentId: assessment.id,
                               ),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.xl),
-                    Text(
-                      LocaleKeys.vocabularyRelated.tr(),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: theme.forgeColors.onImmersive,
-                      ),
-                    ),
-                    const SizedBox(height: AppSpacing.sm),
-                    for (final id in entry.relatedIds)
-                      if (const VocabularyRepository().byId(id)
-                          case final related?)
-                        FgButton(
-                          text: related.name,
-                          variant: FgButtonVariant.secondary,
-                          onPressed: () =>
-                              VocabularyDestination(id).push<void>(context),
                         ),
-                  ],
+                        if (learn != null &&
+                            !learn.canOpenLesson(
+                              assessment.linkedLessonId,
+                            )) ...[
+                          Text(LocaleKeys.compactAssessmentLocked.tr()),
+                          FgButton(
+                            text: LocaleKeys.vocabularyViewPath.tr(),
+                            variant: FgButtonVariant.secondary,
+                            onPressed: () {
+                              final module = learn.modules.firstWhere(
+                                (module) => module.lessons.any(
+                                  (lesson) =>
+                                      lesson.id == assessment.linkedLessonId,
+                                ),
+                              );
+                              ModuleDestination(module.id).push<void>(context);
+                            },
+                          ),
+                        ],
+                        FgDetails(
+                          key: ValueKey('vocabulary-progress-${entry.id}'),
+                          title: LocaleKeys.detailsProgress.tr(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(
+                                LocaleKeys.programmesCompletionNotMastery.tr(),
+                              ),
+                              if (status != null) ...[
+                                Text(
+                                  LocaleKeys.vocabularyCategoryEvidenceHint
+                                      .tr(),
+                                ),
+                                for (final attempt
+                                    in status.categoryAttempts) ...[
+                                  const SizedBox(height: AppSpacing.md),
+                                  Text(
+                                    '${DateFormat.yMMMd().add_Hm().format(attempt.performedAt.toLocal())} • ${attempt.assessment.title}',
+                                  ),
+                                  Text(
+                                    attempt.passed
+                                        ? LocaleKeys.vocabularyCriteriaMet.tr()
+                                        : LocaleKeys.vocabularyCriteriaNotMet
+                                              .tr(),
+                                  ),
+                                  if (attempt.notes.isNotEmpty)
+                                    Text(attempt.notes),
+                                  if (attempt.evidenceId case final evidenceId?)
+                                    FgButton(
+                                      text: LocaleKeys.vocabularyViewEvidence
+                                          .tr(),
+                                      variant: FgButtonVariant.secondary,
+                                      onPressed: () =>
+                                          Navigator.of(
+                                            context,
+                                            rootNavigator: true,
+                                          ).push<void>(
+                                            MaterialPageRoute(
+                                              builder: (_) => EvidenceViewer(
+                                                evidenceId: evidenceId,
+                                              ),
+                                            ),
+                                          ),
+                                    ),
+                                ],
+                                const SizedBox(height: AppSpacing.lg),
+                                Text(
+                                  LocaleKeys.vocabularyPracticeHistory.tr(
+                                    args: ['${status.practiceHistory.length}'],
+                                  ),
+                                ),
+                                if (status.practiceHistory.isEmpty)
+                                  Text(LocaleKeys.vocabularyNoPractice.tr()),
+                                for (final record
+                                    in status.practiceHistory.take(3))
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                      top: AppSpacing.sm,
+                                    ),
+                                    child: Text(
+                                      LocaleKeys.vocabularyPracticeSummary.tr(
+                                        args: [
+                                          DateFormat.yMMMd().add_Hm().format(
+                                            record.performedAt.toLocal(),
+                                          ),
+                                          '${record.durationSeconds}',
+                                          '${record.bpm}',
+                                          '${record.difficulty}',
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                              FgButton(
+                                text: LocaleKeys.vocabularyOpenHistory.tr(),
+                                variant: FgButtonVariant.secondary,
+                                onPressed: () => Navigator.of(context)
+                                    .push<void>(
+                                      MaterialPageRoute(
+                                        builder: (_) => PracticeLogPage(
+                                          vocabularyId: entry.id,
+                                        ),
+                                      ),
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: AppSpacing.xl),
+                        FgSectionHeading(
+                          title: LocaleKeys.vocabularyRelated
+                              .tr()
+                              .toUpperCase(),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        for (final id in entry.relatedIds)
+                          if (const VocabularyRepository().byId(id)
+                              case final related?)
+                            FgButton(
+                              text: related.name,
+                              variant: FgButtonVariant.secondary,
+                              onPressed: () =>
+                                  VocabularyDestination(id).push<void>(context),
+                            ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+                const SizedBox(
+                  height: AppSizes.bottomNavHeight + AppSpacing.xxl,
+                ),
+              ],
             ),
-          ],
+          ),
         );
       },
     );
@@ -424,26 +465,18 @@ class _VocabularyEntryPageState extends ConsumerState<VocabularyEntryPage> {
     final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
-      child: FgCard(
-        immersive: true,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              title,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: theme.forgeColors.onImmersive,
-              ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: theme.textTheme.titleMedium),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            body,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: context.forgeMutedForeground,
             ),
-            const SizedBox(height: AppSpacing.sm),
-            Text(
-              body,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.forgeColors.onImmersiveMuted,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

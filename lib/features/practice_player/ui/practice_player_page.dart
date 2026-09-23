@@ -177,271 +177,329 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
         if (didPop) _pause();
       },
       child: FgImmersiveScaffold(
-        title: widget.block.title,
-        bodyBuilder: (context) => ListView(
-          padding: AppSpacing.allLG,
-          children: [
-            if (widget.block.workoutId != null)
-              Text(
-                LocaleKeys.dailyPracticeVariation.tr(
-                  args: [forgeBelts[widget.block.level].name],
+        bodyBuilder: (context) => Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: AppSizes.readingContentMax,
+            ),
+            child: ListView(
+              padding: AppSpacing.allLG,
+              children: [
+                AppHeader(
+                  title: widget.block.title,
+                  onBack: () => Navigator.of(context).maybePop(),
                 ),
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-            FgRoundPanel(
-              label: LocaleKeys.cypherPracticeFloor.tr(),
-              active: true,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${seconds ~/ 60}:${(seconds % 60).toString().padLeft(2, '0')}',
-                    style: Theme.of(context).textTheme.displayLarge,
-                    semanticsLabel: LocaleKeys.playerActiveSeconds.tr(
+                FgRoundPanel(
+                  label: widget.block.workoutId != null
+                      ? '${LocaleKeys.cypherPracticeFloor.tr()} · ${LocaleKeys.dailyPracticeVariation.tr(args: [forgeBelts[widget.block.level].name])}'
+                      : LocaleKeys.cypherPracticeFloor.tr(),
+                  active: _clock.running,
+                  child: FgPracticeMeter(
+                    elapsed:
+                        '${(seconds ~/ 60).toString().padLeft(2, '0')}:${(seconds % 60).toString().padLeft(2, '0')}',
+                    elapsedSemanticLabel: LocaleKeys.playerActiveSeconds.tr(
                       args: ['$seconds'],
                     ),
-                  ),
-                  Text(
-                    LocaleKeys.compactTarget.tr(
+                    target: LocaleKeys.compactTarget.tr(
                       args: ['${widget.block.minutes}'],
                     ),
+                    progress: seconds / (widget.block.minutes * 60),
+                    status: _clock.countIn > 0
+                        ? LocaleKeys.playerCountIn.tr(
+                            args: ['${_clock.countIn}'],
+                          )
+                        : _clock.running
+                        ? LocaleKeys.playerCount.tr(args: ['${_clock.beat}'])
+                        : (seconds > 0
+                                  ? LocaleKeys.playerPaused
+                                  : LocaleKeys.compactReady)
+                              .tr(),
+                    announceStatus: _clock.countIn > 0,
+                    activeCount: _clock.running && _clock.countIn == 0
+                        ? _clock.beat
+                        : null,
+                    firstCount: _clock.phraseStart,
+                    lastCount: _clock.phraseEnd,
+                    metadata: LocaleKeys.playerRhythmSummary.tr(
+                      args: [
+                        '${_clock.bpm}',
+                        '${_clock.phraseStart}',
+                        '${_clock.phraseEnd}',
+                      ],
+                    ),
                   ),
-                  if (_goalReached) Text(LocaleKeys.playerGoalReached.tr()),
-                  const SizedBox(height: AppSpacing.lg),
+                ),
+                if (_goalReached) ...[
+                  const SizedBox(height: AppSpacing.md),
                   Semantics(
-                    liveRegion: _clock.countIn > 0,
-                    child: Text(
-                      _clock.countIn > 0
-                          ? LocaleKeys.playerCountIn.tr(
-                              args: ['${_clock.countIn}'],
-                            )
-                          : _clock.running
-                          ? LocaleKeys.playerCount.tr(args: ['${_clock.beat}'])
-                          : LocaleKeys.compactReady.tr(),
-                      style: Theme.of(context).textTheme.headlineLarge,
-                    ),
+                    liveRegion: true,
+                    child: Text(LocaleKeys.playerGoalReached.tr()),
                   ),
-                  if (!_independent && widget.block.cues.isNotEmpty) ...[
-                    const SizedBox(height: AppSpacing.md),
-                    Text(
-                      widget.block.cues[cueIndex],
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ],
-                  const SizedBox(height: AppSpacing.lg),
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
+                ],
+                const SizedBox(height: AppSpacing.lg),
+                // Controls precede changing cues so a different cue length
+                // cannot move the pause target while someone is practising.
+                FgButton(
+                  text:
+                      (_clock.running
+                              ? LocaleKeys.playerPause
+                              : LocaleKeys.playerStart)
+                          .tr(),
+                  isLoading: _loading,
+                  icon: Icon(_clock.running ? Icons.pause : Icons.play_arrow),
+                  onPressed: _clock.running ? _pause : _start,
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                FgButton(
+                  text: LocaleKeys.playerSave.tr(),
+                  icon: const Icon(Icons.check),
+                  variant: FgButtonVariant.secondary,
+                  isEnabled: seconds > 0 && !_loading,
+                  onPressed: _save,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                FgRoundPanel(
+                  label:
+                      (_independent
+                              ? LocaleKeys.playerIndependent
+                              : LocaleKeys.playerFocus)
+                          .tr(),
+                  child: Text(
+                    _independent
+                        ? LocaleKeys.playerIndependentHelp.tr()
+                        : widget.block.cues.isNotEmpty
+                        ? widget.block.cues[cueIndex]
+                        : widget.block.adaptation,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
+                Text(
+                  LocaleKeys.compactPracticeSafety.tr(),
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                if (_audioError != null)
+                  Semantics(liveRegion: true, child: Text(_audioError!)),
+                FgDetails(
+                  key: const ValueKey('player-setup'),
+                  title: LocaleKeys.playerSetup.tr(),
+                  maintainState: true,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      FgButton(
-                        text:
-                            (_clock.running
-                                    ? LocaleKeys.playerPause
-                                    : LocaleKeys.playerStart)
-                                .tr(),
-                        isLoading: _loading,
-                        icon: Icon(
-                          _clock.running ? Icons.pause : Icons.play_arrow,
-                        ),
-                        onPressed: _clock.running ? _pause : _start,
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(LocaleKeys.playerMute.tr()),
+                        value: _muted,
+                        onChanged: (value) {
+                          _pause();
+                          setState(() => _muted = value);
+                        },
                       ),
-                      FgButton(
-                        text: LocaleKeys.playerSave.tr(),
-                        variant: FgButtonVariant.secondary,
-                        isEnabled: seconds > 0 && !_loading,
-                        onPressed: _save,
+                      FgSlider(
+                        value: _clock.bpm.toDouble(),
+                        min: 20,
+                        max: 300,
+                        divisions: 280,
+                        semanticLabel: LocaleKeys.playerTempo.tr(),
+                        label: LocaleKeys.playerTempo.tr(),
+                        valueLabel: '${_clock.bpm} BPM',
+                        onChanged: (value) {
+                          _pause();
+                          _clock.setTempo(value.round());
+                        },
+                      ),
+                      Text(
+                        LocaleKeys.playerPhrase.tr(),
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      Wrap(
+                        spacing: AppSpacing.lg,
+                        runSpacing: AppSpacing.sm,
+                        children: [
+                          DropdownButton<int>(
+                            value: _clock.phraseStart,
+                            items: List.generate(
+                              _clock.phraseEnd,
+                              (i) => DropdownMenuItem(
+                                value: i + 1,
+                                child: Text(
+                                  LocaleKeys.playerFromCount.tr(
+                                    args: ['${i + 1}'],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            onChanged: (value) {
+                              if (value != null) {
+                                _pause();
+                                _clock.setPhrase(value, _clock.phraseEnd);
+                              }
+                            },
+                          ),
+                          DropdownButton<int>(
+                            value: _clock.phraseEnd,
+                            items: List.generate(
+                              9 - _clock.phraseStart,
+                              (i) => DropdownMenuItem(
+                                value: i + _clock.phraseStart,
+                                child: Text(
+                                  LocaleKeys.playerToCount.tr(
+                                    args: ['${i + _clock.phraseStart}'],
+                                  ),
+                                ),
+                              ),
+                            ),
+                            onChanged: (value) {
+                              if (value != null) {
+                                _pause();
+                                _clock.setPhrase(_clock.phraseStart, value);
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                      SwitchListTile(
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(LocaleKeys.playerIndependent.tr()),
+                        value: _independent,
+                        onChanged: (value) {
+                          _pause();
+                          setState(() => _independent = value);
+                        },
+                      ),
+                      Text(LocaleKeys.playerTempoPause.tr()),
+                    ],
+                  ),
+                ),
+                if (!_independent) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  if (_demonstration != null)
+                    LocalVideoView(
+                      key: ValueKey(_demonstration),
+                      evidenceId: _demonstration!,
+                      playing: _clock.running && _clock.countIn == 0,
+                    ),
+                  if (_showSchematic) _StepTouchDiagram(beat: _clock.beat),
+                ],
+                const SizedBox(height: AppSpacing.lg),
+                FgButton(
+                  text: LocaleKeys.playerMedia.tr(),
+                  icon: Icon(
+                    _editingMedia ? Icons.expand_less : Icons.attach_file,
+                  ),
+                  variant: FgButtonVariant.secondary,
+                  onPressed: () {
+                    _pause();
+                    setState(() => _editingMedia = !_editingMedia);
+                  },
+                ),
+                if (_editingMedia) ...[
+                  const SizedBox(height: AppSpacing.md),
+                  Text(LocaleKeys.playerNoTeacherVideo.tr()),
+                  Text(LocaleKeys.playerManageMedia.tr()),
+                  if (!_independent)
+                    SwitchListTile(
+                      contentPadding: EdgeInsets.zero,
+                      title: Text(LocaleKeys.playerSchematic.tr()),
+                      value: _showSchematic,
+                      onChanged: (value) =>
+                          setState(() => _showSchematic = value),
+                    ),
+                  Text(
+                    LocaleKeys.playerDemoMedia.tr(),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  EvidencePicker(
+                    value: _demonstration,
+                    onChanged: (value) =>
+                        setState(() => _demonstration = value),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    LocaleKeys.playerEvidence.tr(),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  EvidencePicker(
+                    value: _evidence,
+                    onChanged: (value) => setState(() => _evidence = value),
+                  ),
+                ],
+                const SizedBox(height: AppSpacing.lg),
+                FgDetails(
+                  key: const ValueKey('player-reflection'),
+                  title: LocaleKeys.playerReflection.tr(),
+                  maintainState: true,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(LocaleKeys.playerReflectionHelp.tr()),
+                      const SizedBox(height: AppSpacing.md),
+                      FgSlider(
+                        value: _difficulty.toDouble(),
+                        min: 1,
+                        max: 10,
+                        divisions: 9,
+                        semanticLabel: LocaleKeys.playerEffort.tr(),
+                        label: LocaleKeys.playerEffort.tr(),
+                        valueLabel: '$_difficulty / 10',
+                        onChanged: (value) =>
+                            setState(() => _difficulty = value.round()),
+                      ),
+                      FgInput(
+                        label: LocaleKeys.playerNotes.tr(),
+                        controller: _notes,
+                        onChanged: (value) {
+                          if (value.length > 9000) {
+                            _notes.text = value.substring(0, 9000);
+                          }
+                        },
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.md),
-                  Text(LocaleKeys.compactPracticeSafety.tr()),
-                ],
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            if (_audioError != null)
-              Semantics(liveRegion: true, child: Text(_audioError!)),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(LocaleKeys.playerMute.tr()),
-              value: _muted,
-              onChanged: (value) {
-                _pause();
-                setState(() => _muted = value);
-              },
-            ),
-            FgSlider(
-              value: _clock.bpm.toDouble(),
-              min: 20,
-              max: 300,
-              divisions: 280,
-              semanticLabel: LocaleKeys.playerTempo.tr(),
-              label: LocaleKeys.playerTempo.tr(),
-              valueLabel: '${_clock.bpm} BPM',
-              onChanged: (value) {
-                _pause();
-                _clock.setTempo(value.round());
-              },
-            ),
-            Text(
-              LocaleKeys.playerPhrase.tr(),
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            Wrap(
-              spacing: AppSpacing.lg,
-              runSpacing: AppSpacing.sm,
-              children: [
-                DropdownButton<int>(
-                  value: _clock.phraseStart,
-                  items: List.generate(
-                    _clock.phraseEnd,
-                    (i) => DropdownMenuItem(
-                      value: i + 1,
-                      child: Text(
-                        LocaleKeys.playerFromCount.tr(args: ['${i + 1}']),
-                      ),
-                    ),
-                  ),
-                  onChanged: (value) {
-                    if (value != null) {
-                      _pause();
-                      _clock.setPhrase(value, _clock.phraseEnd);
-                    }
-                  },
                 ),
-                DropdownButton<int>(
-                  value: _clock.phraseEnd,
-                  items: List.generate(
-                    9 - _clock.phraseStart,
-                    (i) => DropdownMenuItem(
-                      value: i + _clock.phraseStart,
-                      child: Text(
-                        LocaleKeys.playerToCount.tr(
-                          args: ['${i + _clock.phraseStart}'],
+                const SizedBox(height: AppSpacing.lg),
+                FgDetails(
+                  title: LocaleKeys.detailsAdaptations.tr(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(widget.block.adaptation),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(LocaleKeys.playerSafety.tr()),
+                    ],
+                  ),
+                ),
+                FgDetails(
+                  title: LocaleKeys.detailsPlayback.tr(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(LocaleKeys.playerOffline.tr()),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(
+                        LocaleKeys.playerTarget.tr(
+                          args: ['${widget.block.minutes}'],
                         ),
                       ),
-                    ),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(LocaleKeys.playerReady.tr()),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(LocaleKeys.playerCueTiming.tr()),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(LocaleKeys.playerTempoPause.tr()),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(LocaleKeys.playerIndependentHelp.tr()),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(LocaleKeys.playerNoTeacherVideo.tr()),
+                    ],
                   ),
-                  onChanged: (value) {
-                    if (value != null) {
-                      _pause();
-                      _clock.setPhrase(_clock.phraseStart, value);
-                    }
-                  },
                 ),
+                const SizedBox(height: AppSpacing.xxl),
               ],
             ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(LocaleKeys.playerIndependent.tr()),
-              value: _independent,
-              onChanged: (value) {
-                _pause();
-                setState(() => _independent = value);
-              },
-            ),
-            if (!_independent) ...[
-              const SizedBox(height: AppSpacing.lg),
-              if (_demonstration != null)
-                LocalVideoView(
-                  key: ValueKey(_demonstration),
-                  evidenceId: _demonstration!,
-                  playing: _clock.running && _clock.countIn == 0,
-                ),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(LocaleKeys.playerSchematic.tr()),
-                value: _showSchematic,
-                onChanged: (value) => setState(() => _showSchematic = value),
-              ),
-              if (_showSchematic) _StepTouchDiagram(beat: _clock.beat),
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            FgButton(
-              text: LocaleKeys.playerManageMedia.tr(),
-              variant: FgButtonVariant.secondary,
-              onPressed: () {
-                _pause();
-                setState(() => _editingMedia = !_editingMedia);
-              },
-            ),
-            if (_editingMedia) ...[
-              Text(
-                LocaleKeys.playerDemoMedia.tr(),
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              EvidencePicker(
-                value: _demonstration,
-                onChanged: (value) => setState(() => _demonstration = value),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Text(
-                LocaleKeys.playerEvidence.tr(),
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
-              EvidencePicker(
-                value: _evidence,
-                onChanged: (value) => setState(() => _evidence = value),
-              ),
-            ],
-            const SizedBox(height: AppSpacing.lg),
-            FgSlider(
-              value: _difficulty.toDouble(),
-              min: 1,
-              max: 10,
-              divisions: 9,
-              semanticLabel: LocaleKeys.playerEffort.tr(),
-              label: LocaleKeys.playerEffort.tr(),
-              valueLabel: '$_difficulty / 10',
-              onChanged: (value) => setState(() => _difficulty = value.round()),
-            ),
-            FgInput(
-              label: LocaleKeys.playerNotes.tr(),
-              controller: _notes,
-              onChanged: (value) {
-                if (value.length > 9000) {
-                  _notes.text = value.substring(0, 9000);
-                }
-              },
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            FgDetails(
-              title: LocaleKeys.detailsAdaptations.tr(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(widget.block.adaptation),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(LocaleKeys.playerSafety.tr()),
-                ],
-              ),
-            ),
-            FgDetails(
-              title: LocaleKeys.detailsPlayback.tr(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(LocaleKeys.playerOffline.tr()),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    LocaleKeys.playerTarget.tr(
-                      args: ['${widget.block.minutes}'],
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(LocaleKeys.playerReady.tr()),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(LocaleKeys.playerCueTiming.tr()),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(LocaleKeys.playerTempoPause.tr()),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(LocaleKeys.playerIndependentHelp.tr()),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(LocaleKeys.playerNoTeacherVideo.tr()),
-                ],
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

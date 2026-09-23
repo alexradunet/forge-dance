@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../constants/assets.dart';
 import '../../../design_system/design_system.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../../routing/routes.dart';
@@ -166,201 +167,238 @@ class _PracticePageState extends ConsumerState<PracticePage>
       canPop: _pending == null && !_busy,
       child: FgImmersiveScaffold(
         title: LocaleKeys.practiceTitle.tr(),
-        bodyBuilder: (context) => ListView(
-          padding: AppSpacing.allLG,
-          children: [
-            if (_error != null) ...[
-              const SizedBox(height: AppSpacing.lg),
-              Text(
-                _error!,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-            ],
-            if (_pending != null) ...[
-              const SizedBox(height: AppSpacing.lg),
-              FgCard(
-                immersive: true,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(LocaleKeys.practiceUnsaved.tr()),
-                    Text(_pending!.title),
-                    Wrap(
-                      spacing: AppSpacing.sm,
+        bodyBuilder: (context) => Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: AppSizes.readingContentMax,
+            ),
+            child: ListView(
+              padding: AppSpacing.allLG,
+              children: [
+                if (_error != null) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    _error!,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                  ),
+                ],
+                if (_pending != null) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  FgCard(
+                    immersive: true,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        FgButton(
-                          text: LocaleKeys.practiceRetrySave.tr(),
-                          isLoading: _busy,
-                          onPressed: _savePending,
-                        ),
-                        FgButton(
-                          text: LocaleKeys.practiceDiscard.tr(),
-                          variant: FgButtonVariant.ghost,
-                          onPressed: _busy ? null : _discard,
+                        Text(LocaleKeys.practiceUnsaved.tr()),
+                        Text(_pending!.title),
+                        Wrap(
+                          spacing: AppSpacing.sm,
+                          children: [
+                            FgButton(
+                              text: LocaleKeys.practiceRetrySave.tr(),
+                              isLoading: _busy,
+                              onPressed: _savePending,
+                            ),
+                            FgButton(
+                              text: LocaleKeys.practiceDiscard.tr(),
+                              variant: FgButtonVariant.ghost,
+                              onPressed: _busy ? null : _discard,
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              ),
-            ],
-            if (method.hasError || preferences.hasError) ...[
-              const SizedBox(height: AppSpacing.lg),
-              Text(
-                LocaleKeys.practiceLoadFailed.tr(
-                  args: ['${method.error ?? preferences.error}'],
-                ),
-              ),
-              FgButton(
-                text: LocaleKeys.practiceRetry.tr(),
-                onPressed: () async {
-                  await ref.read(methodViewModelProvider.notifier).reload();
-                  await ref
-                      .read(practicePreferencesViewModelProvider.notifier)
-                      .reload();
-                },
-              ),
-            ] else if (progress == null || choices == null || plan == null)
-              const Center(child: FgSpinner())
-            else ...[
-              const SizedBox(height: AppSpacing.lg),
-              FgSectionHeading(
-                eyebrow: LocaleKeys.dailyPracticeHeading.tr(
-                  args: [
-                    DateFormat.yMMMd(context.locale.toString())
-                        .format(DateTime.parse(plan.dateKey)),
-                  ],
-                ),
-                title: plan.title,
-                subtitle: LocaleKeys.dailyPracticePrescription.tr(
-                  args: [forgeBelts[plan.beltIndex].name, '${plan.minutes}'],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(plan.focus),
-              if (choices.gentle) Text(LocaleKeys.dailyPracticeGentleHelp.tr()),
-              const SizedBox(height: AppSpacing.lg),
-              _choices(context, choices),
-              const SizedBox(height: AppSpacing.sm),
-              Text(LocaleKeys.compactSafety.tr()),
-              if (learn.hasError)
-                Text(LocaleKeys.practiceLessonLoadFailed.tr()),
-              for (final block in plan.blocks) ...[
-                const SizedBox(height: AppSpacing.lg),
-                FgRoundPanel(
-                  label: LocaleKeys.cypherRound.tr(
-                    args: [
-                      '${plan.blocks.indexOf(block) + 1}'.padLeft(2, '0'),
-                      '${plan.blocks.length}'.padLeft(2, '0'),
-                    ],
                   ),
-                  active: block == plan.blocks.first,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        block.title,
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      Text(
-                        LocaleKeys.compactPracticeBlock.tr(
-                          args: [
-                            '${block.minutes}',
-                            forgeBelts[block.level].name,
-                            '${block.bpm}',
-                          ],
+                ],
+                if (method.hasError || preferences.hasError) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    LocaleKeys.practiceLoadFailed.tr(
+                      args: ['${method.error ?? preferences.error}'],
+                    ),
+                  ),
+                  FgButton(
+                    text: LocaleKeys.practiceRetry.tr(),
+                    onPressed: () async {
+                      await ref.read(methodViewModelProvider.notifier).reload();
+                      await ref
+                          .read(practicePreferencesViewModelProvider.notifier)
+                          .reload();
+                    },
+                  ),
+                ] else if (progress == null || choices == null || plan == null)
+                  const Center(child: FgSpinner())
+                else ...[
+                  FgDanceHero(
+                    key: const ValueKey('practice-photo-hero'),
+                    image: const AssetImage(Assets.studioDancerPreview),
+                    imageLabel: LocaleKeys.photoPreviewLabel.tr(),
+                    compact: true,
+                    eyebrow: LocaleKeys.dailyPracticeHeading.tr(
+                      args: [
+                        DateFormat.yMMMd(context.locale.toString())
+                            .format(DateTime.parse(plan.dateKey)),
+                      ],
+                    ),
+                    title: plan.title,
+                    subtitle:
+                        '${LocaleKeys.dailyPracticePrescription.tr(args: [forgeBelts[plan.beltIndex].name, '${plan.minutes}'])}\n${plan.focus}',
+                    action: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        FgButton(
+                          key: const ValueKey('practice-hero-start'),
+                          text: LocaleKeys.photoStartRound.tr(),
+                          icon: const Icon(Icons.play_arrow),
+                          expand: true,
+                          onPressed: _busy || _pending != null
+                              ? null
+                              : () => _play(plan.blocks.first),
                         ),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(
+                          LocaleKeys.compactSafety.tr(),
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (choices.gentle)
+                    Text(LocaleKeys.dailyPracticeGentleHelp.tr()),
+                  const SizedBox(height: AppSpacing.lg),
+                  _choices(context, choices),
+                  if (learn.hasError)
+                    Text(LocaleKeys.practiceLessonLoadFailed.tr()),
+                  for (final block in plan.blocks) ...[
+                    const SizedBox(height: AppSpacing.lg),
+                    FgRoundPanel(
+                      label: LocaleKeys.cypherRound.tr(
+                        args: [
+                          '${plan.blocks.indexOf(block) + 1}'.padLeft(2, '0'),
+                          '${plan.blocks.length}'.padLeft(2, '0'),
+                        ],
                       ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Wrap(
-                        spacing: AppSpacing.sm,
-                        runSpacing: AppSpacing.sm,
+                      active: block == plan.blocks.first,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          FgButton(
-                            text: LocaleKeys.practicePlay.tr(),
-                            icon: const Icon(Icons.play_arrow),
-                            onPressed: _busy || _pending != null
-                                ? null
-                                : () => _play(block),
+                          FgPhotoHeading(
+                            image: AssetImage(
+                              Assets.practicePreviewPhotos[plan.blocks.indexOf(
+                                    block,
+                                  ) %
+                                  Assets.practicePreviewPhotos.length],
+                            ),
+                            imageLabel: LocaleKeys.photoPreviewLabel.tr(),
+                            title: block.title,
+                            subtitle: LocaleKeys.compactPracticeBlock.tr(
+                              args: [
+                                '${block.minutes}',
+                                forgeBelts[block.level].name,
+                                '${block.bpm}',
+                              ],
+                            ),
                           ),
-                          FgButton(
-                            text: LocaleKeys.practiceRelatedLesson.tr(),
-                            variant: FgButtonVariant.secondary,
-                            onPressed:
-                                _busy ||
-                                    _pending != null ||
-                                    !(learn.value?.canOpenLesson(
-                                          block.lessonId,
-                                        ) ??
-                                        false)
-                                ? null
-                                : () => _openLesson(block.lessonId),
+                          const SizedBox(height: AppSpacing.sm),
+                          Wrap(
+                            spacing: AppSpacing.sm,
+                            runSpacing: AppSpacing.sm,
+                            children: [
+                              FgButton(
+                                text: LocaleKeys.practicePlay.tr(),
+                                icon: const Icon(Icons.play_arrow),
+                                onPressed: _busy || _pending != null
+                                    ? null
+                                    : () => _play(block),
+                              ),
+                              FgButton(
+                                text: LocaleKeys.practiceRelatedLesson.tr(),
+                                variant: FgButtonVariant.secondary,
+                                onPressed:
+                                    _busy ||
+                                        _pending != null ||
+                                        !(learn.value?.canOpenLesson(
+                                              block.lessonId,
+                                            ) ??
+                                            false)
+                                    ? null
+                                    : () => _openLesson(block.lessonId),
+                              ),
+                            ],
+                          ),
+                          if (!(learn.value?.canOpenLesson(block.lessonId) ??
+                              false))
+                            Text(LocaleKeys.compactPracticeLessonLocked.tr()),
+                          FgDetails(
+                            key: ValueKey('practice-adaptations-${block.id}'),
+                            title: LocaleKeys.detailsAdaptations.tr(),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(block.adaptation),
+                                if (!(learn.value?.canOpenLesson(
+                                      block.lessonId,
+                                    ) ??
+                                    false)) ...[
+                                  const SizedBox(height: AppSpacing.sm),
+                                  Text(LocaleKeys.practiceLessonLocked.tr()),
+                                ],
+                              ],
+                            ),
                           ),
                         ],
                       ),
-                      if (!(learn.value?.canOpenLesson(block.lessonId) ??
-                          false))
-                        Text(LocaleKeys.compactPracticeLessonLocked.tr()),
-                      FgDetails(
-                        key: ValueKey('practice-adaptations-${block.id}'),
-                        title: LocaleKeys.detailsAdaptations.tr(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(block.adaptation),
-                            if (!(learn.value?.canOpenLesson(block.lessonId) ??
-                                false)) ...[
-                              const SizedBox(height: AppSpacing.sm),
-                              Text(LocaleKeys.practiceLessonLocked.tr()),
-                            ],
-                          ],
-                        ),
+                    ),
+                  ],
+                  const SizedBox(height: AppSpacing.lg),
+                  Wrap(
+                    spacing: AppSpacing.sm,
+                    runSpacing: AppSpacing.sm,
+                    children: [
+                      FgButton(
+                        text: LocaleKeys.compactLogbook.tr(),
+                        icon: const Icon(Icons.history),
+                        variant: FgButtonVariant.ghost,
+                        onPressed: _pending != null || _busy
+                            ? null
+                            : () => Navigator.of(context).push<void>(
+                                MaterialPageRoute(
+                                  builder: (_) => const PracticeLogPage(),
+                                ),
+                              ),
+                      ),
+                      FgButton(
+                        text: LocaleKeys.compactFitness.tr(),
+                        icon: const Icon(Icons.fitness_center),
+                        variant: FgButtonVariant.ghost,
+                        onPressed: _pending != null || _busy
+                            ? null
+                            : () => context.push(Routes.workout),
                       ),
                     ],
                   ),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.lg),
-              Wrap(
-                spacing: AppSpacing.sm,
-                runSpacing: AppSpacing.sm,
-                children: [
-                  FgButton(
-                    text: LocaleKeys.compactLogbook.tr(),
-                    icon: const Icon(Icons.history),
-                    variant: FgButtonVariant.ghost,
-                    onPressed: _pending != null || _busy
-                        ? null
-                        : () => Navigator.of(context).push<void>(
-                            MaterialPageRoute(
-                              builder: (_) => const PracticeLogPage(),
-                            ),
-                          ),
+                  FgDetails(
+                    title: LocaleKeys.photoAboutTitle.tr(),
+                    child: Text(LocaleKeys.photoAboutBody.tr()),
                   ),
-                  FgButton(
-                    text: LocaleKeys.compactFitness.tr(),
-                    icon: const Icon(Icons.fitness_center),
-                    variant: FgButtonVariant.ghost,
-                    onPressed: _pending != null || _busy
-                        ? null
-                        : () => context.push(Routes.workout),
+                  FgDetails(
+                    title: LocaleKeys.detailsHowPracticeWorks.tr(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(LocaleKeys.dailyPracticeSharedTheme.tr()),
+                        Text(LocaleKeys.practiceIntro.tr()),
+                        Text(LocaleKeys.practiceGentle.tr()),
+                        Text(LocaleKeys.practiceConditioning.tr()),
+                      ],
+                    ),
                   ),
                 ],
-              ),
-              FgDetails(
-                title: LocaleKeys.detailsHowPracticeWorks.tr(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(LocaleKeys.dailyPracticeSharedTheme.tr()),
-                    Text(LocaleKeys.practiceIntro.tr()),
-                    Text(LocaleKeys.practiceGentle.tr()),
-                    Text(LocaleKeys.practiceConditioning.tr()),
-                  ],
-                ),
-              ),
-            ],
-          ],
+              ],
+            ),
+          ),
         ),
       ),
     );

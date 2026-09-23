@@ -93,7 +93,7 @@ class FgButton extends StatelessWidget {
         }),
         foregroundColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.disabled) && !isLoading) {
-            return context.forgeForeground.withValues(alpha: 0.38);
+            return context.forgeMutedForeground;
           }
           return foreground;
         }),
@@ -116,7 +116,9 @@ class FgButton extends StatelessWidget {
         tapTargetSize: MaterialTapTargetSize.padded,
         visualDensity: VisualDensity.standard,
       ),
-      child: _content(foreground),
+      child: _content(
+        isInteractive || isLoading ? foreground : context.forgeMutedForeground,
+      ),
     );
 
     final decoratedButton = DecoratedBox(
