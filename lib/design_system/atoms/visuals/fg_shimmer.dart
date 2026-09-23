@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../../theme/forge_theme_extensions.dart';
+import '../../tokens/app_animation.dart';
 import '../../tokens/app_colors.dart';
 
 /// Standard shimmer loading effect.
@@ -17,7 +20,8 @@ class FgShimmer extends StatefulWidget {
     this.width,
     this.height,
     this.shape = const RoundedRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(8))),
+      borderRadius: BorderRadius.all(Radius.circular(8)),
+    ),
     this.baseColor = AppColors.gray800,
     this.highlightColor = AppColors.gray700,
     this.child,
@@ -50,7 +54,8 @@ class FgShimmer extends StatefulWidget {
       width: width,
       height: height,
       shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadius)),
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
       baseColor: baseColor ?? AppColors.gray800,
       highlightColor: highlightColor ?? AppColors.gray700,
     );
@@ -69,8 +74,18 @@ class _FgShimmerState extends State<FgShimmer>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
-    )..repeat();
+      duration: AppAnimation.shimmer,
+    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!context.forgeMotion.disableAnimations && TickerMode.of(context)) {
+      if (!_controller.isAnimating) _controller.repeat();
+    } else {
+      _controller.stop();
+    }
   }
 
   @override
@@ -116,6 +131,9 @@ class _SlidingGradientTransform extends GradientTransform {
   @override
   Matrix4? transform(Rect bounds, {TextDirection? textDirection}) {
     return Matrix4.translationValues(
-        bounds.width * (slidePercent * 2 - 1), 0.0, 0.0);
+      bounds.width * (slidePercent * 2 - 1),
+      0.0,
+      0.0,
+    );
   }
 }

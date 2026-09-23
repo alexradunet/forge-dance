@@ -1,9 +1,77 @@
+import 'dart:ui' show SemanticsFlag;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:forge_dance/design_system/design_system.dart';
-import 'package:forge_dance/design_system/molecules/cards/fg_program_card.dart';
 
 void main() {
+  testWidgets(
+    'editorial route card is one selected keyboard action in every theme',
+    (tester) async {
+      final semantics = tester.ensureSemantics();
+      try {
+        for (final theme in [
+          AppThemes.light,
+          AppThemes.dark,
+          AppThemes.highContrastLight,
+          AppThemes.highContrastDark,
+        ]) {
+          var opened = 0;
+          final focusNode = FocusNode();
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: theme,
+              home: Scaffold(
+                body: FgProgramCard(
+                  title: 'Find the Beat',
+                  label: 'ROUTE 01 • Enrolled',
+                  summary: 'Build a safe base and locate a steady pulse.',
+                  details: '0 of 6 lessons studied',
+                  actionLabel: 'Continue programme',
+                  isSelected: true,
+                  focusNode: focusNode,
+                  onTap: () => opened++,
+                ),
+              ),
+            ),
+          );
+          focusNode.requestFocus();
+          await tester.pumpAndSettle();
+          expect(find.byType(FgImage), findsNothing);
+          expect(find.byType(InkWell), findsOneWidget);
+          final data = tester
+              .getSemantics(find.byType(FgCard))
+              .getSemanticsData();
+          expect(data.hasFlag(SemanticsFlag.isButton), isTrue);
+          expect(data.hasFlag(SemanticsFlag.isSelected), isTrue);
+          expect(data.label, contains('Continue programme'));
+          final material = tester.widget<Material>(
+            find.descendant(
+              of: find.byType(FgCard),
+              matching: find.byType(Material),
+            ),
+          );
+          expect(
+            (material.shape! as RoundedRectangleBorder).borderRadius,
+            AppBorderRadius.small,
+          );
+          await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+          await tester.pumpAndSettle();
+          expect(opened, 1);
+          await tester.sendKeyEvent(LogicalKeyboardKey.space);
+          await tester.pumpAndSettle();
+          expect(opened, 2);
+          expect(tester.takeException(), isNull);
+          await tester.pumpWidget(const SizedBox.shrink());
+          focusNode.dispose();
+        }
+      } finally {
+        semantics.dispose();
+      }
+    },
+  );
+
   for (final width in [320.0, 1024.0]) {
     testWidgets('program cards adapt at $width with large text', (
       tester,

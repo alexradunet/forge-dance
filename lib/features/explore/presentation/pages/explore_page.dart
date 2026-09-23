@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../design_system/design_system.dart';
-import '../../../../design_system/molecules/cards/fg_program_card.dart';
 import '../../../../generated/locale_keys.g.dart';
 import '../../../../routing/routes.dart';
 import '../../../learn/model/lesson.dart';
@@ -38,23 +37,24 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    body: FgBackground(
-      child: ref
-          .watch(learnViewModelProvider)
-          .when(
-            loading: () => const Center(child: FgSpinner()),
-            error: (_, _) => FgEmpty(
-              icon: Icons.error_outline,
-              title: LocaleKeys.unexpectedErrorOccurred.tr(),
-              tone: FgEmptyTone.error,
-            ),
-            data: _buildContent,
-          ),
-    ),
-  );
+  Widget build(BuildContext context) {
+    final learn = ref.watch(learnViewModelProvider);
+    return FgImmersiveScaffold(
+      bodyBuilder: (context) => learn.when(
+        loading: () => const Center(child: FgSpinner()),
+        error: (_, _) => FgEmpty(
+          icon: Icons.error_outline,
+          title: LocaleKeys.unexpectedErrorOccurred.tr(),
+          tone: FgEmptyTone.error,
+          actionLabel: LocaleKeys.programmesRetry.tr(),
+          onAction: () => ref.invalidate(learnViewModelProvider),
+        ),
+        data: (state) => _buildContent(context, state),
+      ),
+    );
+  }
 
-  Widget _buildContent(LearnState state) {
+  Widget _buildContent(BuildContext context, LearnState state) {
     final sections = [
       for (final category in ModuleCategory.values)
         (
@@ -74,9 +74,13 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
-          child: AppHeader(
-            title: LocaleKeys.exploreTitle.tr(),
-            subtitle: LocaleKeys.exploreSubtitle.tr(),
+          child: Padding(
+            padding: AppSpacing.screen,
+            child: FgSectionHeading(
+              eyebrow: LocaleKeys.exploreTitle.tr().toUpperCase(),
+              title: LocaleKeys.cypherLearnHeadline.tr(),
+              subtitle: LocaleKeys.cypherLearnSubtitle.tr(),
+            ),
           ),
         ),
         SliverPadding(
@@ -94,11 +98,23 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
           sliver: SliverToBoxAdapter(
-            child: FgButton(
-              text: LocaleKeys.lessonHistory.tr(),
-              icon: const Icon(Icons.history),
-              variant: FgButtonVariant.secondary,
-              onPressed: () => context.push(Routes.lessonHistory),
+            child: Wrap(
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
+              children: [
+                FgButton(
+                  text: LocaleKeys.forgeProgrammes.tr(),
+                  icon: const Icon(Icons.route_outlined),
+                  variant: FgButtonVariant.ghost,
+                  onPressed: () => context.push(Routes.programmes),
+                ),
+                FgButton(
+                  text: LocaleKeys.lessonHistory.tr(),
+                  icon: const Icon(Icons.history),
+                  variant: FgButtonVariant.ghost,
+                  onPressed: () => context.push(Routes.lessonHistory),
+                ),
+              ],
             ),
           ),
         ),
@@ -119,17 +135,12 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _categoryLabel(section.category),
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      color: Theme.of(context).forgeColors.onImmersive,
-                    ),
-                  ),
+                  FgSectionHeading(title: _categoryLabel(section.category)),
                   const SizedBox(height: AppSpacing.lg),
                   FgProgramCardLayout(
                     children: [
                       for (final module in section.modules)
-                        _moduleCard(state, module),
+                        _moduleCard(context, state, module),
                     ],
                   ),
                 ],
@@ -150,7 +161,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
     ModuleCategory.choreography => LocaleKeys.categoryChoreography.tr(),
   };
 
-  Widget _moduleCard(LearnState state, Module module) {
+  Widget _moduleCard(BuildContext context, LearnState state, Module module) {
     final locked = !state.isModuleUnlocked(module);
     final unmet = state.unmetPrerequisiteLessonIds(module);
     final requirement = unmet.isEmpty
@@ -171,6 +182,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
               ],
             ),
       locked: locked,
+      actionLabel: LocaleKeys.vocabularyViewPath.tr(),
       progress: state.moduleProgressOf(module),
       onTap: () {
         ref.read(learnViewModelProvider.notifier).selectModule(module.id);

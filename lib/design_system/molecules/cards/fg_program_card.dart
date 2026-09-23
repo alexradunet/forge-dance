@@ -2,43 +2,59 @@ import 'package:flutter/material.dart';
 
 import '../../design_system.dart';
 
-/// Readable, keyboard-accessible program preview with content-sized metadata.
+/// Editorial preview for a module or guided route. Metadata is content-sized;
+/// a photo is optional, and the entire card is one native keyboard action.
 class FgProgramCard extends StatelessWidget {
   const FgProgramCard({
     super.key,
     required this.title,
-    required this.imageUrl,
     required this.label,
-    required this.details,
     required this.onTap,
+    this.imageUrl,
+    this.summary,
+    this.details,
+    this.actionLabel,
     this.progress,
     this.locked = false,
+    this.isSelected = false,
+    this.focusNode,
+    this.autofocus = false,
   });
 
   final String title;
-  final String imageUrl;
+  final String? imageUrl;
   final String label;
-  final String details;
+  final String? summary;
+  final String? details;
+  final String? actionLabel;
   final VoidCallback onTap;
   final double? progress;
   final bool locked;
+  final bool isSelected;
+  final FocusNode? focusNode;
+  final bool autofocus;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).forgeColors;
     return FgCard(
       immersive: true,
+      shape: FgCardShape.editorial,
       padding: EdgeInsets.zero,
       onTap: onTap,
+      isSelected: isSelected,
+      focusNode: focusNode,
+      autofocus: autofocus,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ExcludeSemantics(
-            child: SizedBox(
-              height: AppSizes.squareTileLg,
-              child: FgImage(imageUrl: imageUrl, fit: BoxFit.cover),
+          if (imageUrl != null)
+            ExcludeSemantics(
+              child: SizedBox(
+                height: AppSizes.squareTileLg,
+                child: FgImage(imageUrl: imageUrl!, fit: BoxFit.cover),
+              ),
             ),
-          ),
           Padding(
             padding: AppSpacing.allXXL,
             child: Column(
@@ -47,17 +63,19 @@ class FgProgramCard extends StatelessWidget {
                 Row(
                   children: [
                     if (locked) ...[
-                      Icon(
-                        Icons.lock_outline,
-                        color: colors.onImmersiveMuted,
-                        size: AppSizes.iconSm,
+                      ExcludeSemantics(
+                        child: Icon(
+                          Icons.lock_outline,
+                          color: colors.onImmersiveMuted,
+                          size: AppSizes.iconSm,
+                        ),
                       ),
                       const SizedBox(width: AppSpacing.sm),
                     ],
                     Expanded(
                       child: Text(
                         label,
-                        style: AppTypography.bodySmall.copyWith(
+                        style: AppTypography.overline.copyWith(
                           color: colors.onImmersiveMuted,
                         ),
                       ),
@@ -69,16 +87,51 @@ class FgProgramCard extends StatelessWidget {
                   title.toUpperCase(),
                   style: AppTypography.h2.copyWith(color: colors.onImmersive),
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  details,
-                  style: AppTypography.bodySmall.copyWith(
-                    color: colors.onImmersiveMuted,
+                if (summary != null) ...[
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    summary!,
+                    style: AppTypography.body.copyWith(
+                      color: colors.onImmersiveMuted,
+                    ),
                   ),
-                ),
+                ],
+                if (details != null) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  Text(
+                    details!,
+                    style: AppTypography.bodySmall.copyWith(
+                      color: colors.onImmersiveMuted,
+                    ),
+                  ),
+                ],
                 if (!locked && progress != null) ...[
                   const SizedBox(height: AppSpacing.lg),
                   FgProgressBar(value: progress!),
+                ],
+                if (actionLabel != null) ...[
+                  const SizedBox(height: AppSpacing.lg),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          actionLabel!,
+                          style: AppTypography.bodySmall.copyWith(
+                            color: colors.onImmersive,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      ExcludeSemantics(
+                        child: Icon(
+                          Icons.arrow_forward,
+                          size: AppSizes.iconSm,
+                          color: colors.onImmersive,
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ],
             ),

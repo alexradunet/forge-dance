@@ -26,6 +26,16 @@ final $Playground = _Story(
       ),
     ),
     _Scenario(
+      name: 'Editorial',
+      args: _Args.fixed(
+        child: const Text('Discovery card'),
+        immersive: true,
+        shape: FgCardShape.editorial,
+        onTap: _noop,
+        semanticLabel: 'Discovery card',
+      ),
+    ),
+    _Scenario(
       name: 'Outlined selected',
       excludeFromTests: true,
       args: _Args.fixed(

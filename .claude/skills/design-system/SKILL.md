@@ -47,7 +47,7 @@ Styles and `AppTypography.textTheme` are compile-time constants backed by bundle
 Atomic hierarchy under `lib/design_system/`:
 
 - **atoms/**: `FgButton` (semantic variants/sizes/shapes, loading/disabled states, optional focus control), `FgIconButton` (required semantic label, selected/loading/disabled states, visual size independent from its 48px target), `FgFilterChip` (native selection/focus/keyboard behavior), `FgBadge`, `FgLevelBadge`, `FgLogo`, `FgInput`, `FgToggle`, `FgRadioButton`, `FgCheckboxItem`, `FgSlider`, `FgStepper`, `FgProgressBar`, `FgSpinner`, `FgAvatar`, `FgCard`, `FgLabel`, `FgIcon`, `FgStatusDot`, `FgDivider`, and visuals (`FgBackground`, `FgGlassContainer`, `FgGradientOverlay`, `FgShimmer`, `FgImage`, `FgRating`, `FgTooltip`, `FgAspectRatio`)
-- **molecules/**: `FgContentCard`, `FgInteractiveCard` (+thumbnail), `FgDetails` (accessible progressive disclosure), `FgEmpty`, `FgCheckboxGroup`, `FgRadioGroup`, lesson timeline nodes/cards, `FgAppNavButton`
+- **molecules/**: `FgDanceHero`, `FgSectionHeading`, `FgRoundPanel`, `FgMovementStage`, `FgProgramCard` (+ responsive `FgProgramCardLayout`), `FgContentCard`, `FgInteractiveCard` (+thumbnail), `FgDetails` (accessible progressive disclosure), `FgEmpty`, `FgCheckboxGroup`, `FgRadioGroup`, lesson timeline nodes/cards, `FgAppNavButton`
 - **organisms/**: `AppHeader`, `AppBottomNav`, `ForgeBottomSheet`, `ForgeAlertDialog`, `FgFilterSheet`, `ProgressSection`, `StatsBreakdown`, lesson path timeline (`LessonPathTimeline`, `LessonNode` models: theory/drill/movement/experiment/boss × completed/current/locked)
 - **templates/**: `FgImmersiveScaffold` (product flow surface, adaptive editorial header, dark root dialogs), `SwipeableCardScreenTemplate` (lesson header + step progress + action zone)
 
@@ -55,7 +55,7 @@ Atomic hierarchy under `lib/design_system/`:
 
 Use `FgImmersiveScaffold(bodyBuilder: (context) => ...)` for learning, assessment, practice, player, history, programme, and related progress/backup screens. Resolve `Theme.of(context)` inside that builder; pass its context into Stateful helper methods instead of reading an outer `State.context`. Keep Riverpod watches in the Consumer's build method and pass the resulting state into the builder.
 
-Use `FgCard(immersive: true)` for the established rounded charcoal cards. Route confirmations and pickers through `FgImmersiveScaffold.showModal`, including dialogs pushed on the root navigator. The scaffold owns the palette, high-contrast theme, Material ink surface, status bar, and adaptive header; screen code does not recreate them.
+Use `FgCard(immersive: true)` for the established rounded charcoal cards; `shape: FgCardShape.editorial` provides crisp discovery panels. Prefer `FgProgramCard` for module/route previews: it owns the single card action, wrapping metadata, optional image, and selected/locked presentation. Route confirmations and pickers through `FgImmersiveScaffold.showModal`, including dialogs pushed on the root navigator. The scaffold owns the palette, high-contrast theme, Material ink surface, status bar, and adaptive header; screen code does not recreate them.
 
 Standard surfaces remain available for deliberately non-immersive utilities and component previews. A light device theme is a required regression case, not a reason to switch a product page to a white background.
 

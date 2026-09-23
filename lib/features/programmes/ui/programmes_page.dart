@@ -30,6 +30,7 @@ class ProgrammesPage extends ConsumerWidget {
         children: [
           AppHeader(
             title: LocaleKeys.programmesTitle.tr(),
+            subtitle: LocaleKeys.cypherProgrammesSubtitle.tr(),
             onBack: () => Navigator.of(context).pop(),
           ),
           Padding(
@@ -52,60 +53,68 @@ class ProgrammesPage extends ConsumerWidget {
                       ref.invalidate(learnViewModelProvider);
                     },
                   ),
-                for (final programme in forgeProgrammes)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-                    child: FgCard(
-                      immersive: true,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            programme.title,
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(
-                                  color: Theme.of(context)
-                                      .forgeColors
-                                      .onImmersive,
-                                ),
-                          ),
-                          const SizedBox(height: AppSpacing.sm),
-                          if (learn.value case final learning?)
-                            Text(
-                              LocaleKeys.programmesProgress.tr(
-                                args: [
-                                  '${programme.completedSessions(learning)}',
-                                  '${programme.sessions.length}',
-                                ],
-                              ),
-                              style: Theme.of(context).textTheme.bodySmall
-                                  ?.copyWith(
-                                    color: Theme.of(context)
-                                        .forgeColors
-                                        .onImmersiveMuted,
-                                  ),
-                            ),
-                          FgButton(
-                            text:
-                                (enrolled.value?.contains(programme.id) ??
-                                    false)
-                                ? LocaleKeys.programmesContinue.tr()
-                                : LocaleKeys.programmesView.tr(),
-                            onPressed: () => Navigator.of(context).push<void>(
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    _ProgrammePage(programme: programme),
-                              ),
-                            ),
-                          ),
-                        ],
+                FgProgramCardLayout(
+                  children: [
+                    for (final (index, programme) in forgeProgrammes.indexed)
+                      _programmeCard(
+                        context,
+                        programme,
+                        index,
+                        learn.value,
+                        enrolled.value?.contains(programme.id) ?? false,
                       ),
-                    ),
-                  ),
+                  ],
+                ),
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _programmeCard(
+    BuildContext context,
+    Programme programme,
+    int index,
+    LearnState? learn,
+    bool enrolled,
+  ) {
+    final locked =
+        learn != null && programme.unmetPrerequisites(learn).isNotEmpty;
+    final status = enrolled
+        ? LocaleKeys.cypherProgrammeEnrolled.tr()
+        : locked
+        ? LocaleKeys.lockedLabel.tr()
+        : learn != null
+        ? LocaleKeys.compactReady.tr()
+        : null;
+    final number = LocaleKeys.cypherProgrammeNumber.tr(
+      args: ['${index + 1}'.padLeft(2, '0')],
+    );
+    return FgProgramCard(
+      key: ValueKey('programme-preview-${programme.id}'),
+      title: programme.title,
+      label: status == null ? number : '$number • $status',
+      summary: programme.description,
+      details: learn == null
+          ? null
+          : LocaleKeys.programmesProgress.tr(
+              args: [
+                '${programme.completedSessions(learn)}',
+                '${programme.sessions.length}',
+              ],
+            ),
+      progress: learn == null
+          ? null
+          : programme.completedSessions(learn) / programme.sessions.length,
+      locked: locked,
+      isSelected: enrolled,
+      actionLabel: enrolled
+          ? LocaleKeys.programmesContinue.tr()
+          : LocaleKeys.programmesView.tr(),
+      onTap: () => Navigator.of(context).push<void>(
+        MaterialPageRoute(builder: (_) => _ProgrammePage(programme: programme)),
       ),
     );
   }

@@ -9,6 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:forge_dance/design_system/design_system.dart';
 import 'package:forge_dance/features/method/model/forge_method.dart';
 import 'package:forge_dance/features/home/presentation/pages/home_page.dart';
+import 'package:forge_dance/features/explore/presentation/pages/explore_page.dart';
+import 'package:forge_dance/features/programmes/repository/programme_catalog.dart';
+import 'package:forge_dance/features/programmes/repository/programme_repository.dart';
 import 'package:forge_dance/features/movement_teacher/prototype/ui/motion_lab_page.dart';
 import 'package:forge_dance/features/profile/ui/view_model/profile_view_model.dart';
 import 'package:forge_dance/features/stats/ui/view_model/user_stats_provider.dart';
@@ -108,9 +111,9 @@ Future<void> _pumpFeature(
       ),
     ),
   );
-  // Home contains cached remote catalogue thumbnails with repeating loading
-  // placeholders. Don't wait for a network image to settle in a widget test.
-  if (page is HomePage) {
+  // Discovery contains remote thumbnails with repeating loading placeholders.
+  // Don't wait for a network image to settle in a widget test.
+  if (page is HomePage || page is ExplorePage) {
     await tester.pump(const Duration(seconds: 1));
   } else {
     await tester.pumpAndSettle();
@@ -225,6 +228,7 @@ void main() {
   // Add new public product screens here; this tests rendered output, not source syntax.
   final screens = <String, Widget Function()>{
     'Home cypher': () => const HomePage(),
+    'Learn discovery': () => const ExplorePage(),
     'Motion lab prototype': () => const MotionLabPage(),
     'Method overview': () => const MethodPage(),
     'Method category': () =>
@@ -261,6 +265,152 @@ void main() {
       },
     );
   }
+
+  for (final width in [320.0, 1024.0]) {
+    testWidgets('Learn search, empty state and clear reflow at $width', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(Size(width, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      const page = ExplorePage();
+      await _pumpFeature(tester, page, textScale: 2);
+      _expectDarkScreen(tester, page);
+      final input = find.byType(TextField);
+      await tester.ensureVisible(input);
+      await tester.enterText(input, '  READY BODY  ');
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(FgProgramCard), findsOneWidget);
+      expect(find.text('READY BODY'), findsOneWidget);
+      final preview = tester.widget<FgProgramCard>(find.byType(FgProgramCard));
+      expect(preview.locked, isFalse);
+      expect(
+        preview.details,
+        LocaleKeys.lessonsCompletedOf.tr(args: ['0', '3']),
+      );
+      await tester.enterText(input, 'no such dance module');
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byType(FgProgramCard), findsNothing);
+      final empty = find.text(LocaleKeys.noResults.tr());
+      await tester.ensureVisible(empty);
+      expect(empty.hitTestable(), findsOneWidget);
+      _expectDarkScreen(tester, page);
+      final clear = find.byTooltip(LocaleKeys.clearSearch.tr());
+      await tester.ensureVisible(clear);
+      await tester.tap(clear);
+      await tester.pump(const Duration(seconds: 1));
+      expect(tester.widget<TextField>(input).controller!.text, isEmpty);
+      expect(find.byType(FgProgramCard), findsWidgets);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Programme disclosure and enrolment reflow at $width', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(Size(width, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      const page = ProgrammesPage();
+      await _pumpFeature(tester, page, textScale: 2);
+      _expectDarkScreen(tester, page);
+      expect(find.text(LocaleKeys.programmesIntroduction.tr()), findsNothing);
+      final details = find.text(LocaleKeys.detailsLearnMore.tr());
+      await tester.ensureVisible(details);
+      await tester.pumpAndSettle();
+      await tester.tap(details);
+      await tester.pumpAndSettle();
+      final introduction = find.text(LocaleKeys.programmesIntroduction.tr());
+      await tester.ensureVisible(introduction);
+      await tester.pumpAndSettle();
+      expect(introduction, findsOneWidget);
+      _expectDarkScreen(tester, page);
+      await tester.ensureVisible(details);
+      await tester.pumpAndSettle();
+      await tester.tap(details);
+      await tester.pumpAndSettle();
+      final card = find.byKey(
+        const ValueKey('programme-preview-find-the-beat'),
+      );
+      final action = find.descendant(
+        of: card,
+        matching: find.text(LocaleKeys.programmesView.tr()),
+      );
+      await tester.ensureVisible(action);
+      await tester.pumpAndSettle();
+      expect(action.hitTestable(), findsOneWidget);
+      await tester.tap(action);
+      await tester.pumpAndSettle();
+      final start = find.widgetWithText(
+        FgButton,
+        LocaleKeys.programmesStart.tr(),
+      );
+      await tester.ensureVisible(start);
+      await tester.pumpAndSettle();
+      expect(tester.widget<FgButton>(start).isEnabled, isTrue);
+      await tester.runAsync(() async {
+        await tester.tap(start);
+        expect(
+          await ProgrammeRepository().getEnrolledIds(),
+          contains('find-the-beat'),
+        );
+      });
+      await tester.pumpAndSettle();
+      expect(find.text(LocaleKeys.programmesLeave.tr()), findsOneWidget);
+      await tester.scrollUntilVisible(find.byType(BackButton), -200);
+      await tester.pumpAndSettle();
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(tester.widget<FgProgramCard>(card).isSelected, isTrue);
+      expect(
+        find.descendant(
+          of: card,
+          matching: find.text(LocaleKeys.programmesContinue.tr()),
+        ),
+        findsOneWidget,
+      );
+      _expectDarkScreen(tester, page);
+    });
+  }
+
+  testWidgets(
+    'locked programme remains inspectable without bypassing prerequisites',
+    (tester) async {
+      await _pumpFeature(tester, const ProgrammesPage());
+      final card = find.byKey(
+        const ValueKey('programme-preview-move-with-control'),
+      );
+      expect(tester.widget<FgProgramCard>(card).locked, isTrue);
+      final action = find.descendant(
+        of: card,
+        matching: find.text(LocaleKeys.programmesView.tr()),
+      );
+      await tester.ensureVisible(action);
+      await tester.pumpAndSettle();
+      expect(action.hitTestable(), findsOneWidget);
+      await tester.tap(action);
+      await tester.pumpAndSettle();
+      final start = find.widgetWithText(
+        FgButton,
+        LocaleKeys.programmesStart.tr(),
+      );
+      expect(tester.widget<FgButton>(start).isEnabled, isFalse);
+      expect(
+        find.text(LocaleKeys.programmesPrerequisiteHint.tr()),
+        findsOneWidget,
+      );
+      final details = find.text(LocaleKeys.detailsProgramme.tr());
+      await tester.ensureVisible(details);
+      await tester.pumpAndSettle();
+      await tester.tap(details);
+      await tester.pumpAndSettle();
+      final description = find.text(forgeProgrammes[1].description);
+      await tester.ensureVisible(description);
+      await tester.pumpAndSettle();
+      expect(description, findsOneWidget);
+      _expectDarkScreen(
+        tester,
+        tester.widget(find.byType(FgImmersiveScaffold).last),
+      );
+    },
+  );
 
   testWidgets('Home poster and complete explanation reflow at large text', (
     tester,

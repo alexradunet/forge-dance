@@ -1,4 +1,4 @@
-# Forge / underground cypher — first vertical slice
+# Forge / underground cypher — design direction and adoption
 
 ## Direction
 
@@ -18,7 +18,10 @@ This updates the visual direction of [the foundation refresh plan](design-system
 | Module | Contract | Adopted in |
 |---|---|---|
 | `FgDanceHero` | Bundled/decorative image, opaque copy area, adaptive split layout, content-sized headline, explicit action, image failure fallback | Home |
-| `FgSectionHeading` | Eyebrow/title/subtitle hierarchy, semantic heading, unlimited wrapping | Home, daily practice, motion lab |
+| `FgSectionHeading` | Eyebrow/title/subtitle hierarchy, semantic heading, unlimited wrapping | Home, Learn discovery, daily practice, motion lab |
+| `FgProgramCard` / `FgProgramCardLayout` | Optional photo, complete route summary, progress/lock/enrolment status, one native keyboard action, responsive content-sized grid | Learn modules, programme discovery |
+| `FgCardShape.editorial` | Crisp corners without replacing existing utility-card defaults | Module and programme previews |
+| `FgShimmer` | Stops for reduced motion or disabled ticker scope; resumes when allowed | Existing image-loading placeholders |
 | `FgRoundPanel` | Numbered or active content region, semantic colors, visible cue/safety slot | Home current lesson, practice blocks, active practice player |
 | `FgMovementStage` | Bounded quiet viewport and accessible description; controls live outside it | Motion lab |
 | `FgButton` | Crisp rounded default; long labels wrap; native focus/keyboard/disabled/loading behavior; pill/circle still explicit choices | Existing application callers |
@@ -26,7 +29,7 @@ This updates the visual direction of [the foundation refresh plan](design-system
 
 Keep feature-owned copy/localization and view-model intents outside the design system. Do not add a second feature-local version of these surfaces. New component state matrices are in Widgetbook. `test/cypher_design_system_test.dart` supplements actual screen contracts with a scoped adoption guard against raw palette values and text sizes.
 
-Home now uses `FgImmersiveScaffold` and its builder context, including under a light host. No appearance preference is changed. Existing profile, curriculum, daily scheduling, safety, unsaved-session protection, and persistence behavior are retained.
+Home and Learn now use `FgImmersiveScaffold` and its builder context, including under a light host. No appearance preference is changed. Existing profile, curriculum, daily scheduling, safety, unsaved-session protection, and persistence behavior are retained.
 
 The hero photo is bundled (~148 KB) so it does not depend on a first-run network request. See [asset provenance](../assets/images/CREDITS.md). Other catalogue thumbnails remain the existing cached network images. No new video autoplay or renderer dependency is added to startup.
 
@@ -56,8 +59,8 @@ The delegated renderer-research lane was stopped because the worker's advertised
 
 ## Remaining rollout
 
-- Apply the editorial hierarchy to Explore, programme/lesson discovery and vocabulary after reviewing each screen's purpose. Don't put a promotional hero on forms or active exercise pages.
-- Audit legacy badge foregrounds and small type, card semantics, shimmer reduced-motion behavior, and raw-palette usage outside the adopted slice. These are existing inconsistencies, not solved by a token rename.
+- Continue the editorial hierarchy into module/lesson detail and vocabulary after reviewing each screen's purpose. Home, Explore and programme discovery establish the shared patterns; don't put a promotional hero on forms or active exercise pages.
+- Audit legacy badge foregrounds and small type, remaining card semantics, shimmer palette defaults, and raw-palette usage outside the adopted slice. Shimmer motion is now covered, but these remaining inconsistencies are not solved by a token rename.
 - Commission battle/cypher imagery with consistent crops and explicit rights. Add only purpose-driven, opt-in instructional video.
 - Keep real light-host, expanded disclosure, large-text and root-dialog tests alongside every migrated screen. Component stories alone are not acceptance.
 
@@ -67,7 +70,7 @@ The delegated renderer-research lane was stopped because the worker's advertised
 
 Local visual captures and logs are under ignored `build/design-refresh/`; they are not source assets.
 
-### Local outcomes (2026-09-23)
+### First-slice outcomes (2026-09-23)
 
 - Core gate passed: analyzer clean, 232 tests passed.
 - Browser integration passed; Widgetbook code generation and analysis passed.
@@ -75,3 +78,13 @@ Local visual captures and logs are under ignored `build/design-refresh/`; they a
 - Current Android debug screenshots inspected for Home, daily practice, active player and motion lab, including expanded disclosures, large text and a wide Home layout. The live lab exercised half-speed playback, pause, side view and its loop. Runtime error check was empty.
 - Home's headerless immersive scroll viewport now respects the status-bar inset; the regression has a focused scaffold test. Emulator font scale was restored to 1.0 and portrait orientation after checks.
 - No physical-device performance result, iOS execution, skinned-model rendering result, or production-teacher readiness is claimed.
+
+### Discovery continuation (2026-09-23)
+
+- Learn has editorial hierarchy, crisp photo cards, direct Programme/history links, and retryable loading errors. Search, prerequisite explanations and existing learning-path destinations are retained.
+- Programme previews reuse the same card, with numbered routes, complete purpose copy, progress and a labelled enrolment state. Locked programmes remain inspectable; enrolment still uses the existing prerequisite checks and repository.
+- The surface suite covers both screens under a light host, search/empty/clear behavior, expanded explanations, real enrolment, and blocked enrolment. Both screens reflow at 320px and 1024px with 2× text. Card tests cover keyboard activation and selected semantics in all four themes; shimmer tests cover live motion/visibility changes and disposal.
+- Core gate passed: analyzer clean, **240 tests passed**. Browser integration and Widgetbook generation/analysis passed.
+- Release Web Wasm + JS fallback build and quality gate passed: performance 53, accessibility 100, best practices 81, SEO 100; 8.11 MiB transferred, zero console errors and failed requests. The same non-fatal Lantern `NO_LCP` diagnostic remains; this is not a production 3D benchmark.
+- Current Android screenshots cover Learn and Programme discovery, collapsed/expanded programme guidance, 2× system text, and landscape Learn. Runtime error check was empty. Emulator font scale was restored to 1.0 and orientation to portrait.
+- No new media dependency, persistence shape, instructional content, or production renderer was introduced.

@@ -70,6 +70,7 @@ export 'atoms/icons/fg_icon.dart';
 // Cards
 export 'molecules/cards/fg_content_card.dart';
 export 'molecules/cards/fg_round_panel.dart';
+export 'molecules/cards/fg_program_card.dart';
 export 'molecules/typography/fg_section_heading.dart';
 export 'molecules/cards/fg_instruction_card.dart';
 export 'molecules/cards/fg_interactive_card.dart';

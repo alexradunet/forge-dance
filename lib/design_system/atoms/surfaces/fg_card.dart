@@ -8,12 +8,15 @@ import '../../tokens/app_spacing.dart';
 
 enum FgCardVariant { opaque, outlined, elevated }
 
+enum FgCardShape { rounded, editorial }
+
 /// Semantic content surface with optional native pointer and keyboard action.
 class FgCard extends StatelessWidget {
   const FgCard({
     super.key,
     required this.child,
     this.variant = FgCardVariant.opaque,
+    this.shape = FgCardShape.rounded,
     this.padding = AppSpacing.card,
     this.onTap,
     this.isSelected = false,
@@ -27,6 +30,7 @@ class FgCard extends StatelessWidget {
   final Widget child;
   final bool immersive;
   final FgCardVariant variant;
+  final FgCardShape shape;
   final EdgeInsetsGeometry padding;
   final VoidCallback? onTap;
   final bool isSelected;
@@ -41,10 +45,13 @@ class FgCard extends StatelessWidget {
     final scheme = theme.colorScheme;
     final emphasis = theme.forgeEmphasis;
     final effectiveOnTap = isEnabled ? onTap : null;
-    final shape = RoundedRectangleBorder(
-      borderRadius: immersive
-          ? AppBorderRadius.xxLarge
-          : AppBorderRadius.defaultRadius,
+    final borderRadius = shape == FgCardShape.editorial
+        ? AppBorderRadius.small
+        : immersive
+        ? AppBorderRadius.xxLarge
+        : AppBorderRadius.defaultRadius;
+    final cardShape = RoundedRectangleBorder(
+      borderRadius: borderRadius,
       side: BorderSide(
         color: isSelected
             ? scheme.primary
@@ -62,7 +69,7 @@ class FgCard extends StatelessWidget {
 
     Widget card = Material(
       color: immersive ? AppColors.surfaceCard : color,
-      shape: shape,
+      shape: cardShape,
       clipBehavior: Clip.antiAlias,
       elevation: 0,
       child: InkWell(
@@ -89,7 +96,7 @@ class FgCard extends StatelessWidget {
     if (variant == FgCardVariant.elevated && emphasis.raised.isNotEmpty) {
       card = DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: AppBorderRadius.defaultRadius,
+          borderRadius: borderRadius,
           boxShadow: emphasis.raised,
         ),
         child: card,
