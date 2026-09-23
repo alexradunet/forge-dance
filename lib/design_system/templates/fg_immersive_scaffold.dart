@@ -31,7 +31,7 @@ class FgImmersiveScaffold extends StatelessWidget {
           child: Material(
             type: MaterialType.transparency,
             child: title == null
-                ? bodyBuilder(context)
+                ? SafeArea(bottom: false, child: bodyBuilder(context))
                 : Column(
                     children: [
                       AppHeader(

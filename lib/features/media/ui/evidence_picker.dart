@@ -115,8 +115,6 @@ class _EvidencePickerState extends ConsumerState<EvidencePicker> {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(LocaleKeys.mediaPrivacy.tr()),
-        const SizedBox(height: AppSpacing.sm),
         Wrap(
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
@@ -179,6 +177,10 @@ class _EvidencePickerState extends ConsumerState<EvidencePicker> {
                   ?.copyWith(color: Theme.of(context).colorScheme.error),
             ),
           ),
+        FgDetails(
+          title: LocaleKeys.detailsPrivacy.tr(),
+          child: Text(LocaleKeys.mediaPrivacy.tr()),
+        ),
       ],
     ),
   );

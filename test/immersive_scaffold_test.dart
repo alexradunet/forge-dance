@@ -20,6 +20,41 @@ double contrast(Color a, Color b) {
 
 void main() {
   testWidgets(
+    'headerless immersive scroll view stays below system status bar',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppThemes.light,
+          home: MediaQuery(
+            data: const MediaQueryData(padding: EdgeInsets.only(top: 32)),
+            child: FgImmersiveScaffold(
+              bodyBuilder: (_) => ListView(
+                key: const ValueKey('scroll-content'),
+                padding: EdgeInsets.zero,
+                children: const [
+                  Text('First movement'),
+                  SizedBox(height: 1500),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+      expect(
+        tester.getTopLeft(find.byKey(const ValueKey('scroll-content'))).dy,
+        32,
+      );
+      await tester.drag(find.byType(ListView), const Offset(0, -300));
+      await tester.pumpAndSettle();
+      expect(
+        tester.getTopLeft(find.byKey(const ValueKey('scroll-content'))).dy,
+        32,
+      );
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets(
     'immersive forms and root dialogs remain dark under a light device theme',
     (tester) async {
       var selected = false;

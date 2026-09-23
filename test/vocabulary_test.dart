@@ -97,9 +97,12 @@ void main() {
     );
     await tester.pumpAndSettle();
     expect(find.text('BOUNCE'), findsOneWidget);
-    await tester.ensureVisible(find.text('vocabularyViewPath'));
+    final primaryPathAction = find
+        .widgetWithText(FgButton, 'vocabularyViewPath')
+        .first;
+    await tester.ensureVisible(primaryPathAction);
     await tester.pumpAndSettle();
-    expect(find.text('vocabularyViewPath'), findsOneWidget);
+    expect(primaryPathAction.hitTestable(), findsOneWidget);
     expect(find.text('vocabularyViewLesson'), findsNothing);
     expect(tester.takeException(), isNull);
   });

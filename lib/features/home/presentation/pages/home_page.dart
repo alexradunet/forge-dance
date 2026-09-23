@@ -1,14 +1,16 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../constants/constants.dart';
+import '../../../../constants/assets.dart';
 import '../../../../routing/routes.dart';
 import '../../../stats/model/user_stats.dart';
+import '../../../movement_teacher/prototype/ui/motion_lab_page.dart';
 import '../../../stats/ui/view_model/user_stats_provider.dart';
 import '../../../../design_system/design_system.dart';
-import '../../../../design_system/molecules/cards/fg_session_card.dart';
 import '../../../../generated/locale_keys.g.dart';
 import '../../../learn/model/lesson.dart';
 import '../../../learn/model/lesson_progress.dart';
@@ -24,16 +26,21 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final learnState = ref.watch(learnViewModelProvider);
 
-    return Scaffold(
-      body: FgBackground(
-        child: learnState.when(
-          loading: () => const Center(child: FgSpinner()),
-          error: (_, _) => FgEmpty(
-            icon: Icons.error_outline,
-            title: LocaleKeys.unexpectedErrorOccurred.tr(),
-            tone: FgEmptyTone.error,
+    return FgImmersiveScaffold(
+      bodyBuilder: (context) => Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: AppSizes.editorialContentMax,
           ),
-          data: (state) => _buildContent(context, ref, state),
+          child: learnState.when(
+            loading: () => const Center(child: FgSpinner()),
+            error: (_, _) => FgEmpty(
+              icon: Icons.error_outline,
+              title: LocaleKeys.unexpectedErrorOccurred.tr(),
+              tone: FgEmptyTone.error,
+            ),
+            data: (state) => _buildContent(context, ref, state),
+          ),
         ),
       ),
     );
@@ -55,54 +62,73 @@ class HomePage extends ConsumerWidget {
           child: AppHeader(
             title: _dancerHandle(profileName),
             subtitle: LocaleKeys.welcomeBack.tr(),
+            compact: true,
           ),
         ),
         SliverPadding(
-          padding: AppSpacing.allXXL,
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
           sliver: SliverToBoxAdapter(
-            child: FgCard(
-              immersive: true,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    LocaleKeys.forgeCoreTitle.tr(),
-                    style: AppTypography.h2.copyWith(
-                      color: Theme.of(context).forgeColors.onImmersive,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(LocaleKeys.forgeCoreSubtitle.tr()),
-                  const SizedBox(height: AppSpacing.lg),
-                  FgButton(
-                    text: LocaleKeys.forgeTodayPractice.tr(),
-                    expand: true,
-                    onPressed: () => context.push(Routes.practice),
-                  ),
-                  const SizedBox(height: AppSpacing.sm),
-                  Wrap(
-                    spacing: AppSpacing.sm,
-                    runSpacing: AppSpacing.sm,
-                    children: [
-                      FgButton(
-                        text: LocaleKeys.forgeAssessments.tr(),
-                        variant: FgButtonVariant.secondary,
-                        onPressed: () => context.push(Routes.method),
-                      ),
-                      FgButton(
-                        text: LocaleKeys.forgeProgrammes.tr(),
-                        variant: FgButtonVariant.secondary,
-                        onPressed: () => context.push(Routes.programmes),
-                      ),
-                      FgButton(
-                        text: LocaleKeys.forgeLogbook.tr(),
-                        variant: FgButtonVariant.ghost,
-                        onPressed: () => context.push(Routes.practiceLog),
-                      ),
-                    ],
-                  ),
-                ],
+            child: FgDanceHero(
+              image: const AssetImage(Assets.cypherDancer),
+              eyebrow: LocaleKeys.cypherEyebrow.tr(),
+              title: LocaleKeys.cypherHeadline.tr(),
+              subtitle: LocaleKeys.cypherInvitation.tr(),
+              action: FgButton(
+                text: LocaleKeys.forgeTodayPractice.tr(),
+                icon: const Icon(Icons.north_east),
+                size: FgButtonSize.lg,
+                expand: true,
+                onPressed: () => context.push(Routes.practice),
               ),
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: AppSpacing.allLG,
+          sliver: SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: AppSpacing.sm,
+                  runSpacing: AppSpacing.sm,
+                  children: [
+                    FgButton(
+                      text: LocaleKeys.forgeAssessments.tr(),
+                      variant: FgButtonVariant.ghost,
+                      onPressed: () => context.push(Routes.method),
+                    ),
+                    FgButton(
+                      text: LocaleKeys.forgeProgrammes.tr(),
+                      variant: FgButtonVariant.ghost,
+                      onPressed: () => context.push(Routes.programmes),
+                    ),
+                    FgButton(
+                      text: LocaleKeys.forgeLogbook.tr(),
+                      icon: const Icon(Icons.history),
+                      variant: FgButtonVariant.ghost,
+                      onPressed: () => context.push(Routes.practiceLog),
+                    ),
+                  ],
+                ),
+                FgDetails(
+                  key: const ValueKey('home-forge-explanation'),
+                  title: LocaleKeys.detailsLearnMore.tr(),
+                  child: Text(LocaleKeys.forgeCoreSubtitle.tr()),
+                ),
+                if (kDebugMode)
+                  FgButton(
+                    text: LocaleKeys.motionLabOpen.tr(),
+                    icon: const Icon(Icons.view_in_ar),
+                    variant: FgButtonVariant.secondary,
+                    onPressed: () =>
+                        Navigator.of(context, rootNavigator: true).push<void>(
+                          MaterialPageRoute(
+                            builder: (_) => const MotionLabPage(),
+                          ),
+                        ),
+                  ),
+              ],
             ),
           ),
         ),
@@ -211,43 +237,38 @@ class HomePage extends ConsumerWidget {
   ) {
     final lesson = state.currentLesson;
 
-    if (lesson == null) {
-      // Every lesson completed — celebrate and offer replay.
-      return FgSessionCard(
-        compact: true,
-        imageAspectRatio: 5 / 2,
-        title: LocaleKeys.moduleComplete.tr().toUpperCase(),
-        subtitle: LocaleKeys.moduleCompleteSubtitle.tr(),
-        label: state.activeModule.title.toUpperCase(),
-        imageUrl: state.activeModule.imageUrl,
-        action: FgButton(
-          text: LocaleKeys.replayLessons.tr(),
-          variant: FgButtonVariant.primary,
-          size: FgButtonSize.lg,
-          onPressed: () =>
-              ModuleDestination(state.activeModule.id).push<void>(context),
-        ),
-      );
-    }
-
-    final subtitle = lesson.duration.isEmpty
+    final subtitle = lesson == null
+        ? LocaleKeys.moduleCompleteSubtitle.tr()
+        : lesson.duration.isEmpty
         ? state.activeModule.title
         : '${state.activeModule.title} • ${lesson.duration}';
 
-    return FgSessionCard(
-      compact: true,
-      imageAspectRatio: 5 / 2,
-      title: lesson.title.toUpperCase(),
-      subtitle: subtitle,
+    return FgRoundPanel(
       label: LocaleKeys.continueTraining.tr().toUpperCase(),
-      imageUrl: state.activeModule.imageUrl,
-      action: FgButton(
-        text: state.statusOf(lesson) == LessonStatus.inProgress
-            ? LocaleKeys.continueLesson.tr()
-            : LocaleKeys.startLesson.tr(),
-        variant: FgButtonVariant.primary,
-        size: FgButtonSize.lg,
-        onPressed: () => _startCurrentLesson(context, ref, state, lesson),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FgSectionHeading(
+            title:
+                lesson?.title.toUpperCase() ??
+                LocaleKeys.moduleComplete.tr().toUpperCase(),
+            subtitle: subtitle,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          FgButton(
+            text: lesson == null
+                ? LocaleKeys.replayLessons.tr()
+                : state.statusOf(lesson) == LessonStatus.inProgress
+                ? LocaleKeys.continueLesson.tr()
+                : LocaleKeys.startLesson.tr(),
+            variant: FgButtonVariant.secondary,
+            onPressed: lesson == null
+                ? () =>
+                      ModuleDestination(state.activeModule.id)
+                          .push<void>(context)
+                : () => _startCurrentLesson(context, ref, state, lesson),
+          ),
+        ],
       ),
     );
   }
@@ -293,8 +314,6 @@ class HomePage extends ConsumerWidget {
     required List<Widget> children,
     bool showViewAll = false,
   }) {
-    final theme = Theme.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -305,14 +324,7 @@ class HomePage extends ConsumerWidget {
           ),
           child: Row(
             children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: theme.forgeColors.onImmersive,
-                  ),
-                ),
-              ),
+              Expanded(child: FgSectionHeading(title: title)),
               if (showViewAll)
                 FgButton(
                   text: LocaleKeys.viewAll.tr().toUpperCase(),

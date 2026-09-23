@@ -9,10 +9,10 @@ import '../../../routing/routes.dart';
 import '../../learn/repository/lesson_catalog.dart';
 import '../../learn/ui/lesson_player_screen.dart';
 import '../../learn/ui/view_model/learn_view_model.dart';
+import '../../method/repository/method_catalog.dart';
 import '../../method/ui/method_view_model.dart';
 import '../../practice_player/ui/practice_player_page.dart';
 import '../model/practice.dart';
-import '../repository/practice_planner.dart';
 import 'practice_log_page.dart';
 import 'practice_view_model.dart';
 
@@ -23,10 +23,30 @@ class PracticePage extends ConsumerStatefulWidget {
   ConsumerState<PracticePage> createState() => _PracticePageState();
 }
 
-class _PracticePageState extends ConsumerState<PracticePage> {
+class _PracticePageState extends ConsumerState<PracticePage>
+    with WidgetsBindingObserver {
   bool _busy = false;
   PracticeRecord? _pending;
   String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ref.invalidate(dailyPracticeDateProvider);
+    }
+  }
 
   Future<void> _play(PracticeBlock block) async {
     if (_busy || _pending != null) return;
@@ -141,6 +161,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
     final learn = ref.watch(learnViewModelProvider);
     final progress = method.value;
     final choices = preferences.value;
+    final plan = ref.watch(dailyPracticePlanProvider);
     return PopScope(
       canPop: _pending == null && !_busy,
       child: FgImmersiveScaffold(
@@ -148,27 +169,6 @@ class _PracticePageState extends ConsumerState<PracticePage> {
         bodyBuilder: (context) => ListView(
           padding: AppSpacing.allLG,
           children: [
-            Text(LocaleKeys.practiceIntro.tr()),
-            const SizedBox(height: AppSpacing.lg),
-            FgButton(
-              text: LocaleKeys.practiceLogTitle.tr(),
-              variant: FgButtonVariant.secondary,
-              onPressed: _pending != null || _busy
-                  ? null
-                  : () => Navigator.of(context).push<void>(
-                      MaterialPageRoute(
-                        builder: (_) => const PracticeLogPage(),
-                      ),
-                    ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            FgButton(
-              text: LocaleKeys.practiceOptionalFitness.tr(),
-              variant: FgButtonVariant.ghost,
-              onPressed: _pending != null || _busy
-                  ? null
-                  : () => context.push(Routes.workout),
-            ),
             if (_error != null) ...[
               const SizedBox(height: AppSpacing.lg),
               Text(
@@ -220,28 +220,41 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                       .reload();
                 },
               ),
-            ] else if (progress == null || choices == null)
+            ] else if (progress == null || choices == null || plan == null)
               const Center(child: FgSpinner())
             else ...[
               const SizedBox(height: AppSpacing.lg),
-              _choices(context, choices),
-              const SizedBox(height: AppSpacing.lg),
-              Text(
-                LocaleKeys.practicePlanSummary.tr(args: ['${choices.minutes}']),
-                style: Theme.of(context).textTheme.titleLarge,
+              FgSectionHeading(
+                eyebrow: LocaleKeys.dailyPracticeHeading.tr(
+                  args: [
+                    DateFormat.yMMMd(context.locale.toString())
+                        .format(DateTime.parse(plan.dateKey)),
+                  ],
+                ),
+                title: plan.title,
+                subtitle: LocaleKeys.dailyPracticePrescription.tr(
+                  args: [forgeBelts[plan.beltIndex].name, '${plan.minutes}'],
+                ),
               ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(plan.focus),
+              if (choices.gentle) Text(LocaleKeys.dailyPracticeGentleHelp.tr()),
+              const SizedBox(height: AppSpacing.lg),
+              _choices(context, choices),
+              const SizedBox(height: AppSpacing.sm),
+              Text(LocaleKeys.compactSafety.tr()),
               if (learn.hasError)
                 Text(LocaleKeys.practiceLessonLoadFailed.tr()),
-              for (final block in buildPracticePlan(
-                progress: progress,
-                minutes: choices.minutes,
-                gentle: choices.gentle,
-                includeConditioning: choices.includeConditioning,
-                support: choices.support,
-              ).blocks) ...[
+              for (final block in plan.blocks) ...[
                 const SizedBox(height: AppSpacing.lg),
-                FgCard(
-                  immersive: true,
+                FgRoundPanel(
+                  label: LocaleKeys.cypherRound.tr(
+                    args: [
+                      '${plan.blocks.indexOf(block) + 1}'.padLeft(2, '0'),
+                      '${plan.blocks.length}'.padLeft(2, '0'),
+                    ],
+                  ),
+                  active: block == plan.blocks.first,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -250,19 +263,14 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                       Text(
-                        LocaleKeys.practiceBlockSummary.tr(
+                        LocaleKeys.compactPracticeBlock.tr(
                           args: [
                             '${block.minutes}',
-                            '${block.level}',
+                            forgeBelts[block.level].name,
                             '${block.bpm}',
                           ],
                         ),
                       ),
-                      if (block.category != null &&
-                          progress.levelFor(block.category!) == 0)
-                        Text(LocaleKeys.practiceUnassessed.tr()),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(block.adaptation),
                       const SizedBox(height: AppSpacing.sm),
                       Wrap(
                         spacing: AppSpacing.sm,
@@ -292,11 +300,65 @@ class _PracticePageState extends ConsumerState<PracticePage> {
                       ),
                       if (!(learn.value?.canOpenLesson(block.lessonId) ??
                           false))
-                        Text(LocaleKeys.practiceLessonLocked.tr()),
+                        Text(LocaleKeys.compactPracticeLessonLocked.tr()),
+                      FgDetails(
+                        key: ValueKey('practice-adaptations-${block.id}'),
+                        title: LocaleKeys.detailsAdaptations.tr(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(block.adaptation),
+                            if (!(learn.value?.canOpenLesson(block.lessonId) ??
+                                false)) ...[
+                              const SizedBox(height: AppSpacing.sm),
+                              Text(LocaleKeys.practiceLessonLocked.tr()),
+                            ],
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
               ],
+              const SizedBox(height: AppSpacing.lg),
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  FgButton(
+                    text: LocaleKeys.compactLogbook.tr(),
+                    icon: const Icon(Icons.history),
+                    variant: FgButtonVariant.ghost,
+                    onPressed: _pending != null || _busy
+                        ? null
+                        : () => Navigator.of(context).push<void>(
+                            MaterialPageRoute(
+                              builder: (_) => const PracticeLogPage(),
+                            ),
+                          ),
+                  ),
+                  FgButton(
+                    text: LocaleKeys.compactFitness.tr(),
+                    icon: const Icon(Icons.fitness_center),
+                    variant: FgButtonVariant.ghost,
+                    onPressed: _pending != null || _busy
+                        ? null
+                        : () => context.push(Routes.workout),
+                  ),
+                ],
+              ),
+              FgDetails(
+                title: LocaleKeys.detailsHowPracticeWorks.tr(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(LocaleKeys.dailyPracticeSharedTheme.tr()),
+                    Text(LocaleKeys.practiceIntro.tr()),
+                    Text(LocaleKeys.practiceGentle.tr()),
+                    Text(LocaleKeys.practiceConditioning.tr()),
+                  ],
+                ),
+              ),
             ],
           ],
         ),
@@ -321,8 +383,24 @@ class _PracticePageState extends ConsumerState<PracticePage> {
       );
     }
 
-    return FgCard(
-      immersive: true,
+    String positionLabel(PracticeSupport support) => switch (support) {
+      PracticeSupport.standing => LocaleKeys.practiceStanding.tr(),
+      PracticeSupport.seated => LocaleKeys.practiceSeated.tr(),
+      PracticeSupport.supported => LocaleKeys.practiceSupported.tr(),
+    };
+
+    return FgDetails(
+      key: const ValueKey('practice-options'),
+      title: LocaleKeys.compactPracticeOptions.tr(
+        args: [
+          [
+            positionLabel(value.support),
+            if (value.gentle) LocaleKeys.compactGentle.tr(),
+            if (value.includeConditioning) LocaleKeys.compactConditioning.tr(),
+          ].join(' · '),
+        ],
+      ),
+      maintainState: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -344,10 +422,10 @@ class _PracticePageState extends ConsumerState<PracticePage> {
           ),
           Row(
             children: [
-              Expanded(child: Text(LocaleKeys.practiceGentle.tr())),
+              Expanded(child: Text(LocaleKeys.compactGentle.tr())),
               FgToggle(
                 value: value.gentle,
-                semanticLabel: LocaleKeys.practiceGentle.tr(),
+                semanticLabel: LocaleKeys.compactGentle.tr(),
                 isEnabled: !_busy && _pending == null,
                 onChanged: (gentle) => change(gentle: gentle),
               ),
@@ -355,10 +433,10 @@ class _PracticePageState extends ConsumerState<PracticePage> {
           ),
           Row(
             children: [
-              Expanded(child: Text(LocaleKeys.practiceConditioning.tr())),
+              Expanded(child: Text(LocaleKeys.compactConditioning.tr())),
               FgToggle(
                 value: value.includeConditioning,
-                semanticLabel: LocaleKeys.practiceConditioning.tr(),
+                semanticLabel: LocaleKeys.compactConditioning.tr(),
                 isEnabled: !_busy && _pending == null,
                 onChanged: (conditioning) => change(conditioning: conditioning),
               ),
@@ -373,13 +451,7 @@ class _PracticePageState extends ConsumerState<PracticePage> {
             children: [
               for (final support in PracticeSupport.values)
                 FgFilterChip(
-                  label: switch (support) {
-                    PracticeSupport.standing =>
-                      LocaleKeys.practiceStanding.tr(),
-                    PracticeSupport.seated => LocaleKeys.practiceSeated.tr(),
-                    PracticeSupport.supported =>
-                      LocaleKeys.practiceSupported.tr(),
-                  },
+                  label: positionLabel(support),
                   isSelected: value.support == support,
                   isEnabled: !_busy && _pending == null,
                   onSelected: (_) => change(support: support),

@@ -15,7 +15,11 @@ class PracticeBlock {
     required List<String> cues,
     required this.adaptation,
     this.vocabularyId,
-  }) : cues = List.unmodifiable(cues);
+    this.workoutId,
+    this.workoutDate,
+  }) : cues = List.unmodifiable(cues) {
+    _validateWorkoutMetadata(workoutId, workoutDate);
+  }
 
   final String id;
   final String title;
@@ -27,12 +31,27 @@ class PracticeBlock {
   final List<String> cues;
   final String adaptation;
   final String? vocabularyId;
+  final String? workoutId;
+  final String? workoutDate;
 }
 
 class PracticePlan {
-  PracticePlan({required List<PracticeBlock> blocks})
-    : blocks = List.unmodifiable(blocks);
+  PracticePlan({
+    required this.workoutId,
+    required this.title,
+    required this.focus,
+    required this.dateKey,
+    required this.beltIndex,
+    required List<PracticeBlock> blocks,
+  }) : blocks = List.unmodifiable(blocks) {
+    _validateWorkoutMetadata(workoutId, dateKey);
+  }
 
+  final String workoutId;
+  final String title;
+  final String focus;
+  final String dateKey;
+  final int beltIndex;
   final List<PracticeBlock> blocks;
   int get minutes => blocks.fold(0, (total, block) => total + block.minutes);
 }
@@ -90,6 +109,8 @@ class PracticeRecord {
     required this.title,
     required this.lessonId,
     this.vocabularyId,
+    this.workoutId,
+    this.workoutDate,
     this.category,
     required this.level,
     required this.performedAt,
@@ -106,6 +127,8 @@ class PracticeRecord {
   final String title;
   final String lessonId;
   final String? vocabularyId;
+  final String? workoutId;
+  final String? workoutDate;
   final ForgeCategory? category;
   final int level;
   final DateTime performedAt;
@@ -125,8 +148,9 @@ class PracticeRecord {
   ).join();
 
   void validate() {
+    _validateWorkoutMetadata(workoutId, workoutDate);
     if ([id, blockId, title, lessonId].any((value) => value.trim().isEmpty) ||
-        level < 1 ||
+        level < 0 ||
         level > 7 ||
         durationSeconds < 1 ||
         durationSeconds > 86400 ||
@@ -151,6 +175,8 @@ class PracticeRecord {
     'title': title,
     'lessonId': lessonId,
     'vocabularyId': vocabularyId,
+    'workoutId': workoutId,
+    'workoutDate': workoutDate,
     'category': category?.name,
     'level': level,
     'performedAt': performedAt.toIso8601String(),
@@ -177,6 +203,8 @@ class PracticeRecord {
         title: json['title'] as String,
         lessonId: json['lessonId'] as String,
         vocabularyId: json['vocabularyId'] as String?,
+        workoutId: json['workoutId'] as String?,
+        workoutDate: json['workoutDate'] as String?,
         category: category,
         level: json['level'] as int,
         performedAt: DateTime.parse(json['performedAt'] as String),
@@ -204,6 +232,8 @@ class PracticeRecord {
     title: title,
     lessonId: lessonId,
     vocabularyId: vocabularyId,
+    workoutId: workoutId,
+    workoutDate: workoutDate,
     category: category,
     level: level,
     performedAt: performedAt,
@@ -222,4 +252,20 @@ class PracticeRecord {
       vocabularyId == other.vocabularyId &&
       level == other.level &&
       bpm == other.bpm;
+}
+
+final _workoutDatePattern = RegExp(r'^\d{4}-\d{2}-\d{2}$');
+
+void _validateWorkoutMetadata(String? workoutId, String? workoutDate) {
+  if (workoutId == null && workoutDate == null) return;
+  if (workoutId == null ||
+      workoutId.trim().isEmpty ||
+      workoutDate == null ||
+      !_workoutDatePattern.hasMatch(workoutDate)) {
+    throw const FormatException('Invalid daily workout identity or date.');
+  }
+  final date = DateTime.tryParse('${workoutDate}T00:00:00Z');
+  if (date == null || date.toIso8601String().substring(0, 10) != workoutDate) {
+    throw const FormatException('Invalid daily workout date.');
+  }
 }

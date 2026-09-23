@@ -44,6 +44,7 @@ class FgNavButton extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               label,
+              textAlign: TextAlign.center,
               style: AppTypography.label.copyWith(
                 color: isActive ? AppColors.textMain : AppColors.textDark,
                 fontSize: 10,

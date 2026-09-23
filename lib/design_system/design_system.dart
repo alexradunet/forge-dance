@@ -69,6 +69,8 @@ export 'atoms/icons/fg_icon.dart';
 
 // Cards
 export 'molecules/cards/fg_content_card.dart';
+export 'molecules/cards/fg_round_panel.dart';
+export 'molecules/typography/fg_section_heading.dart';
 export 'molecules/cards/fg_instruction_card.dart';
 export 'molecules/cards/fg_interactive_card.dart';
 export 'molecules/cards/fg_interactive_card_thumbnail.dart';
@@ -80,6 +82,7 @@ export 'molecules/inputs/fg_radio_group.dart';
 // Feedback
 export 'molecules/feedback/fg_empty.dart';
 export 'molecules/feedback/fg_snack_bar.dart';
+export 'molecules/feedback/fg_details.dart';
 
 // Navigation
 export 'molecules/navigation/fg_app_nav_button.dart';
@@ -87,6 +90,8 @@ export 'molecules/navigation/fg_step_navigation.dart';
 
 // Media
 export 'molecules/media/fg_media_dock.dart';
+export 'molecules/media/fg_dance_hero.dart';
+export 'molecules/media/fg_movement_stage.dart';
 export 'molecules/media/fg_timer_control.dart';
 
 // Lessons

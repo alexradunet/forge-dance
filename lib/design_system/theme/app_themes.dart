@@ -405,15 +405,8 @@ abstract final class AppThemes {
                 offset: const Offset(0, 12),
               ),
             ],
-      primaryAction: highContrast
-          ? const []
-          : [
-              BoxShadow(
-                color: scheme.primary.withValues(alpha: 0.28),
-                blurRadius: 15,
-                offset: const Offset(0, 4),
-              ),
-            ],
+      // Crisp, poster-like actions: the accent carries emphasis without glow.
+      primaryAction: const [],
       glassFill: highContrast
           ? scheme.surfaceContainerHigh
           : scheme.surfaceContainer.withValues(alpha: 0.82),

@@ -42,6 +42,10 @@ Rules for AI agents and contributors working on Forge Dance.
 - Use `lib/design_system/` tokens/components for colors, typography, spacing, shadows, buttons, inputs, and layout primitives.
 - No ad-hoc colors, text styles, spacing systems, or one-off design primitives in feature code.
 - If a design primitive is missing, add it to the design system first.
+- Before UI changes, read `.claude/skills/design-system/SKILL.md` and the existing screen/component pattern.
+- Learning and practice flows use `FgImmersiveScaffold`, its `bodyBuilder` context, `FgCard(immersive: true)`, and `FgImmersiveScaffold.showModal` for root dialogs. Preserve this dark surface even when the host theme is light; do not change a user's appearance preference to repair a screen.
+- Use progressive disclosure: show the next action and current status first; put secondary explanations in labelled `FgDetails` sections without deleting the full text. Keep active exercise instructions, essential safety, validation errors, and destructive-action consequences visible.
+- Add new or substantially changed product screens to `test/feature_surface_contract_test.dart`. UI handoff requires the real screen to pass under a light host, plus expanded-detail, large-text, and root-dialog coverage where applicable; verify current collapsed/expanded screenshots in the running app. Component-only tests do not replace screen coverage.
 
 ## Generated code
 

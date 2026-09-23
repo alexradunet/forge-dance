@@ -10,6 +10,15 @@ abstract final class AppTypography {
   static const displayFamily = 'Bebas Neue';
   static const bodyFamily = 'Inter';
 
+  /// Street-poster display. Content-driven height; never squeeze to fit.
+  static const poster = TextStyle(
+    fontFamily: displayFamily,
+    fontSize: 64,
+    fontWeight: FontWeight.w400,
+    height: 0.98,
+    letterSpacing: 0.4,
+  );
+
   static const h1 = TextStyle(
     fontFamily: displayFamily,
     fontSize: 48,

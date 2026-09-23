@@ -47,11 +47,30 @@ Styles and `AppTypography.textTheme` are compile-time constants backed by bundle
 Atomic hierarchy under `lib/design_system/`:
 
 - **atoms/**: `FgButton` (semantic variants/sizes/shapes, loading/disabled states, optional focus control), `FgIconButton` (required semantic label, selected/loading/disabled states, visual size independent from its 48px target), `FgFilterChip` (native selection/focus/keyboard behavior), `FgBadge`, `FgLevelBadge`, `FgLogo`, `FgInput`, `FgToggle`, `FgRadioButton`, `FgCheckboxItem`, `FgSlider`, `FgStepper`, `FgProgressBar`, `FgSpinner`, `FgAvatar`, `FgCard`, `FgLabel`, `FgIcon`, `FgStatusDot`, `FgDivider`, and visuals (`FgBackground`, `FgGlassContainer`, `FgGradientOverlay`, `FgShimmer`, `FgImage`, `FgRating`, `FgTooltip`, `FgAspectRatio`)
-- **molecules/**: `FgContentCard`, `FgInteractiveCard` (+thumbnail), `FgEmpty`, `FgCheckboxGroup`, `FgRadioGroup`, lesson timeline nodes/cards, `FgAppNavButton`
+- **molecules/**: `FgContentCard`, `FgInteractiveCard` (+thumbnail), `FgDetails` (accessible progressive disclosure), `FgEmpty`, `FgCheckboxGroup`, `FgRadioGroup`, lesson timeline nodes/cards, `FgAppNavButton`
 - **organisms/**: `AppHeader`, `AppBottomNav`, `ForgeBottomSheet`, `ForgeAlertDialog`, `FgFilterSheet`, `ProgressSection`, `StatsBreakdown`, lesson path timeline (`LessonPathTimeline`, `LessonNode` models: theory/drill/movement/experiment/boss × completed/current/locked)
-- **templates/**: `SwipeableCardScreenTemplate` (header + step progress + action zone)
+- **templates/**: `FgImmersiveScaffold` (product flow surface, adaptive editorial header, dark root dialogs), `SwipeableCardScreenTemplate` (lesson header + step progress + action zone)
 
-Screen scaffolding pattern: `Scaffold(backgroundColor: Colors.transparent, body: FgBackground(child: CustomScrollView(...)))` with `AppHeader` as the first sliver — see `home_page.dart`.
+## Product screen contract
+
+Use `FgImmersiveScaffold(bodyBuilder: (context) => ...)` for learning, assessment, practice, player, history, programme, and related progress/backup screens. Resolve `Theme.of(context)` inside that builder; pass its context into Stateful helper methods instead of reading an outer `State.context`. Keep Riverpod watches in the Consumer's build method and pass the resulting state into the builder.
+
+Use `FgCard(immersive: true)` for the established rounded charcoal cards. Route confirmations and pickers through `FgImmersiveScaffold.showModal`, including dialogs pushed on the root navigator. The scaffold owns the palette, high-contrast theme, Material ink surface, status bar, and adaptive header; screen code does not recreate them.
+
+Standard surfaces remain available for deliberately non-immersive utilities and component previews. A light device theme is a required regression case, not a reason to switch a product page to a white background.
+
+## Progressive disclosure
+
+Lead with a short title, meaningful status/metrics, and the next action. Keep full secondary copy in `FgDetails` with a descriptive label (for example, “Adaptations & guidance”), collapsed by default. Reference existing translation/catalogue content rather than maintaining a shortened duplicate as the only source.
+
+- Keep current exercise cues, assessment criteria, safety stop signals, errors, unsaved-state warnings, and destructive confirmation consequences visible.
+- Full text must remain reachable in the disclosure or the existing detail destination. Truncation without a way to read the full content is not disclosure.
+- Use stable content keys for repeated disclosures. Keep forms outside collapsed details, or use `maintainState: true` when collapsing must retain an active form; do not eagerly create hidden media players.
+- Avoid nested explanation panels and repeated paragraphs on each card. Test expand/collapse accessibility, preserved content, and the primary action remaining usable.
+
+## UI completion gate
+
+Add new or substantially changed public product screens to `test/feature_surface_contract_test.dart`; test rendered surfaces and text contrast under a light host rather than inspecting source code for widget names. Add meaningful screen disclosure/interaction coverage, keep `test/immersive_scaffold_test.dart` passing, and exercise the changed screen in the live app at normal and large text. Inspect current collapsed and expanded screenshots before calling a UI change complete.
 
 ## Adding a new component
 

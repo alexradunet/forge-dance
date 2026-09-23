@@ -24,4 +24,33 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets('all navigation destinations remain reachable at large text', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    var selected = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppThemes.dark,
+        home: MediaQuery(
+          data: const MediaQueryData(textScaler: TextScaler.linear(2)),
+          child: Scaffold(
+            body: const SizedBox.expand(),
+            bottomNavigationBar: AppBottomNav(
+              currentIndex: selected,
+              onTabChange: (index) => selected = index,
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    for (final label in ['Learn', 'Home', 'Workout', 'Profile']) {
+      expect(find.text(label).hitTestable(), findsOneWidget);
+    }
+    await tester.tap(find.text('Profile'));
+    expect(selected, 4);
+  });
 }

@@ -183,7 +183,6 @@ class _LocalVideoViewState extends ConsumerState<LocalVideoView>
             child: Video(controller: _video, controls: NoVideoControls),
           ),
         ),
-        Text(LocaleKeys.mediaRecordedPerspective.tr()),
         if (_error != null)
           Semantics(
             liveRegion: true,
@@ -205,78 +204,91 @@ class _LocalVideoViewState extends ConsumerState<LocalVideoView>
                 );
               },
             ),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(LocaleKeys.mediaMirror.tr()),
-            value: _mirror,
-            onChanged: (value) => setState(() => _mirror = value),
-          ),
-          FgSlider(
-            value: _speed,
-            min: 0.25,
-            max: 1.5,
-            divisions: 5,
-            semanticLabel: LocaleKeys.mediaSpeed.tr(),
-            label: LocaleKeys.mediaSpeed.tr(),
-            valueLabel: '${_speed.toStringAsFixed(2)}×',
-            onChanged: (value) {
-              setState(() => _speed = value);
-              unawaited(_command(() => _player.setRate(value)));
-            },
-          ),
-          if (_duration > 0) ...[
-            FgSlider(
-              value: _position.clamp(0, _duration),
-              min: 0,
-              max: _duration,
-              semanticLabel: LocaleKeys.mediaPosition.tr(),
-              label: LocaleKeys.mediaPosition.tr(),
-              valueLabel:
-                  '${_position.toStringAsFixed(1)} / ${_duration.toStringAsFixed(1)} s',
-              onChanged: (value) => _command(
-                () => _player.seek(
-                  Duration(milliseconds: (value * 1000).round()),
+        ],
+        FgDetails(
+          title: LocaleKeys.compactVideoControls.tr(),
+          maintainState: true,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(LocaleKeys.mediaRecordedPerspective.tr()),
+              if (_ready) ...[
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(LocaleKeys.mediaMirror.tr()),
+                  value: _mirror,
+                  onChanged: (value) => setState(() => _mirror = value),
                 ),
-              ),
-            ),
-            SwitchListTile(
-              contentPadding: EdgeInsets.zero,
-              title: Text(LocaleKeys.mediaLoop.tr()),
-              value: _loop,
-              onChanged: (value) => setState(() => _loop = value),
-            ),
-            if (_loop && _duration > 0.2) ...[
-              FgSlider(
-                value: _start,
-                min: 0,
-                max: _duration - 0.1,
-                semanticLabel: LocaleKeys.mediaLoopStart.tr(),
-                label: LocaleKeys.mediaLoopStart.tr(),
-                valueLabel: '${_start.toStringAsFixed(1)} s',
-                onChanged: (value) {
-                  setState(() => _start = value.clamp(0, _end - 0.1));
-                  unawaited(
-                    _command(
+                FgSlider(
+                  value: _speed,
+                  min: 0.25,
+                  max: 1.5,
+                  divisions: 5,
+                  semanticLabel: LocaleKeys.mediaSpeed.tr(),
+                  label: LocaleKeys.mediaSpeed.tr(),
+                  valueLabel: '${_speed.toStringAsFixed(2)}×',
+                  onChanged: (value) {
+                    setState(() => _speed = value);
+                    unawaited(_command(() => _player.setRate(value)));
+                  },
+                ),
+                if (_duration > 0) ...[
+                  FgSlider(
+                    value: _position.clamp(0, _duration),
+                    min: 0,
+                    max: _duration,
+                    semanticLabel: LocaleKeys.mediaPosition.tr(),
+                    label: LocaleKeys.mediaPosition.tr(),
+                    valueLabel:
+                        '${_position.toStringAsFixed(1)} / ${_duration.toStringAsFixed(1)} s',
+                    onChanged: (value) => _command(
                       () => _player.seek(
-                        Duration(milliseconds: (_start * 1000).round()),
+                        Duration(milliseconds: (value * 1000).round()),
                       ),
                     ),
-                  );
-                },
-              ),
-              FgSlider(
-                value: _end,
-                min: 0.1,
-                max: _duration,
-                semanticLabel: LocaleKeys.mediaLoopEnd.tr(),
-                label: LocaleKeys.mediaLoopEnd.tr(),
-                valueLabel: '${_end.toStringAsFixed(1)} s',
-                onChanged: (value) =>
-                    setState(() => _end = value.clamp(_start + 0.1, _duration)),
-              ),
+                  ),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Text(LocaleKeys.mediaLoop.tr()),
+                    value: _loop,
+                    onChanged: (value) => setState(() => _loop = value),
+                  ),
+                  if (_loop && _duration > 0.2) ...[
+                    FgSlider(
+                      value: _start,
+                      min: 0,
+                      max: _duration - 0.1,
+                      semanticLabel: LocaleKeys.mediaLoopStart.tr(),
+                      label: LocaleKeys.mediaLoopStart.tr(),
+                      valueLabel: '${_start.toStringAsFixed(1)} s',
+                      onChanged: (value) {
+                        setState(() => _start = value.clamp(0, _end - 0.1));
+                        unawaited(
+                          _command(
+                            () => _player.seek(
+                              Duration(milliseconds: (_start * 1000).round()),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    FgSlider(
+                      value: _end,
+                      min: 0.1,
+                      max: _duration,
+                      semanticLabel: LocaleKeys.mediaLoopEnd.tr(),
+                      label: LocaleKeys.mediaLoopEnd.tr(),
+                      valueLabel: '${_end.toStringAsFixed(1)} s',
+                      onChanged: (value) => setState(
+                        () => _end = value.clamp(_start + 0.1, _duration),
+                      ),
+                    ),
+                  ],
+                ],
+              ],
             ],
-          ],
-        ],
+          ),
+        ),
       ],
     ),
   );

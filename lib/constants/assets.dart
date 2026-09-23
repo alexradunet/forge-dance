@@ -7,4 +7,5 @@ class Assets {
   static const error404 = 'assets/images/404.svg';
   static const welcome = 'assets/images/welcome.svg';
   static const avatar = 'assets/images/avatar.webp';
+  static const cypherDancer = 'assets/images/cypher-dancer.webp';
 }

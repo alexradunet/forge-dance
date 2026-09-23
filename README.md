@@ -19,10 +19,11 @@ Video imports are private and permission-cleared by the learner: up to 20 MiB ea
 - Six core categories build the belt: rhythm, body control, footwork, coordination, retention, and creativity. Mobility and movement capacity guide supporting practice without gating belts.
 - Seven assessed levels per category and seven integrated assessments define promotion through the existing eight belt colours. All six core categories and an integrated assessment must meet the target level. XP remains participation history, never proof of mastery.
 - Results are self-assessed against provisional, versioned teaching rubrics—not coach verification or a universal dance ranking. Failed retests can lower current capability without removing previously earned belts.
-- Daily practice scales each category independently and offers seated/supported options, time budgets, gentler variants, and optional conditioning. Repeated same-day practice is recorded separately.
+- Daily practice follows a shared six-theme rotation by local calendar date, with authored White-to-Black progressions selected by earned FORGE belt. It offers seated/supported options, exact time budgets, gentler variants, and optional thematic conditioning. The plan refreshes at local midnight and on resume; started drills retain their original prescription. Logs preserve the scheduled workout date and performed variation, and repeated same-day practice is recorded separately.
 - The offline cue player provides count-in, metronome, phrase loops, independent practice, notes, and private evidence. Imported video supports mirroring, speed, seeking, and phrase loops. No instructor footage is bundled; the step-touch graphic is explicitly schematic.
 - Five programmes curate the existing lesson curriculum. Vocabulary distinguishes studying a lesson from demonstrated category capability and recorded practice.
 - Learning and practice screens share the app's immersive dark palette, rounded charcoal cards, orange actions, and editorial headers. Their dialogs use the same theme even on light-system devices; high-contrast and large-text settings remain supported without changing saved appearance preferences.
+- Screens lead with actions and concise status. Expand labelled guidance, technique, privacy, or session-detail sections to read the full explanations; exercise cues, assessment criteria, safety warnings, and confirmation consequences stay visible.
 
 ## Android development in Orca
 

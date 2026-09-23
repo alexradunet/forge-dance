@@ -8,6 +8,7 @@ import 'package:forge_dance/features/learn/repository/lesson_catalog.dart';
 import 'package:forge_dance/features/method/model/forge_method.dart';
 import 'package:forge_dance/features/method/repository/method_catalog.dart';
 import 'package:forge_dance/features/practice/model/practice.dart';
+import 'package:forge_dance/features/practice/repository/daily_practice_catalog.dart';
 import 'package:forge_dance/features/practice/repository/practice_planner.dart';
 import 'package:forge_dance/features/practice/repository/practice_repository.dart';
 import 'package:forge_dance/features/practice/ui/practice_view_model.dart';
@@ -30,6 +31,59 @@ MethodProgress _progress(Map<ForgeCategory, int> levels) => MethodProgress(
             .toList(),
       ),
   ],
+);
+
+MethodProgress _beltProgress(int belt) => MethodProgress(
+  attempts: belt == 0
+      ? []
+      : [
+          for (final assessment in forgeAssessments.where(
+            (assessment) =>
+                assessment.level == belt &&
+                (assessment.category == null || assessment.category!.isCore),
+          ))
+            AssessmentAttempt(
+              id: 'pass-${assessment.id}',
+              assessmentId: assessment.id,
+              performedAt: DateTime.utc(2026, 1, 1),
+              notes: 'Recalled the complete phrase and explained the chosen adaptations.',
+              metCriteriaIds: assessment.criteria
+                  .map((value) => value.id)
+                  .toList(),
+            ),
+        ],
+);
+
+PracticePlan _dailyPlan({
+  DateTime? date,
+  int belt = 0,
+  int minutes = 20,
+  bool gentle = false,
+  bool conditioning = false,
+  PracticeSupport support = PracticeSupport.standing,
+}) => buildPracticePlan(
+  date: date ?? DateTime.utc(2026, 1, 1),
+  progress: _beltProgress(belt),
+  minutes: minutes,
+  gentle: gentle,
+  includeConditioning: conditioning,
+  support: support,
+);
+
+PracticeRecord _dailyRecord(String id, PracticeBlock block) => PracticeRecord(
+  id: id,
+  blockId: block.id,
+  workoutId: block.workoutId,
+  workoutDate: block.workoutDate,
+  title: block.title,
+  lessonId: block.lessonId,
+  category: block.category,
+  level: block.level,
+  performedAt: DateTime.utc(2026, 9, 7, 12),
+  durationSeconds: 90,
+  bpm: block.bpm,
+  attempts: 2,
+  difficulty: 3,
 );
 
 PracticeRecord _record(
@@ -58,99 +112,357 @@ void main() {
   setUp(() => SharedPreferences.setMockInitialValues({}));
 
   test(
-    'mixed capability scales each category instead of using a belt or average',
+    'a civil date shares one workout across belts, times and preferences',
     () {
-      final levels = {
-        ForgeCategory.rhythm: 5,
-        ForgeCategory.bodyControl: 2,
-        ForgeCategory.footwork: 3,
-        ForgeCategory.coordination: 1,
-        ForgeCategory.retention: 4,
-        ForgeCategory.creativity: 2,
-        ForgeCategory.mobility: 1,
-        ForgeCategory.capacity: 3,
-      };
-      final plan = buildPracticePlan(
-        progress: _progress(levels),
-        minutes: 30,
-        gentle: false,
-        includeConditioning: true,
+      final white = _dailyPlan(date: DateTime(2026, 9, 7));
+      final black = _dailyPlan(
+        date: DateTime.utc(2026, 9, 7, 23, 59),
+        belt: 7,
+        minutes: 45,
+        support: PracticeSupport.seated,
+        conditioning: true,
       );
-      for (final block in plan.blocks) {
-        expect(block.level, levels[block.category]);
+      expect(black.workoutId, white.workoutId);
+      expect(black.title, white.title);
+      expect(black.focus, white.focus);
+      expect(black.dateKey, '2026-09-07');
+      expect(white.dateKey, black.dateKey);
+      expect(white.blocks[1].level, 0);
+      expect(black.blocks[1].level, 7);
+      expect(white.blocks[1].cues, isNot(black.blocks[1].cues));
+      expect(white.blocks[2].cues, isNot(black.blocks[2].cues));
+      for (final block in [...white.blocks, ...black.blocks]) {
+        expect(block.workoutId, white.workoutId);
+        expect(block.workoutDate, white.dateKey);
       }
-      expect(plan.blocks.first.category, ForgeCategory.mobility);
-      expect(plan.blocks.last.category, ForgeCategory.mobility);
-      expect(plan.minutes, 30);
     },
   );
 
-  test('unassessed work is beginner-labelled and all links resolve to real lessons', () {
-    final plan = buildPracticePlan(
-      progress: MethodProgress(),
-      minutes: 10,
-      gentle: false,
-      includeConditioning: false,
-      support: PracticeSupport.seated,
-    );
-    final lessonIds = allModules
-        .expand((module) => module.lessons)
-        .map((lesson) => lesson.id)
-        .toSet();
-    for (final block in plan.blocks) {
-      expect(block.level, 1);
-      expect(block.adaptation, contains('Not assessed'));
-      expect(block.adaptation, contains('remain seated'));
-      expect(lessonIds, contains(block.lessonId));
-    }
+  test('rotation continues through years, leap days and DST civil dates', () {
     expect(
-      plan.blocks.any((block) => block.category == ForgeCategory.capacity),
-      isFalse,
+      dailyPracticeThemeFor(DateTime.utc(2026, 1, 1)).id,
+      dailyPracticeThemes.first.id,
     );
-    expect(plan.minutes, 10);
+    expect(
+      dailyPracticeThemeFor(DateTime.utc(2025, 12, 31)).id,
+      dailyPracticeThemes.last.id,
+    );
+    expect(
+      dailyPracticeThemeFor(DateTime.utc(2027, 1, 1)).id,
+      dailyPracticeThemes[365 % dailyPracticeThemes.length].id,
+    );
+    for (final dates in [
+      [DateTime(2026, 12, 31), DateTime(2027, 1, 1)],
+      [DateTime(2028, 2, 28), DateTime(2028, 2, 29), DateTime(2028, 3, 1)],
+      [DateTime(2026, 3, 28), DateTime(2026, 3, 29), DateTime(2026, 3, 30)],
+      [DateTime(2026, 10, 24), DateTime(2026, 10, 25), DateTime(2026, 10, 26)],
+    ]) {
+      for (var i = 0; i < dates.length; i++) {
+        final date = dates[i];
+        final theme = dailyPracticeThemeFor(date);
+        expect(
+          dailyPracticeThemeFor(
+            DateTime(date.year, date.month, date.day, 23, 59),
+          ).id,
+          theme.id,
+        );
+        expect(
+          dailyPracticeThemeFor(DateTime.utc(date.year, date.month, date.day))
+              .id,
+          theme.id,
+        );
+        if (i > 0) {
+          final previous = dailyPracticeThemes.indexOf(
+            dailyPracticeThemeFor(dates[i - 1]),
+          );
+          expect(
+            theme.id,
+            dailyPracticeThemes[(previous + 1) % dailyPracticeThemes.length].id,
+          );
+        }
+      }
+    }
   });
 
-  test('time budgets preserve recovery and gentle work changes complexity without regrading', () {
-    final progress = _progress({
-      ForgeCategory.rhythm: 6,
-      ForgeCategory.bodyControl: 1,
-    });
-    for (final minutes in [10, 11, 20, 60]) {
-      final plan = buildPracticePlan(
-        progress: progress,
-        minutes: minutes,
-        gentle: true,
-        includeConditioning: true,
-        support: PracticeSupport.supported,
-      );
-      expect(plan.minutes, minutes);
-      expect(plan.blocks.every((block) => block.minutes > 0), isTrue);
-      expect(plan.blocks.first.category, ForgeCategory.mobility);
-      expect(plan.blocks.last.category, ForgeCategory.mobility);
-      expect(
-        plan.blocks
-            .singleWhere((block) => block.category == ForgeCategory.rhythm)
-            .level,
-        5,
-      );
-      expect(
-        plan.blocks
-            .singleWhere((block) => block.category == ForgeCategory.bodyControl)
-            .level,
-        1,
-      );
-    }
-    expect(progress.levelFor(ForgeCategory.rhythm), 6);
-    expect(
-      () => buildPracticePlan(
-        progress: progress,
-        minutes: 9,
+  test(
+    'earned belt governs the variation, not stronger individual categories',
+    () {
+      final mixed = _progress({
+        ForgeCategory.rhythm: 7,
+        ForgeCategory.bodyControl: 5,
+        ForgeCategory.footwork: 4,
+      });
+      final beginner = buildPracticePlan(
+        date: DateTime.utc(2026, 1, 1),
+        progress: mixed,
+        minutes: 20,
         gentle: false,
-        includeConditioning: true,
-      ),
-      throwsArgumentError,
+        includeConditioning: false,
+      );
+      expect(beginner.beltIndex, 0);
+      expect(beginner.blocks[1].level, 0);
+      final earned = _beltProgress(4);
+      final afterRetest = MethodProgress(
+        attempts: [
+          ...earned.attempts,
+          AssessmentAttempt(
+            id: 'failed-rhythm-retest',
+            assessmentId: 'rhythm-4-v1',
+            performedAt: DateTime.utc(2026, 1, 2),
+            metCriteriaIds: const [],
+          ),
+        ],
+      );
+      expect(afterRetest.levelFor(ForgeCategory.rhythm), 0);
+      final retained = buildPracticePlan(
+        date: DateTime.utc(2026, 1, 1),
+        progress: afterRetest,
+        minutes: 20,
+        gentle: false,
+        includeConditioning: false,
+      );
+      expect(retained.beltIndex, 4);
+      expect(retained.blocks[1].level, 4);
+    },
+  );
+
+  test(
+    'every theme has distinct White-to-Black work with real lesson links',
+    () {
+      final lessonIds = allModules
+          .expand((module) => module.lessons)
+          .map((lesson) => lesson.id)
+          .toSet();
+      expect(
+        dailyPracticeThemes.map((theme) => theme.category).toSet(),
+        containsAll(ForgeCategory.values.where((category) => category.isCore)),
+      );
+      for (var day = 0; day < dailyPracticeThemes.length; day++) {
+        final theme = dailyPracticeThemes[day];
+        final drillCues = <String>{};
+        final applicationCues = <String>{};
+        for (var belt = 0; belt <= 7; belt++) {
+          final plan = _dailyPlan(
+            date: DateTime.utc(2026, 1, 1 + day),
+            belt: belt,
+            conditioning: true,
+          );
+          expect(plan.beltIndex, belt);
+          expect(plan.workoutId, theme.id);
+          expect(plan.blocks.map((block) => block.category), [
+            ForgeCategory.mobility,
+            theme.category,
+            theme.category,
+            ForgeCategory.capacity,
+            ForgeCategory.mobility,
+          ]);
+          for (final block in plan.blocks) {
+            expect(block.level, belt);
+            expect(block.workoutId, theme.id);
+            expect(block.workoutDate, plan.dateKey);
+            expect(lessonIds, contains(block.lessonId));
+          }
+          // Same support and tempo: a distinct instructional task must be authored,
+          // not just a new label, faster metronome or a changed belt number.
+          expect(drillCues.add(plan.blocks[1].cues.join('\n')), isTrue);
+          expect(applicationCues.add(plan.blocks[2].cues.join('\n')), isTrue);
+        }
+      }
+    },
+  );
+
+  test(
+    'gentle lowers complexity without changing earned belt or daily theme',
+    () {
+      for (var day = 0; day < dailyPracticeThemes.length; day++) {
+        for (var belt = 0; belt <= 7; belt++) {
+          final date = DateTime.utc(2026, 1, 1 + day);
+          final regular = _dailyPlan(date: date, belt: belt);
+          final gentle = _dailyPlan(date: date, belt: belt, gentle: true);
+          final lower = _dailyPlan(date: date, belt: belt == 0 ? 0 : belt - 1);
+          expect(gentle.beltIndex, belt);
+          expect(gentle.workoutId, regular.workoutId);
+          expect(gentle.blocks[1].level, lower.blocks[1].level);
+          expect(gentle.blocks[1].title, lower.blocks[1].title);
+          expect(gentle.blocks[1].cues, containsAll(lower.blocks[1].cues));
+          expect(gentle.blocks[2].cues, containsAll(lower.blocks[2].cues));
+          expect(gentle.blocks[1].bpm, lessThan(regular.blocks[1].bpm));
+        }
+      }
+    },
+  );
+
+  test(
+    'support changes instructions and comparison identity, not the theme',
+    () {
+      for (var day = 0; day < dailyPracticeThemes.length; day++) {
+        final date = DateTime.utc(2026, 1, 1 + day);
+        final standing = _dailyPlan(date: date, belt: 4);
+        for (final support in [
+          PracticeSupport.seated,
+          PracticeSupport.supported,
+        ]) {
+          final adapted = _dailyPlan(date: date, belt: 4, support: support);
+          expect(adapted.workoutId, standing.workoutId);
+          expect(adapted.beltIndex, standing.beltIndex);
+          expect(adapted.blocks[1].title, standing.blocks[1].title);
+          for (var i = 0; i < standing.blocks.length; i++) {
+            expect(
+              adapted.blocks[i].adaptation,
+              isNot(standing.blocks[i].adaptation),
+            );
+            expect(adapted.blocks[i].cues, isNot(standing.blocks[i].cues));
+            expect(adapted.blocks[i].id, isNot(standing.blocks[i].id));
+          }
+        }
+      }
+    },
+  );
+
+  test(
+    'every allowed duration is exact with recovery and optional conditioning',
+    () {
+      for (var minutes = 10; minutes <= 60; minutes++) {
+        for (final conditioning in [false, true]) {
+          final plan = _dailyPlan(minutes: minutes, conditioning: conditioning);
+          expect(plan.minutes, minutes);
+          expect(plan.blocks.every((block) => block.minutes > 0), isTrue);
+          expect(plan.blocks.first.category, ForgeCategory.mobility);
+          expect(plan.blocks.last.category, ForgeCategory.mobility);
+          expect(
+            plan.blocks
+                .where((block) => block.category == ForgeCategory.capacity)
+                .length,
+            conditioning ? 1 : 0,
+          );
+        }
+      }
+      for (final minutes in [9, 61]) {
+        expect(() => _dailyPlan(minutes: minutes), throwsArgumentError);
+      }
+    },
+  );
+
+  test(
+    'White daily records survive portable import, restart and reflection edits',
+    () async {
+      final plan = _dailyPlan(date: DateTime.utc(2028, 2, 29));
+      final result = _dailyRecord('daily-white', plan.blocks[1]);
+      final repository = PracticeRepository();
+      await repository.replaceFromJson(
+        jsonDecode(jsonEncode([result.toJson()])) as List<Object?>,
+      );
+      final restored = (await PracticeRepository().getAll()).single;
+      expect(restored.level, 0);
+      expect(restored.workoutId, plan.workoutId);
+      expect(restored.workoutDate, '2028-02-29');
+      expect(restored.toJson(), result.toJson());
+      await repository.updateReflection(
+        restored.withReflection(
+          notes: 'A smaller gesture made the pattern clear.',
+          difficulty: 2,
+          evidenceId: null,
+        ),
+      );
+      final edited = (await PracticeRepository().getAll()).single;
+      expect(edited.notes, 'A smaller gesture made the pattern clear.');
+      expect(edited.workoutId, result.workoutId);
+      expect(edited.workoutDate, result.workoutDate);
+      for (final change in [
+        {'workoutId': 'another-theme'},
+        {'workoutDate': '2028-03-01'},
+      ]) {
+        await expectLater(
+          repository.updateReflection(
+            PracticeRecord.fromJson({...edited.toJson(), ...change}),
+          ),
+          throwsStateError,
+        );
+      }
+      expect((await repository.getAll()).single.toJson(), edited.toJson());
+    },
+  );
+
+  test('legacy records without daily fields remain importable alongside daily records', () async {
+    final legacyJson = _record('legacy').toJson()
+      ..remove('workoutId')
+      ..remove('workoutDate');
+    final daily = _dailyRecord('daily', _dailyPlan().blocks[1]);
+    final repository = PracticeRepository();
+    await repository.replaceFromJson([legacyJson, daily.toJson()]);
+    final restored = await PracticeRepository().getAll();
+    final legacy = restored.singleWhere((record) => record.id == 'legacy');
+    expect(legacy.workoutId, isNull);
+    expect(legacy.workoutDate, isNull);
+    expect(legacy.isComparableTo(_record('repeat')), isTrue);
+    expect(
+      restored.singleWhere((record) => record.id == 'daily').toJson(),
+      daily.toJson(),
     );
   });
+
+  test('daily identity rejects partial metadata, impossible dates and invalid levels', () {
+    final valid = _dailyRecord('daily', _dailyPlan().blocks[1]).toJson();
+    for (final change in <Map<String, Object?>>[
+      {'workoutId': null},
+      {'workoutDate': null},
+      {'workoutId': ' '},
+      {'workoutId': 1},
+      {'workoutDate': 20260101},
+      {'workoutDate': '2026-1-01'},
+      {'workoutDate': '2026-02-29'},
+      {'workoutDate': '2028-02-30'},
+      {'level': -1},
+      {'level': 8},
+    ]) {
+      expect(
+        () => PracticeRecord.fromJson({...valid, ...change}),
+        throwsFormatException,
+      );
+    }
+  });
+
+  test(
+    'history compares recurring variants across dates but not changed tasks',
+    () {
+      final original = _dailyRecord('original', _dailyPlan(belt: 3).blocks[1]);
+      final repeat = _dailyRecord(
+        'repeat',
+        _dailyPlan(
+          date: DateTime.utc(2026, 1, 1 + dailyPracticeThemes.length),
+          belt: 3,
+          minutes: 45,
+        ).blocks[1],
+      );
+      expect(repeat.workoutDate, isNot(original.workoutDate));
+      expect(original.isComparableTo(repeat), isTrue);
+      for (final plan in [
+        _dailyPlan(date: DateTime.utc(2026, 1, 2), belt: 3),
+        _dailyPlan(belt: 4),
+        _dailyPlan(belt: 3, support: PracticeSupport.seated),
+        _dailyPlan(belt: 3, support: PracticeSupport.supported),
+        _dailyPlan(belt: 3, gentle: true),
+      ]) {
+        expect(
+          original.isComparableTo(_dailyRecord('changed', plan.blocks[1])),
+          isFalse,
+        );
+      }
+      expect(
+        original.isComparableTo(
+          _dailyRecord('application', _dailyPlan(belt: 3).blocks[2]),
+        ),
+        isFalse,
+      );
+      final conditioned = _dailyPlan(belt: 3, conditioning: true);
+      expect(
+        original.isComparableTo(
+          _dailyRecord('conditioning-enabled', conditioned.blocks[1]),
+        ),
+        isTrue,
+      );
+    },
+  );
 
   test('concurrent same-day repeats survive a fresh repository and retry is idempotent', () async {
     final first = _record(PracticeRecord.createId());

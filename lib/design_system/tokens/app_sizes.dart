@@ -74,6 +74,13 @@ class AppSizes {
   // CARD SIZES
   // ═══════════════════════════════════════════════════════════
 
+  /// Local content constraints for editorial compositions and the motion lab.
+  static const double editorialBreakpoint = 720;
+  static const double editorialContentMax = 1040;
+  static const double readingContentMax = 760;
+  static const double posterImageAspectRatio = 16 / 9;
+  static const double movementStageHeight = 320;
+
   /// Compact card width (2-col grid)
   static const double cardCompactWidth = 160.0;
 

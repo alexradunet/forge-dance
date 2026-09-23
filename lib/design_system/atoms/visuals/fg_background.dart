@@ -13,7 +13,7 @@ class FgBackground extends StatelessWidget {
     super.key,
     this.child,
     this.showGrid = false,
-    this.showGradients = true,
+    this.showGradients = false,
     this.surface = ForgeSurface.immersive,
   });
 

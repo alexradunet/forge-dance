@@ -1,9 +1,39 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../method/ui/method_view_model.dart';
 import '../model/practice.dart';
+import '../repository/practice_planner.dart';
 import '../repository/practice_repository.dart';
 
 part 'practice_view_model.g.dart';
+
+/// Re-evaluate the shared calendar at local midnight, not after 24 hours.
+@riverpod
+DateTime dailyPracticeDate(Ref ref) {
+  final now = DateTime.now();
+  final midnight = DateTime(now.year, now.month, now.day + 1);
+  final timer = Timer(midnight.difference(now), ref.invalidateSelf);
+  ref.onDispose(timer.cancel);
+  return DateTime(now.year, now.month, now.day);
+}
+
+@riverpod
+PracticePlan? dailyPracticePlan(Ref ref) {
+  final date = ref.watch(dailyPracticeDateProvider);
+  final progress = ref.watch(methodViewModelProvider).value;
+  final preferences = ref.watch(practicePreferencesViewModelProvider).value;
+  if (progress == null || preferences == null) return null;
+  return buildPracticePlan(
+    date: date,
+    progress: progress,
+    minutes: preferences.minutes,
+    gentle: preferences.gentle,
+    includeConditioning: preferences.includeConditioning,
+    support: preferences.support,
+  );
+}
 
 @Riverpod(keepAlive: true)
 class PracticeViewModel extends _$PracticeViewModel {

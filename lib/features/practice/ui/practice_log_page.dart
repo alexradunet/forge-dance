@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../design_system/design_system.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../media/ui/evidence_picker.dart';
+import '../../method/repository/method_catalog.dart';
 import '../model/practice.dart';
 import 'practice_view_model.dart';
 
@@ -77,7 +78,10 @@ class _PracticeLogPageState extends ConsumerState<PracticeLogPage> {
       bodyBuilder: (context) => ListView(
         padding: AppSpacing.allLG,
         children: [
-          Text(LocaleKeys.practiceLogIntro.tr()),
+          FgDetails(
+            title: LocaleKeys.detailsProgress.tr(),
+            child: Text(LocaleKeys.practiceLogIntro.tr()),
+          ),
           if (widget.lessonId != null || widget.vocabularyId != null)
             Text(LocaleKeys.practiceFilteredHistory.tr()),
           const SizedBox(height: AppSpacing.lg),
@@ -122,6 +126,7 @@ class _PracticeLogPageState extends ConsumerState<PracticeLogPage> {
     PracticeRecord record,
     PracticeRecord? previous,
   ) => FgCard(
+    key: ValueKey(record.id),
     immersive: true,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -132,44 +137,31 @@ class _PracticeLogPageState extends ConsumerState<PracticeLogPage> {
               .add_jm()
               .format(record.performedAt.toLocal()),
         ),
+        if (record.workoutDate != null)
+          Text(
+            LocaleKeys.dailyPracticeWorkoutDate.tr(
+              args: [
+                DateFormat.yMMMd(context.locale.toString())
+                    .format(DateTime.parse('${record.workoutDate}T00:00:00Z')),
+              ],
+            ),
+          ),
+        if (record.workoutId != null)
+          Text(
+            LocaleKeys.dailyPracticeVariation.tr(
+              args: [forgeBelts[record.level].name],
+            ),
+          ),
         Text(
-          LocaleKeys.practiceRecordedMetrics.tr(
+          LocaleKeys.compactRecord.tr(
             args: [
-              '${record.level}',
               '${record.durationSeconds}',
               '${record.bpm}',
-              '${record.attempts}',
               '${record.difficulty}',
             ],
           ),
         ),
-        if (record.notes.isNotEmpty) ...[
-          const SizedBox(height: AppSpacing.sm),
-          Text(record.notes),
-        ],
         const SizedBox(height: AppSpacing.sm),
-        if (previous == null)
-          Text(LocaleKeys.practiceNoComparable.tr())
-        else ...[
-          Text(
-            LocaleKeys.practiceComparedWith.tr(
-              args: [
-                DateFormat.yMMMd(context.locale.toString())
-                    .add_jm()
-                    .format(previous.performedAt.toLocal()),
-              ],
-            ),
-          ),
-          Text(
-            LocaleKeys.practiceComparison.tr(
-              args: [
-                _signed(record.durationSeconds - previous.durationSeconds),
-                _signed(record.attempts - previous.attempts),
-                _signed(record.difficulty - previous.difficulty),
-              ],
-            ),
-          ),
-        ],
         Wrap(
           spacing: AppSpacing.sm,
           runSpacing: AppSpacing.sm,
@@ -203,6 +195,57 @@ class _PracticeLogPageState extends ConsumerState<PracticeLogPage> {
               onPressed: _busy ? null : () => _delete(record),
             ),
           ],
+        ),
+        FgDetails(
+          key: ValueKey('practice-record-${record.id}'),
+          title: LocaleKeys.detailsSession.tr(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                LocaleKeys.practiceRecordedMetrics.tr(
+                  args: [
+                    record.workoutId != null || record.level == 0
+                        ? forgeBelts[record.level].name
+                        : '${record.level}',
+                    '${record.durationSeconds}',
+                    '${record.bpm}',
+                    '${record.attempts}',
+                    '${record.difficulty}',
+                  ],
+                ),
+              ),
+              if (record.notes.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(record.notes),
+              ],
+              const SizedBox(height: AppSpacing.sm),
+              if (previous == null)
+                Text(LocaleKeys.practiceNoComparable.tr())
+              else ...[
+                Text(
+                  LocaleKeys.practiceComparedWith.tr(
+                    args: [
+                      DateFormat.yMMMd(context.locale.toString())
+                          .add_jm()
+                          .format(previous.performedAt.toLocal()),
+                    ],
+                  ),
+                ),
+                Text(
+                  LocaleKeys.practiceComparison.tr(
+                    args: [
+                      _signed(
+                        record.durationSeconds - previous.durationSeconds,
+                      ),
+                      _signed(record.attempts - previous.attempts),
+                      _signed(record.difficulty - previous.difficulty),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
         ),
       ],
     ),

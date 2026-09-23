@@ -105,6 +105,33 @@ class _VocabularyEntryPageState extends ConsumerState<VocabularyEntryPage> {
     return FgImmersiveScaffold(
       bodyBuilder: (context) {
         final theme = Theme.of(context);
+        final prerequisiteLinks = Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (const VocabularyRepository().prerequisitesFor(entry).isEmpty)
+              Text(LocaleKeys.programmesNoPrerequisites.tr()),
+            for (final lesson in const VocabularyRepository().prerequisitesFor(
+              entry,
+            ))
+              FgButton(
+                text: lesson.title,
+                variant: FgButtonVariant.secondary,
+                isEnabled: learn != null,
+                onPressed: () {
+                  if (learn == null) return;
+                  final module = learn.modules.firstWhere(
+                    (module) =>
+                        module.lessons.any((item) => item.id == lesson.id),
+                  );
+                  if (learn.canOpenLesson(lesson.id)) {
+                    LessonDestination(module.id, lesson.id).push<void>(context);
+                  } else {
+                    ModuleDestination(module.id).push<void>(context);
+                  }
+                },
+              ),
+          ],
+        );
         return ListView(
           children: [
             AppHeader(
@@ -127,41 +154,8 @@ class _VocabularyEntryPageState extends ConsumerState<VocabularyEntryPage> {
                         color: theme.forgeColors.onImmersive,
                       ),
                     ),
-                    if (entry.aliases.isNotEmpty) ...[
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        LocaleKeys.vocabularyAlsoKnown.tr(
-                          args: [entry.aliases.join(', ')],
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: AppSpacing.xl),
-                    _section(
-                      context,
-                      LocaleKeys.vocabularyContext.tr(),
-                      entry.context,
-                    ),
+                    const SizedBox(height: AppSpacing.lg),
                     _section(context, LocaleKeys.vocabularyCue.tr(), entry.cue),
-                    _section(
-                      context,
-                      LocaleKeys.vocabularyMistake.tr(),
-                      entry.commonMistake,
-                    ),
-                    _section(
-                      context,
-                      LocaleKeys.vocabularyPractice.tr(),
-                      entry.practice,
-                    ),
-                    _section(
-                      context,
-                      LocaleKeys.vocabularyEasier.tr(),
-                      entry.easierPractice,
-                    ),
-                    _section(
-                      context,
-                      LocaleKeys.vocabularyHarder.tr(),
-                      entry.harderPractice,
-                    ),
                     Text(LocaleKeys.vocabularyComfort.tr()),
                     const SizedBox(height: AppSpacing.lg),
                     FgButton(
@@ -179,42 +173,15 @@ class _VocabularyEntryPageState extends ConsumerState<VocabularyEntryPage> {
                         }
                       },
                     ),
-                    if (!canOpenLesson)
+                    if (!canOpenLesson) ...[
                       Text(LocaleKeys.vocabularyPathHint.tr()),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      LocaleKeys.programmesPrerequisites.tr(),
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: theme.forgeColors.onImmersive,
+                      const SizedBox(height: AppSpacing.lg),
+                      Text(
+                        LocaleKeys.programmesPrerequisites.tr(),
+                        style: theme.textTheme.titleMedium,
                       ),
-                    ),
-                    if (const VocabularyRepository()
-                        .prerequisitesFor(entry)
-                        .isEmpty)
-                      Text(LocaleKeys.programmesNoPrerequisites.tr()),
-                    for (final lesson
-                        in const VocabularyRepository().prerequisitesFor(entry))
-                      FgButton(
-                        text: lesson.title,
-                        variant: FgButtonVariant.secondary,
-                        isEnabled: learn != null,
-                        onPressed: () {
-                          if (learn == null) return;
-                          final module = learn.modules.firstWhere(
-                            (module) => module.lessons.any(
-                              (item) => item.id == lesson.id,
-                            ),
-                          );
-                          if (learn.canOpenLesson(lesson.id)) {
-                            LessonDestination(
-                              module.id,
-                              lesson.id,
-                            ).push<void>(context);
-                          } else {
-                            ModuleDestination(module.id).push<void>(context);
-                          }
-                        },
-                      ),
+                      prerequisiteLinks,
+                    ],
                     const SizedBox(height: AppSpacing.lg),
                     FgButton(
                       text: LocaleKeys.vocabularyStartEasier.tr(),
@@ -227,6 +194,52 @@ class _VocabularyEntryPageState extends ConsumerState<VocabularyEntryPage> {
                       isEnabled: canOpenLesson,
                       onPressed: () => _practice(harder: true),
                     ),
+                    FgDetails(
+                      key: ValueKey('vocabulary-technique-${entry.id}'),
+                      title: LocaleKeys.detailsMovement.tr(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          if (entry.aliases.isNotEmpty)
+                            Text(
+                              LocaleKeys.vocabularyAlsoKnown.tr(
+                                args: [entry.aliases.join(', ')],
+                              ),
+                            ),
+                          _section(
+                            context,
+                            LocaleKeys.vocabularyContext.tr(),
+                            entry.context,
+                          ),
+                          _section(
+                            context,
+                            LocaleKeys.vocabularyMistake.tr(),
+                            entry.commonMistake,
+                          ),
+                          _section(
+                            context,
+                            LocaleKeys.vocabularyPractice.tr(),
+                            entry.practice,
+                          ),
+                          _section(
+                            context,
+                            LocaleKeys.vocabularyEasier.tr(),
+                            entry.easierPractice,
+                          ),
+                          _section(
+                            context,
+                            LocaleKeys.vocabularyHarder.tr(),
+                            entry.harderPractice,
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (canOpenLesson)
+                      FgDetails(
+                        key: ValueKey('vocabulary-prerequisites-${entry.id}'),
+                        title: LocaleKeys.programmesPrerequisites.tr(),
+                        child: prerequisiteLinks,
+                      ),
                     const SizedBox(height: AppSpacing.xl),
                     Text(
                       LocaleKeys.vocabularyLearningEvidence.tr(),
@@ -234,7 +247,6 @@ class _VocabularyEntryPageState extends ConsumerState<VocabularyEntryPage> {
                         color: theme.forgeColors.onImmersive,
                       ),
                     ),
-                    Text(LocaleKeys.programmesCompletionNotMastery.tr()),
                     if (learning.isLoading ||
                         method.isLoading ||
                         practice.isLoading)
@@ -268,71 +280,7 @@ class _VocabularyEntryPageState extends ConsumerState<VocabularyEntryPage> {
                                 args: [entry.category.label],
                               ),
                       ),
-                      Text(LocaleKeys.vocabularyCategoryEvidenceHint.tr()),
-                      for (final attempt in status.categoryAttempts.take(
-                        3,
-                      )) ...[
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          '${DateFormat.yMMMd().add_Hm().format(attempt.performedAt.toLocal())} • ${attempt.assessment.title}',
-                        ),
-                        Text(
-                          attempt.passed
-                              ? LocaleKeys.vocabularyCriteriaMet.tr()
-                              : LocaleKeys.vocabularyCriteriaNotMet.tr(),
-                        ),
-                        if (attempt.notes.isNotEmpty) Text(attempt.notes),
-                        if (attempt.evidenceId case final evidenceId?)
-                          FgButton(
-                            text: LocaleKeys.vocabularyViewEvidence.tr(),
-                            variant: FgButtonVariant.secondary,
-                            onPressed: () =>
-                                Navigator.of(
-                                  context,
-                                  rootNavigator: true,
-                                ).push<void>(
-                                  MaterialPageRoute(
-                                    builder: (_) =>
-                                        EvidenceViewer(evidenceId: evidenceId),
-                                  ),
-                                ),
-                          ),
-                      ],
-                      const SizedBox(height: AppSpacing.lg),
-                      Text(
-                        LocaleKeys.vocabularyPracticeHistory.tr(
-                          args: ['${status.practiceHistory.length}'],
-                        ),
-                      ),
-                      if (status.practiceHistory.isEmpty)
-                        Text(LocaleKeys.vocabularyNoPractice.tr()),
-                      for (final record in status.practiceHistory.take(3))
-                        Padding(
-                          padding: const EdgeInsets.only(top: AppSpacing.sm),
-                          child: Text(
-                            LocaleKeys.vocabularyPracticeSummary.tr(
-                              args: [
-                                DateFormat.yMMMd().add_Hm().format(
-                                  record.performedAt.toLocal(),
-                                ),
-                                '${record.durationSeconds}',
-                                '${record.bpm}',
-                                '${record.difficulty}',
-                              ],
-                            ),
-                          ),
-                        ),
                     ],
-                    FgButton(
-                      text: LocaleKeys.vocabularyOpenHistory.tr(),
-                      variant: FgButtonVariant.secondary,
-                      onPressed: () => Navigator.of(context).push<void>(
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              PracticeLogPage(vocabularyId: entry.id),
-                        ),
-                      ),
-                    ),
                     FgButton(
                       text: LocaleKeys.vocabularyAssessCategory.tr(
                         args: [entry.category.label],
@@ -347,6 +295,102 @@ class _VocabularyEntryPageState extends ConsumerState<VocabularyEntryPage> {
                             initialAssessmentId: assessment.id,
                           ),
                         ),
+                      ),
+                    ),
+                    if (learn != null &&
+                        !learn.canOpenLesson(assessment.linkedLessonId)) ...[
+                      Text(LocaleKeys.compactAssessmentLocked.tr()),
+                      FgButton(
+                        text: LocaleKeys.vocabularyViewPath.tr(),
+                        variant: FgButtonVariant.secondary,
+                        onPressed: () {
+                          final module = learn.modules.firstWhere(
+                            (module) => module.lessons.any(
+                              (lesson) =>
+                                  lesson.id == assessment.linkedLessonId,
+                            ),
+                          );
+                          ModuleDestination(module.id).push<void>(context);
+                        },
+                      ),
+                    ],
+                    FgDetails(
+                      key: ValueKey('vocabulary-progress-${entry.id}'),
+                      title: LocaleKeys.detailsProgress.tr(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(LocaleKeys.programmesCompletionNotMastery.tr()),
+                          if (status != null) ...[
+                            Text(
+                              LocaleKeys.vocabularyCategoryEvidenceHint.tr(),
+                            ),
+                            for (final attempt in status.categoryAttempts) ...[
+                              const SizedBox(height: AppSpacing.md),
+                              Text(
+                                '${DateFormat.yMMMd().add_Hm().format(attempt.performedAt.toLocal())} • ${attempt.assessment.title}',
+                              ),
+                              Text(
+                                attempt.passed
+                                    ? LocaleKeys.vocabularyCriteriaMet.tr()
+                                    : LocaleKeys.vocabularyCriteriaNotMet.tr(),
+                              ),
+                              if (attempt.notes.isNotEmpty) Text(attempt.notes),
+                              if (attempt.evidenceId case final evidenceId?)
+                                FgButton(
+                                  text: LocaleKeys.vocabularyViewEvidence.tr(),
+                                  variant: FgButtonVariant.secondary,
+                                  onPressed: () =>
+                                      Navigator.of(
+                                        context,
+                                        rootNavigator: true,
+                                      ).push<void>(
+                                        MaterialPageRoute(
+                                          builder: (_) => EvidenceViewer(
+                                            evidenceId: evidenceId,
+                                          ),
+                                        ),
+                                      ),
+                                ),
+                            ],
+                            const SizedBox(height: AppSpacing.lg),
+                            Text(
+                              LocaleKeys.vocabularyPracticeHistory.tr(
+                                args: ['${status.practiceHistory.length}'],
+                              ),
+                            ),
+                            if (status.practiceHistory.isEmpty)
+                              Text(LocaleKeys.vocabularyNoPractice.tr()),
+                            for (final record in status.practiceHistory.take(3))
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  top: AppSpacing.sm,
+                                ),
+                                child: Text(
+                                  LocaleKeys.vocabularyPracticeSummary.tr(
+                                    args: [
+                                      DateFormat.yMMMd().add_Hm().format(
+                                        record.performedAt.toLocal(),
+                                      ),
+                                      '${record.durationSeconds}',
+                                      '${record.bpm}',
+                                      '${record.difficulty}',
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ],
+                          FgButton(
+                            text: LocaleKeys.vocabularyOpenHistory.tr(),
+                            variant: FgButtonVariant.secondary,
+                            onPressed: () => Navigator.of(context).push<void>(
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    PracticeLogPage(vocabularyId: entry.id),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xl),

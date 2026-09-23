@@ -8,6 +8,7 @@ import '../../../design_system/design_system.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../../media/ui/evidence_picker.dart';
 import '../../media/ui/local_video_view.dart';
+import '../../method/repository/method_catalog.dart';
 import '../../practice/model/practice.dart';
 import '../model/practice_clock.dart';
 
@@ -130,6 +131,8 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
       title: widget.block.title,
       lessonId: widget.block.lessonId,
       vocabularyId: widget.block.vocabularyId,
+      workoutId: widget.block.workoutId,
+      workoutDate: widget.block.workoutDate,
       category: widget.block.category,
       level: widget.block.level,
       performedAt: _performedAt,
@@ -178,11 +181,16 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
         bodyBuilder: (context) => ListView(
           padding: AppSpacing.allLG,
           children: [
-            Text(LocaleKeys.playerOffline.tr()),
-            Text(widget.block.adaptation),
-            const SizedBox(height: AppSpacing.lg),
-            FgCard(
-              immersive: true,
+            if (widget.block.workoutId != null)
+              Text(
+                LocaleKeys.dailyPracticeVariation.tr(
+                  args: [forgeBelts[widget.block.level].name],
+                ),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            FgRoundPanel(
+              label: LocaleKeys.cypherPracticeFloor.tr(),
+              active: true,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -194,7 +202,7 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
                     ),
                   ),
                   Text(
-                    LocaleKeys.playerTarget.tr(
+                    LocaleKeys.compactTarget.tr(
                       args: ['${widget.block.minutes}'],
                     ),
                   ),
@@ -209,7 +217,7 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
                             )
                           : _clock.running
                           ? LocaleKeys.playerCount.tr(args: ['${_clock.beat}'])
-                          : LocaleKeys.playerReady.tr(),
+                          : LocaleKeys.compactReady.tr(),
                       style: Theme.of(context).textTheme.headlineLarge,
                     ),
                   ),
@@ -219,7 +227,6 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
                       widget.block.cues[cueIndex],
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
-                    Text(LocaleKeys.playerCueTiming.tr()),
                   ],
                   const SizedBox(height: AppSpacing.lg),
                   Wrap(
@@ -246,6 +253,8 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
                       ),
                     ],
                   ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(LocaleKeys.compactPracticeSafety.tr()),
                 ],
               ),
             ),
@@ -274,7 +283,6 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
                 _clock.setTempo(value.round());
               },
             ),
-            Text(LocaleKeys.playerTempoPause.tr()),
             Text(
               LocaleKeys.playerPhrase.tr(),
               style: Theme.of(context).textTheme.titleMedium,
@@ -326,7 +334,6 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
               title: Text(LocaleKeys.playerIndependent.tr()),
-              subtitle: Text(LocaleKeys.playerIndependentHelp.tr()),
               value: _independent,
               onChanged: (value) {
                 _pause();
@@ -335,7 +342,6 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
             ),
             if (!_independent) ...[
               const SizedBox(height: AppSpacing.lg),
-              Text(LocaleKeys.playerNoTeacherVideo.tr()),
               if (_demonstration != null)
                 LocalVideoView(
                   key: ValueKey(_demonstration),
@@ -399,7 +405,42 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
               },
             ),
             const SizedBox(height: AppSpacing.lg),
-            Text(LocaleKeys.playerSafety.tr()),
+            FgDetails(
+              title: LocaleKeys.detailsAdaptations.tr(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(widget.block.adaptation),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(LocaleKeys.playerSafety.tr()),
+                ],
+              ),
+            ),
+            FgDetails(
+              title: LocaleKeys.detailsPlayback.tr(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(LocaleKeys.playerOffline.tr()),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(
+                    LocaleKeys.playerTarget.tr(
+                      args: ['${widget.block.minutes}'],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(LocaleKeys.playerReady.tr()),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(LocaleKeys.playerCueTiming.tr()),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(LocaleKeys.playerTempoPause.tr()),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(LocaleKeys.playerIndependentHelp.tr()),
+                  const SizedBox(height: AppSpacing.sm),
+                  Text(LocaleKeys.playerNoTeacherVideo.tr()),
+                ],
+              ),
+            ),
           ],
         ),
       ),

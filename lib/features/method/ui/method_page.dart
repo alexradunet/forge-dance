@@ -54,8 +54,25 @@ class MethodPage extends ConsumerWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                Text(LocaleKeys.methodCurrentHelp.tr()),
-                const SizedBox(height: AppSpacing.lg),
+                FgDetails(
+                  title: LocaleKeys.detailsAboutMethod.tr(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(LocaleKeys.methodCurrentHelp.tr()),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(LocaleKeys.methodCoreCategory.tr()),
+                      const SizedBox(height: AppSpacing.sm),
+                      Text(LocaleKeys.methodSupportCategory.tr()),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(LocaleKeys.methodSupportHelp.tr()),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(LocaleKeys.methodBeltsHelp.tr()),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(LocaleKeys.forgeCriteriaProvisional.tr()),
+                    ],
+                  ),
+                ),
                 for (final category in ForgeCategory.values) ...[
                   FgCard(
                     immersive: true,
@@ -80,16 +97,25 @@ class MethodPage extends ConsumerWidget {
                                 category.label,
                                 style: Theme.of(context).textTheme.titleMedium,
                               ),
-                              Text(
-                                category.isCore
-                                    ? LocaleKeys.methodCoreCategory.tr()
-                                    : LocaleKeys.methodSupportCategory.tr(),
+                              Wrap(
+                                spacing: AppSpacing.sm,
+                                runSpacing: AppSpacing.xs,
+                                children: [
+                                  Text(_categoryLevel(value, category)),
+                                  Text(
+                                    category.isCore
+                                        ? LocaleKeys.compactCore.tr()
+                                        : LocaleKeys.compactSupport.tr(),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ),
                         const SizedBox(width: AppSpacing.sm),
-                        Flexible(child: Text(_categoryLevel(value, category))),
                         const Icon(Icons.chevron_right),
                       ],
                     ),
@@ -102,7 +128,6 @@ class MethodPage extends ConsumerWidget {
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                Text(LocaleKeys.methodBeltsHelp.tr()),
                 for (final belt in forgeBelts)
                   _BeltRequirements(belt: belt, progress: value),
               ] else ...[
@@ -116,10 +141,14 @@ class MethodPage extends ConsumerWidget {
                         style: Theme.of(context).textTheme.headlineSmall,
                       ),
                       const SizedBox(height: AppSpacing.sm),
-                      Text(
-                        initialCategory!.isCore
-                            ? LocaleKeys.methodCurrentHelp.tr()
-                            : LocaleKeys.methodSupportHelp.tr(),
+                      Text(LocaleKeys.compactSelfAssessed.tr()),
+                      FgDetails(
+                        title: LocaleKeys.detailsAboutMethod.tr(),
+                        child: Text(
+                          initialCategory!.isCore
+                              ? LocaleKeys.methodCurrentHelp.tr()
+                              : LocaleKeys.methodSupportHelp.tr(),
+                        ),
                       ),
                     ],
                   ),
@@ -138,27 +167,30 @@ class MethodPage extends ConsumerWidget {
                 ],
               ],
               const SizedBox(height: AppSpacing.xxl),
-              Text(
-                LocaleKeys.methodDatedEvidence.tr(),
-                style: Theme.of(context).textTheme.titleLarge,
+              FgDetails(
+                title: LocaleKeys.methodDatedEvidence.tr(),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (value.attempts
+                        .where(
+                          (attempt) =>
+                              initialCategory == null ||
+                              attempt.assessment.category == initialCategory,
+                        )
+                        .isEmpty)
+                      Text(LocaleKeys.methodNoAttempts.tr()),
+                    for (final attempt in value.attempts.reversed.where(
+                      (attempt) =>
+                          initialCategory == null ||
+                          attempt.assessment.category == initialCategory,
+                    )) ...[
+                      _AttemptTile(key: ValueKey(attempt.id), attempt: attempt),
+                      const SizedBox(height: AppSpacing.sm),
+                    ],
+                  ],
+                ),
               ),
-              const SizedBox(height: AppSpacing.sm),
-              if (value.attempts
-                  .where(
-                    (attempt) =>
-                        initialCategory == null ||
-                        attempt.assessment.category == initialCategory,
-                  )
-                  .isEmpty)
-                Text(LocaleKeys.methodNoAttempts.tr()),
-              for (final attempt in value.attempts.reversed.where(
-                (attempt) =>
-                    initialCategory == null ||
-                    attempt.assessment.category == initialCategory,
-              )) ...[
-                _AttemptTile(attempt: attempt),
-                const SizedBox(height: AppSpacing.sm),
-              ],
               const SizedBox(height: AppSpacing.xxl),
             ],
           ),
@@ -207,7 +239,7 @@ class _Summary extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineLarge,
         ),
         const SizedBox(height: AppSpacing.sm),
-        Text(LocaleKeys.methodSelfAssessed.tr()),
+        Text(LocaleKeys.compactSelfAssessed.tr()),
         const SizedBox(height: AppSpacing.lg),
         if (progress.earnedBeltIndex < 7) ...[
           Text(
@@ -222,14 +254,26 @@ class _Summary extends StatelessWidget {
           ),
         ] else
           Text(LocaleKeys.methodAllBeltsEarned.tr()),
-        for (final award in progress.awards) ...[
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            LocaleKeys.methodAwardDate.tr(
-              args: [forgeBelts[award.index].name, _date(award.awardedAt)],
-            ),
+        FgDetails(
+          title: LocaleKeys.detailsProgress.tr(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(LocaleKeys.methodSelfAssessed.tr()),
+              for (final award in progress.awards) ...[
+                const SizedBox(height: AppSpacing.sm),
+                Text(
+                  LocaleKeys.methodAwardDate.tr(
+                    args: [
+                      forgeBelts[award.index].name,
+                      _date(award.awardedAt),
+                    ],
+                  ),
+                ),
+              ],
+            ],
           ),
-        ],
+        ),
       ],
     ),
   );
@@ -241,42 +285,58 @@ class _BeltRequirements extends StatelessWidget {
   final MethodProgress progress;
 
   @override
-  Widget build(BuildContext context) => ExpansionTile(
-    title: Text(belt.name),
-    subtitle: Text(belt.description),
-    initiallyExpanded: belt.index == progress.earnedBeltIndex + 1,
-    childrenPadding: AppSpacing.allLG,
-    children: [
-      for (final requirement in progress.requirementsForBelt(belt.index))
-        Padding(
-          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-          child: Row(
-            children: [
-              Icon(
-                requirement.isMet
-                    ? Icons.check_circle_outline
-                    : Icons.radio_button_unchecked,
-                color: requirement.isMet
-                    ? Theme.of(context).forgeColors.success
-                    : Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(child: Text(requirement.description)),
+  Widget build(BuildContext context) {
+    final requirements = progress.requirementsForBelt(belt.index);
+    final summary = requirements.isEmpty
+        ? LocaleKeys.forgeEntryBelt.tr()
+        : LocaleKeys.compactBeltProgress.tr(
+            args: [
+              '${requirements.where((requirement) => requirement.isMet).length}',
+              '${requirements.length}',
             ],
-          ),
-        ),
-      if (belt.integratedAssessmentId case final id?)
-        FgButton(
-          text: LocaleKeys.methodOpenIntegrated.tr(),
-          variant: FgButtonVariant.secondary,
-          onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => _AssessmentPage(assessment: assessmentById(id)),
+          );
+    return FgDetails(
+      key: ValueKey('belt-${belt.index}'),
+      title: '${belt.name} · $summary',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(belt.description),
+          const SizedBox(height: AppSpacing.md),
+          for (final requirement in requirements)
+            Padding(
+              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Icon(
+                    requirement.isMet
+                        ? Icons.check_circle_outline
+                        : Icons.radio_button_unchecked,
+                    color: requirement.isMet
+                        ? Theme.of(context).forgeColors.success
+                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(child: Text(requirement.description)),
+                ],
+              ),
             ),
-          ),
-        ),
-    ],
-  );
+          if (belt.integratedAssessmentId case final id?)
+            FgButton(
+              text: LocaleKeys.methodOpenIntegrated.tr(),
+              variant: FgButtonVariant.secondary,
+              onPressed: () => Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) =>
+                      _AssessmentPage(assessment: assessmentById(id)),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
 }
 
 class _AssessmentTile extends StatelessWidget {
@@ -307,8 +367,6 @@ class _AssessmentTile extends StatelessWidget {
             assessment.title,
             style: Theme.of(context).textTheme.titleMedium,
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(assessment.instructions),
           if (previous != null) ...[
             const SizedBox(height: AppSpacing.sm),
             Text(
@@ -321,6 +379,9 @@ class _AssessmentTile extends StatelessWidget {
                 ],
               ),
             ),
+          ] else ...[
+            const SizedBox(height: AppSpacing.sm),
+            Text(LocaleKeys.methodNotAssessed.tr()),
           ],
         ],
       ),
@@ -422,8 +483,12 @@ class _AssessmentPageState extends ConsumerState<_AssessmentPage> {
                   assessment.instructions,
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(assessment.adaptation),
+                const SizedBox(height: AppSpacing.md),
+                Text(LocaleKeys.compactMethodAssessmentSafety.tr()),
+                FgDetails(
+                  title: LocaleKeys.detailsAdaptations.tr(),
+                  child: Text(assessment.adaptation),
+                ),
               ],
             ),
           ),
@@ -459,13 +524,16 @@ class _AssessmentPageState extends ConsumerState<_AssessmentPage> {
           const SizedBox(height: AppSpacing.lg),
           FgInput(
             label: LocaleKeys.methodNotes.tr(),
-            helperText: LocaleKeys.methodNotesHelp.tr(),
             controller: _notes,
             isEnabled: !_saving,
             onChanged: (_) => _changed(() {}),
           ),
           if (assessment.requiresNotes)
             Text(LocaleKeys.methodNotesRequired.tr()),
+          FgDetails(
+            title: LocaleKeys.compactMethodNotesGuide.tr(),
+            child: Text(LocaleKeys.methodNotesHelp.tr()),
+          ),
           const SizedBox(height: AppSpacing.lg),
           AbsorbPointer(
             absorbing: _saving,
@@ -517,27 +585,32 @@ class _AssessmentPageState extends ConsumerState<_AssessmentPage> {
 }
 
 class _AttemptTile extends StatelessWidget {
-  const _AttemptTile({required this.attempt});
+  const _AttemptTile({super.key, required this.attempt});
   final AssessmentAttempt attempt;
 
   @override
   Widget build(BuildContext context) => FgCard(
     immersive: true,
-    child: ExpansionTile(
-      tilePadding: EdgeInsets.zero,
-      title: Text(attempt.assessment.title),
-      subtitle: Text(
-        LocaleKeys.methodAttemptSummary.tr(
-          args: [
-            _date(attempt.performedAt),
-            attempt.passed
-                ? LocaleKeys.methodPassed.tr()
-                : LocaleKeys.methodNotYet.tr(),
-            '${attempt.rubricVersion}',
-          ],
-        ),
-      ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          attempt.assessment.title,
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          LocaleKeys.methodAttemptSummary.tr(
+            args: [
+              _date(attempt.performedAt),
+              attempt.passed
+                  ? LocaleKeys.methodPassed.tr()
+                  : LocaleKeys.methodNotYet.tr(),
+              '${attempt.rubricVersion}',
+            ],
+          ),
+        ),
+        const SizedBox(height: AppSpacing.md),
         for (final criterion in attempt.assessment.criteria)
           Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),

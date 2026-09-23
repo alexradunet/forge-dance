@@ -168,20 +168,13 @@ class FgButton extends StatelessWidget {
         if (icon != null && text != null) const SizedBox(width: AppSpacing.sm),
         if (text != null)
           Flexible(
-            child: Text(
-              text!,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: _textStyle.copyWith(color: color),
-            ),
+            child: Text(text!, style: _textStyle.copyWith(color: color)),
           ),
       ],
     );
   }
 
-  FgButtonShape get _defaultShape => variant == FgButtonVariant.primary
-      ? FgButtonShape.pill
-      : FgButtonShape.rounded;
+  FgButtonShape get _defaultShape => FgButtonShape.rounded;
 
   Color _backgroundColor(ColorScheme scheme) {
     return switch (variant) {
@@ -230,10 +223,18 @@ class FgButton extends StatelessWidget {
   };
 
   EdgeInsets get _padding => switch (size) {
-    FgButtonSize.sm => const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-    FgButtonSize.md ||
-    FgButtonSize.lg => const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-    FgButtonSize.xl => const EdgeInsets.symmetric(horizontal: AppSpacing.xxl),
+    FgButtonSize.sm => const EdgeInsets.symmetric(
+      horizontal: AppSpacing.md,
+      vertical: AppSpacing.sm,
+    ),
+    FgButtonSize.md || FgButtonSize.lg => const EdgeInsets.symmetric(
+      horizontal: AppSpacing.lg,
+      vertical: AppSpacing.sm,
+    ),
+    FgButtonSize.xl => const EdgeInsets.symmetric(
+      horizontal: AppSpacing.xxl,
+      vertical: AppSpacing.sm,
+    ),
   };
 
   OutlinedBorder _shapeFor(FgButtonShape value) {
@@ -247,7 +248,7 @@ class FgButton extends StatelessWidget {
 
   BorderRadius _borderRadius(FgButtonShape value) {
     return switch (value) {
-      FgButtonShape.rounded => AppBorderRadius.large,
+      FgButtonShape.rounded => AppBorderRadius.small,
       FgButtonShape.pill || FgButtonShape.circle => AppBorderRadius.pill,
     };
   }

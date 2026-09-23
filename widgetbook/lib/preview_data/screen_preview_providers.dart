@@ -18,20 +18,18 @@ const previewStats = UserStats(
   streakCount: 12,
   level: 8,
   beltName: 'Blue',
-  xpIntoLevel: 720,
-  xpForLevelSpan: 1000,
-  nextLevelXp: 2000,
+  nextBeltName: 'Purple',
   levelProgress: 0.72,
 );
 
-const previewNewDancerStats = UserStats(xpForLevelSpan: 240, nextLevelXp: 240);
+const previewNewDancerStats = UserStats(nextBeltName: 'Yellow');
 
 const previewMaxLevelStats = UserStats(
   totalXp: 2810,
   streakCount: 48,
   level: 8,
   beltName: 'Black',
-  nextLevelXp: null,
+  nextBeltName: null,
   levelProgress: 1,
 );
 

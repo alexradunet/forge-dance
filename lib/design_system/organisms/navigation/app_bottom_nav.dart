@@ -27,7 +27,6 @@ class AppBottomNav extends StatelessWidget {
         16 + MediaQuery.of(context).padding.bottom,
       ),
       child: FgGlassContainer(
-        height: 72,
         borderRadius: 24,
         blurSigma: 20,
         color: AppColors.surfaceDark,
@@ -41,8 +40,8 @@ class AppBottomNav extends StatelessWidget {
             offset: const Offset(0, 4),
           ),
         ],
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        child: Wrap(
+          alignment: WrapAlignment.spaceEvenly,
           children: [
             _buildBatItem(
               0,

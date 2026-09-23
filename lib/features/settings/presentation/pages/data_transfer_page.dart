@@ -88,8 +88,8 @@ class _DataTransferPageState extends ConsumerState<DataTransferPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(LocaleKeys.forgeTransferDescription.tr()),
-                      const SizedBox(height: AppSpacing.xxl),
+                      Text(LocaleKeys.compactBackupIntro.tr()),
+                      const SizedBox(height: AppSpacing.lg),
                       FgButton(
                         key: _exportKey,
                         text: LocaleKeys.forgeExportData.tr(),
@@ -104,7 +104,19 @@ class _DataTransferPageState extends ConsumerState<DataTransferPage> {
                         onPressed: busy ? null : _restore,
                       ),
                       const SizedBox(height: AppSpacing.lg),
-                      Text(LocaleKeys.forgeRestoreWarning.tr()),
+                      Text(LocaleKeys.compactRestoreWarning.tr()),
+                      FgDetails(
+                        key: const ValueKey('backup-included-details'),
+                        title: LocaleKeys.detailsBackup.tr(),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(LocaleKeys.forgeTransferDescription.tr()),
+                            const SizedBox(height: AppSpacing.sm),
+                            Text(LocaleKeys.forgeRestoreWarning.tr()),
+                          ],
+                        ),
+                      ),
                       if (busy)
                         const Padding(
                           padding: AppSpacing.allLG,
