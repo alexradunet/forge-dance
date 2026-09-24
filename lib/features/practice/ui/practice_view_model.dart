@@ -4,6 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../method/ui/method_view_model.dart';
 import '../model/practice.dart';
+import '../model/workout_session.dart';
 import '../repository/practice_planner.dart';
 import '../repository/practice_repository.dart';
 
@@ -32,6 +33,16 @@ PracticePlan? dailyPracticePlan(Ref ref) {
     gentle: preferences.gentle,
     includeConditioning: preferences.includeConditioning,
     support: preferences.support,
+  );
+}
+
+/// Capture the persistence intent when the route starts, independent of later
+/// plan/provider changes. The factory also permits isolated monotonic test clocks.
+@riverpod
+WorkoutSession Function(PracticePlan) workoutSessionFactory(Ref ref) {
+  return (plan) => WorkoutSession(
+    plan: plan,
+    save: ref.read(practiceViewModelProvider.notifier).record,
   );
 }
 

@@ -79,6 +79,15 @@ import 'package:forge_dance/features/main/presentation/pages/main_screen.dart';
 import 'package:forge_dance/routing/shell_navigation_observer.dart';
 import 'package:forge_dance/features/common/ui/widgets/offline_container.dart';
 
+import 'package:forge_dance/features/practice/ui/workout_session_page.dart';
+import 'package:forge_dance/features/practice/model/workout_session.dart'
+    as daily;
+
+import 'support/workout_session_fixture.dart';
+
+import 'package:forge_dance/features/practice_player/model/practice_clock.dart';
+
+part 'workout_session_surface_contracts.dart';
 part 'remaining_surface_contracts.dart';
 part 'review_surface_contracts.dart';
 part 'personal_surface_contracts.dart';
@@ -114,6 +123,11 @@ Future<void> _pumpFeature(
   WorkoutViewModel Function()? workoutViewModel,
   ProgrammeRepository? programmeRepository,
   bool waitForWorkout = true,
+  daily.WorkoutSession Function(
+    PracticePlan,
+    Future<void> Function(PracticeRecord),
+  )?
+  workoutSessionFactory,
 }) async {
   SharedPreferences.setMockInitialValues(initialPreferences);
   await tester.runAsync(EasyLocalization.ensureInitialized);
@@ -129,6 +143,14 @@ Future<void> _pumpFeature(
     }
     final result = ProviderContainer(
       overrides: [
+        if (workoutSessionFactory != null)
+          workoutSessionFactoryProvider.overrideWith(
+            (ref) =>
+                (plan) => workoutSessionFactory(
+                  plan,
+                  ref.read(practiceViewModelProvider.notifier).record,
+                ),
+          ),
         if (programmeRepository != null)
           programmeRepositoryProvider.overrideWithValue(programmeRepository),
         mediaRepositoryProvider.overrideWithValue(
@@ -414,6 +436,7 @@ void main() {
     _expectAppearanceContrast(tester);
   });
 
+  _workoutSessionSurfaceContracts();
   _personalSurfaceContracts();
   _learningSurfaceContracts();
   _remainingSurfaceContracts();
@@ -873,33 +896,61 @@ void main() {
   );
 
   for (final width in [320.0, 1040.0]) {
-    for (final page in [const HomePage(), const PracticePage()]) {
-      testWidgets(
-        '${page.runtimeType} photo disclosure reflows at $width and 2x text',
-        (tester) async {
-          await tester.binding.setSurfaceSize(Size(width, 900));
-          addTearDown(() => tester.binding.setSurfaceSize(null));
-          await _pumpFeature(tester, page, textScale: 2);
-          _expectDarkScreen(tester, page);
-          expect(find.byType(FgPhoto), findsWidgets);
-          for (final photo in tester.widgetList<FgPhoto>(
-            find.byType(FgPhoto),
-          )) {
-            expect(photo.image, isA<AssetImage>());
-          }
-          final about = find.text(LocaleKeys.photoAboutTitle.tr());
-          await tester.scrollUntilVisible(about, 250);
-          await tester.pumpAndSettle();
-          await tester.tap(about);
-          await tester.pumpAndSettle();
-          final explanation = find.text(LocaleKeys.photoAboutBody.tr());
-          await tester.ensureVisible(explanation);
-          await tester.pumpAndSettle();
-          expect(explanation.hitTestable(), findsOneWidget);
-          _expectDarkScreen(tester, page);
-        },
-      );
-    }
+    testWidgets(
+      'Home omits duplicate shortcuts and development disclosures at $width and 2x text',
+      (tester) async {
+        await tester.binding.setSurfaceSize(Size(width, 900));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        const page = HomePage();
+        await _pumpFeature(tester, page, textScale: 2);
+        await _show(tester, find.byKey(const ValueKey('home-content-end')));
+        for (final label in [
+          LocaleKeys.exploreTitle,
+          LocaleKeys.forgeProgrammes,
+          LocaleKeys.forgeAssessments,
+          LocaleKeys.forgeLogbook,
+          LocaleKeys.motionLabOpen,
+          LocaleKeys.photoAboutTitle,
+          LocaleKeys.photoAboutBody,
+          LocaleKeys.detailsLearnMore,
+        ]) {
+          expect(find.text(label.tr(), skipOffstage: false), findsNothing);
+        }
+        expect(find.byType(FgDetails, skipOffstage: false), findsNothing);
+        expect(find.byType(MotionLabPage, skipOffstage: false), findsNothing);
+        expect(find.byType(FgProgressSection), findsOneWidget);
+        for (final photo in tester.widgetList<FgPhoto>(
+          find.byType(FgPhoto, skipOffstage: false),
+        )) {
+          expect(photo.image, isA<AssetImage>());
+        }
+        _expectDarkScreen(tester, page);
+        expect(tester.takeException(), isNull);
+      },
+    );
+
+    testWidgets('PracticePage photo disclosure reflows at $width and 2x text', (
+      tester,
+    ) async {
+      await tester.binding.setSurfaceSize(Size(width, 900));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      const page = PracticePage();
+      await _pumpFeature(tester, page, textScale: 2);
+      _expectDarkScreen(tester, page);
+      expect(find.byType(FgPhoto), findsWidgets);
+      for (final photo in tester.widgetList<FgPhoto>(find.byType(FgPhoto))) {
+        expect(photo.image, isA<AssetImage>());
+      }
+      final about = find.text(LocaleKeys.photoAboutTitle.tr());
+      await _show(tester, about);
+      await tester.tap(about);
+      await tester.pumpAndSettle();
+      final explanation = find.text(LocaleKeys.photoAboutBody.tr());
+      await tester.ensureVisible(explanation);
+      await tester.pumpAndSettle();
+      expect(explanation.hitTestable(), findsOneWidget);
+      _expectDarkScreen(tester, page);
+    });
   }
 
   for (final width in [320.0, 1040.0]) {
@@ -954,7 +1005,7 @@ void main() {
         );
         // Lay out the slivers beyond the large-text hero before inspecting them.
         await _show(tester, continueLesson);
-        await _show(tester, find.byKey(const ValueKey('home-programmes-link')));
+        await _show(tester, find.byKey(const ValueKey('home-content-end')));
         expect(
           find.text(
             LocaleKeys.continueTraining.tr().toUpperCase(),
@@ -987,63 +1038,54 @@ void main() {
     );
   }
 
-  testWidgets('Home compact destinations retain real routes and offline hero', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(390, 844));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-    const home = HomePage();
-    final router = GoRouter(
-      initialLocation: Routes.home,
-      routes: [
-        GoRoute(path: Routes.home, builder: (_, _) => home),
-        GoRoute(path: Routes.practice, builder: (_, _) => const PracticePage()),
-        GoRoute(path: Routes.explore, builder: (_, _) => const ExplorePage()),
-        GoRoute(
-          path: Routes.programmes,
-          builder: (_, _) => const ProgrammesPage(),
-        ),
-      ],
-    );
-    addTearDown(router.dispose);
-    await _pumpFeature(tester, home, router: router);
-    expect(
-      tester.widget<FgDanceHero>(find.byType(FgDanceHero)).image,
-      const AssetImage(Assets.cypherDancer),
-    );
-    final practice = find.widgetWithText(
-      FgButton,
-      LocaleKeys.forgeTodayPractice.tr(),
-    );
-    await tester.ensureVisible(practice);
-    await tester.pumpAndSettle();
-    await tester.tap(practice);
-    await tester.pumpAndSettle();
-    expect(find.byType(PracticePage), findsOneWidget);
-    router.go(Routes.home);
-    await tester.pumpAndSettle();
-    final learn = find.byKey(const ValueKey('home-learn-link'));
-    await tester.scrollUntilVisible(learn, 250);
-    await tester.pumpAndSettle();
-    expect(tester.widget<FgButton>(learn).text, LocaleKeys.exploreTitle.tr());
-    expect(find.byType(FgPhotoTile), findsNothing);
-    await tester.tap(learn);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 1));
-    expect(find.byType(ExplorePage), findsOneWidget);
-    router.go(Routes.home);
-    await tester.pumpAndSettle();
-    final programmes = find.byKey(const ValueKey('home-programmes-link'));
-    await tester.scrollUntilVisible(programmes, 250);
-    await tester.pumpAndSettle();
-    await tester.tap(programmes);
-    await tester.pumpAndSettle();
-    expect(find.byType(ProgrammesPage), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
+  testWidgets(
+    'Home practice and progress retain real routes and offline hero',
+    (tester) async {
+      await tester.binding.setSurfaceSize(const Size(390, 844));
+      addTearDown(() => tester.binding.setSurfaceSize(null));
+      const home = HomePage();
+      final router = GoRouter(
+        initialLocation: Routes.home,
+        routes: [
+          GoRoute(path: Routes.home, builder: (_, _) => home),
+          GoRoute(
+            path: Routes.practice,
+            builder: (_, _) => const PracticePage(),
+          ),
+          GoRoute(path: Routes.method, builder: (_, _) => const MethodPage()),
+        ],
+      );
+      addTearDown(router.dispose);
+      await _pumpFeature(tester, home, router: router);
+      expect(
+        tester.widget<FgDanceHero>(find.byType(FgDanceHero)).image,
+        const AssetImage(Assets.cypherDancer),
+      );
+      final practice = find.widgetWithText(
+        FgButton,
+        LocaleKeys.forgeTodayPractice.tr(),
+      );
+      await tester.ensureVisible(practice);
+      await tester.pumpAndSettle();
+      await tester.tap(practice);
+      await tester.pumpAndSettle();
+      expect(find.byType(PracticePage), findsOneWidget);
+      router.go(Routes.home);
+      await tester.pumpAndSettle();
+      final progress = find.descendant(
+        of: find.byType(FgProgressSection),
+        matching: find.byType(FgCard),
+      );
+      await _show(tester, progress);
+      await tester.tap(progress);
+      await tester.pumpAndSettle();
+      expect(find.byType(MethodPage), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
 
   testWidgets(
-    'workout photo hero opens the real first round paused, without decorative photos',
+    'workout photo hero opens the consolidated session at first round paused',
     (tester) async {
       await _pumpFeature(tester, const PracticePage());
       final start = find.byKey(const ValueKey('practice-hero-start'));
@@ -1061,6 +1103,9 @@ void main() {
         gentle: false,
         includeConditioning: false,
       );
+      expect(find.byType(WorkoutSessionPage), findsOneWidget);
+      expect(player.session!.plan.dateKey, plan.dateKey);
+      expect(player.session!.rounds.length, plan.blocks.length);
       expect(player.block.id, plan.blocks.first.id);
       expect(
         find.widgetWithText(FgButton, LocaleKeys.playerStart.tr()),
@@ -1072,9 +1117,7 @@ void main() {
     },
   );
 
-  testWidgets('Home poster and complete explanation reflow at large text', (
-    tester,
-  ) async {
+  testWidgets('Home poster and progress reflow at large text', (tester) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
     addTearDown(() => tester.binding.setSurfaceSize(null));
     const page = HomePage();
@@ -1087,13 +1130,10 @@ void main() {
     await tester.ensureVisible(action);
     await tester.pump(const Duration(seconds: 1));
     expect(action.hitTestable(), findsOneWidget);
-    expect(find.text(LocaleKeys.forgeCoreSubtitle.tr()), findsNothing);
-    final disclosure = find.text(LocaleKeys.detailsLearnMore.tr());
-    await tester.scrollUntilVisible(disclosure, 250);
-    await tester.pumpAndSettle();
-    await tester.tap(disclosure);
-    await tester.pump(const Duration(seconds: 1));
-    expect(find.text(LocaleKeys.forgeCoreSubtitle.tr()), findsOneWidget);
+    await _show(tester, find.byKey(const ValueKey('home-content-end')));
+    expect(find.byType(FgProgressSection), findsOneWidget);
+    expect(find.byType(FgDetails, skipOffstage: false), findsNothing);
+    _expectDarkScreen(tester, page);
     expect(tester.takeException(), isNull);
   });
 
@@ -1267,9 +1307,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text(plan.blocks.first.adaptation), findsOneWidget);
     _expectDarkScreen(tester, page);
-    final practice = find
-        .widgetWithText(FgButton, LocaleKeys.practicePlay.tr())
-        .first;
+    final practice = find.byKey(const ValueKey('practice-hero-start'));
+    await tester.scrollUntilVisible(practice, -500);
     await tester.ensureVisible(practice);
     await tester.pumpAndSettle();
     await tester.tap(practice);

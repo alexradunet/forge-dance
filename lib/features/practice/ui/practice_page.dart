@@ -12,7 +12,7 @@ import '../../learn/ui/lesson_player_screen.dart';
 import '../../learn/ui/view_model/learn_view_model.dart';
 import '../../method/repository/method_catalog.dart';
 import '../../method/ui/method_view_model.dart';
-import '../../practice_player/ui/practice_player_page.dart';
+import 'workout_session_page.dart';
 import '../model/practice.dart';
 import 'practice_log_page.dart';
 import 'practice_view_model.dart';
@@ -27,7 +27,6 @@ class PracticePage extends ConsumerStatefulWidget {
 class _PracticePageState extends ConsumerState<PracticePage>
     with WidgetsBindingObserver {
   bool _busy = false;
-  PracticeRecord? _pending;
   String? _error;
 
   @override
@@ -49,46 +48,14 @@ class _PracticePageState extends ConsumerState<PracticePage>
     }
   }
 
-  Future<void> _play(PracticeBlock block) async {
-    if (_busy || _pending != null) return;
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
-    final record = await Navigator.of(context, rootNavigator: true)
-        .push<PracticeRecord>(
-          MaterialPageRoute(builder: (_) => PracticePlayerPage(block: block)),
-        );
-    if (!mounted) return;
-    setState(() {
-      _busy = false;
-      _pending = record;
-    });
-    if (record != null) await _savePending();
-  }
-
-  Future<void> _savePending() async {
-    final record = _pending;
-    if (_busy || record == null) return;
-    setState(() {
-      _busy = true;
-      _error = null;
-    });
-    try {
-      await ref.read(practiceViewModelProvider.notifier).record(record);
-      if (!mounted) return;
-      setState(() => _pending = null);
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(LocaleKeys.practiceSaved.tr())));
-    } catch (error) {
-      if (mounted) {
-        setState(
-          () => _error = LocaleKeys.practiceSaveFailed.tr(args: ['$error']),
-        );
-      }
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+  Future<void> _play(PracticePlan plan) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    final session = ref.read(workoutSessionFactoryProvider)(plan);
+    await Navigator.of(context, rootNavigator: true).push<void>(
+      MaterialPageRoute(builder: (_) => WorkoutSessionPage(session: session)),
+    );
+    if (mounted) setState(() => _busy = false);
   }
 
   Future<void> _saveChoices(PracticePreferences value) async {
@@ -107,34 +74,6 @@ class _PracticePageState extends ConsumerState<PracticePage>
       }
     } finally {
       if (mounted) setState(() => _busy = false);
-    }
-  }
-
-  Future<void> _discard() async {
-    final discard = await FgImmersiveScaffold.showModal<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(LocaleKeys.practiceDiscardTitle.tr()),
-        content: Text(LocaleKeys.practiceDiscardBody.tr()),
-        actions: [
-          FgButton(
-            text: LocaleKeys.practiceCancel.tr(),
-            variant: FgButtonVariant.ghost,
-            onPressed: () => Navigator.pop(context, false),
-          ),
-          FgButton(
-            text: LocaleKeys.practiceDiscard.tr(),
-            variant: FgButtonVariant.destructive,
-            onPressed: () => Navigator.pop(context, true),
-          ),
-        ],
-      ),
-    );
-    if (discard == true && mounted) {
-      setState(() {
-        _pending = null;
-        _error = null;
-      });
     }
   }
 
@@ -164,7 +103,7 @@ class _PracticePageState extends ConsumerState<PracticePage>
     final choices = preferences.value;
     final plan = ref.watch(dailyPracticePlanProvider);
     return PopScope(
-      canPop: _pending == null && !_busy,
+      canPop: !_busy,
       child: FgImmersiveScaffold(
         title: LocaleKeys.practiceTitle.tr(),
         bodyBuilder: (context) => Center(
@@ -181,34 +120,6 @@ class _PracticePageState extends ConsumerState<PracticePage>
                     _error!,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.error,
-                    ),
-                  ),
-                ],
-                if (_pending != null) ...[
-                  const SizedBox(height: AppSpacing.lg),
-                  FgCard(
-                    immersive: true,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(LocaleKeys.practiceUnsaved.tr()),
-                        Text(_pending!.title),
-                        Wrap(
-                          spacing: AppSpacing.sm,
-                          children: [
-                            FgButton(
-                              text: LocaleKeys.practiceRetrySave.tr(),
-                              isLoading: _busy,
-                              onPressed: _savePending,
-                            ),
-                            FgButton(
-                              text: LocaleKeys.practiceDiscard.tr(),
-                              variant: FgButtonVariant.ghost,
-                              onPressed: _busy ? null : _discard,
-                            ),
-                          ],
-                        ),
-                      ],
                     ),
                   ),
                 ],
@@ -250,12 +161,10 @@ class _PracticePageState extends ConsumerState<PracticePage>
                       children: [
                         FgButton(
                           key: const ValueKey('practice-hero-start'),
-                          text: LocaleKeys.photoStartRound.tr(),
+                          text: LocaleKeys.workoutStartSession.tr(),
                           icon: const Icon(Icons.play_arrow),
                           expand: true,
-                          onPressed: _busy || _pending != null
-                              ? null
-                              : () => _play(plan.blocks.first),
+                          onPressed: _busy ? null : () => _play(plan),
                         ),
                         const SizedBox(height: AppSpacing.md),
                         Text(
@@ -307,18 +216,10 @@ class _PracticePageState extends ConsumerState<PracticePage>
                             runSpacing: AppSpacing.sm,
                             children: [
                               FgButton(
-                                text: LocaleKeys.practicePlay.tr(),
-                                icon: const Icon(Icons.play_arrow),
-                                onPressed: _busy || _pending != null
-                                    ? null
-                                    : () => _play(block),
-                              ),
-                              FgButton(
                                 text: LocaleKeys.practiceRelatedLesson.tr(),
                                 variant: FgButtonVariant.secondary,
                                 onPressed:
                                     _busy ||
-                                        _pending != null ||
                                         !(learn.value?.canOpenLesson(
                                               block.lessonId,
                                             ) ??
@@ -361,7 +262,7 @@ class _PracticePageState extends ConsumerState<PracticePage>
                         text: LocaleKeys.compactLogbook.tr(),
                         icon: const Icon(Icons.history),
                         variant: FgButtonVariant.ghost,
-                        onPressed: _pending != null || _busy
+                        onPressed: _busy
                             ? null
                             : () => Navigator.of(context).push<void>(
                                 MaterialPageRoute(
@@ -373,7 +274,7 @@ class _PracticePageState extends ConsumerState<PracticePage>
                         text: LocaleKeys.compactFitness.tr(),
                         icon: const Icon(Icons.fitness_center),
                         variant: FgButtonVariant.ghost,
-                        onPressed: _pending != null || _busy
+                        onPressed: _busy
                             ? null
                             : () => context.push(Routes.workout),
                       ),
@@ -453,7 +354,7 @@ class _PracticePageState extends ConsumerState<PracticePage>
                 FgFilterChip(
                   label: LocaleKeys.practiceMinutes.tr(args: ['$minutes']),
                   isSelected: value.minutes == minutes,
-                  isEnabled: !_busy && _pending == null,
+                  isEnabled: !_busy,
                   onSelected: (_) => change(minutes: minutes),
                 ),
             ],
@@ -464,7 +365,7 @@ class _PracticePageState extends ConsumerState<PracticePage>
               FgToggle(
                 value: value.gentle,
                 semanticLabel: LocaleKeys.compactGentle.tr(),
-                isEnabled: !_busy && _pending == null,
+                isEnabled: !_busy,
                 onChanged: (gentle) => change(gentle: gentle),
               ),
             ],
@@ -475,7 +376,7 @@ class _PracticePageState extends ConsumerState<PracticePage>
               FgToggle(
                 value: value.includeConditioning,
                 semanticLabel: LocaleKeys.compactConditioning.tr(),
-                isEnabled: !_busy && _pending == null,
+                isEnabled: !_busy,
                 onChanged: (conditioning) => change(conditioning: conditioning),
               ),
             ],
@@ -491,7 +392,7 @@ class _PracticePageState extends ConsumerState<PracticePage>
                 FgFilterChip(
                   label: positionLabel(support),
                   isSelected: value.support == support,
-                  isEnabled: !_busy && _pending == null,
+                  isEnabled: !_busy,
                   onSelected: (_) => change(support: support),
                 ),
             ],

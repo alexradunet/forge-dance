@@ -9,7 +9,13 @@ import '../repository/media_repository.dart';
 import 'local_video_view.dart';
 
 class EvidencePicker extends ConsumerStatefulWidget {
-  const EvidencePicker({super.key, this.value, required this.onChanged});
+  const EvidencePicker({
+    super.key,
+    this.value,
+    required this.onChanged,
+    this.isReadOnly = false,
+  });
+  final bool isReadOnly;
   final String? value;
   final ValueChanged<String?> onChanged;
   @override
@@ -21,13 +27,16 @@ class _EvidencePickerState extends ConsumerState<EvidencePicker> {
   String? _error;
 
   Future<void> _import() async {
+    if (widget.isReadOnly || _busy) return;
     setState(() {
       _busy = true;
       _error = null;
     });
     try {
       final item = await ref.read(mediaRepositoryProvider).pickAndImportVideo();
-      if (mounted && item != null) widget.onChanged(item.id);
+      if (mounted && !widget.isReadOnly && item != null) {
+        widget.onChanged(item.id);
+      }
     } catch (error) {
       if (mounted) setState(() => _error = mediaErrorText(error));
     } finally {
@@ -36,6 +45,7 @@ class _EvidencePickerState extends ConsumerState<EvidencePicker> {
   }
 
   Future<void> _choose() async {
+    if (widget.isReadOnly || _busy) return;
     setState(() {
       _busy = true;
       _error = null;
@@ -64,7 +74,9 @@ class _EvidencePickerState extends ConsumerState<EvidencePicker> {
                     .toList(),
         ),
       );
-      if (mounted && selected != null) widget.onChanged(selected.id);
+      if (mounted && !widget.isReadOnly && selected != null) {
+        widget.onChanged(selected.id);
+      }
     } catch (error) {
       if (mounted) setState(() => _error = mediaErrorText(error));
     } finally {
@@ -73,6 +85,7 @@ class _EvidencePickerState extends ConsumerState<EvidencePicker> {
   }
 
   Future<void> _delete() async {
+    if (widget.isReadOnly || _busy) return;
     final id = widget.value;
     if (id == null) return;
     final confirmed = await FgImmersiveScaffold.showModal<bool>(
@@ -95,7 +108,7 @@ class _EvidencePickerState extends ConsumerState<EvidencePicker> {
         ],
       ),
     );
-    if (confirmed != true || !mounted) return;
+    if (confirmed != true || !mounted || widget.isReadOnly) return;
     setState(() {
       _busy = true;
       _error = null;
@@ -125,12 +138,13 @@ class _EvidencePickerState extends ConsumerState<EvidencePicker> {
               text: LocaleKeys.mediaImport.tr(),
               icon: const Icon(Icons.video_library_outlined),
               isLoading: _busy,
+              isEnabled: !widget.isReadOnly,
               onPressed: _import,
             ),
             FgButton(
               text: LocaleKeys.mediaLibrary.tr(),
               variant: FgButtonVariant.secondary,
-              isEnabled: !_busy,
+              isEnabled: !_busy && !widget.isReadOnly,
               onPressed: _choose,
             ),
             if (widget.value != null) ...[
@@ -147,7 +161,7 @@ class _EvidencePickerState extends ConsumerState<EvidencePicker> {
                     ),
               ),
               FgButton(
-                isEnabled: !_busy,
+                isEnabled: !_busy && !widget.isReadOnly,
                 text: LocaleKeys.mediaUnlink.tr(),
                 variant: FgButtonVariant.ghost,
                 onPressed: () => widget.onChanged(null),
@@ -155,7 +169,7 @@ class _EvidencePickerState extends ConsumerState<EvidencePicker> {
               FgButton(
                 text: LocaleKeys.mediaDelete.tr(),
                 variant: FgButtonVariant.destructive,
-                isEnabled: !_busy,
+                isEnabled: !_busy && !widget.isReadOnly,
                 onPressed: _delete,
               ),
             ],

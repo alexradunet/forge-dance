@@ -1,6 +1,5 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -8,7 +7,6 @@ import '../../../../constants/constants.dart';
 import '../../../../constants/assets.dart';
 import '../../../../routing/routes.dart';
 import '../../../stats/model/user_stats.dart';
-import '../../../movement_teacher/prototype/ui/motion_lab_page.dart';
 import '../../../stats/ui/view_model/user_stats_provider.dart';
 import '../../../../design_system/design_system.dart';
 import '../../../../generated/locale_keys.g.dart';
@@ -105,79 +103,12 @@ class HomePage extends ConsumerWidget {
               state.recommendedModules,
             ),
           ),
-        SliverPadding(
-          padding: AppSpacing.allLG,
-          sliver: SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Wrap(
-                  spacing: AppSpacing.sm,
-                  runSpacing: AppSpacing.sm,
-                  children: [
-                    FgButton(
-                      key: const ValueKey('home-learn-link'),
-                      text: LocaleKeys.exploreTitle.tr(),
-                      icon: const Icon(Icons.school_outlined),
-                      variant: FgButtonVariant.ghost,
-                      onPressed: () => MainTabDestination.explore.go(context),
-                    ),
-                    FgButton(
-                      key: const ValueKey('home-programmes-link'),
-                      text: LocaleKeys.forgeProgrammes.tr(),
-                      icon: const Icon(Icons.route_outlined),
-                      variant: FgButtonVariant.ghost,
-                      onPressed: () => context.push(Routes.programmes),
-                    ),
-                    FgButton(
-                      text: LocaleKeys.forgeAssessments.tr(),
-                      variant: FgButtonVariant.ghost,
-                      onPressed: () => context.push(Routes.method),
-                    ),
-                    FgButton(
-                      text: LocaleKeys.forgeLogbook.tr(),
-                      icon: const Icon(Icons.history),
-                      variant: FgButtonVariant.ghost,
-                      onPressed: () => context.push(Routes.practiceLog),
-                    ),
-                  ],
-                ),
-                FgDetails(
-                  key: const ValueKey('home-forge-explanation'),
-                  title: LocaleKeys.detailsLearnMore.tr(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(LocaleKeys.cypherInvitation.tr()),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(LocaleKeys.forgeCoreSubtitle.tr()),
-                      if (kDebugMode)
-                        FgButton(
-                          text: LocaleKeys.motionLabOpen.tr(),
-                          icon: const Icon(Icons.view_in_ar),
-                          variant: FgButtonVariant.secondary,
-                          onPressed: () =>
-                              Navigator.of(
-                                context,
-                                rootNavigator: true,
-                              ).push<void>(
-                                MaterialPageRoute(
-                                  builder: (_) => const MotionLabPage(),
-                                ),
-                              ),
-                        ),
-                    ],
-                  ),
-                ),
-                FgDetails(
-                  title: LocaleKeys.photoAboutTitle.tr(),
-                  child: Text(LocaleKeys.photoAboutBody.tr()),
-                ),
-              ],
-            ),
+        const SliverToBoxAdapter(
+          child: SizedBox(
+            key: ValueKey('home-content-end'),
+            height: AppSpacing.xxl,
           ),
         ),
-        const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
       ],
     );
   }

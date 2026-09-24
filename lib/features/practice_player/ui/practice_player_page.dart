@@ -10,11 +10,23 @@ import '../../media/ui/evidence_picker.dart';
 import '../../media/ui/local_video_view.dart';
 import '../../method/repository/method_catalog.dart';
 import '../../practice/model/practice.dart';
+import '../../practice/model/workout_session.dart';
 import '../model/practice_clock.dart';
 
 /// Returns a completed record only. The launching flow owns persistence once.
 class PracticePlayerPage extends StatefulWidget {
-  const PracticePlayerPage({super.key, required this.block});
+  const PracticePlayerPage({
+    super.key,
+    required this.block,
+    this.session,
+    this.navigation,
+    this.onExit,
+    this.onNext,
+  });
+  final WorkoutSession? session;
+  final Widget? navigation;
+  final VoidCallback? onExit;
+  final VoidCallback? onNext;
   final PracticeBlock block;
   @override
   State<PracticePlayerPage> createState() => _PracticePlayerPageState();
@@ -26,39 +38,72 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
   Player? _audio;
   StreamSubscription<String>? _audioErrors;
   final _notes = TextEditingController();
-  final _performedAt = DateTime.now();
-  bool _muted = false;
-  bool _independent = false;
+  late final WorkoutRound _round;
+  DateTime get _performedAt => _round.performedAt;
+  bool get _muted => _round.muted;
+  set _muted(bool value) => _round.muted = value;
+  bool get _independent => _round.independent;
+  set _independent(bool value) => _round.independent = value;
   bool _loading = false;
   bool _goalReached = false;
   bool _editingMedia = false;
-  bool _showSchematic = false;
+  bool get _showSchematic => _round.showSchematic;
+  set _showSchematic(bool value) => _round.showSchematic = value;
   int _epoch = 0;
-  int _difficulty = 5;
-  String? _evidence;
-  String? _demonstration;
+  int? _sessionRevision;
+  int get _difficulty => _round.difficulty;
+  set _difficulty(int value) => _round.difficulty = value;
+  String? get _evidence => _round.evidence;
+  set _evidence(String? value) => _round.evidence = value;
+  String? get _demonstration => _round.demonstration;
+  set _demonstration(String? value) => _round.demonstration = value;
   String? _audioError;
+  bool get _editable => widget.session == null || widget.session!.editable;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _clock = PracticeClock(bpm: widget.block.bpm)..addListener(_tick);
-    try {
-      _audio = Player();
-      _audioErrors = _audio!.stream.error.listen((_) {
-        if (mounted) {
-          _pause();
-          setState(() => _audioError = LocaleKeys.playerAudioError.tr());
-        }
-      });
-    } catch (_) {
-      _audioError = LocaleKeys.playerAudioError.tr();
+    _round =
+        widget.session?.current ??
+        WorkoutRound(
+          widget.block,
+          PracticeClock(bpm: widget.block.bpm),
+          DateTime.now(),
+        );
+    _clock = _round.clock..addListener(_tick);
+    _notes.text = _round.notes;
+    _notes.addListener(() => _round.notes = _notes.text);
+    _goalReached = _round.reachedTarget;
+    _sessionRevision = widget.session?.playbackRevision;
+    widget.session?.addListener(_sessionChanged);
+  }
+
+  void _sessionChanged() {
+    final revision = widget.session?.playbackRevision;
+    if (revision != _sessionRevision) {
+      _sessionRevision = revision;
+      _pause();
     }
+  }
+
+  void _ensureAudio() {
+    if (_audio != null) return;
+    _audio = Player();
+    _audioErrors = _audio!.stream.error.listen((_) {
+      if (mounted) {
+        _pause();
+        setState(() => _audioError = LocaleKeys.playerAudioError.tr());
+      }
+    });
   }
 
   void _tick() {
     if (!mounted) return;
+    if (!_clock.running) {
+      ++_epoch;
+      _pauseAudio();
+    }
     if (!_goalReached &&
         _clock.activeDuration.inSeconds >= widget.block.minutes * 60) {
       _goalReached = true;
@@ -69,28 +114,36 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
   }
 
   Future<void> _start() async {
-    if (_loading ||
+    if ((widget.session != null &&
+            (!widget.session!.editable || _round.reachedTarget)) ||
+        _loading ||
         _clock.running ||
         _clock.activeDuration.inSeconds >= 86400) {
       return;
     }
     final epoch = ++_epoch;
+    final revision = widget.session?.playbackRevision;
+    bool valid() =>
+        mounted &&
+        epoch == _epoch &&
+        (widget.session == null || widget.session!.canStart(_round, revision!));
     setState(() {
       _loading = true;
       _editingMedia = false;
     });
     try {
       if (!_muted) {
+        _ensureAudio();
         if (_audio == null) throw StateError('Audio unavailable');
         await _audio!.open(
           await Media.memory(makeMetronomeWav(_clock.bpm), type: 'audio/wav'),
           play: false,
         );
         await _audio!.setPlaylistMode(PlaylistMode.single);
-        if (!mounted || epoch != _epoch) return;
+        if (!valid()) return;
         await _audio!.play();
       }
-      if (!mounted || epoch != _epoch) {
+      if (!valid()) {
         await _audio?.pause();
         return;
       }
@@ -107,6 +160,10 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
   void _pause() {
     ++_epoch;
     _clock.pause();
+    _pauseAudio();
+  }
+
+  void _pauseAudio() {
     final audio = _audio;
     if (audio != null) {
       unawaited(
@@ -155,8 +212,10 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     ++_epoch;
+    widget.session?.removeListener(_sessionChanged);
     _clock.removeListener(_tick);
-    _clock.dispose();
+    _pauseAudio();
+    if (widget.session == null) _clock.dispose();
     unawaited(_audioErrors?.cancel());
     unawaited(_audio?.dispose());
     _notes.dispose();
@@ -187,8 +246,10 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
               children: [
                 AppHeader(
                   title: widget.block.title,
-                  onBack: () => Navigator.of(context).maybePop(),
+                  onBack:
+                      widget.onExit ?? () => Navigator.of(context).maybePop(),
                 ),
+                if (widget.navigation != null) widget.navigation!,
                 FgRoundPanel(
                   label: widget.block.workoutId != null
                       ? '${LocaleKeys.cypherPracticeFloor.tr()} · ${LocaleKeys.dailyPracticeVariation.tr(args: [forgeBelts[widget.block.level].name])}'
@@ -229,11 +290,18 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
                     ),
                   ),
                 ),
-                if (_goalReached) ...[
+                if (_goalReached &&
+                    (widget.session == null ||
+                        _round.status == WorkoutRoundStatus.current)) ...[
                   const SizedBox(height: AppSpacing.md),
                   Semantics(
                     liveRegion: true,
-                    child: Text(LocaleKeys.playerGoalReached.tr()),
+                    container: true,
+                    child: Text(
+                      widget.session == null
+                          ? LocaleKeys.playerGoalReached.tr()
+                          : LocaleKeys.workoutTargetReached.tr(),
+                    ),
                   ),
                 ],
                 const SizedBox(height: AppSpacing.lg),
@@ -247,15 +315,25 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
                           .tr(),
                   isLoading: _loading,
                   icon: Icon(_clock.running ? Icons.pause : Icons.play_arrow),
-                  onPressed: _clock.running ? _pause : _start,
+                  onPressed:
+                      widget.session != null &&
+                          (!widget.session!.editable || _round.reachedTarget)
+                      ? null
+                      : _clock.running
+                      ? _pause
+                      : _start,
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 FgButton(
-                  text: LocaleKeys.playerSave.tr(),
+                  text: widget.session == null
+                      ? LocaleKeys.playerSave.tr()
+                      : LocaleKeys.workoutSaveNext.tr(),
                   icon: const Icon(Icons.check),
                   variant: FgButtonVariant.secondary,
-                  isEnabled: seconds > 0 && !_loading,
-                  onPressed: _save,
+                  isEnabled: widget.session == null
+                      ? seconds > 0 && !_loading
+                      : _round.reachedTarget && widget.session!.editable,
+                  onPressed: widget.onNext ?? _save,
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 FgRoundPanel(
@@ -292,10 +370,16 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
                         contentPadding: EdgeInsets.zero,
                         title: Text(LocaleKeys.playerMute.tr()),
                         value: _muted,
-                        onChanged: (value) {
-                          _pause();
-                          setState(() => _muted = value);
-                        },
+                        onChanged: !_editable
+                            ? null
+                            : (value) {
+                                if (widget.session != null &&
+                                    !widget.session!.editable) {
+                                  return;
+                                }
+                                _pause();
+                                setState(() => _muted = value);
+                              },
                       ),
                       FgSlider(
                         value: _clock.bpm.toDouble(),
@@ -305,10 +389,16 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
                         semanticLabel: LocaleKeys.playerTempo.tr(),
                         label: LocaleKeys.playerTempo.tr(),
                         valueLabel: '${_clock.bpm} BPM',
-                        onChanged: (value) {
-                          _pause();
-                          _clock.setTempo(value.round());
-                        },
+                        onChanged: !_editable
+                            ? null
+                            : (value) {
+                                if (widget.session != null &&
+                                    !widget.session!.editable) {
+                                  return;
+                                }
+                                _pause();
+                                _clock.setTempo(value.round());
+                              },
                       ),
                       Text(
                         LocaleKeys.playerPhrase.tr(),
@@ -331,12 +421,18 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
                                 ),
                               ),
                             ),
-                            onChanged: (value) {
-                              if (value != null) {
-                                _pause();
-                                _clock.setPhrase(value, _clock.phraseEnd);
-                              }
-                            },
+                            onChanged: !_editable
+                                ? null
+                                : (value) {
+                                    if (widget.session != null &&
+                                        !widget.session!.editable) {
+                                      return;
+                                    }
+                                    if (value != null) {
+                                      _pause();
+                                      _clock.setPhrase(value, _clock.phraseEnd);
+                                    }
+                                  },
                           ),
                           DropdownButton<int>(
                             value: _clock.phraseEnd,
@@ -351,12 +447,21 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
                                 ),
                               ),
                             ),
-                            onChanged: (value) {
-                              if (value != null) {
-                                _pause();
-                                _clock.setPhrase(_clock.phraseStart, value);
-                              }
-                            },
+                            onChanged: !_editable
+                                ? null
+                                : (value) {
+                                    if (widget.session != null &&
+                                        !widget.session!.editable) {
+                                      return;
+                                    }
+                                    if (value != null) {
+                                      _pause();
+                                      _clock.setPhrase(
+                                        _clock.phraseStart,
+                                        value,
+                                      );
+                                    }
+                                  },
                           ),
                         ],
                       ),
@@ -364,10 +469,16 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
                         contentPadding: EdgeInsets.zero,
                         title: Text(LocaleKeys.playerIndependent.tr()),
                         value: _independent,
-                        onChanged: (value) {
-                          _pause();
-                          setState(() => _independent = value);
-                        },
+                        onChanged: !_editable
+                            ? null
+                            : (value) {
+                                if (widget.session != null &&
+                                    !widget.session!.editable) {
+                                  return;
+                                }
+                                _pause();
+                                setState(() => _independent = value);
+                              },
                       ),
                       Text(LocaleKeys.playerTempoPause.tr()),
                     ],
@@ -404,17 +515,27 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
                       contentPadding: EdgeInsets.zero,
                       title: Text(LocaleKeys.playerSchematic.tr()),
                       value: _showSchematic,
-                      onChanged: (value) =>
-                          setState(() => _showSchematic = value),
+                      onChanged: !_editable
+                          ? null
+                          : (value) => setState(() {
+                              if (widget.session == null ||
+                                  widget.session!.editable) {
+                                _showSchematic = value;
+                              }
+                            }),
                     ),
                   Text(
                     LocaleKeys.playerDemoMedia.tr(),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   EvidencePicker(
+                    isReadOnly: !_editable,
                     value: _demonstration,
-                    onChanged: (value) =>
-                        setState(() => _demonstration = value),
+                    onChanged: (value) => setState(() {
+                      if (widget.session == null || widget.session!.editable) {
+                        _demonstration = value;
+                      }
+                    }),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
@@ -422,8 +543,13 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   EvidencePicker(
+                    isReadOnly: !_editable,
                     value: _evidence,
-                    onChanged: (value) => setState(() => _evidence = value),
+                    onChanged: (value) => setState(() {
+                      if (widget.session == null || widget.session!.editable) {
+                        _evidence = value;
+                      }
+                    }),
                   ),
                 ],
                 const SizedBox(height: AppSpacing.lg),
@@ -444,18 +570,40 @@ class _PracticePlayerPageState extends State<PracticePlayerPage>
                         semanticLabel: LocaleKeys.playerEffort.tr(),
                         label: LocaleKeys.playerEffort.tr(),
                         valueLabel: '$_difficulty / 10',
-                        onChanged: (value) =>
-                            setState(() => _difficulty = value.round()),
+                        onChanged: !_editable
+                            ? null
+                            : (value) => setState(() {
+                                if (widget.session == null ||
+                                    widget.session!.editable) {
+                                  _difficulty = value.round();
+                                }
+                              }),
                       ),
-                      FgInput(
-                        label: LocaleKeys.playerNotes.tr(),
-                        controller: _notes,
-                        onChanged: (value) {
-                          if (value.length > 9000) {
-                            _notes.text = value.substring(0, 9000);
-                          }
-                        },
-                      ),
+                      if (!_editable) ...[
+                        Text(
+                          LocaleKeys.playerNotes.tr(),
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        Text(_notes.text),
+                      ] else
+                        FgInput(
+                          label: LocaleKeys.playerNotes.tr(),
+                          controller: _notes,
+                          isEnabled:
+                              widget.session == null ||
+                              widget.session!.editable,
+                          onChanged: !_editable
+                              ? null
+                              : (value) {
+                                  if (widget.session != null &&
+                                      !widget.session!.editable) {
+                                    return;
+                                  }
+                                  if (value.length > 9000) {
+                                    _notes.text = value.substring(0, 9000);
+                                  }
+                                },
+                        ),
                     ],
                   ),
                 ),

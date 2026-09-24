@@ -695,49 +695,87 @@ void _shellSurfaceContracts() {
     });
   }
   testWidgets(
-    'Actual shell tabs cannot discard pending practice or interrupt a save',
+    'Actual shell keeps consolidated workout above tabs through durable save and explicit exit',
     (tester) async {
       final repo = _GuardedPracticeRepository()..hold = Completer<void>();
       final router = _contractShell(Routes.practice);
       addTearDown(router.dispose);
+      final times = <WorkoutTestStopwatch>[];
+      late ProviderContainer container;
       await _pumpFeature(
         tester,
         const SizedBox.shrink(),
         router: router,
         practiceRepository: repo,
+        beforePump: (value) async => container = value,
+        workoutSessionFactory: (plan, save) => daily.WorkoutSession(
+          plan: plan,
+          save: save,
+          clockFactory: (block) {
+            final time = WorkoutTestStopwatch();
+            times.add(time);
+            return PracticeClock(bpm: block.bpm, stopwatch: time);
+          },
+        ),
       );
-      final start = find.widgetWithText(
-        FgButton,
-        LocaleKeys.photoStartRound.tr(),
-      );
+      final start = find.byKey(const ValueKey('practice-hero-start'));
       await _show(tester, start);
       await tester.tap(start);
       await tester.pumpAndSettle();
-      expect(find.byType(PracticePlayerPage), findsOneWidget);
-      await tester.runAsync(() async {
-        Navigator.of(tester.element(find.byType(PracticePlayerPage)))
-            .pop(_historyRecord('latest'));
-        await Future<void>.delayed(const Duration(milliseconds: 20));
-      });
-      await tester.pump(const Duration(milliseconds: 400));
-      await tester.tap(find.text('Home'));
+      final session = tester
+          .widget<WorkoutSessionPage>(find.byType(WorkoutSessionPage))
+          .session;
+      final frozen = session.plan;
+      await tester.runAsync(
+        () => container
+            .read(practicePreferencesViewModelProvider.notifier)
+            .save(
+              const PracticePreferences(
+                minutes: 10,
+                support: PracticeSupport.seated,
+                gentle: true,
+              ),
+            ),
+      );
+      await tester.pumpAndSettle();
+      expect(session.plan, same(frozen));
+      expect(session.current.block, same(frozen.blocks.first));
+      session.current.clock.start();
+      times.first.advance(
+        Duration(seconds: frozen.blocks.first.minutes * 60 + 12),
+      );
+      session.pause();
       await tester.pump();
+      await tester.tap(find.byKey(const ValueKey('workout-next')));
+      await tester.pump();
+      expect(session.saving, true);
+      expect(find.text('Home').hitTestable(), findsNothing);
+      final navigator = tester.state<NavigatorState>(
+        find.byType(Navigator).first,
+      );
+      unawaited(navigator.maybePop());
+      await tester.pump();
+      expect(find.byType(AlertDialog), findsNothing);
+      expect(find.byType(WorkoutSessionPage), findsOneWidget);
       expect(router.routeInformationProvider.value.uri.path, Routes.practice);
       await tester.runAsync(() async {
         repo.hold!.complete();
       });
       await tester.pumpAndSettle();
-      await tester.tap(find.text('Home'));
-      await tester.pump();
-      expect(router.routeInformationProvider.value.uri.path, Routes.practice);
+      expect(find.byKey(const ValueKey('workout-save-error')), findsOneWidget);
+      expect(session.index, 0);
+      expect(find.text('Home').hitTestable(), findsNothing);
       repo.fail = false;
       repo.hold = null;
-      final retry = find.widgetWithText(
-        FgButton,
-        LocaleKeys.practiceRetrySave.tr(),
-      );
-      await _show(tester, retry, delta: -250);
-      await _tapStorage(tester, retry);
+      await _tapStorage(tester, find.byKey(const ValueKey('workout-retry')));
+      await tester.pumpAndSettle();
+      expect(session.index, 1);
+      expect(repo.submitted.length, 2);
+      expect(repo.submitted.first, same(repo.submitted.last));
+      expect(find.byType(WorkoutSessionPage), findsOneWidget);
+      unawaited(navigator.maybePop());
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const ValueKey('workout-confirm')));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Home'));
       await tester.pumpAndSettle();
