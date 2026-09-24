@@ -64,7 +64,6 @@ class HomePage extends ConsumerWidget {
           child: AppHeader(
             title: _dancerHandle(profileName),
             subtitle: LocaleKeys.welcomeBack.tr(),
-            compact: true,
           ),
         ),
         SliverPadding(

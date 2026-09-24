@@ -74,10 +74,12 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
     return CustomScrollView(
       slivers: [
         SliverToBoxAdapter(
+          child: AppHeader(title: LocaleKeys.exploreTitle.tr()),
+        ),
+        SliverToBoxAdapter(
           child: Padding(
             padding: AppSpacing.screen,
             child: FgSectionHeading(
-              eyebrow: LocaleKeys.exploreTitle.tr().toUpperCase(),
               title: LocaleKeys.cypherLearnHeadline.tr(),
               subtitle: LocaleKeys.cypherLearnSubtitle.tr(),
             ),

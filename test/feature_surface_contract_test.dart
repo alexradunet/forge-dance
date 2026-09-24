@@ -92,6 +92,7 @@ part 'remaining_surface_contracts.dart';
 part 'review_surface_contracts.dart';
 part 'personal_surface_contracts.dart';
 part 'learning_surface_contracts.dart';
+part 'page_header_surface_contracts.dart';
 
 class _CatalogueLoader extends AssetLoader {
   _CatalogueLoader(this.catalogue);
@@ -436,6 +437,7 @@ void main() {
     _expectAppearanceContrast(tester);
   });
 
+  _pageHeaderSurfaceContracts();
   _workoutSessionSurfaceContracts();
   _personalSurfaceContracts();
   _learningSurfaceContracts();

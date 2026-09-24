@@ -5,8 +5,10 @@ import '../../tokens/app_sizes.dart';
 import '../../tokens/app_spacing.dart';
 import '../../tokens/app_typography.dart';
 
-/// Compact editorial header. Slots participate in layout rather than
-/// overlapping the title, including at larger accessibility text sizes.
+/// Shared editorial page header, centered to the reading content width.
+/// Slots participate in layout rather than overlapping the title, including
+/// at larger accessibility text sizes. Compact active-player headers retain
+/// their available width.
 class AppHeader extends StatelessWidget implements PreferredSizeWidget {
   const AppHeader({
     super.key,
@@ -40,52 +42,61 @@ class AppHeader extends StatelessWidget implements PreferredSizeWidget {
       color: isTransparent ? Colors.transparent : colors.immersiveBackground,
       child: SafeArea(
         bottom: false,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.xxl,
-            vertical: AppSpacing.lg,
-          ),
-          child: Row(
-            children: [
-              if (onBack != null) ...[
-                BackButton(color: foreground, onPressed: onBack),
-                const SizedBox(width: AppSpacing.sm),
-              ],
-              if (leftSlot != null) ...[
-                leftSlot!,
-                const SizedBox(width: AppSpacing.md),
-              ],
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title.toUpperCase(),
-                      maxLines: compact ? 2 : null,
-                      overflow: compact ? TextOverflow.ellipsis : null,
-                      style: (compact ? AppTypography.h4 : AppTypography.h2)
-                          .copyWith(color: foreground),
-                    ),
-                    if (subtitle != null) ...[
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        subtitle!,
-                        maxLines: compact ? 1 : null,
-                        overflow: compact ? TextOverflow.ellipsis : null,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: mutedForeground,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
+        child: Align(
+          alignment: Alignment.topCenter,
+          heightFactor: 1,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: compact ? double.infinity : AppSizes.readingContentMax,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.xxl,
+                vertical: AppSpacing.lg,
               ),
-              if (rightSlot != null) ...[
-                const SizedBox(width: AppSpacing.md),
-                rightSlot!,
-              ],
-            ],
+              child: Row(
+                children: [
+                  if (onBack != null) ...[
+                    BackButton(color: foreground, onPressed: onBack),
+                    const SizedBox(width: AppSpacing.sm),
+                  ],
+                  if (leftSlot != null) ...[
+                    leftSlot!,
+                    const SizedBox(width: AppSpacing.md),
+                  ],
+                  Expanded(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title.toUpperCase(),
+                          maxLines: compact ? 2 : null,
+                          overflow: compact ? TextOverflow.ellipsis : null,
+                          style: (compact ? AppTypography.h4 : AppTypography.h2)
+                              .copyWith(color: foreground),
+                        ),
+                        if (subtitle != null) ...[
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            subtitle!,
+                            maxLines: compact ? 1 : null,
+                            overflow: compact ? TextOverflow.ellipsis : null,
+                            style: AppTypography.bodySmall.copyWith(
+                              color: mutedForeground,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (rightSlot != null) ...[
+                    const SizedBox(width: AppSpacing.md),
+                    rightSlot!,
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
       ),

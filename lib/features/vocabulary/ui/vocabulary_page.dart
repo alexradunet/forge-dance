@@ -51,17 +51,15 @@ class _VocabularyPageState extends ConsumerState<VocabularyPage> {
           ),
           child: CustomScrollView(
             slivers: [
+              SliverToBoxAdapter(
+                child: AppHeader(title: LocaleKeys.vocabularyTitle.tr()),
+              ),
               SliverPadding(
                 padding: AppSpacing.allLG,
                 sliver: SliverToBoxAdapter(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Text(
-                        LocaleKeys.vocabularyTitle.tr(),
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
                       FgPhotoHeading(
                         image: const AssetImage(Assets.danceFloorPreview),
                         imageLabel: LocaleKeys.photoPreviewLabel.tr(),
