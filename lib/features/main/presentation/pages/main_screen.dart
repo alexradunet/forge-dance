@@ -15,12 +15,16 @@ class MainScreen extends StatelessWidget {
     required this.child,
     required this.location,
     this.canChangeTab,
+    this.currentIndex,
+    this.onTabChange,
     super.key,
   });
 
   final Widget child;
   final String location;
   final bool Function()? canChangeTab;
+  final int? currentIndex;
+  final ValueChanged<int>? onTabChange;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +34,7 @@ class MainScreen extends StatelessWidget {
       canPop: location != Routes.workout,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop && location == Routes.workout) {
-          MainTabDestination.home.go(context);
+          closeDetail(context, fallback: Routes.practice);
         }
       },
       child: AnnotatedRegion<SystemUiOverlayStyle>(
@@ -40,11 +44,16 @@ class MainScreen extends StatelessWidget {
           body: child,
           bottomNavigationBar: showBottomNav
               ? AppBottomNav(
-                  currentIndex: MainTabDestination.fromLocation(location)
-                      .tabIndex,
+                  currentIndex:
+                      currentIndex ??
+                      MainTabDestination.fromLocation(location).tabIndex,
                   onTabChange: (index) {
                     if (canChangeTab?.call() ?? true) {
-                      MainTabDestination.values[index].go(context);
+                      if (onTabChange != null) {
+                        onTabChange!(index);
+                      } else {
+                        MainTabDestination.values[index].go(context);
+                      }
                     }
                   },
                 )

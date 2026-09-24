@@ -80,7 +80,7 @@ class HomePage extends ConsumerWidget {
                 text: LocaleKeys.forgeTodayPractice.tr(),
                 icon: const Icon(Icons.north_east),
                 expand: true,
-                onPressed: () => context.push(Routes.practice),
+                onPressed: () => MainTabDestination.workout.go(context),
               ),
             ),
           ),

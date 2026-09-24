@@ -7,7 +7,7 @@ void _pageHeaderSurfaceContracts() {
     'Vocabulary': (page: const VocabularyPage(), back: false),
     'Programmes': (page: const ProgrammesPage(), back: true),
     'Profile': (page: const ProfilePage(), back: false),
-    'Practice': (page: const PracticePage(), back: true),
+    'Practice': (page: const PracticePage(), back: false),
     'Settings': (page: const SettingsPage(), back: true),
     'Movement reference': (
       page: VocabularyEntryPage(

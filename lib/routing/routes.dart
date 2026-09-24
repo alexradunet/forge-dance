@@ -26,6 +26,15 @@ class Routes {
   static const dataTransfer = '$settings/data';
 }
 
+/// Close a pushed detail to its caller, with a useful landing for direct links.
+void closeDetail(BuildContext context, {required String fallback}) {
+  if (context.canPop()) {
+    context.pop();
+  } else {
+    context.go(fallback);
+  }
+}
+
 sealed class AppDestination {
   const AppDestination();
   String get location;
@@ -58,9 +67,9 @@ enum MainTabDestination implements AppDestination {
   static MainTabDestination fromLocation(String location) {
     if (location == Routes.library) return vocabulary;
     if (location.startsWith('${Routes.main}/module/')) return explore;
-    if (location.startsWith(Routes.workout)) return workout;
-    if (location.startsWith(Routes.method)) return profile;
-    if (location.startsWith(Routes.programmes)) return explore;
+    if (_isWithin(location, Routes.workout)) return workout;
+    if (_isWithin(location, Routes.method)) return profile;
+    if (_isWithin(location, Routes.programmes)) return explore;
     return values.firstWhere(
       (tab) =>
           location == tab.location || location.startsWith('${tab.location}/'),
@@ -68,6 +77,9 @@ enum MainTabDestination implements AppDestination {
     );
   }
 }
+
+bool _isWithin(String location, String route) =>
+    location == route || location.startsWith('$route/');
 
 class VocabularyDestination extends AppDestination {
   const VocabularyDestination(this.entryId);

@@ -56,12 +56,12 @@ class ProgrammesPage extends ConsumerWidget {
                 FgProgramCardLayout(
                   children: [
                     for (final (index, programme) in forgeProgrammes.indexed)
-                      _programmeCard(
-                        context,
-                        programme,
-                        index,
-                        learn.value,
-                        enrolled.value?.contains(programme.id) ?? false,
+                      ProgrammePathCard(
+                        programme: programme,
+                        index: index,
+                        learn: learn.value,
+                        enrolled:
+                            enrolled.value?.contains(programme.id) ?? false,
                       ),
                   ],
                 ),
@@ -72,14 +72,26 @@ class ProgrammesPage extends ConsumerWidget {
       ),
     );
   }
+}
 
-  Widget _programmeCard(
-    BuildContext context,
-    Programme programme,
-    int index,
-    LearnState? learn,
-    bool enrolled,
-  ) {
+/// Shared path preview; enrolment and lesson progress have one source of truth.
+class ProgrammePathCard extends StatelessWidget {
+  const ProgrammePathCard({
+    required this.programme,
+    required this.index,
+    required this.learn,
+    required this.enrolled,
+    super.key,
+  });
+
+  final Programme programme;
+  final int index;
+  final LearnState? learn;
+  final bool enrolled;
+
+  @override
+  Widget build(BuildContext context) {
+    final learn = this.learn;
     final locked =
         learn != null && programme.unmetPrerequisites(learn).isNotEmpty;
     final status = enrolled

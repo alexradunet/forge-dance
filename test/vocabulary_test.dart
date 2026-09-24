@@ -39,15 +39,80 @@ void main() {
       'weight-transfer',
     );
     expect(
-      repository.search(kind: VocabularyKind.move).map((entry) => entry.id),
+      repository.search(kinds: {VocabularyKind.move}).map((entry) => entry.id),
       ['bounce', 'rock'],
     );
     expect(
-      repository.search(kind: VocabularyKind.move, style: 'Foundations'),
+      repository.search(kinds: {VocabularyKind.move}, styles: {'Foundations'}),
       isEmpty,
     );
     expect(repository.search(query: 'no-such-term'), isEmpty);
   });
+
+  test('multi-select unions within groups and intersects across groups', () {
+    expect(
+      repository.search(kinds: VocabularyKind.values.toSet()),
+      hasLength(repository.entries.length),
+    );
+    expect(
+      repository.search(styles: {'Foundations', 'Hip hop'}),
+      hasLength(repository.entries.length),
+    );
+    expect(
+      repository
+          .search(
+            kinds: {VocabularyKind.move},
+            styles: {'Foundations', 'Hip hop'},
+          )
+          .map((e) => e.id),
+      ['bounce', 'rock'],
+    );
+    expect(
+      repository
+          .search(
+            query: 'weight shift',
+            kinds: VocabularyKind.values.toSet(),
+            styles: {'Foundations'},
+          )
+          .single
+          .id,
+      'weight-transfer',
+    );
+  });
+
+  test(
+    'filter toggles are immutable; clear preserves search; reset clears all',
+    () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final subscription = container.listen(
+        vocabularyViewModelProvider,
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+      final notifier = container.read(vocabularyViewModelProvider.notifier);
+      notifier.search('weight');
+      notifier.toggleKind(VocabularyKind.move);
+      final before = container.read(vocabularyViewModelProvider);
+      notifier.toggleKind(VocabularyKind.concept);
+      notifier.toggleStyle('Foundations');
+      notifier.toggleStyle('Hip hop');
+      expect(before.kinds, {VocabularyKind.move});
+      expect(container.read(vocabularyViewModelProvider).styles, hasLength(2));
+      notifier.toggleStyle('Hip hop');
+      expect(container.read(vocabularyViewModelProvider).styles, {
+        'Foundations',
+      });
+      notifier.clearFilters();
+      expect(container.read(vocabularyViewModelProvider).query, 'weight');
+      expect(
+        container.read(vocabularyViewModelProvider).hasSelections,
+        isFalse,
+      );
+      notifier.reset();
+      expect(container.read(vocabularyViewModelProvider).query, isEmpty);
+    },
+  );
 
   testWidgets('search and filter intents update visible vocabulary', (
     tester,
@@ -63,7 +128,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Weight transfer'), findsOneWidget);
     expect(find.text('Bounce'), findsNothing);
-    await tester.tap(find.widgetWithText(FgFilterChip, 'vocabularyMoves'));
+    final filters = find.text('vocabularyFilters');
+    await tester.ensureVisible(filters);
+    await tester.tap(filters);
+    await tester.pumpAndSettle();
+    final moves = find.widgetWithText(FgFilterChip, 'vocabularyMoves');
+    await tester.ensureVisible(moves);
+    await tester.tap(moves);
     await tester.pumpAndSettle();
     expect(find.text('noResults'), findsOneWidget);
     final container = ProviderScope.containerOf(

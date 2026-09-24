@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -7,6 +8,10 @@ import '../../../../design_system/design_system.dart';
 import '../../../../generated/locale_keys.g.dart';
 import '../../../../routing/routes.dart';
 import '../../../learn/model/lesson.dart';
+import '../../../learn/repository/learning_catalogue.dart';
+import '../../../programmes/repository/programme_catalog.dart';
+import '../../../programmes/ui/programmes_page.dart';
+import '../../../programmes/ui/programmes_view_model.dart';
 import '../../../learn/ui/state/learn_state.dart';
 import '../../../learn/ui/view_model/learn_view_model.dart';
 
@@ -55,21 +60,8 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
   }
 
   Widget _buildContent(BuildContext context, LearnState state) {
-    final sections = [
-      for (final category in ModuleCategory.values)
-        (
-          category: category,
-          modules: state.modules
-              .where(
-                (module) =>
-                    module.category == category &&
-                    (_query.isEmpty ||
-                        module.title.toLowerCase().contains(_query) ||
-                        module.tag.toLowerCase().contains(_query)),
-              )
-              .toList(),
-        ),
-    ].where((section) => section.modules.isNotEmpty).toList();
+    final catalogue = learningCatalogue(_query, state.modules);
+    final enrolled = ref.watch(programmesViewModelProvider);
 
     return CustomScrollView(
       slivers: [
@@ -104,12 +96,14 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.sm,
               children: [
-                FgButton(
-                  text: LocaleKeys.forgeProgrammes.tr(),
-                  icon: const Icon(Icons.route_outlined),
-                  variant: FgButtonVariant.ghost,
-                  onPressed: () => context.push(Routes.programmes),
-                ),
+                if (kDebugMode)
+                  FgButton(
+                    text: 'Preview roadmap',
+                    icon: const Icon(Icons.account_tree_outlined),
+                    variant: FgButtonVariant.ghost,
+                    onPressed: () =>
+                        context.go('${Routes.explore}?variant=roadmap'),
+                  ),
                 FgButton(
                   text: LocaleKeys.lessonHistory.tr(),
                   icon: const Icon(Icons.history),
@@ -120,7 +114,7 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
             ),
           ),
         ),
-        if (sections.isEmpty)
+        if (catalogue.modules.isEmpty && catalogue.programmes.isEmpty)
           SliverToBoxAdapter(
             child: FgEmpty(
               icon: Icons.search_off,
@@ -128,27 +122,39 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
               description: LocaleKeys.searchExploreHint.tr(),
             ),
           ),
-        SliverList.builder(
-          itemCount: sections.length,
-          itemBuilder: (context, index) {
-            final section = sections[index];
-            return Padding(
-              padding: AppSpacing.screen,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FgSectionHeading(title: _categoryLabel(section.category)),
-                  const SizedBox(height: AppSpacing.lg),
-                  FgProgramCardLayout(
-                    children: [
-                      for (final module in section.modules)
-                        _moduleCard(context, state, module),
-                    ],
+        SliverPadding(
+          padding: AppSpacing.screen,
+          sliver: SliverToBoxAdapter(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                FgSectionHeading(title: LocaleKeys.learningPaths.tr()),
+                const SizedBox(height: AppSpacing.lg),
+                if (enrolled.isLoading) const Center(child: FgSpinner()),
+                if (enrolled.hasError)
+                  FgEmpty(
+                    icon: Icons.error_outline,
+                    title: LocaleKeys.learningPathsLoadError.tr(),
+                    actionLabel: LocaleKeys.programmesRetry.tr(),
+                    onAction: () => ref.invalidate(programmesViewModelProvider),
                   ),
-                ],
-              ),
-            );
-          },
+                FgProgramCardLayout(
+                  children: [
+                    if (enrolled.hasValue)
+                      for (final programme in catalogue.programmes)
+                        ProgrammePathCard(
+                          programme: programme,
+                          index: forgeProgrammes.indexOf(programme),
+                          learn: state,
+                          enrolled: enrolled.value!.contains(programme.id),
+                        ),
+                    for (final module in catalogue.modules)
+                      _moduleCard(context, state, module),
+                  ],
+                ),
+              ],
+            ),
+          ),
         ),
         const SliverToBoxAdapter(
           child: SizedBox(height: AppSizes.bottomNavHeight + AppSpacing.xxl),
@@ -156,12 +162,6 @@ class _ExplorePageState extends ConsumerState<ExplorePage> {
       ],
     );
   }
-
-  String _categoryLabel(ModuleCategory category) => switch (category) {
-    ModuleCategory.fundamentals => LocaleKeys.categoryFundamentals.tr(),
-    ModuleCategory.streetStyles => LocaleKeys.categoryStreetStyles.tr(),
-    ModuleCategory.choreography => LocaleKeys.categoryChoreography.tr(),
-  };
 
   Widget _moduleCard(BuildContext context, LearnState state, Module module) {
     final locked = !state.isModuleUnlocked(module);

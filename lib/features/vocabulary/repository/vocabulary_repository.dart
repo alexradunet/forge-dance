@@ -22,15 +22,15 @@ class VocabularyRepository {
 
   List<VocabularyEntry> search({
     String query = '',
-    VocabularyKind? kind,
-    String? style,
+    Set<VocabularyKind> kinds = const {},
+    Set<String> styles = const {},
   }) {
     final normalized = query.trim().toLowerCase();
     return entries
         .where(
           (entry) =>
-              (kind == null || entry.kind == kind) &&
-              (style == null || entry.style == style) &&
+              (kinds.isEmpty || kinds.contains(entry.kind)) &&
+              (styles.isEmpty || styles.contains(entry.style)) &&
               [
                 entry.name,
                 entry.definition,

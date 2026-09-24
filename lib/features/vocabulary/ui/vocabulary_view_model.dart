@@ -10,34 +10,53 @@ part 'vocabulary_view_model.g.dart';
 
 @immutable
 class VocabularyFilters {
-  const VocabularyFilters({this.query = '', this.kind, this.style});
+  VocabularyFilters({
+    this.query = '',
+    Set<VocabularyKind> kinds = const {},
+    Set<String> styles = const {},
+  }) : kinds = Set.unmodifiable(kinds),
+       styles = Set.unmodifiable(styles);
+
   final String query;
-  final VocabularyKind? kind;
-  final String? style;
+  final Set<VocabularyKind> kinds;
+  final Set<String> styles;
+  bool get hasSelections => kinds.isNotEmpty || styles.isNotEmpty;
 }
 
 @riverpod
 class VocabularyViewModel extends _$VocabularyViewModel {
   @override
-  VocabularyFilters build() => const VocabularyFilters();
+  VocabularyFilters build() => VocabularyFilters();
 
-  void reset() => state = const VocabularyFilters();
+  void reset() => state = VocabularyFilters();
+
+  void clearFilters() => state = VocabularyFilters(query: state.query);
 
   void search(String query) => state = VocabularyFilters(
     query: query,
-    kind: state.kind,
-    style: state.style,
+    kinds: state.kinds,
+    styles: state.styles,
   );
-  void selectKind(VocabularyKind? kind) => state = VocabularyFilters(
-    query: state.query,
-    kind: kind,
-    style: state.style,
-  );
-  void selectStyle(String? style) => state = VocabularyFilters(
-    query: state.query,
-    kind: state.kind,
-    style: style,
-  );
+
+  void toggleKind(VocabularyKind kind) {
+    final kinds = {...state.kinds};
+    if (!kinds.remove(kind)) kinds.add(kind);
+    state = VocabularyFilters(
+      query: state.query,
+      kinds: kinds,
+      styles: state.styles,
+    );
+  }
+
+  void toggleStyle(String style) {
+    final styles = {...state.styles};
+    if (!styles.remove(style)) styles.add(style);
+    state = VocabularyFilters(
+      query: state.query,
+      kinds: state.kinds,
+      styles: styles,
+    );
+  }
 }
 
 @riverpod
@@ -45,8 +64,8 @@ List<VocabularyEntry> vocabularyResults(Ref ref) {
   final filters = ref.watch(vocabularyViewModelProvider);
   return const VocabularyRepository().search(
     query: filters.query,
-    kind: filters.kind,
-    style: filters.style,
+    kinds: filters.kinds,
+    styles: filters.styles,
   );
 }
 

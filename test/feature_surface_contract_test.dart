@@ -41,6 +41,7 @@ import 'package:forge_dance/generated/locale_keys.g.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forge_dance/routing/routes.dart';
+import 'package:forge_dance/routing/main_navigation.dart';
 
 import 'package:forge_dance/features/onboarding/ui/onboarding_screen.dart';
 import 'package:forge_dance/features/onboarding/ui/splash_screen.dart';
@@ -56,6 +57,7 @@ import 'package:forge_dance/features/common/ui/providers/app_theme_mode_provider
 import 'package:forge_dance/constants/constants.dart';
 
 import 'package:forge_dance/features/learn/ui/module_view_screen.dart';
+import 'package:forge_dance/features/learn/ui/prototype/learning_roadmap_prototype.dart';
 import 'package:forge_dance/features/learn/ui/lesson_player_screen.dart';
 import 'package:forge_dance/features/learn/repository/lesson_catalog.dart';
 import 'package:forge_dance/features/learn/model/lesson_progress.dart';
@@ -93,6 +95,7 @@ part 'review_surface_contracts.dart';
 part 'personal_surface_contracts.dart';
 part 'learning_surface_contracts.dart';
 part 'page_header_surface_contracts.dart';
+part 'roadmap_prototype_surface_contracts.dart';
 
 class _CatalogueLoader extends AssetLoader {
   _CatalogueLoader(this.catalogue);
@@ -443,6 +446,7 @@ void main() {
   _learningSurfaceContracts();
   _remainingSurfaceContracts();
   _reviewSurfaceContracts();
+  _roadmapPrototypeSurfaceContracts();
 
   for (final entry in screens.entries) {
     testWidgets(
@@ -475,6 +479,14 @@ void main() {
         expect(definition.hitTestable(), findsOneWidget);
         final card = find.byKey(const ValueKey('vocabulary-weight-transfer'));
         expect(tester.widget<FgReferenceCard>(card).indexLabel, '06');
+        final filterTitle = find.text(
+          LocaleKeys.vocabularyFilters.tr(
+            args: [LocaleKeys.vocabularyAll.tr()],
+          ),
+        );
+        await _show(tester, filterTitle, delta: -250);
+        await tester.tap(filterTitle);
+        await tester.pumpAndSettle();
         final moves = find.widgetWithText(
           FgFilterChip,
           LocaleKeys.vocabularyMoves.tr(),
@@ -493,14 +505,6 @@ void main() {
         await tester.tap(reset);
         await tester.pumpAndSettle();
         expect(tester.widget<TextField>(input).controller!.text, isEmpty);
-        final styles = find.text(
-          LocaleKeys.vocabularyStyleFilter.tr(
-            args: [LocaleKeys.vocabularyAllStyles.tr()],
-          ),
-        );
-        await _show(tester, styles, delta: -250);
-        await tester.tap(styles);
-        await tester.pumpAndSettle();
         final hipHop = find.widgetWithText(FgFilterChip, 'Hip hop');
         await _show(tester, hipHop);
         await tester.tap(hipHop);
@@ -516,6 +520,19 @@ void main() {
           find.text(LocaleKeys.vocabularyIndex.tr(args: ['2'])),
           findsOneWidget,
         );
+        final foundations = find.widgetWithText(FgFilterChip, 'Foundations');
+        await _show(tester, foundations, delta: -250);
+        await tester.tap(foundations);
+        await tester.pumpAndSettle();
+        expect(container.read(vocabularyResultsProvider), hasLength(6));
+        final summary = find.text(
+          LocaleKeys.vocabularyFilters.tr(args: ['Foundations · Hip hop']),
+        );
+        await _show(tester, summary, delta: -250);
+        await tester.tap(summary);
+        await tester.pumpAndSettle();
+        expect(find.widgetWithText(FgFilterChip, 'Hip hop'), findsNothing);
+        expect(summary, findsOneWidget);
         final about = find.text(LocaleKeys.detailsLearnMore.tr());
         await _show(tester, about);
         await tester.tap(about);
@@ -764,14 +781,35 @@ void main() {
       await tester.ensureVisible(input);
       await tester.enterText(input, '  READY BODY  ');
       await tester.pump(const Duration(seconds: 1));
-      expect(find.byType(FgProgramCard), findsOneWidget);
-      expect(find.text('READY BODY'), findsOneWidget);
-      final preview = tester.widget<FgProgramCard>(find.byType(FgProgramCard));
-      expect(preview.locked, isFalse);
+      // Searching a foundation module finds the paths containing its lessons,
+      // rather than exposing a duplicate module catalogue.
+      final cards = tester
+          .widgetList<FgProgramCard>(find.byType(FgProgramCard))
+          .toList();
       expect(
-        preview.details,
-        LocaleKeys.lessonsCompletedOf.tr(args: ['0', '3']),
+        cards.map((card) => card.title),
+        containsAll(['Find the Beat', 'Movement Foundations']),
       );
+      expect(cards.map((card) => card.title), isNot(contains('Ready Body')));
+      expect(cards.every((card) => !card.locked), isTrue);
+      final firstPath = find.byKey(
+        const ValueKey('programme-preview-find-the-beat'),
+      );
+      await _show(tester, firstPath);
+      await tester.tap(firstPath);
+      await tester.pumpAndSettle();
+      final details = find.text(LocaleKeys.detailsProgramme.tr());
+      await _show(tester, details);
+      await tester.tap(details);
+      await tester.pumpAndSettle();
+      expect(find.text(forgeProgrammes.first.description), findsOneWidget);
+      await tester.binding.handlePopRoute();
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<TextField>(input).controller!.text,
+        '  READY BODY  ',
+      );
+      await _show(tester, input, delta: -250);
       await tester.enterText(input, 'no such dance module');
       await tester.pump(const Duration(seconds: 1));
       expect(find.byType(FgProgramCard), findsNothing);
@@ -1049,12 +1087,26 @@ void main() {
       final router = GoRouter(
         initialLocation: Routes.home,
         routes: [
-          GoRoute(path: Routes.home, builder: (_, _) => home),
-          GoRoute(
-            path: Routes.practice,
-            builder: (_, _) => const PracticePage(),
-          ),
-          GoRoute(path: Routes.method, builder: (_, _) => const MethodPage()),
+          mainNavigation([
+            GoRoute(path: Routes.home, builder: (_, _) => home),
+            GoRoute(
+              path: Routes.vocabulary,
+              builder: (_, _) => const VocabularyPage(),
+            ),
+            GoRoute(
+              path: Routes.explore,
+              builder: (_, _) => const ExplorePage(),
+            ),
+            GoRoute(
+              path: Routes.profile,
+              builder: (_, _) => const ProfilePage(),
+            ),
+            GoRoute(
+              path: Routes.practice,
+              builder: (_, _) => const PracticePage(),
+            ),
+            GoRoute(path: Routes.method, builder: (_, _) => const MethodPage()),
+          ]),
         ],
       );
       addTearDown(router.dispose);
@@ -1072,7 +1124,13 @@ void main() {
       await tester.tap(practice);
       await tester.pumpAndSettle();
       expect(find.byType(PracticePage), findsOneWidget);
-      router.go(Routes.home);
+      expect(
+        tester.widget<AppBottomNav>(find.byType(AppBottomNav)).currentIndex,
+        3,
+      );
+      expect(find.text('Practice'), findsOneWidget);
+      expect(tester.widget<AppHeader>(find.byType(AppHeader)).onBack, isNull);
+      await tester.tap(find.byIcon(Icons.home_outlined));
       await tester.pumpAndSettle();
       final progress = find.descendant(
         of: find.byType(FgProgressSection),

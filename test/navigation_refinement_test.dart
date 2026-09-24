@@ -17,8 +17,8 @@ void main() {
                 MainScreen(location: state.uri.path, child: child),
             routes: [
               GoRoute(
-                path: Routes.home,
-                builder: (_, _) => const Text('Home content'),
+                path: Routes.practice,
+                builder: (_, _) => const Text('Practice content'),
               ),
               GoRoute(
                 path: Routes.workout,
@@ -56,7 +56,7 @@ void main() {
 
       await tester.binding.handlePopRoute();
       await tester.pumpAndSettle();
-      expect(find.text('Home content'), findsOneWidget);
+      expect(find.text('Practice content'), findsOneWidget);
     },
   );
 

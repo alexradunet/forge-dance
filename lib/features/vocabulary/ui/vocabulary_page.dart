@@ -80,52 +80,76 @@ class _VocabularyPageState extends ConsumerState<VocabularyPage> {
                         showFilter: false,
                       ),
                       const SizedBox(height: AppSpacing.md),
-                      Wrap(
-                        spacing: AppSpacing.sm,
-                        runSpacing: AppSpacing.sm,
-                        children: [
-                          FgFilterChip(
-                            label: LocaleKeys.vocabularyAll.tr(),
-                            isSelected: filters.kind == null,
-                            onSelected: (_) => notifier.selectKind(null),
-                          ),
-                          for (final kind in VocabularyKind.values)
-                            FgFilterChip(
-                              label: vocabularyKindLabel(kind),
-                              isSelected: filters.kind == kind,
-                              onSelected: (_) => notifier.selectKind(kind),
-                            ),
-                        ],
-                      ),
                       FgDetails(
-                        key: const ValueKey('vocabulary-style-filter'),
-                        title: LocaleKeys.vocabularyStyleFilter.tr(
+                        key: const ValueKey('vocabulary-filters'),
+                        title: LocaleKeys.vocabularyFilters.tr(
                           args: [
-                            filters.style ??
-                                LocaleKeys.vocabularyAllStyles.tr(),
+                            filters.hasSelections
+                                ? [
+                                    for (final kind in VocabularyKind.values)
+                                      if (filters.kinds.contains(kind))
+                                        vocabularyKindLabel(kind),
+                                    for (final style in repository.styles)
+                                      if (filters.styles.contains(style)) style,
+                                  ].join(' · ')
+                                : LocaleKeys.vocabularyAll.tr(),
                           ],
                         ),
-                        child: Wrap(
-                          spacing: AppSpacing.sm,
-                          runSpacing: AppSpacing.sm,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            FgFilterChip(
-                              label: LocaleKeys.vocabularyAllStyles.tr(),
-                              isSelected: filters.style == null,
-                              onSelected: (_) => notifier.selectStyle(null),
+                            Text(LocaleKeys.vocabularyFilterHelp.tr()),
+                            const SizedBox(height: AppSpacing.md),
+                            Text(
+                              LocaleKeys.vocabularyFilterType.tr(),
+                              style: Theme.of(context).textTheme.titleSmall,
                             ),
-                            for (final style in repository.styles)
-                              FgFilterChip(
-                                label: style,
-                                isSelected: filters.style == style,
-                                onSelected: (_) => notifier.selectStyle(style),
-                              ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Wrap(
+                              spacing: AppSpacing.sm,
+                              runSpacing: AppSpacing.sm,
+                              children: [
+                                for (final kind in VocabularyKind.values)
+                                  FgFilterChip(
+                                    label: vocabularyKindLabel(kind),
+                                    isSelected: filters.kinds.contains(kind),
+                                    onSelected: (_) =>
+                                        notifier.toggleKind(kind),
+                                  ),
+                              ],
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            Text(
+                              LocaleKeys.vocabularyFilterStyle.tr(),
+                              style: Theme.of(context).textTheme.titleSmall,
+                            ),
+                            const SizedBox(height: AppSpacing.sm),
+                            Wrap(
+                              spacing: AppSpacing.sm,
+                              runSpacing: AppSpacing.sm,
+                              children: [
+                                for (final style in repository.styles)
+                                  FgFilterChip(
+                                    label: style,
+                                    isSelected: filters.styles.contains(style),
+                                    onSelected: (_) =>
+                                        notifier.toggleStyle(style),
+                                  ),
+                              ],
+                            ),
                           ],
                         ),
                       ),
-                      if (filters.query.isNotEmpty ||
-                          filters.kind != null ||
-                          filters.style != null)
+                      if (filters.hasSelections)
+                        Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: FgButton(
+                            text: LocaleKeys.vocabularyClearFilters.tr(),
+                            variant: FgButtonVariant.ghost,
+                            onPressed: notifier.clearFilters,
+                          ),
+                        ),
+                      if (filters.query.isNotEmpty)
                         Align(
                           alignment: AlignmentDirectional.centerStart,
                           child: FgButton(

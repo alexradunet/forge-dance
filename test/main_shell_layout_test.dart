@@ -47,10 +47,16 @@ void main() {
       ),
     );
     expect(tester.takeException(), isNull);
-    for (final label in ['Learn', 'Home', 'Workout', 'Profile']) {
+    // Without a localization host, EasyLocalization renders the keys.
+    for (final label in [
+      'navLearn',
+      'navHome',
+      'navPractice',
+      'profileTitle',
+    ]) {
       expect(find.text(label).hitTestable(), findsOneWidget);
     }
-    await tester.tap(find.text('Profile'));
+    await tester.tap(find.text('profileTitle'));
     expect(selected, 4);
   });
 }

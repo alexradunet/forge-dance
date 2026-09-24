@@ -84,7 +84,7 @@ class _PracticePageState extends ConsumerState<PracticePage>
       (module) => module.lessons.any((lesson) => lesson.id == lessonId),
     );
     ref.read(learnViewModelProvider.notifier).selectModule(module.id);
-    await Navigator.of(context).push<void>(
+    await Navigator.of(context, rootNavigator: true).push<void>(
       MaterialPageRoute(
         builder: (context) => LessonPlayerScreen(
           lessonId: lessonId,
@@ -106,6 +106,7 @@ class _PracticePageState extends ConsumerState<PracticePage>
       canPop: !_busy,
       child: FgImmersiveScaffold(
         title: LocaleKeys.practiceTitle.tr(),
+        showBack: false,
         bodyBuilder: (context) => Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(

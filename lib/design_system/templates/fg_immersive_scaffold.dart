@@ -15,11 +15,13 @@ class FgImmersiveScaffold extends StatelessWidget {
     required this.bodyBuilder,
     this.title,
     this.onBack,
+    this.showBack = true,
   });
 
   final WidgetBuilder bodyBuilder;
   final String? title;
   final VoidCallback? onBack;
+  final bool showBack;
 
   @override
   Widget build(BuildContext context) => _ImmersiveTheme(
@@ -36,8 +38,9 @@ class FgImmersiveScaffold extends StatelessWidget {
                     children: [
                       AppHeader(
                         title: title!,
-                        onBack:
-                            onBack ?? () => Navigator.of(context).maybePop(),
+                        onBack: showBack
+                            ? onBack ?? () => Navigator.of(context).maybePop()
+                            : null,
                       ),
                       Expanded(child: bodyBuilder(context)),
                     ],
