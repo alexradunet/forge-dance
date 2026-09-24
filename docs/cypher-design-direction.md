@@ -27,7 +27,7 @@ This updates the visual direction of [the foundation refresh plan](design-system
 | `FgPracticeMeter` | Elapsed time, target progress, accessible status and a wrapping eight-count strip; no decorative animation | Active practice player |
 | `FgReferenceCard` | Stable index number, complete definition and real study status; one native keyboard destination | Vocabulary index |
 | `FgPhoto` / `FgPhotoHeading` | Decorative image with a fallback; labelled thumbnail beside wrapping text, stacking at narrow widths/large text | Home current lesson, workout rounds |
-| `FgPhotoTile` / `FgPhotoTileLayout` | One native destination action per image card; two-up discovery becomes stacked at large text | Home Learn/Programme links |
+| `FgPhotoTile` / `FgPhotoTileLayout` | One native destination action per image card; two-up discovery becomes stacked at large text | Available in Widgetbook; Home now uses compact links |
 | `FgButton` | Crisp rounded default; long labels wrap; native focus/keyboard/disabled/loading behavior; pill/circle still explicit choices | Existing application callers |
 | `FgBackground` | Matte immersive default; decorative gradients opt-in | Existing immersive flows |
 
@@ -36,6 +36,12 @@ Keep feature-owned copy/localization and view-model intents outside the design s
 Home and Learn now use `FgImmersiveScaffold` and its builder context, including under a light host. No appearance preference is changed. Existing profile, curriculum, daily scheduling, safety, unsaved-session protection, and persistence behavior are retained.
 
 Home and the Workout tab use bundled editorial preview photos: the existing ~148 KB hero plus two additional WebPs (~340 KB total). These are explicitly placeholder/inspiration images, not adjacent movement demonstrations or instructor identities; no activity or progress is fabricated. See [asset provenance](../assets/images/CREDITS.md). Learn catalogue thumbnails remain cached network images. No video autoplay or renderer dependency is added to startup.
+
+### Home density refinement
+
+Home retains only the first **Continue Training** card, even when several modules are in progress. Other learning paths remain available through Learn. The oversized **Make it your own** heading and photo tiles are removed; Learn and Programmes remain compact links alongside assessments and the logbook. The hero, actual current-lesson action, progress, recommendations and full disclosures are preserved.
+
+Rendered Home contracts cover multiple in-progress modules at320/1040px with2× text, the retained lesson destination and compact Learn/Programme routes. Core409 tests, browser integration and release-web quality checks pass (55/100/81/100;8.11MiB;zero console errors/failed requests). Current normal/2× collapsed/expanded emulator captures are under ignored `build/home-simplification/`; the disconnected physical phone has not received this update.
 
 ## Motion lab: executable interaction experiment
 

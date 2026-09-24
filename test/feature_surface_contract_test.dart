@@ -902,7 +902,92 @@ void main() {
     }
   }
 
-  testWidgets('Home photo destinations retain real routes and offline assets', (
+  for (final width in [320.0, 1040.0]) {
+    testWidgets(
+      'Home keeps only the first continue card with multiple active modules at $width',
+      (tester) async {
+        await tester.binding.setSurfaceSize(Size(width, 900));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        final module = allModules.first;
+        final lesson = module.lessons.first;
+        final otherLesson = allModules[1].lessons.first;
+        const home = HomePage();
+        final router = GoRouter(
+          initialLocation: Routes.home,
+          routes: [
+            GoRoute(path: Routes.home, builder: (_, _) => home),
+            GoRoute(
+              path: LessonDestination(module.id, lesson.id).location,
+              builder: (context, _) => LessonPlayerScreen(
+                lessonId: lesson.id,
+                onBack: () => context.pop(),
+              ),
+            ),
+          ],
+        );
+        addTearDown(router.dispose);
+        await _pumpFeature(
+          tester,
+          home,
+          router: router,
+          textScale: 2,
+          initialPreferences: _lessonPreferences([
+            LessonProgress(
+              lessonId: lesson.id,
+              status: LessonStatus.inProgress,
+            ),
+            LessonProgress(
+              lessonId: otherLesson.id,
+              status: LessonStatus.inProgress,
+            ),
+          ]),
+          beforePump: (container) async {
+            expect(
+              container.read(learnViewModelProvider).value!.inProgressModules,
+              hasLength(2),
+            );
+          },
+        );
+        final continueLesson = find.widgetWithText(
+          FgButton,
+          LocaleKeys.continueLesson.tr(),
+        );
+        // Lay out the slivers beyond the large-text hero before inspecting them.
+        await _show(tester, continueLesson);
+        await _show(tester, find.byKey(const ValueKey('home-programmes-link')));
+        expect(
+          find.text(
+            LocaleKeys.continueTraining.tr().toUpperCase(),
+            skipOffstage: false,
+          ),
+          findsOneWidget,
+        );
+        expect(find.byType(FgRoundPanel, skipOffstage: false), findsOneWidget);
+        expect(find.byType(FgPhotoTile, skipOffstage: false), findsNothing);
+        expect(
+          find.text(
+            LocaleKeys.photoDiscoverHeading.tr().toUpperCase(),
+            skipOffstage: false,
+          ),
+          findsNothing,
+        );
+        expect(find.text(otherLesson.title, skipOffstage: false), findsNothing);
+        await _show(tester, continueLesson, delta: -250);
+        _expectDarkScreen(tester, home);
+        await tester.runAsync(() => tester.tap(continueLesson));
+        await tester.pumpAndSettle();
+        expect(
+          tester
+              .widget<LessonPlayerScreen>(find.byType(LessonPlayerScreen))
+              .lessonId,
+          lesson.id,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  testWidgets('Home compact destinations retain real routes and offline hero', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(390, 844));
@@ -937,20 +1022,18 @@ void main() {
     expect(find.byType(PracticePage), findsOneWidget);
     router.go(Routes.home);
     await tester.pumpAndSettle();
-    final learn = find.byKey(const ValueKey('home-learn-photo'));
+    final learn = find.byKey(const ValueKey('home-learn-link'));
     await tester.scrollUntilVisible(learn, 250);
     await tester.pumpAndSettle();
-    expect(
-      tester.widget<FgPhotoTile>(learn).image,
-      const AssetImage(Assets.studioDancerPreview),
-    );
+    expect(tester.widget<FgButton>(learn).text, LocaleKeys.exploreTitle.tr());
+    expect(find.byType(FgPhotoTile), findsNothing);
     await tester.tap(learn);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     expect(find.byType(ExplorePage), findsOneWidget);
     router.go(Routes.home);
     await tester.pumpAndSettle();
-    final programmes = find.byKey(const ValueKey('home-programmes-photo'));
+    final programmes = find.byKey(const ValueKey('home-programmes-link'));
     await tester.scrollUntilVisible(programmes, 250);
     await tester.pumpAndSettle();
     await tester.tap(programmes);

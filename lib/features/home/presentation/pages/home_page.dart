@@ -59,10 +59,6 @@ class HomePage extends ConsumerWidget {
     String? profileName,
     UserStats stats,
   ) {
-    // The active module already has the prominent continue card below.
-    final otherInProgress = state.inProgressModules
-        .where((module) => module.id != state.activeModule.id)
-        .toList();
     return CustomScrollView(
       physics: const BouncingScrollPhysics(),
       slivers: [
@@ -98,47 +94,7 @@ class HomePage extends ConsumerWidget {
             child: _buildDailySessionCard(context, ref, state),
           ),
         ),
-        SliverPadding(
-          padding: AppSpacing.allLG,
-          sliver: SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                FgSectionHeading(title: LocaleKeys.photoDiscoverHeading.tr()),
-                const SizedBox(height: AppSpacing.lg),
-                FgPhotoTileLayout(
-                  children: [
-                    FgPhotoTile(
-                      key: const ValueKey('home-learn-photo'),
-                      image: const AssetImage(Assets.studioDancerPreview),
-                      label: LocaleKeys.exploreTitle.tr(),
-                      title: LocaleKeys.photoLearnTitle.tr(),
-                      onTap: () => MainTabDestination.explore.go(context),
-                    ),
-                    FgPhotoTile(
-                      key: const ValueKey('home-programmes-photo'),
-                      image: const AssetImage(Assets.danceFloorPreview),
-                      label: LocaleKeys.forgeProgrammes.tr(),
-                      title: LocaleKeys.photoProgrammesTitle.tr(),
-                      onTap: () => context.push(Routes.programmes),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
         SliverToBoxAdapter(child: _buildProgressSection(context, stats)),
-        if (otherInProgress.isNotEmpty)
-          SliverToBoxAdapter(
-            child: _buildModuleSection(
-              context,
-              ref,
-              state,
-              LocaleKeys.continueTraining.tr(),
-              otherInProgress,
-            ),
-          ),
         if (state.recommendedModules.isNotEmpty)
           SliverToBoxAdapter(
             child: _buildModuleSection(
@@ -159,6 +115,20 @@ class HomePage extends ConsumerWidget {
                   spacing: AppSpacing.sm,
                   runSpacing: AppSpacing.sm,
                   children: [
+                    FgButton(
+                      key: const ValueKey('home-learn-link'),
+                      text: LocaleKeys.exploreTitle.tr(),
+                      icon: const Icon(Icons.school_outlined),
+                      variant: FgButtonVariant.ghost,
+                      onPressed: () => MainTabDestination.explore.go(context),
+                    ),
+                    FgButton(
+                      key: const ValueKey('home-programmes-link'),
+                      text: LocaleKeys.forgeProgrammes.tr(),
+                      icon: const Icon(Icons.route_outlined),
+                      variant: FgButtonVariant.ghost,
+                      onPressed: () => context.push(Routes.programmes),
+                    ),
                     FgButton(
                       text: LocaleKeys.forgeAssessments.tr(),
                       variant: FgButtonVariant.ghost,
