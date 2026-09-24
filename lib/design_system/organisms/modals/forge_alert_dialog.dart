@@ -4,6 +4,7 @@ import '../../atoms/buttons/fg_button.dart';
 import '../../theme/forge_theme_extensions.dart';
 import '../../tokens/app_sizes.dart';
 import '../../tokens/app_spacing.dart';
+import '../../templates/fg_immersive_scaffold.dart';
 
 enum ForgeAlertTone { primary, destructive, success, reward }
 
@@ -45,7 +46,7 @@ class ForgeAlertDialog extends StatelessWidget {
     bool isPrimaryDestructive = false,
     bool barrierDismissible = true,
   }) {
-    return showDialog<bool>(
+    return FgImmersiveScaffold.showModal<bool>(
       context: context,
       barrierDismissible: barrierDismissible,
       builder: (context) => ForgeAlertDialog(
@@ -75,6 +76,7 @@ class ForgeAlertDialog extends StatelessWidget {
     };
 
     return AlertDialog(
+      scrollable: true,
       semanticLabel: title,
       icon: icon == null
           ? null

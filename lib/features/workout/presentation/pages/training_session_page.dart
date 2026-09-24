@@ -32,9 +32,8 @@ class TrainingSessionPage extends ConsumerStatefulWidget {
       _TrainingSessionPageState();
 }
 
-class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
-  static const _wideMinWidth = 760.0;
-  static const _expandedMediaMaxHeight = 320.0;
+class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage>
+    with WidgetsBindingObserver {
   int _currentPage = 0;
   bool _isTimerRunning = false;
   int _timeLeft = 0;
@@ -43,51 +42,88 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
   final Set<int> _completedExercises = {};
   bool _completionHandled = false;
   bool _xpAwarded = false;
-  bool _mediaCollapsed = false;
+  bool _saving = false;
+  bool _saveFailed = false;
+  bool _allowExit = false;
+  bool _confirmingExit = false;
   late final ScrollController _contentScrollController;
 
   @override
   void initState() {
     super.initState();
     _currentPage = widget.startImmediately ? 1 : 0;
-    _contentScrollController = ScrollController()..addListener(_handleScroll);
+    _contentScrollController = ScrollController();
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
     _timer?.cancel();
-    _contentScrollController
-      ..removeListener(_handleScroll)
-      ..dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    _contentScrollController.dispose();
     super.dispose();
   }
 
-  void _handleScroll() {
-    if (!_contentScrollController.hasClients || _mediaCollapsed) return;
-    if (_contentScrollController.offset > 24) {
-      setState(() => _mediaCollapsed = true);
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) _stopTimer();
+  }
+
+  Future<void> _close(BuildContext context) async {
+    if (_saving || _confirmingExit) return;
+    _clearFeedback();
+    final wod = ref.read(workoutViewModelProvider).value?.wod;
+    if (!_isIntro && (wod == null || !_isComplete(wod) || _saveFailed)) {
+      _stopTimer();
+      _confirmingExit = true;
+      final leave = await FgImmersiveScaffold.showModal<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          scrollable: true,
+          title: Text(LocaleKeys.workoutLeaveTitle.tr()),
+          content: Text(LocaleKeys.workoutLeaveBody.tr()),
+          actions: [
+            FgButton(
+              text: LocaleKeys.practiceCancel.tr(),
+              variant: FgButtonVariant.ghost,
+              onPressed: () => Navigator.pop(context, false),
+            ),
+            FgButton(
+              text: LocaleKeys.practiceDiscard.tr(),
+              variant: FgButtonVariant.destructive,
+              onPressed: () => Navigator.pop(context, true),
+            ),
+          ],
+        ),
+      );
+      _confirmingExit = false;
+      if (leave != true || !mounted) return;
+      ref.read(workoutViewModelProvider.notifier).abandonCompletion();
     }
+    setState(() => _allowExit = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) (widget.onClose ?? () => Navigator.of(context).pop())();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final workoutState = ref.watch(workoutViewModelProvider);
     final state = workoutState.value;
-
     if (state == null) {
-      return Scaffold(
-        body: FgBackground(
-          child: workoutState.hasError
-              ? FgEmpty(
-                  icon: Icons.error_outline,
-                  title: LocaleKeys.unexpectedErrorOccurred.tr(),
-                  tone: FgEmptyTone.error,
-                )
-              : const Center(child: FgSpinner()),
-        ),
+      return FgImmersiveScaffold(
+        title: LocaleKeys.workoutOverview.tr(),
+        bodyBuilder: (context) => workoutState.hasError
+            ? FgEmpty(
+                icon: Icons.error_outline,
+                title: LocaleKeys.unexpectedErrorOccurred.tr(),
+                tone: FgEmptyTone.error,
+                actionLabel: LocaleKeys.practiceRetry.tr(),
+                onAction: () => ref.invalidate(workoutViewModelProvider),
+              )
+            : const Center(child: FgSpinner()),
       );
     }
-
     final wod = state.wod;
     if (_isIntro) {
       return WorkoutOverview(
@@ -97,261 +133,146 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
       );
     }
     _initializeTimerIfNeeded(wod);
-    final isComplete = _isComplete(wod);
-
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: FgBackground(
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final isWide = constraints.maxWidth >= _wideMinWidth;
-              return Column(
-                children: [
-                  AppHeader(
-                    compact: true,
-                    title: wod.title,
-                    subtitle: isComplete
-                        ? LocaleKeys.sessionComplete.tr()
-                        : LocaleKeys.exerciseOf.tr(
-                            args: [
-                              '${_activeExerciseIndex + 1}',
-                              '${wod.exercises.length}',
-                            ],
-                          ),
-                    onBack: widget.onClose ?? () => Navigator.of(context).pop(),
-                  ),
-                  Expanded(
-                    child: isWide
-                        ? _WideWorkoutLayout(
-                            media: _buildMediaPane(
-                              wod,
-                              expanded: true,
-                              minHeight: 160,
-                              maxHeight: _expandedMediaMaxHeight,
+    final complete = _isComplete(wod);
+    return PopScope(
+      canPop: _allowExit,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _close(context);
+      },
+      child: FgImmersiveScaffold(
+        bodyBuilder: (context) => FgReadingBody(
+          child: Column(
+            children: [
+              Expanded(
+                child: ListView(
+                  key: const ValueKey('workout-content-scroll'),
+                  controller: _contentScrollController,
+                  padding: AppSpacing.allLG,
+                  children: [
+                    AppHeader(
+                      compact: true,
+                      title: wod.title,
+                      onBack: _saving ? null : () => _close(context),
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    if (complete) ...[
+                      if (_saving) ...[
+                        const Center(child: FgSpinner()),
+                        Text(LocaleKeys.workoutSaving.tr()),
+                      ] else if (_saveFailed)
+                        FgEmpty(
+                          icon: Icons.error_outline,
+                          title: LocaleKeys.workoutSaveFailed.tr(),
+                          tone: FgEmptyTone.error,
+                          actionLabel: LocaleKeys.practiceRetry.tr(),
+                          onAction: _handleCompletion,
+                        )
+                      else
+                        _WorkoutComplete(
+                          wod: wod,
+                          xpAwarded: _xpAwarded,
+                          streak:
+                              ref.watch(userStatsProvider).value?.streakCount ??
+                              0,
+                          projectionHealth: state.projectionHealth,
+                        ),
+                    ] else ...[
+                      FgRoundPanel(
+                        active: true,
+                        label: LocaleKeys.exerciseOf.tr(
+                          args: [
+                            '${_activeExerciseIndex + 1}',
+                            '${wod.exercises.length}',
+                          ],
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              wod.exercises[_activeExerciseIndex].name,
+                              style: Theme.of(context).textTheme.headlineMedium,
                             ),
-                            content: _buildContentPanel(
-                              wod,
-                              projectionHealth: state.projectionHealth,
-                              isWide: true,
+                            const SizedBox(height: AppSpacing.lg),
+                            FgTimerControl(
+                              remaining: _timeLeft,
+                              total:
+                                  wod.exercises[_activeExerciseIndex].seconds,
+                              running: _isTimerRunning,
+                              actionLabel:
+                                  (_timeLeft == 0
+                                          ? LocaleKeys.timerComplete
+                                          : _isTimerRunning
+                                          ? LocaleKeys.pauseTimer
+                                          : LocaleKeys.startTimer)
+                                      .tr(),
+                              semanticLabel: LocaleKeys
+                                  .workoutTimerToggleSemantic
+                                  .tr(args: ['$_timeLeft']),
+                              onToggle: _toggleTimer,
                             ),
-                          )
-                        : _NarrowWorkoutLayout(
-                            mediaCollapsed: _mediaCollapsed,
-                            media: _buildMediaPane(
-                              wod,
-                              expanded: true,
-                              minHeight: 104,
-                              maxHeight: (constraints.maxHeight * 0.30).clamp(
-                                204.0,
-                                _expandedMediaMaxHeight,
+                            const SizedBox(height: AppSpacing.lg),
+                            Text(LocaleKeys.workoutWrittenCues.tr()),
+                            const SizedBox(height: AppSpacing.md),
+                            Text(
+                              (_isLocked(wod)
+                                      ? LocaleKeys.exerciseTimerInstruction
+                                      : _skippedExercises.contains(
+                                          _activeExerciseIndex,
+                                        )
+                                      ? LocaleKeys.exerciseSkippedReady
+                                      : LocaleKeys.exerciseTimerComplete)
+                                  .tr(),
+                            ),
+                            const SizedBox(height: AppSpacing.lg),
+                            FgButton(
+                              text: LocaleKeys.skip.tr(),
+                              variant: FgButtonVariant.secondary,
+                              onPressed: _isLocked(wod)
+                                  ? () => _skipCurrentExercise(wod)
+                                  : null,
+                              semanticLabel: LocaleKeys.skipExerciseSemantic.tr(
+                                args: [
+                                  '${_activeExerciseIndex + 1}',
+                                  '${wod.exercises.length}',
+                                ],
                               ),
                             ),
-                            mediaDock: _buildMediaDock(wod),
-                            content: _buildContentPanel(
-                              wod,
-                              projectionHealth: state.projectionHealth,
-                              isWide: false,
-                            ),
-                          ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMediaPane(
-    Workout wod, {
-    required bool expanded,
-    required double minHeight,
-    required double maxHeight,
-  }) {
-    final motion = context.forgeMotion;
-    return AnimatedContainer(
-      key: const ValueKey('workout-media-shell'),
-      duration: motion.standard,
-      curve: motion.enterCurve,
-      constraints: BoxConstraints(minHeight: minHeight, maxHeight: maxHeight),
-      child: GestureDetector(
-        key: const ValueKey('workout-media-swipe-zone'),
-        behavior: HitTestBehavior.opaque,
-        onHorizontalDragEnd: (details) {
-          final velocity = details.primaryVelocity ?? 0;
-          if (velocity < 0) {
-            _nextPage(wod);
-          } else if (velocity > 0) {
-            _previousPage();
-          }
-        },
-        child: FgCard(
-          immersive: true,
-          padding: EdgeInsets.zero,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              _WorkoutMediaVisual(imageUrl: wod.imageUrl),
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [
-                      Colors.black.withValues(alpha: 0.08),
-                      Colors.black.withValues(alpha: 0.48),
+                          ],
+                        ),
+                      ),
                     ],
-                  ),
+                  ],
                 ),
               ),
-              if (_isExercise(wod)) _buildTimerOverlay(wod),
+              SafeArea(
+                top: false,
+                minimum: AppSpacing.allLG,
+                child: _NavigationControls(
+                  currentPage: _currentPage,
+                  totalPages: _totalPageCount(wod),
+                  isComplete: complete,
+                  nextLocked: _isLocked(wod),
+                  completing: _saving,
+                  onPrevious: _saving || complete
+                      ? null
+                      : () {
+                          if (_currentPage == 1 && widget.startImmediately) {
+                            _close(context);
+                          } else {
+                            _previousPage();
+                          }
+                        },
+                  onNext: _saving || _saveFailed
+                      ? null
+                      : complete
+                      ? () => _close(context)
+                      : () => _nextPage(wod),
+                ),
+              ),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildTimerOverlay(Workout wod) {
-    return Positioned(
-      left: AppSpacing.lg,
-      right: AppSpacing.lg,
-      bottom: AppSpacing.lg,
-      child: FgTimerControl(
-        remaining: _timeLeft,
-        total: wod.exercises[_activeExerciseIndex].seconds,
-        running: _isTimerRunning,
-        actionLabel:
-            (_timeLeft == 0
-                    ? LocaleKeys.timerComplete
-                    : _isTimerRunning
-                    ? LocaleKeys.pauseTimer
-                    : LocaleKeys.startTimer)
-                .tr(),
-        semanticLabel: LocaleKeys.workoutTimerToggleSemantic.tr(
-          args: ['$_timeLeft'],
-        ),
-        onToggle: _toggleTimer,
-      ),
-    );
-  }
-
-  Widget _buildMediaDock(Workout wod) {
-    final isExercise = _isExercise(wod);
-    final subtitle = isExercise
-        ? LocaleKeys.exerciseOf.tr(
-            args: ['${_activeExerciseIndex + 1}', '${wod.exercises.length}'],
-          )
-        : _isComplete(wod)
-        ? LocaleKeys.sessionComplete.tr()
-        : LocaleKeys.workoutOverview.tr();
-
-    return FgMediaDock(
-      key: const ValueKey('workout-media-dock'),
-      thumbnail: _WorkoutMediaVisual(imageUrl: wod.imageUrl),
-      title: _mediaTitle(wod),
-      subtitle: subtitle,
-      onExpand: () => setState(() => _mediaCollapsed = false),
-      expandSemanticLabel: LocaleKeys.expandDemonstrationSemantic.tr(),
-      action: isExercise
-          ? FgButton(
-              text: '${_timeLeft}s',
-              semanticLabel: LocaleKeys.workoutTimerToggleSemantic.tr(
-                args: ['$_timeLeft'],
-              ),
-              shape: FgButtonShape.pill,
-              size: FgButtonSize.sm,
-              variant: _isTimerRunning || !_isLocked(wod)
-                  ? FgButtonVariant.primary
-                  : FgButtonVariant.tertiary,
-              onPressed: _toggleTimer,
-            )
-          : null,
-    );
-  }
-
-  Widget _buildContentPanel(
-    Workout wod, {
-    required ProjectionHealth projectionHealth,
-    required bool isWide,
-  }) {
-    final content = AnimatedSwitcher(
-      duration: context.forgeMotion.standard,
-      switchInCurve: context.forgeMotion.enterCurve,
-      switchOutCurve: context.forgeMotion.exitCurve,
-      transitionBuilder: (child, animation) {
-        if (MediaQuery.disableAnimationsOf(context)) return child;
-        if (isWide) return FadeTransition(opacity: animation, child: child);
-        return SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0.04, 0),
-            end: Offset.zero,
-          ).animate(animation),
-          child: FadeTransition(opacity: animation, child: child),
-        );
-      },
-      child: KeyedSubtree(
-        key: ValueKey(_currentPage),
-        child: _buildContentForPage(wod, projectionHealth),
-      ),
-    );
-
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            key: const ValueKey('workout-content-scroll'),
-            controller: isWide ? null : _contentScrollController,
-            padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-            child: SizedBox(width: double.infinity, child: content),
-          ),
-        ),
-        SafeArea(
-          top: false,
-          minimum: EdgeInsets.fromLTRB(
-            0,
-            0,
-            0,
-            isWide ? AppSpacing.xxl : AppSpacing.sm,
-          ),
-          child: _NavigationControls(
-            currentPage: _currentPage,
-            totalPages: _totalPageCount(wod),
-            isComplete: _isComplete(wod),
-            nextLocked: _isLocked(wod),
-            completing: false,
-            onPrevious: _currentPage == 0 ? null : _previousPage,
-            onNext: _isComplete(wod)
-                ? widget.onClose ?? () => Navigator.of(context).pop()
-                : () => _nextPage(wod),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildContentForPage(Workout wod, ProjectionHealth projectionHealth) {
-    if (_isComplete(wod)) {
-      final streak = ref.watch(userStatsProvider).value?.streakCount ?? 0;
-      return _WorkoutComplete(
-        wod: wod,
-        xpAwarded: _xpAwarded,
-        streak: streak,
-        projectionHealth: projectionHealth,
-      );
-    }
-    final exercise = wod.exercises[_activeExerciseIndex];
-    return _ExerciseContent(
-      exercise: exercise,
-      exerciseNumber: _activeExerciseIndex + 1,
-      exerciseCount: wod.exercises.length,
-      isTimerComplete: !_isLocked(wod),
-      wasSkipped: _skippedExercises.contains(_activeExerciseIndex),
-      onSkip: () => _skipCurrentExercise(wod),
     );
   }
 
@@ -385,7 +306,15 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
     }
   }
 
+  void _clearFeedback() {
+    final messenger = ScaffoldMessenger.of(context);
+    messenger.clearSnackBars();
+    messenger.removeCurrentSnackBar();
+  }
+
   void _previousPage() {
+    if (_confirmingExit || _saving) return;
+    _clearFeedback();
     if (_currentPage <= 0) return;
     HapticFeedback.lightImpact();
     _timer?.cancel();
@@ -393,7 +322,6 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
     setState(() {
       _currentPage--;
       _timeLeft = 0;
-      _mediaCollapsed = false;
       _isTimerRunning = false;
     });
     if (_isIntro && widget.startImmediately) {
@@ -404,6 +332,7 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
   }
 
   void _nextPage(Workout wod) {
+    if (_confirmingExit || _saving) return;
     if (_isLocked(wod)) {
       _showLockedFeedback();
       return;
@@ -412,6 +341,8 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
   }
 
   void _goToPage(int page, Workout wod) {
+    if (_confirmingExit || _saving) return;
+    _clearFeedback();
     if (page <= _currentPage) {
       while (_currentPage > page) {
         _previousPage();
@@ -428,7 +359,6 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
     setState(() {
       _currentPage = page.clamp(0, _totalPageCount(wod) - 1);
       _timeLeft = 0;
-      _mediaCollapsed = false;
       _isTimerRunning = false;
     });
     _initializeTimerIfNeeded(wod);
@@ -439,6 +369,9 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
 
   void _skipCurrentExercise(Workout wod, {int? expectedPage}) {
     if (!mounted ||
+        _confirmingExit ||
+        _saving ||
+        _allowExit ||
         !_isExercise(wod) ||
         (expectedPage != null && expectedPage != _currentPage)) {
       return;
@@ -478,14 +411,25 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
   }
 
   Future<void> _handleCompletion() async {
-    if (_completionHandled) return;
-    _completionHandled = true;
-
-    final awarded = await ref
-        .read(workoutViewModelProvider.notifier)
-        .completeWod();
-    if (!mounted) return;
-    setState(() => _xpAwarded = awarded);
+    if (_saving || (_completionHandled && !_saveFailed)) return;
+    setState(() {
+      _saving = true;
+      _saveFailed = false;
+    });
+    try {
+      final awarded = await ref
+          .read(workoutViewModelProvider.notifier)
+          .completeWod();
+      if (!mounted) return;
+      setState(() {
+        _completionHandled = true;
+        _xpAwarded = awarded;
+      });
+    } catch (_) {
+      if (mounted) setState(() => _saveFailed = true);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   int _totalPageCount(Workout wod) => wod.exercises.length + 2;
@@ -500,165 +444,6 @@ class _TrainingSessionPageState extends ConsumerState<TrainingSessionPage> {
       _timeLeft > 0 &&
       !_completedExercises.contains(_activeExerciseIndex) &&
       !_skippedExercises.contains(_activeExerciseIndex);
-
-  String _mediaTitle(Workout wod) {
-    if (_isIntro) return wod.title;
-    if (_isComplete(wod)) return LocaleKeys.sessionComplete.tr();
-    return wod.exercises[_activeExerciseIndex].name;
-  }
-}
-
-class _WideWorkoutLayout extends StatelessWidget {
-  const _WideWorkoutLayout({required this.media, required this.content});
-
-  final Widget media;
-  final Widget content;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppSpacing.xxl,
-        0,
-        AppSpacing.xxl,
-        AppSpacing.xxl,
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(child: Center(child: media)),
-          const SizedBox(width: AppSpacing.xxl),
-          Expanded(child: content),
-        ],
-      ),
-    );
-  }
-}
-
-class _NarrowWorkoutLayout extends StatelessWidget {
-  const _NarrowWorkoutLayout({
-    required this.mediaCollapsed,
-    required this.media,
-    required this.mediaDock,
-    required this.content,
-  });
-
-  final bool mediaCollapsed;
-  final Widget media;
-  final Widget mediaDock;
-  final Widget content;
-
-  @override
-  Widget build(BuildContext context) {
-    final motion = context.forgeMotion;
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-      child: Column(
-        children: [
-          AnimatedSwitcher(
-            duration: motion.standard,
-            switchInCurve: motion.enterCurve,
-            switchOutCurve: motion.exitCurve,
-            child: mediaCollapsed ? mediaDock : media,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Expanded(child: content),
-        ],
-      ),
-    );
-  }
-}
-
-class _WorkoutMediaVisual extends StatelessWidget {
-  const _WorkoutMediaVisual({required this.imageUrl});
-
-  final String imageUrl;
-
-  @override
-  Widget build(BuildContext context) {
-    return FgImage(
-      imageUrl: imageUrl,
-      fit: BoxFit.cover,
-      placeholder: const _MediaFallbackIcon(),
-      errorWidget: const _MediaFallbackIcon(),
-    );
-  }
-}
-
-class _MediaFallbackIcon extends StatelessWidget {
-  const _MediaFallbackIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: FittedBox(
-        fit: BoxFit.contain,
-        child: Icon(
-          Icons.fitness_center_rounded,
-          size: 180,
-          color: Theme.of(context).forgeColors.onImmersive
-              .withValues(alpha: 0.72),
-        ),
-      ),
-    );
-  }
-}
-
-class _ExerciseContent extends StatelessWidget {
-  const _ExerciseContent({
-    required this.exercise,
-    required this.exerciseNumber,
-    required this.exerciseCount,
-    required this.isTimerComplete,
-    required this.wasSkipped,
-    required this.onSkip,
-  });
-
-  final WorkoutExercise exercise;
-  final int exerciseNumber;
-  final int exerciseCount;
-  final bool isTimerComplete;
-  final bool wasSkipped;
-  final VoidCallback onSkip;
-
-  @override
-  Widget build(BuildContext context) {
-    return FgInstructionCard(
-      eyebrow: LocaleKeys.exerciseOf.tr(
-        args: ['$exerciseNumber', '$exerciseCount'],
-      ),
-      icon: isTimerComplete
-          ? Icons.check_circle_outline_rounded
-          : Icons.timer_outlined,
-      title: exercise.name,
-      description: isTimerComplete
-          ? (wasSkipped
-                ? LocaleKeys.exerciseSkippedReady.tr()
-                : LocaleKeys.exerciseTimerComplete.tr())
-          : LocaleKeys.exerciseTimerInstruction.tr(),
-      details: Row(
-        children: [
-          Expanded(
-            child: Text(
-              LocaleKeys.secondsCount.tr(args: ['${exercise.seconds}']),
-              style: AppTypography.bodySmall.copyWith(
-                color: context.forgeMutedForeground,
-              ),
-            ),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          FgButton(
-            text: LocaleKeys.skip.tr(),
-            variant: FgButtonVariant.secondary,
-            onPressed: isTimerComplete ? null : onSkip,
-            semanticLabel: LocaleKeys.skipExerciseSemantic.tr(
-              args: ['$exerciseNumber', '$exerciseCount'],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _WorkoutComplete extends StatelessWidget {

@@ -31,6 +31,7 @@ class ProfileMenuItem extends StatelessWidget {
 
     return FgCard(
       variant: FgCardVariant.outlined,
+      shape: FgCardShape.editorial,
       padding: EdgeInsets.zero,
       onTap: onTap,
       child: ListTile(
@@ -39,10 +40,8 @@ class ProfileMenuItem extends StatelessWidget {
         leading: Icon(icon, size: AppSizes.iconLg, color: foreground),
         title: Text(
           label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: foreground,
-                fontWeight: FontWeight.w500,
-              ),
+          style: Theme.of(context).textTheme.bodyMedium
+              ?.copyWith(color: foreground, fontWeight: FontWeight.w500),
         ),
         trailing: showArrow
             ? Icon(
@@ -73,13 +72,12 @@ class ProfileMenuSection extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-          child: FgLabel(text: title),
+          child: FgSectionHeading(title: title),
         ),
         const SizedBox(height: AppSpacing.md),
         for (var index = 0; index < items.length; index++) ...[
           items[index],
-          if (index < items.length - 1)
-            const SizedBox(height: AppSpacing.sm),
+          if (index < items.length - 1) const SizedBox(height: AppSpacing.sm),
         ],
       ],
     );

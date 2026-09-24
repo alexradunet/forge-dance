@@ -2,15 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../../../generated/locale_keys.g.dart';
+import '../../design_system.dart';
 
-import '../../tokens/app_colors.dart';
-import '../../molecules/navigation/fg_app_nav_button.dart';
-import '../../atoms/visuals/fg_glass_container.dart';
-
+/// Content-sized navigation: labels wrap at large text instead of being clipped.
 class AppBottomNav extends StatelessWidget {
   final int currentIndex;
-  final Function(int) onTabChange;
-
+  final ValueChanged<int> onTabChange;
   const AppBottomNav({
     super.key,
     required this.currentIndex,
@@ -18,52 +15,43 @@ class AppBottomNav extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.fromLTRB(
-        24,
-        8,
-        24,
-        16 + MediaQuery.of(context).padding.bottom,
-      ),
-      child: FgGlassContainer(
-        borderRadius: 24,
-        blurSigma: 20,
-        color: AppColors.surfaceDark,
-        opacity: 0.95,
-        borderWidth: 1,
-        borderColor: Colors.white.withOpacity(0.1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 4),
-          ),
-        ],
-        child: Wrap(
-          alignment: WrapAlignment.spaceEvenly,
-          children: [
-            _buildBatItem(
-              0,
-              Icons.menu_book_outlined,
-              LocaleKeys.vocabularyTitle.tr(),
+  Widget build(BuildContext context) => Theme(
+    data: MediaQuery.highContrastOf(context)
+        ? AppThemes.highContrastDark
+        : AppThemes.dark,
+    child: Builder(
+      builder: (context) => Material(
+        color: Theme.of(context).colorScheme.surface,
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: AppSpacing.allSM,
+            child: Wrap(
+              alignment: WrapAlignment.spaceEvenly,
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              children: [
+                _item(
+                  0,
+                  Icons.menu_book_outlined,
+                  LocaleKeys.vocabularyTitle.tr(),
+                ),
+                _item(1, Icons.school_outlined, 'Learn'),
+                _item(2, Icons.home_outlined, 'Home'),
+                _item(3, Icons.fitness_center, 'Workout'),
+                _item(4, Icons.person_outline, 'Profile'),
+              ],
             ),
-            _buildBatItem(1, Icons.school_outlined, 'Learn'),
-            _buildBatItem(2, Icons.home_outlined, 'Home'),
-            _buildBatItem(3, Icons.fitness_center, 'Workout'),
-            _buildBatItem(4, Icons.person_outline, 'Profile'),
-          ],
+          ),
         ),
       ),
-    );
-  }
+    ),
+  );
 
-  Widget _buildBatItem(int index, IconData icon, String label) {
-    return FgNavButton(
-      icon: icon,
-      label: label,
-      isActive: currentIndex == index,
-      onTap: () => onTabChange(index),
-    );
-  }
+  Widget _item(int index, IconData icon, String label) => FgNavButton(
+    icon: icon,
+    label: label,
+    isActive: currentIndex == index,
+    onTap: () => onTabChange(index),
+  );
 }

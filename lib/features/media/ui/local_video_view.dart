@@ -3,12 +3,11 @@ import 'dart:async';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:media_kit/media_kit.dart';
-import 'package:media_kit_video/media_kit_video.dart';
 
 import '../../../design_system/design_system.dart';
 import '../../../generated/locale_keys.g.dart';
 import '../repository/media_repository.dart';
+import 'local_video_playback.dart';
 
 /// The only perspective is the one actually recorded. Mirroring never invents
 /// an unavailable front/back camera. Phrase boundaries are local video seconds.
@@ -24,8 +23,8 @@ class LocalVideoView extends ConsumerStatefulWidget {
 
 class _LocalVideoViewState extends ConsumerState<LocalVideoView>
     with WidgetsBindingObserver {
-  late final Player _player;
-  late final VideoController _video;
+  LocalVideoPlayback? _playback;
+  LocalVideoPlayback get _player => _playback!;
   final _subscriptions = <StreamSubscription<dynamic>>[];
   String? _title;
   String? _error;
@@ -46,10 +45,12 @@ class _LocalVideoViewState extends ConsumerState<LocalVideoView>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _player = Player();
-    _video = VideoController(_player);
+    unawaited(_load());
+  }
+
+  void _subscribe() {
     _subscriptions.add(
-      _player.stream.error.listen((_) {
+      _player.errors.listen((_) {
         if (mounted) {
           setState(() {
             _error = LocaleKeys.mediaUnsupported.tr();
@@ -59,7 +60,7 @@ class _LocalVideoViewState extends ConsumerState<LocalVideoView>
       }),
     );
     _subscriptions.add(
-      _player.stream.duration.listen((duration) {
+      _player.duration.listen((duration) {
         if (!mounted || duration.inMilliseconds <= 0) return;
         setState(() {
           _duration = duration.inMilliseconds / 1000;
@@ -68,12 +69,12 @@ class _LocalVideoViewState extends ConsumerState<LocalVideoView>
       }),
     );
     _subscriptions.add(
-      _player.stream.playing.listen((playing) {
+      _player.playing.listen((playing) {
         if (mounted) setState(() => _playing = playing);
       }),
     );
     _subscriptions.add(
-      _player.stream.position.listen((position) {
+      _player.position.listen((position) {
         if (!mounted) return;
         final seconds = position.inMilliseconds / 1000;
         setState(() => _position = seconds);
@@ -83,11 +84,10 @@ class _LocalVideoViewState extends ConsumerState<LocalVideoView>
       }),
     );
     _subscriptions.add(
-      _player.stream.completed.listen((completed) {
+      _player.completed.listen((completed) {
         if (completed && _loop && !_seeking) unawaited(_repeat());
       }),
     );
-    unawaited(_load());
   }
 
   Future<void> _load() async {
@@ -97,9 +97,9 @@ class _LocalVideoViewState extends ConsumerState<LocalVideoView>
       if (item == null) throw StateError('missing');
       final bytes = await repository.readBytes(item.id);
       if (!mounted) return;
-      final media = await Media.memory(bytes, type: item.mimeType);
-      if (!mounted) return;
-      await _player.open(media, play: false);
+      _playback = ref.read(localVideoPlaybackFactoryProvider)();
+      _subscribe();
+      await _player.open(bytes, item.mimeType);
       _requestedPlay = _foreground && (widget.playing ?? false);
       if (mounted && _requestedPlay) await _player.play();
       if (mounted) {
@@ -148,7 +148,7 @@ class _LocalVideoViewState extends ConsumerState<LocalVideoView>
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     _foreground = state == AppLifecycleState.resumed;
-    if (state != AppLifecycleState.resumed) {
+    if (state != AppLifecycleState.resumed && _playback != null) {
       _requestedPlay = false;
       unawaited(_command(_player.pause));
     }
@@ -160,29 +160,33 @@ class _LocalVideoViewState extends ConsumerState<LocalVideoView>
     for (final subscription in _subscriptions) {
       unawaited(subscription.cancel());
     }
-    unawaited(_player.dispose());
+    if (_playback != null) unawaited(_player.dispose());
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) => FgCard(
     immersive: true,
+    shape: FgCardShape.editorial,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          _title ?? LocaleKeys.mediaLoading.tr(),
+          _title ??
+              (_error == null ? LocaleKeys.mediaLoading : LocaleKeys.mediaView)
+                  .tr(),
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: AppSpacing.sm),
-        AspectRatio(
-          aspectRatio: 16 / 9,
-          child: Transform(
-            alignment: Alignment.center,
-            transform: Matrix4.diagonal3Values(_mirror ? -1 : 1, 1, 1),
-            child: Video(controller: _video, controls: NoVideoControls),
+        if (_playback != null && _error == null)
+          AspectRatio(
+            aspectRatio: 16 / 9,
+            child: Transform(
+              alignment: Alignment.center,
+              transform: Matrix4.diagonal3Values(_mirror ? -1 : 1, 1, 1),
+              child: _player.buildVideo(),
+            ),
           ),
-        ),
         if (_error != null)
           Semantics(
             liveRegion: true,
@@ -192,7 +196,7 @@ class _LocalVideoViewState extends ConsumerState<LocalVideoView>
                   ?.copyWith(color: Theme.of(context).colorScheme.error),
             ),
           ),
-        if (_ready) ...[
+        if (_ready && _error == null) ...[
           if (widget.playing == null)
             FgButton(
               text: (_playing ? LocaleKeys.playerPause : LocaleKeys.playerStart)
@@ -212,7 +216,7 @@ class _LocalVideoViewState extends ConsumerState<LocalVideoView>
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(LocaleKeys.mediaRecordedPerspective.tr()),
-              if (_ready) ...[
+              if (_ready && _error == null) ...[
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(LocaleKeys.mediaMirror.tr()),

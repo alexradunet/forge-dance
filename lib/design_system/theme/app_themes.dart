@@ -328,14 +328,8 @@ abstract final class AppThemes {
       onTertiaryContainer: isDark
           ? const Color(0xFFF6E8FF)
           : const Color(0xFF31005A),
-      error: AppColors.passionRed,
-      onError: AppColors.crystalWhite,
-      errorContainer: isDark
-          ? const Color(0xFF930020)
-          : const Color(0xFFFFDAD9),
-      onErrorContainer: isDark
-          ? const Color(0xFFFFDAD9)
-          : const Color(0xFF410006),
+      // Keep generated error/onError/container pairs: raw crimson is not a
+      // readable text foreground on immersive surfaces, especially in forms.
       surface: isDark ? AppColors.surfaceDark : AppColors.gray50,
       onSurface: isDark ? AppColors.crystalWhite : AppColors.gray950,
       surfaceContainerLowest: isDark

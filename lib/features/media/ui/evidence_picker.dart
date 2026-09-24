@@ -78,6 +78,7 @@ class _EvidencePickerState extends ConsumerState<EvidencePicker> {
     final confirmed = await FgImmersiveScaffold.showModal<bool>(
       context: context,
       builder: (context) => AlertDialog(
+        scrollable: true,
         title: Text(LocaleKeys.mediaDelete.tr()),
         content: Text(LocaleKeys.mediaDeleteConfirm.tr()),
         actions: [
@@ -112,6 +113,7 @@ class _EvidencePickerState extends ConsumerState<EvidencePicker> {
   @override
   Widget build(BuildContext context) => FgCard(
     immersive: true,
+    shape: FgCardShape.editorial,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -133,6 +135,7 @@ class _EvidencePickerState extends ConsumerState<EvidencePicker> {
             ),
             if (widget.value != null) ...[
               FgButton(
+                isEnabled: !_busy,
                 text: LocaleKeys.mediaView.tr(),
                 variant: FgButtonVariant.secondary,
                 onPressed: () =>
@@ -144,6 +147,7 @@ class _EvidencePickerState extends ConsumerState<EvidencePicker> {
                     ),
               ),
               FgButton(
+                isEnabled: !_busy,
                 text: LocaleKeys.mediaUnlink.tr(),
                 variant: FgButtonVariant.ghost,
                 onPressed: () => widget.onChanged(null),
@@ -205,13 +209,15 @@ class EvidenceViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) => FgImmersiveScaffold(
     title: LocaleKeys.mediaView.tr(),
-    bodyBuilder: (context) => ListView(
-      padding: AppSpacing.allLG,
-      children: [
-        LocalVideoView(evidenceId: evidenceId),
-        const SizedBox(height: AppSpacing.lg),
-        Text(LocaleKeys.mediaNotVerified.tr()),
-      ],
+    bodyBuilder: (context) => FgReadingBody(
+      child: ListView(
+        padding: AppSpacing.allLG,
+        children: [
+          Text(LocaleKeys.mediaNotVerified.tr()),
+          const SizedBox(height: AppSpacing.lg),
+          LocalVideoView(evidenceId: evidenceId),
+        ],
+      ),
     ),
   );
 }

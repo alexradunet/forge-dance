@@ -18,92 +18,121 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
   final TextEditingController _nameController = TextEditingController();
-  bool _isButtonEnabled = false;
+  bool _saving = false;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
-    _nameController.addListener(_updateButtonState);
+    _nameController.addListener(_updateName);
   }
 
   @override
   void dispose() {
-    _nameController.removeListener(_updateButtonState);
+    _nameController.removeListener(_updateName);
     _nameController.dispose();
     super.dispose();
   }
 
-  void _updateButtonState() {
-    final isEnabled = _nameController.text.trim().isNotEmpty;
-    if (isEnabled != _isButtonEnabled) {
-      setState(() {
-        _isButtonEnabled = isEnabled;
-      });
-    }
-  }
+  void _updateName() => setState(() {});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: FgBackground(
-        child: Column(
+  Widget build(BuildContext context) => PopScope(
+    canPop: !_saving,
+    child: FgImmersiveScaffold(
+      bodyBuilder: (context) => FgReadingBody(
+        child: ListView(
+          padding: AppSpacing.allXXL,
           children: [
-            AppHeader(
-              title: LocaleKeys.gettingStarted.tr().toUpperCase(),
-              subtitle: LocaleKeys.setUpYourProfile.tr(),
+            const SizedBox(height: AppSpacing.xxl),
+            FgSectionHeading(
+              eyebrow: LocaleKeys.gettingStarted.tr(),
+              title: LocaleKeys.personalOnboardingTitle.tr(),
+              subtitle: LocaleKeys.personalOnboardingIntro.tr(),
             ),
-            Expanded(
-              child: Padding(
-                padding: AppSpacing.allXXL,
-                child: Column(
-                  children: [
-                    const SizedBox(height: AppSpacing.xxl),
-                    FgAvatar.large(
+            const SizedBox(height: AppSpacing.xxxl),
+            FgCard(
+              immersive: true,
+              shape: FgCardShape.editorial,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: FgAvatar.large(
                       initials: _nameController.text.trim().isEmpty
                           ? null
                           : _nameController.text.trim().characters.first,
                     ),
-                    const SizedBox(height: AppSpacing.xxxl),
-                    FgInput(
-                      key: const ValueKey('onboarding.name'),
-                      label: LocaleKeys.yourName.tr(),
-                      controller: _nameController,
-                      isRequired: true,
-                      textCapitalization: TextCapitalization.words,
-                      textInputAction: TextInputAction.done,
-                    ),
-                    const Spacer(),
-                    FgButton(
-                      key: const ValueKey('onboarding.continue'),
-                      text: LocaleKeys.continueText.tr(),
-                      expand: true,
-                      onPressed: _isButtonEnabled
-                          ? () => _saveNameAndContinue(context)
-                          : null,
-                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xxl),
+                  FgSectionHeading(title: LocaleKeys.setUpYourProfile.tr()),
+                  const SizedBox(height: AppSpacing.lg),
+                  FgInput(
+                    key: const ValueKey('onboarding.name'),
+                    label: LocaleKeys.yourName.tr(),
+                    controller: _nameController,
+                    isRequired: true,
+                    isEnabled: !_saving,
+                    textCapitalization: TextCapitalization.words,
+                    textInputAction: TextInputAction.done,
+                    onSubmitted: (_) => _saveNameAndContinue(context),
+                  ),
+                  if (_error != null) ...[
                     const SizedBox(height: AppSpacing.lg),
+                    Semantics(
+                      liveRegion: true,
+                      child: Text(
+                        _error!,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ),
                   ],
-                ),
+                  const SizedBox(height: AppSpacing.xxl),
+                  FgButton(
+                    key: const ValueKey('onboarding.continue'),
+                    text: LocaleKeys.continueText.tr(),
+                    expand: true,
+                    isLoading: _saving,
+                    onPressed:
+                        !_saving && _nameController.text.trim().isNotEmpty
+                        ? () => _saveNameAndContinue(context)
+                        : null,
+                  ),
+                ],
               ),
             ),
+            const SizedBox(height: AppSpacing.xxl),
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
 
   Future<void> _saveNameAndContinue(BuildContext context) async {
+    if (_saving || _nameController.text.trim().isEmpty) return;
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
     try {
       await ref
           .read(profileViewModelProvider.notifier)
           .editProfile(name: _nameController.text.trim());
-      if (context.mounted) {
-        context.pushReplacement(Routes.main);
+      // The existing notifier retains failures in state rather than throwing.
+      if (ref.read(profileViewModelProvider).hasError) {
+        throw StateError('Profile save failed');
       }
-    } catch (error) {
+      if (context.mounted) context.pushReplacement(Routes.main);
+    } catch (_) {
       if (context.mounted) {
-        context.showErrorSnackBar(LocaleKeys.failedToSaveProfile.tr());
+        setState(() => _error = LocaleKeys.failedToSaveProfile.tr());
+        context.showErrorSnackBar(_error!);
       }
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
   }
 }

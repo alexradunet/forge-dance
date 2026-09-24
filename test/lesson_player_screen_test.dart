@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:forge_dance/design_system/design_system.dart';
@@ -94,182 +95,115 @@ void main() {
     return progress;
   }
 
-  testWidgets('small screen supports doubled player text', (tester) async {
-    await pumpLesson(tester, size: const Size(320, 640), textScale: 2);
-    expect(tester.takeException(), isNull);
-    expect(find.byType(FgStepNavigation), findsOneWidget);
-  });
-
-  for (final size in [const Size(390, 760), const Size(1000, 600)]) {
-    testWidgets('media and coaching cards share a width at $size', (
-      tester,
-    ) async {
-      await pumpLesson(tester, size: size);
-      final mediaRect = tester.getRect(
-        find.byKey(const ValueKey('lesson-media-shell')),
-      );
-      final textRect = tester.getRect(find.byType(FgInstructionCard));
-      expect(textRect.width, closeTo(mediaRect.width, 0.01));
-      if (size.width < 760) {
-        expect(textRect.left, closeTo(mediaRect.left, 0.01));
-        expect(textRect.right, closeTo(mediaRect.right, 0.01));
-      }
-      expect(tester.takeException(), isNull);
-    });
+  for (final size in [const Size(320, 640), const Size(1040, 400)]) {
+    testWidgets(
+      'written lesson prioritizes scrollable cues without fake media at $size',
+      (tester) async {
+        await pumpLesson(tester, size: size, textScale: 2);
+        expect(find.byType(PageView), findsNothing);
+        expect(find.byType(FgMediaDock), findsNothing);
+        expect(find.byType(FgImage), findsNothing);
+        expect(find.text('lessonWrittenCues'), findsOneWidget);
+        final viewport = find.byKey(const ValueKey('lesson-content-scroll'));
+        expect(tester.getSize(viewport).height, greaterThan(size.height / 2));
+        final step = readyBody.lessons.first.steps.first;
+        await tester.ensureVisible(find.text(step.description));
+        await tester.pumpAndSettle();
+        expect(find.text(step.description).hitTestable(), findsOneWidget);
+        final navBefore = tester.getRect(find.byType(FgStepNavigation));
+        await tester.ensureVisible(find.text('techniqueDetails'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('techniqueDetails'));
+        await tester.pumpAndSettle();
+        for (final cue in [step.focus, step.breath, step.energy]) {
+          await tester.ensureVisible(find.text(cue));
+          await tester.pumpAndSettle();
+          expect(find.text(cue).hitTestable(), findsOneWidget);
+        }
+        expect(tester.getRect(find.byType(FgStepNavigation)), navBefore);
+        expect(tester.takeException(), isNull);
+      },
+    );
   }
 
-  group('adaptive lesson player', () {
-    testWidgets(
-      'narrow lessons show summary first and reveal technique details',
-      (tester) async {
-        await pumpLesson(tester, size: const Size(390, 760));
-        final firstStep = readyBody.lessons.first.steps.first;
-
-        expect(find.text('lessonStepOf'), findsOneWidget);
-        expect(find.bySemanticsLabel('lessonStepOf'), findsOneWidget);
-        expect(find.text(firstStep.title), findsWidgets);
-        expect(find.text(firstStep.description), findsOneWidget);
-        expect(find.text(firstStep.focus), findsNothing);
-        expect(find.byIcon(Icons.arrow_back_rounded), findsOneWidget);
-        expect(find.byIcon(Icons.arrow_forward_rounded), findsOneWidget);
-        expect(find.text('nextStep'), findsOneWidget);
-        expect(find.text('previousStep'), findsNothing);
-        expect(find.bySemanticsLabel('goToLessonStep'), findsNothing);
-        final previousButton = find.bySemanticsLabel('previousStepSemantic');
-        final nextButton = find.bySemanticsLabel('nextStepSemantic');
-        expect(
-          tester.getSize(nextButton).width,
-          greaterThan(tester.getSize(previousButton).width),
-        );
-        expect(
-          tester.getCenter(previousButton).dx,
-          lessThan(tester.getCenter(find.byType(FgProgressBar)).dx),
-        );
-        expect(
-          tester.getCenter(find.byType(FgProgressBar)).dx,
-          lessThan(tester.getCenter(nextButton).dx),
-        );
-        final progressBar = tester.widget<FgProgressBar>(
-          find.byType(FgProgressBar),
-        );
-        expect(progressBar.segments, readyBody.lessons.first.steps.length);
-        expect(progressBar.value, 0.25);
-
-        await tester.ensureVisible(find.text('techniqueDetails'));
-        await tester.pumpAndSettle();
-        await tester.ensureVisible(find.text('techniqueDetails'));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('techniqueDetails'));
-        await tester.pumpAndSettle();
-
-        expect(find.text(firstStep.focus), findsOneWidget);
-        expect(find.text(firstStep.breath), findsOneWidget);
-        expect(find.text(firstStep.energy), findsOneWidget);
-      },
+  testWidgets('next previous and keyboard preserve written step state', (
+    tester,
+  ) async {
+    await pumpLesson(tester, size: const Size(390, 760));
+    await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
+    await tester.pumpAndSettle();
+    expect(find.text(readyBody.lessons.first.steps[1].title), findsOneWidget);
+    // Tab puts focus inside the navigation shortcut scope.
+    for (var index = 0; index < 8; index++) {
+      await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+      if (FocusManager.instance.primaryFocus?.context
+              ?.findAncestorWidgetOfExactType<FgStepNavigation>() !=
+          null) {
+        break;
+      }
+    }
+    expect(
+      FocusManager.instance.primaryFocus?.context
+          ?.findAncestorWidgetOfExactType<FgStepNavigation>(),
+      isNotNull,
     );
-
-    testWidgets('narrow content scroll docks media and expand brings it back', (
-      tester,
-    ) async {
-      await pumpLesson(tester, size: const Size(390, 760));
-
-      expect(find.byKey(const ValueKey('lesson-media-shell')), findsOneWidget);
-
-      await tester.drag(
-        find.byKey(const ValueKey('lesson-content-scroll')),
-        const Offset(0, -220),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const ValueKey('lesson-media-shell')), findsNothing);
-      expect(find.byKey(const ValueKey('lesson-media-dock')), findsOneWidget);
-      expect(find.text('lessonStepOf'), findsWidgets);
-
-      await tester.tap(find.byIcon(Icons.expand_less_rounded));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const ValueKey('lesson-media-shell')), findsOneWidget);
-      expect(find.byKey(const ValueKey('lesson-media-dock')), findsNothing);
-    });
-
-    testWidgets(
-      'wide lessons place navigation in the content panel and swipe only on media',
-      (tester) async {
-        await pumpLesson(tester, size: const Size(1000, 430));
-        final firstStep = readyBody.lessons.first.steps.first;
-        final secondStep = readyBody.lessons.first.steps[1];
-
-        await tester.drag(
-          find.byKey(const ValueKey('lesson-content-scroll')),
-          const Offset(-320, 0),
-        );
-        await tester.pumpAndSettle();
-        expect(find.text('lessonStepOf'), findsOneWidget);
-        expect(find.bySemanticsLabel('lessonStepOf'), findsOneWidget);
-        expect(find.text(firstStep.title), findsWidgets);
-
-        await tester.drag(
-          find.byKey(const ValueKey('lesson-media-page-view')),
-          const Offset(-320, 0),
-        );
-        await tester.pumpAndSettle();
-
-        expect(find.text('lessonStepOf'), findsOneWidget);
-        expect(find.bySemanticsLabel('lessonStepOf'), findsOneWidget);
-        expect(find.text(secondStep.title), findsWidgets);
-      },
-    );
-
-    testWidgets(
-      'step changes reset expanded media and collapse technique details',
-      (tester) async {
-        await pumpLesson(tester, size: const Size(390, 560));
-        final secondStep = readyBody.lessons.first.steps[1];
-
-        await tester.ensureVisible(find.text('techniqueDetails'));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('techniqueDetails'));
-        await tester.pumpAndSettle();
-        await tester.drag(
-          find.byKey(const ValueKey('lesson-content-scroll')),
-          const Offset(0, -220),
-        );
-        await tester.pumpAndSettle();
-        expect(find.byKey(const ValueKey('lesson-media-dock')), findsOneWidget);
-
-        await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
-        await tester.pumpAndSettle();
-
-        expect(find.text('lessonStepOf'), findsOneWidget);
-        expect(find.bySemanticsLabel('lessonStepOf'), findsOneWidget);
-        expect(find.byKey(const ValueKey('lesson-media-dock')), findsNothing);
-        expect(find.text(secondStep.focus), findsNothing);
-      },
-    );
-
-    testWidgets(
-      'final action completes the lesson through existing progress flow',
-      (tester) async {
-        var backedOut = false;
-        final progress = await pumpLesson(
-          tester,
-          size: const Size(390, 760),
-          onBack: () => backedOut = true,
-        );
-
-        for (var index = 0; index < 3; index++) {
-          await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
-          await tester.pumpAndSettle();
-        }
-        await tester.tap(find.bySemanticsLabel('completeLesson'));
-        await tester.pumpAndSettle();
-
-        expect(
-          progress.store[readyBody.lessons.first.id]?.status,
-          LessonStatus.completed,
-        );
-        expect(backedOut, isTrue);
-      },
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(find.text(readyBody.lessons.first.steps[2].title), findsOneWidget);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(find.text(readyBody.lessons.first.steps[1].title), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('previousStepSemantic'));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(readyBody.lessons.first.steps.first.title),
+      findsOneWidget,
     );
   });
+
+  testWidgets('step changes reset technique disclosure and reading scroll', (
+    tester,
+  ) async {
+    await pumpLesson(tester, size: const Size(390, 560));
+    await tester.ensureVisible(find.text('techniqueDetails'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('techniqueDetails'));
+    await tester.pumpAndSettle();
+    await tester.drag(
+      find.byKey(const ValueKey('lesson-content-scroll')),
+      const Offset(0, -220),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
+    await tester.pumpAndSettle();
+    expect(find.text(readyBody.lessons.first.steps[1].focus), findsNothing);
+    expect(find.text('lessonWrittenCues').hitTestable(), findsOneWidget);
+  });
+
+  testWidgets(
+    'final action completes the lesson through existing progress flow',
+    (tester) async {
+      var backedOut = false;
+      final progress = await pumpLesson(
+        tester,
+        size: const Size(390, 760),
+        onBack: () => backedOut = true,
+      );
+      for (
+        var index = 1;
+        index < readyBody.lessons.first.steps.length;
+        index++
+      ) {
+        await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
+        await tester.pumpAndSettle();
+      }
+      await tester.tap(find.bySemanticsLabel('completeLesson'));
+      await tester.pumpAndSettle();
+      expect(
+        progress.store[readyBody.lessons.first.id]?.status,
+        LessonStatus.completed,
+      );
+      expect(backedOut, isTrue);
+    },
+  );
 }

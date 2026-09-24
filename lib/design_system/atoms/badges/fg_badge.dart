@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../tokens/app_colors.dart';
 import '../../tokens/app_typography.dart';
 import '../../tokens/app_border_radius.dart';
+import '../../theme/forge_theme_extensions.dart';
 
 enum FgBadgeVariant { solid, outline, subtle }
 
@@ -42,7 +43,7 @@ class FgBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = _getColors();
+    final colors = _getColors(context);
     final borderRadius = shape == FgBadgeShape.pill
         ? BorderRadius.circular(999)
         : AppBorderRadius.small;
@@ -84,33 +85,44 @@ class FgBadge extends StatelessWidget {
     );
   }
 
-  _BadgeColors _getColors() {
-    final baseColor = _getBaseColor();
-
-    switch (variant) {
-      case FgBadgeVariant.solid:
-        return _BadgeColors(
-          background: baseColor,
-          foreground: _getSolidForeground(baseColor),
-        );
-      case FgBadgeVariant.outline:
-        return _BadgeColors(
-          background: Colors.transparent,
-          foreground: baseColor,
-          border: baseColor,
-        );
-      case FgBadgeVariant.subtle:
-        // Adjust for visibility on dark background
-        final isNeutral = color == FgBadgeColor.neutral;
-        return _BadgeColors(
-          background: isNeutral
-              ? AppColors.crystalWhite.withOpacity(0.05)
-              : baseColor.withOpacity(0.15),
-          foreground: isNeutral
-              ? AppColors.crystalWhite.withOpacity(0.8)
-              : baseColor.withOpacity(0.9), // Slightly lighter for readability
-        );
-    }
+  _BadgeColors _getColors(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final forge = theme.forgeColors;
+    final baseColor = switch (color) {
+      FgBadgeColor.brand => scheme.primary,
+      FgBadgeColor.success => forge.success,
+      FgBadgeColor.warning => forge.warning,
+      FgBadgeColor.error => scheme.error,
+      FgBadgeColor.neutral => scheme.surfaceContainerHighest,
+      FgBadgeColor.gold => forge.reward,
+      _ => _getBaseColor(),
+    };
+    final foreground = switch (color) {
+      FgBadgeColor.brand => scheme.onPrimary,
+      FgBadgeColor.success => forge.onSuccess,
+      FgBadgeColor.warning => forge.onWarning,
+      FgBadgeColor.error => scheme.onError,
+      FgBadgeColor.neutral => scheme.onSurface,
+      FgBadgeColor.gold => forge.onReward,
+      // Durable category hues still need a readable paired foreground.
+      _ => baseColor.computeLuminance() > 0.179 ? Colors.black : Colors.white,
+    };
+    return switch (variant) {
+      FgBadgeVariant.solid => _BadgeColors(
+        background: baseColor,
+        foreground: foreground,
+      ),
+      FgBadgeVariant.outline => _BadgeColors(
+        background: Colors.transparent,
+        foreground: scheme.onSurface,
+        border: baseColor,
+      ),
+      FgBadgeVariant.subtle => _BadgeColors(
+        background: baseColor.withValues(alpha: 0.12),
+        foreground: scheme.onSurface,
+      ),
+    };
   }
 
   Color _getBaseColor() {
@@ -134,15 +146,6 @@ class FgBadge extends StatelessWidget {
       case FgBadgeColor.gold:
         return AppColors.legendGold;
     }
-  }
-
-  Color _getSolidForeground(Color bg) {
-    if (color == FgBadgeColor.warning ||
-        color == FgBadgeColor.success ||
-        color == FgBadgeColor.gold) {
-      return AppColors.gray950;
-    }
-    return AppColors.crystalWhite;
   }
 }
 

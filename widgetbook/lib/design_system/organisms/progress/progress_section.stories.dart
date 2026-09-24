@@ -10,6 +10,7 @@ final $Playground = _Story(
   name: 'Playground',
   args: _Args(
     title: StringArg('Weekly progress'),
+    editorial: BoolArg(true),
     stats: Arg.fixed(const [
       FgStatData(label: 'Sessions', value: '4', icon: Icons.fitness_center),
       FgStatData(label: 'Minutes', value: '128', unit: 'min'),

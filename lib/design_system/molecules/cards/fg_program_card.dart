@@ -148,7 +148,13 @@ class FgProgramCard extends StatelessWidget {
 
 /// Content-sized cards; narrow windows stack rather than clipping text.
 class FgProgramCardLayout extends StatelessWidget {
-  const FgProgramCardLayout({super.key, required this.children});
+  const FgProgramCardLayout({
+    super.key,
+    required this.children,
+    this.maxColumns = 3,
+  }) : assert(maxColumns > 0);
+
+  final int maxColumns;
   final List<Widget> children;
 
   @override
@@ -158,7 +164,7 @@ class FgProgramCardLayout extends StatelessWidget {
           ((constraints.maxWidth + AppSpacing.lg) /
                   (AppSizes.cardStandardWidth + AppSpacing.lg))
               .floor()
-              .clamp(1, 3);
+              .clamp(1, maxColumns);
       final width =
           (constraints.maxWidth - AppSpacing.lg * (columns - 1)) / columns;
       return Wrap(

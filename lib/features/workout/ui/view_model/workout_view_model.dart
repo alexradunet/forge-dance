@@ -11,6 +11,7 @@ part 'workout_view_model.g.dart';
 @riverpod
 class WorkoutViewModel extends _$WorkoutViewModel {
   late SessionRepository _repository;
+  DateTime? _pendingCompletionMoment;
 
   @override
   FutureOr<WorkoutState> build() async {
@@ -26,26 +27,36 @@ class WorkoutViewModel extends _$WorkoutViewModel {
     );
   }
 
+  /// Abandons only the failed attempt's retry identity, never durable records.
+  void abandonCompletion() {
+    _pendingCompletionMoment = null;
+  }
+
   /// Completes today's WOD. Returns true when XP was awarded (first
   /// completion today) — repeating the same WOD on the same day is free.
-  Future<bool> completeWod() async {
+  Future<bool> completeWod({DateTime? now}) async {
     final current = state.value;
     if (current == null) return false;
     if (current.wodCompletedToday) return false;
 
-    state = const AsyncValue.loading();
+    // A failed write may already have committed. Keep its daily record key
+    // stable even when the user retries after midnight.
+    final moment = _pendingCompletionMoment ??= now ?? DateTime.now();
     try {
       final result = await ref
           .read(trainingActivityProvider)
-          .completeWorkout(workout: current.wod);
-      state = AsyncData(current.copyWith(
-        sessions: {...current.sessions, result.record.docKey: result.record},
-        projectionHealth: result.projection,
-      ));
+          .completeWorkout(workout: current.wod, now: moment);
+      _pendingCompletionMoment = null;
+      state = AsyncData(
+        current.copyWith(
+          sessions: {...current.sessions, result.record.docKey: result.record},
+          projectionHealth: result.projection,
+        ),
+      );
       return result.status == CompletionStatus.completed;
-    } catch (error, stackTrace) {
-      state = AsyncError(error, stackTrace);
-      return false;
+    } catch (_) {
+      // Keep the current circuit available for an idempotent retry.
+      rethrow;
     }
   }
 }

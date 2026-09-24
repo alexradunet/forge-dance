@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 
-import '../../tokens/app_colors.dart';
-import '../../tokens/app_typography.dart';
-import '../../atoms/icons/fg_icon.dart';
+import '../../design_system.dart';
 
 class FgNavButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool isActive;
   final VoidCallback onTap;
-
   const FgNavButton({
     super.key,
     required this.icon,
@@ -20,38 +17,40 @@ class FgNavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: isActive
-              ? AppColors.forgeFire.withOpacity(0.1)
-              : Colors.transparent,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FgIcon(
-              icon: icon,
-              size: 24,
-              color: isActive ? AppColors.forgeFire : AppColors.textMuted,
+    final scheme = Theme.of(context).colorScheme;
+    return MergeSemantics(
+      child: Semantics(
+        selected: isActive,
+        child: TextButton(
+          style: TextButton.styleFrom(
+            foregroundColor: isActive
+                ? scheme.onPrimaryContainer
+                : scheme.onSurfaceVariant,
+            backgroundColor: isActive ? scheme.primaryContainer : null,
+            minimumSize: const Size(
+              AppSizes.comfortableTouchTarget,
+              AppSizes.comfortableTouchTarget,
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: AppTypography.label.copyWith(
-                color: isActive ? AppColors.textMain : AppColors.textDark,
-                fontSize: 10,
-                fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+            padding: AppSpacing.allSM,
+            shape: RoundedRectangleBorder(borderRadius: AppBorderRadius.small),
+          ),
+          onPressed: onTap,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: AppSizes.iconLg),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: isActive
+                      ? scheme.onPrimaryContainer
+                      : scheme.onSurfaceVariant,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

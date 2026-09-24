@@ -46,7 +46,7 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
     super.dispose();
   }
 
-  void _showFilterSheet() {
+  void _showFilterSheet(BuildContext context) {
     final projection = ref.read(learnViewModelProvider).value?.library;
     if (projection == null) return;
     final draft = {..._selectedFilters};
@@ -83,8 +83,8 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
   Widget build(BuildContext context) {
     final learnState = ref.watch(learnViewModelProvider);
 
-    return Scaffold(
-      body: FgBackground(
+    return FgImmersiveScaffold(
+      bodyBuilder: (context) => FgReadingBody(
         child: learnState.when(
           loading: () => const Center(child: FgSpinner()),
           error: (_, _) => FgEmpty(
@@ -92,13 +92,13 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
             title: LocaleKeys.unexpectedErrorOccurred.tr(),
             tone: FgEmptyTone.error,
           ),
-          data: (state) => _buildContent(state),
+          data: (state) => _buildContent(context, state),
         ),
       ),
     );
   }
 
-  Widget _buildContent(LearnState state) {
+  Widget _buildContent(BuildContext context, LearnState state) {
     final projection = state.library;
     final items = projection.matching(
       query: _query,
@@ -126,7 +126,7 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
             top: AppSpacing.lg,
             bottom: AppSpacing.sm,
           ),
-          sliver: SliverToBoxAdapter(child: _buildSearchBar()),
+          sliver: SliverToBoxAdapter(child: _buildSearchBar(context)),
         ),
 
         // Content
@@ -145,7 +145,7 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
                     title: LocaleKeys.noResults.tr(),
                     description: LocaleKeys.searchLibraryHint.tr(),
                   )
-                : _buildGridView(items),
+                : _buildGridView(context, items),
           ),
         ),
 
@@ -162,30 +162,23 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
         : LocaleKeys.statusInProgress.tr();
   }
 
-  Widget _buildGridView(List<LibraryEntry> items) {
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: _crossAxisCount,
-        mainAxisSpacing: AppSpacing.lg,
-        crossAxisSpacing: AppSpacing.lg,
-        childAspectRatio: AppSizes.lessonCardAspectRatio,
-      ),
-      itemCount: items.length,
-      itemBuilder: (context, index) {
-        final item = items[index];
-        return FgContentCard.compact(
-          title: item.lesson.title.toUpperCase(),
-          subtitle: item.module.title,
-          footerLabel: _statusLabel(item.status),
-          imageUrl: item.module.imageUrl,
-          onTap: () => LessonDestination(
-            item.module.id,
-            item.lesson.id,
-          ).push<void>(context),
-        );
-      },
+  Widget _buildGridView(BuildContext context, List<LibraryEntry> items) {
+    return FgProgramCardLayout(
+      maxColumns: _crossAxisCount,
+      children: [
+        for (final item in items)
+          FgProgramCard(
+            title: item.lesson.title,
+            summary: item.module.title,
+            label: _statusLabel(item.status),
+            details: '${item.lesson.duration} · ${item.lesson.difficulty}',
+            actionLabel: LocaleKeys.vocabularyViewLesson.tr(),
+            onTap: () => LessonDestination(
+              item.module.id,
+              item.lesson.id,
+            ).push<void>(context),
+          ),
+      ],
     );
   }
 
@@ -210,14 +203,14 @@ class _CollectionPageState extends ConsumerState<CollectionPage> {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchBar(BuildContext context) {
     return FgInput.search(
       controller: _searchController,
       placeholder: LocaleKeys.searchLibraryHint.tr(),
       onClear: _searchController.clear,
       clearSemanticsLabel: LocaleKeys.clearSearch.tr(),
       showFilter: true,
-      onFilterPressed: _showFilterSheet,
+      onFilterPressed: () => _showFilterSheet(context),
       filterSemanticsLabel: LocaleKeys.filterSearch.tr(),
     );
   }

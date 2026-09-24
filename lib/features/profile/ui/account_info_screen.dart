@@ -26,6 +26,8 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
   late final TextEditingController nameController;
   String? avatar;
   String? name;
+  String? _error;
+  bool _saving = false;
 
   @override
   void initState() {
@@ -39,12 +41,19 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
   }
 
   Future<void> _loadDeviceAvatar() async {
-    final identity = widget.originalProfile.id ?? 'local-development';
-    final saved = await ref.read(deviceAvatarRepositoryProvider).load(identity);
-    if (mounted && saved != null) setState(() => avatar = saved);
+    try {
+      final identity = widget.originalProfile.id ?? 'local-development';
+      final saved = await ref
+          .read(deviceAvatarRepositoryProvider)
+          .load(identity);
+      if (mounted && saved != null) setState(() => avatar = saved);
+    } catch (error) {
+      if (mounted) setState(() => _error = error.toString());
+    }
   }
 
   Future<void> _selectImage() async {
+    if (_saving) return;
     try {
       final identity = widget.originalProfile.id ?? 'local-development';
       final result = await ref
@@ -52,7 +61,10 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
           .selectAndSave(identity);
       if (mounted && result != null) setState(() => avatar = result);
     } catch (error) {
-      if (mounted) context.showErrorSnackBar(error.toString());
+      if (mounted) {
+        setState(() => _error = error.toString());
+        context.showErrorSnackBar(error.toString());
+      }
     }
   }
 
@@ -67,25 +79,37 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
     super.dispose();
   }
 
+  bool get _canSave =>
+      !_saving &&
+      (name?.trim().isNotEmpty ?? false) &&
+      (avatar != widget.originalProfile.avatar ||
+          name != widget.originalProfile.name);
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: FgBackground(
-        child: Column(
+  Widget build(BuildContext context) => PopScope(
+    canPop: !_saving,
+    child: FgImmersiveScaffold(
+      title: LocaleKeys.accountInformation.tr(),
+      onBack: () {
+        if (!_saving) context.pop();
+      },
+      bodyBuilder: (context) => FgReadingBody(
+        child: ListView(
+          padding: AppSpacing.allXXL,
           children: [
-            AppHeader(
-              title: LocaleKeys.accountInformation.tr(),
-              onBack: () => context.pop(),
+            FgSectionHeading(
+              eyebrow: LocaleKeys.personalLocalIdentity.tr(),
+              title: LocaleKeys.setUpYourProfile.tr(),
+              subtitle: LocaleKeys.personalAccountIntro.tr(),
             ),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(
-                  vertical: AppSpacing.xxxl,
-                  horizontal: AppSpacing.xxl,
-                ),
+            const SizedBox(height: AppSpacing.xxl),
+            FgCard(
+              immersive: true,
+              shape: FgCardShape.editorial,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Wrap(
-                    alignment: WrapAlignment.center,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     spacing: AppSpacing.lg,
                     runSpacing: AppSpacing.lg,
@@ -97,67 +121,80 @@ class _AccountInfoScreenState extends ConsumerState<AccountInfoScreen> {
                       FgButton(
                         text: LocaleKeys.selectAvatar.tr(),
                         variant: FgButtonVariant.secondary,
-                        size: FgButtonSize.sm,
-                        onPressed: _selectImage,
+                        onPressed: _saving ? null : _selectImage,
                       ),
                     ],
                   ),
-                  const SizedBox(height: AppSpacing.xxxl),
-                  FgLabel(text: LocaleKeys.email.tr()),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    widget.originalProfile.email.orEmpty(),
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: Theme.of(context).forgeColors.onImmersive,
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xxxl),
+                  const SizedBox(height: AppSpacing.xxl),
+                  if (widget.originalProfile.email.orEmpty().isNotEmpty) ...[
+                    FgLabel(text: LocaleKeys.email.tr()),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(widget.originalProfile.email.orEmpty()),
+                    const SizedBox(height: AppSpacing.xxl),
+                  ],
                   FgInput(
                     label: LocaleKeys.name.tr(),
                     controller: nameController,
+                    isRequired: true,
+                    isEnabled: !_saving,
+                    errorText: name?.trim().isEmpty == true
+                        ? LocaleKeys.personalNameRequired.tr()
+                        : null,
                     textCapitalization: TextCapitalization.words,
                     textInputAction: TextInputAction.done,
+                    onSubmitted: (_) {
+                      if (_canSave) _save(context);
+                    },
+                  ),
+                  if (_error != null) ...[
+                    const SizedBox(height: AppSpacing.lg),
+                    Semantics(
+                      liveRegion: true,
+                      child: Text(
+                        _error!,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: AppSpacing.xxl),
+                  FgButton(
+                    text: LocaleKeys.confirm.tr(),
+                    expand: true,
+                    isLoading: _saving,
+                    onPressed: _canSave ? () => _save(context) : null,
                   ),
                 ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(
-                left: AppSpacing.xxl,
-                right: AppSpacing.xxl,
-                bottom: AppSpacing.xxxl,
-              ),
-              child: FgButton(
-                text: LocaleKeys.confirm.tr(),
-                expand: true,
-                onPressed:
-                    avatar != widget.originalProfile.avatar ||
-                        name != widget.originalProfile.name
-                    ? () async {
-                        try {
-                          Global.showLoading(context);
-                          await ref
-                              .read(profileViewModelProvider.notifier)
-                              .editProfile(name: name);
-                          if (context.mounted) {
-                            context.pop();
-                          }
-                        } catch (error) {
-                          if (context.mounted) {
-                            context.showErrorSnackBar(
-                              LocaleKeys.unexpectedErrorOccurred.tr(),
-                            );
-                          }
-                        } finally {
-                          Global.hideLoading();
-                        }
-                      }
-                    : null,
               ),
             ),
           ],
         ),
       ),
-    );
+    ),
+  );
+
+  Future<void> _save(BuildContext context) async {
+    if (!_canSave) return;
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+    try {
+      Global.showLoading(context);
+      await ref.read(profileViewModelProvider.notifier).editProfile(name: name);
+      if (ref.read(profileViewModelProvider).hasError) {
+        throw StateError('Profile save failed');
+      }
+      if (context.mounted) context.pop();
+    } catch (_) {
+      if (context.mounted) {
+        setState(() => _error = LocaleKeys.unexpectedErrorOccurred.tr());
+        context.showErrorSnackBar(_error!);
+      }
+    } finally {
+      Global.hideLoading();
+      if (mounted) setState(() => _saving = false);
+    }
   }
 }

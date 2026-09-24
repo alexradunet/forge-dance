@@ -31,15 +31,19 @@ class FgRadioGroup<T> extends StatelessWidget {
     this.selectedValue,
     this.onChanged,
     this.semanticLabel,
+    this.editorial = false,
   });
 
   final List<FgRadioGroupItem<T>> items;
   final T? selectedValue;
   final ValueChanged<T>? onChanged;
   final String? semanticLabel;
+  final bool editorial;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Semantics(
       label: semanticLabel,
       container: semanticLabel != null,
@@ -53,13 +57,26 @@ class FgRadioGroup<T> extends StatelessWidget {
             for (var index = 0; index < items.length; index++) ...[
               FgCard(
                 variant: FgCardVariant.outlined,
+                shape: editorial ? FgCardShape.editorial : FgCardShape.rounded,
                 padding: EdgeInsets.zero,
                 child: RadioListTile<T>.adaptive(
                   value: items[index].value,
-                  title: Text(items[index].label),
+                  title: Text(
+                    items[index].label,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: items[index].isEnabled && onChanged != null
+                          ? scheme.onSurface
+                          : scheme.onSurfaceVariant,
+                    ),
+                  ),
                   subtitle: items[index].description == null
                       ? null
-                      : Text(items[index].description!),
+                      : Text(
+                          items[index].description!,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
                   secondary: items[index].leading,
                   selected: items[index].value == selectedValue,
                   enabled: items[index].isEnabled && onChanged != null,

@@ -19,8 +19,9 @@ class StatsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(userStatsProvider);
 
-    return Scaffold(
-      body: FgBackground(
+    return FgImmersiveScaffold(
+      title: LocaleKeys.myProgress.tr(),
+      bodyBuilder: (context) => FgReadingBody(
         child: stats.when(
           loading: () => const Center(child: FgSpinner()),
           error: (_, _) => FgEmpty(
@@ -37,17 +38,12 @@ class StatsPage extends ConsumerWidget {
   Widget _buildMainContent(BuildContext context, UserStats stats) {
     return CustomScrollView(
       slivers: [
-        SliverToBoxAdapter(
-          child: AppHeader(
-            title: LocaleKeys.myProgress.tr().toUpperCase(),
-            subtitle: LocaleKeys.statsSubtitle.tr(),
-            onBack: () => Navigator.of(context).pop(),
-          ),
-        ),
         SliverPadding(
           padding: const EdgeInsets.all(AppSpacing.xxl),
           sliver: SliverToBoxAdapter(
             child: FgProgressSection(
+              immersive: true,
+              editorial: true,
               title: LocaleKeys.statsSubtitle.tr(),
               stats: [
                 FgStatData(

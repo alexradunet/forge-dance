@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:ui' show SemanticsFlag, SemanticsAction;
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
@@ -16,6 +18,7 @@ import 'package:forge_dance/features/programmes/repository/programme_repository.
 import 'package:forge_dance/features/movement_teacher/prototype/ui/motion_lab_page.dart';
 import 'package:forge_dance/features/profile/ui/view_model/profile_view_model.dart';
 import 'package:forge_dance/features/stats/ui/view_model/user_stats_provider.dart';
+import 'package:forge_dance/features/stats/model/user_stats.dart';
 import 'package:forge_dance/features/learn/ui/view_model/learn_view_model.dart';
 import 'package:forge_dance/features/method/ui/method_view_model.dart';
 import 'package:forge_dance/features/practice/ui/practice_view_model.dart';
@@ -39,6 +42,48 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forge_dance/routing/routes.dart';
 
+import 'package:forge_dance/features/onboarding/ui/onboarding_screen.dart';
+import 'package:forge_dance/features/onboarding/ui/splash_screen.dart';
+import 'package:forge_dance/features/profile/model/profile.dart';
+import 'package:forge_dance/features/profile/repository/profile_repository.dart';
+import 'package:forge_dance/features/profile/presentation/pages/profile_page.dart';
+import 'package:forge_dance/features/profile/ui/account_info_screen.dart';
+import 'package:forge_dance/features/profile/ui/appearances_screen.dart';
+import 'package:forge_dance/features/profile/ui/widgets/level_item.dart';
+import 'package:forge_dance/features/settings/presentation/pages/settings_page.dart';
+import 'package:forge_dance/features/settings/repository/portable_backup_repository.dart';
+import 'package:forge_dance/features/common/ui/providers/app_theme_mode_provider.dart';
+import 'package:forge_dance/constants/constants.dart';
+
+import 'package:forge_dance/features/learn/ui/module_view_screen.dart';
+import 'package:forge_dance/features/learn/ui/lesson_player_screen.dart';
+import 'package:forge_dance/features/learn/repository/lesson_catalog.dart';
+import 'package:forge_dance/features/learn/model/lesson_progress.dart';
+import 'package:forge_dance/features/learn/model/lesson.dart';
+import 'package:forge_dance/features/learn/repository/progress_repository.dart';
+import 'package:forge_dance/features/library/presentation/pages/collection_page.dart';
+import 'package:forge_dance/features/stats/presentation/pages/stats_page.dart';
+import 'package:forge_dance/features/method/repository/method_repository.dart';
+import 'package:forge_dance/features/method/repository/method_catalog.dart';
+
+import 'package:forge_dance/features/media/model/local_media.dart';
+import 'package:forge_dance/features/media/repository/media_repository.dart';
+import 'package:forge_dance/features/media/ui/evidence_picker.dart';
+import 'package:forge_dance/features/media/ui/local_video_playback.dart';
+import 'package:forge_dance/features/workout/presentation/pages/training_session_page.dart';
+import 'package:forge_dance/features/workout/repository/session_repository.dart';
+import 'package:forge_dance/features/workout/repository/workout_catalog.dart';
+import 'package:forge_dance/features/workout/model/workout_session.dart';
+import 'package:forge_dance/features/workout/ui/view_model/workout_view_model.dart';
+import 'package:forge_dance/features/main/presentation/pages/main_screen.dart';
+import 'package:forge_dance/routing/shell_navigation_observer.dart';
+import 'package:forge_dance/features/common/ui/widgets/offline_container.dart';
+
+part 'remaining_surface_contracts.dart';
+part 'review_surface_contracts.dart';
+part 'personal_surface_contracts.dart';
+part 'learning_surface_contracts.dart';
+
 class _CatalogueLoader extends AssetLoader {
   _CatalogueLoader(this.catalogue);
   final Map<String, dynamic> catalogue;
@@ -53,8 +98,24 @@ Future<void> _pumpFeature(
   double textScale = 1,
   GoRouter? router,
   List<PracticeRecord> records = const [],
+  ProfileRepository? profileRepository,
+  PortableBackupRepository? backupRepository,
+  Future<UserStats>? statsResult,
+  Map<String, Object> initialPreferences = const {},
+  MethodRepository? methodRepository,
+  ProgressRepository? progressRepository,
+  PracticeRepository? practiceRepository,
+  Future<void> Function(ProviderContainer)? beforePump,
+  bool settle = true,
+  bool waitForLearning = true,
+  MediaRepository? mediaRepository,
+  LocalVideoPlayback Function()? playbackFactory,
+  SessionRepository? sessionRepository,
+  WorkoutViewModel Function()? workoutViewModel,
+  ProgrammeRepository? programmeRepository,
+  bool waitForWorkout = true,
 }) async {
-  SharedPreferences.setMockInitialValues({});
+  SharedPreferences.setMockInitialValues(initialPreferences);
   await tester.runAsync(EasyLocalization.ensureInitialized);
   final catalogue = await tester.runAsync(
     () async =>
@@ -68,9 +129,36 @@ Future<void> _pumpFeature(
     }
     final result = ProviderContainer(
       overrides: [
+        if (programmeRepository != null)
+          programmeRepositoryProvider.overrideWithValue(programmeRepository),
+        mediaRepositoryProvider.overrideWithValue(
+          mediaRepository ?? _ContractMediaRepository(),
+        ),
+        if (playbackFactory != null)
+          localVideoPlaybackFactoryProvider.overrideWith(
+            (_) => playbackFactory,
+          ),
+        if (sessionRepository != null)
+          sessionRepositoryProvider.overrideWithValue(sessionRepository),
+        if (workoutViewModel != null)
+          workoutViewModelProvider.overrideWith(workoutViewModel),
+        if (methodRepository != null)
+          methodRepositoryProvider.overrideWithValue(methodRepository),
+        if (progressRepository != null)
+          progressRepositoryProvider.overrideWithValue(progressRepository),
+        if (practiceRepository != null)
+          practiceRepositoryProvider.overrideWithValue(practiceRepository),
+        if (statsResult != null)
+          userStatsProvider.overrideWith((_) => statsResult),
+        if (profileRepository != null)
+          profileRepositoryProvider.overrideWithValue(profileRepository),
+        if (backupRepository != null)
+          portableBackupRepositoryProvider.overrideWithValue(backupRepository),
         dailyPracticeDateProvider.overrideWithValue(DateTime(2026, 9, 7)),
       ],
     );
+    result.listen(workoutViewModelProvider, (_, _) {});
+    result.listen(appThemeModeProvider, (_, _) {});
     result.listen(profileViewModelProvider, (_, _) {});
     result.listen(userStatsProvider, (_, _) {});
     result.listen(methodViewModelProvider, (_, _) {});
@@ -79,14 +167,18 @@ Future<void> _pumpFeature(
     result.listen(practicePreferencesViewModelProvider, (_, _) {});
     result.listen(programmesViewModelProvider, (_, _) {});
     await Future.wait([
+      if (waitForWorkout) result.read(workoutViewModelProvider.future),
+      result.read(appThemeModeProvider.future),
       result.read(profileViewModelProvider.future),
-      result.read(userStatsProvider.future),
+      if (statsResult == null && waitForLearning)
+        result.read(userStatsProvider.future),
       result.read(methodViewModelProvider.future),
-      result.read(learnViewModelProvider.future),
+      if (waitForLearning) result.read(learnViewModelProvider.future),
       result.read(practiceViewModelProvider.future),
       result.read(practicePreferencesViewModelProvider.future),
       result.read(programmesViewModelProvider.future),
     ]);
+    if (beforePump != null) await beforePump(result);
     return result;
   });
   addTearDown(container!.dispose);
@@ -131,7 +223,7 @@ Future<void> _pumpFeature(
     ),
   );
   // Explore still uses remote thumbnails. Home/Workout now use bundled photos.
-  if (page is ExplorePage) {
+  if (!settle || page is ExplorePage || statsResult != null) {
     await tester.pump(const Duration(seconds: 1));
   } else {
     await tester.pumpAndSettle();
@@ -147,7 +239,7 @@ Future<void> _show(
   await tester.scrollUntilVisible(
     target,
     delta,
-    scrollable: find.byType(Scrollable).first,
+    scrollable: find.byType(Scrollable).hitTestable().first,
   );
   await tester.pumpAndSettle();
   await tester.ensureVisible(target);
@@ -191,6 +283,11 @@ void _expectDarkScreen(WidgetTester tester, Widget page) {
     );
   }
 
+  _expectReadableText(tester, root, background);
+  expect(tester.takeException(), isNull);
+}
+
+void _expectReadableText(WidgetTester tester, Finder root, Color background) {
   for (final element
       in find
           .descendant(of: root, matching: find.byType(RichText))
@@ -198,39 +295,51 @@ void _expectDarkScreen(WidgetTester tester, Widget page) {
           .evaluate()) {
     final richText = element.widget as RichText;
     final foreground = richText.text.style?.color;
-    var disabled = false;
+    var isIcon = false;
     element.visitAncestorElements((ancestor) {
       final widget = ancestor.widget;
-      if (widget is ButtonStyleButton &&
-          widget.onPressed == null &&
-          widget.onLongPress == null) {
-        disabled = true;
-      }
-      return !disabled;
+      if (widget is Icon) isIcon = true;
+      return true;
     });
-    if (foreground == null ||
-        foreground.a < 0.99 ||
-        disabled ||
-        richText.text.toPlainText().trim().isEmpty) {
+    if (foreground == null || richText.text.toPlainText().trim().isEmpty) {
       continue;
     }
     var backing = background;
+    final layers = <Color>[];
     element.visitAncestorElements((ancestor) {
       final widget = ancestor.widget;
       final color = widget is Material
           ? widget.color
           : widget is ColoredBox
           ? widget.color
+          : widget is DecoratedBox && widget.decoration is BoxDecoration
+          ? (widget.decoration as BoxDecoration).color
           : null;
-      if (color != null && color.a >= 0.95) {
-        backing = color;
-        return false;
+      if (color != null) {
+        layers.add(color);
+        if (color.a == 1) return false;
       }
       return true;
     });
+    for (final layer in layers.reversed) {
+      backing = Color.alphaBlend(layer, backing);
+    }
     // Chips paint their fill inside RawChip rather than on a Material ancestor.
     element.visitAncestorElements((ancestor) {
       final widget = ancestor.widget;
+      if (widget is Badge &&
+          widget.label != null &&
+          find
+              .descendant(
+                of: find.byWidget(widget.label!),
+                matching: find.byWidget(richText),
+              )
+              .evaluate()
+              .contains(element)) {
+        backing =
+            widget.backgroundColor ?? Theme.of(ancestor).colorScheme.error;
+        return false;
+      }
       if (widget is FilterChip) {
         final fill = widget.selected
             ? widget.selectedColor
@@ -241,10 +350,10 @@ void _expectDarkScreen(WidgetTester tester, Widget page) {
       return true;
     });
     expect(
-      _contrast(foreground, backing),
-      greaterThanOrEqualTo(4.5),
+      _contrast(Color.alphaBlend(foreground, backing), backing),
+      greaterThanOrEqualTo(isIcon ? 3 : 4.5),
       reason:
-          'Visible enabled text must remain readable: ${richText.text.toPlainText()}',
+          'Visible text (including disabled and alpha-composited states) must remain readable: ${richText.text.toPlainText()}',
     );
   }
   expect(tester.takeException(), isNull);
@@ -261,6 +370,9 @@ void main() {
   });
   // Add new public product screens here; this tests rendered output, not source syntax.
   final screens = <String, Widget Function()>{
+    ..._remainingImmersiveScreens,
+    ..._personalImmersiveScreens,
+    ..._learningImmersiveScreens,
     'Home cypher': () => const HomePage(),
     'Learn discovery': () => const ExplorePage(),
     'Motion lab prototype': () => const MotionLabPage(),
@@ -289,6 +401,23 @@ void main() {
       onBack: () {},
     ),
   };
+
+  // Deliberately standard utility; selection must not coerce the host theme.
+  testWidgets('Appearance normal light-host surface and default selection', (
+    tester,
+  ) async {
+    await _pumpFeature(tester, const AppearancesScreen());
+    expect(
+      Theme.of(tester.element(find.byType(AppearancesScreen))).brightness,
+      Brightness.light,
+    );
+    _expectAppearanceContrast(tester);
+  });
+
+  _personalSurfaceContracts();
+  _learningSurfaceContracts();
+  _remainingSurfaceContracts();
+  _reviewSurfaceContracts();
 
   for (final entry in screens.entries) {
     testWidgets(
@@ -941,7 +1070,7 @@ void main() {
     const page = MethodPage();
     await _pumpFeature(tester, page);
     expect(find.text(LocaleKeys.methodCurrentHelp.tr()), findsNothing);
-    expect(find.text(ForgeCategory.rhythm.label), findsOneWidget);
+    expect(find.text(ForgeCategory.rhythm.label.toUpperCase()), findsOneWidget);
     await tester.tap(find.text(LocaleKeys.detailsAboutMethod.tr()));
     await tester.pumpAndSettle();
     expect(find.text(LocaleKeys.methodCurrentHelp.tr()), findsOneWidget);
@@ -949,7 +1078,8 @@ void main() {
     expect(find.text(LocaleKeys.forgeCriteriaProvisional.tr()), findsOneWidget);
     await tester.tap(find.text(LocaleKeys.detailsAboutMethod.tr()));
     await tester.pumpAndSettle();
-    await tester.tap(find.text(ForgeCategory.rhythm.label));
+    await _show(tester, find.text(ForgeCategory.rhythm.label.toUpperCase()));
+    await tester.tap(find.text(ForgeCategory.rhythm.label.toUpperCase()));
     await tester.pumpAndSettle();
     expect(find.text(assessmentById('rhythm-1-v1').title), findsOneWidget);
   });

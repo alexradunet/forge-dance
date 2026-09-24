@@ -1,4 +1,4 @@
-import 'dart:ui' show SemanticsAction;
+import 'dart:ui' show SemanticsAction, SemanticsFlag;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,6 +7,75 @@ import 'package:forge_dance/design_system/design_system.dart';
 
 void main() {
   group('action primitive contracts', () {
+    testWidgets(
+      'reading card separates heading, body and enabled action semantics',
+      (tester) async {
+        final semantics = tester.ensureSemantics();
+        try {
+          for (final theme in [
+            AppThemes.light,
+            AppThemes.dark,
+            AppThemes.highContrastLight,
+            AppThemes.highContrastDark,
+          ]) {
+            var activations = 0;
+            await tester.pumpWidget(
+              MaterialApp(
+                theme: theme,
+                home: Scaffold(
+                  body: FgCard(
+                    child: Column(
+                      children: [
+                        const FgSectionHeading(title: 'Dated attempt'),
+                        const Text('Full criteria and reflection'),
+                        FgButton(
+                          text: 'View evidence',
+                          onPressed: () => activations++,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+            await tester.pumpAndSettle();
+            final heading = tester
+                .getSemantics(find.text('Dated attempt'))
+                .getSemanticsData();
+            expect(heading.label, 'Dated attempt');
+            expect(heading.hasFlag(SemanticsFlag.isHeader), true);
+            expect(heading.hasAction(SemanticsAction.tap), false);
+            final body = tester
+                .getSemantics(find.text('Full criteria and reflection'))
+                .getSemanticsData();
+            expect(body.hasFlag(SemanticsFlag.isHeader), false);
+            final button = tester.getSemantics(find.byType(FgButton));
+            expect(button.getSemanticsData().label, 'View evidence');
+            expect(
+              button.getSemanticsData().hasFlag(SemanticsFlag.isButton),
+              true,
+            );
+            expect(
+              button.getSemanticsData().hasFlag(SemanticsFlag.isEnabled),
+              true,
+            );
+            expect(
+              button.getSemanticsData().hasFlag(SemanticsFlag.isHeader),
+              false,
+            );
+            tester.binding.pipelineOwner.semanticsOwner!.performAction(
+              button.id,
+              SemanticsAction.tap,
+            );
+            await tester.pump();
+            expect(activations, 1);
+          }
+        } finally {
+          semantics.dispose();
+        }
+      },
+    );
+
     testWidgets('every size keeps a minimum 48px interactive target', (
       tester,
     ) async {

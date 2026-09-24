@@ -137,6 +137,7 @@ class FgButton extends StatelessWidget {
     );
 
     return Semantics(
+      container: true,
       button: true,
       enabled: isInteractive,
       label: semanticLabel ?? text,

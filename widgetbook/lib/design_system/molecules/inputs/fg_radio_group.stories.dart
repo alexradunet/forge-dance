@@ -11,10 +11,12 @@ final $Playground = _Story(name: 'Playground');
 class FgStringRadioGroupPreview extends StatefulWidget {
   const FgStringRadioGroupPreview({
     super.key,
+    this.editorial = true,
     this.initialValue = 'house',
     this.semanticLabel = 'Preferred dance style',
   });
 
+  final bool editorial;
   final String initialValue;
   final String semanticLabel;
 
@@ -37,6 +39,7 @@ class _FgStringRadioGroupPreviewState extends State<FgStringRadioGroupPreview> {
   @override
   Widget build(BuildContext context) {
     return FgRadioGroup<String>(
+      editorial: widget.editorial,
       semanticLabel: widget.semanticLabel,
       selectedValue: _selectedValue,
       items: const [

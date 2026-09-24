@@ -39,49 +39,32 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
         widget.profile ??
         ref.watch(profileViewModelProvider.select((it) => it.value?.profile));
 
-    return Scaffold(
-      body: FgBackground(
-        child: Column(
+    return FgImmersiveScaffold(
+      title: LocaleKeys.settings.tr(),
+      onBack: () => context.pop(),
+      bodyBuilder: (context) => FgReadingBody(
+        child: ListView(
+          padding: AppSpacing.allXXL,
           children: [
-            AppHeader(
-              title: LocaleKeys.settings.tr().toUpperCase(),
-              onBack: () => context.pop(),
+            FgSectionHeading(
+              title: LocaleKeys.personalYourSpace.tr(),
+              subtitle: LocaleKeys.personalSettingsIntro.tr(),
             ),
-            Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.xxl,
-                  ),
-                  child: Column(
-                    children: [
-                      const SizedBox(height: AppSpacing.xxl),
-                      _buildSettingsMenu(profile),
-                      const SizedBox(height: AppSpacing.huge2),
-                      Center(
-                        child: Text(
-                          'Version $_version',
-                          style: Theme.of(context).textTheme.labelSmall
-                              ?.copyWith(
-                                color: Theme.of(context)
-                                    .forgeColors
-                                    .onImmersiveMuted,
-                              ),
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.huge2),
-                    ],
-                  ),
-                ),
-              ),
+            const SizedBox(height: AppSpacing.xxxl),
+            _buildSettingsMenu(context, profile),
+            const SizedBox(height: AppSpacing.xxxl),
+            Text(
+              'Version $_version',
+              style: Theme.of(context).textTheme.labelSmall,
             ),
+            const SizedBox(height: AppSpacing.xxl),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildSettingsMenu(Profile? profile) {
+  Widget _buildSettingsMenu(BuildContext context, Profile? profile) {
     return Column(
       children: [
         ProfileMenuSection(
@@ -135,6 +118,7 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
   void _getPackageInfo() {
     PackageInfo.fromPlatform()
         .then((info) {
+          if (!mounted) return;
           setState(() {
             _version = info.version;
           });

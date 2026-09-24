@@ -29,6 +29,7 @@ import '../features/practice/ui/practice_log_page.dart';
 import '../features/programmes/ui/programmes_page.dart';
 import '../features/settings/presentation/pages/data_transfer_page.dart';
 import 'routes.dart';
+import 'shell_navigation_observer.dart';
 
 part 'router.g.dart';
 
@@ -108,143 +109,157 @@ GoRouter router(Ref ref) {
   );
 }
 
-List<RouteBase> _routes(Ref ref) => [
-  GoRoute(
-    path: Routes.splash,
-    pageBuilder: (context, state) => state.slidePage(const SplashScreen()),
-  ),
-  GoRoute(
-    path: Routes.onboarding,
-    pageBuilder: (context, state) => state.slidePage(const OnboardingScreen()),
-  ),
-  ShellRoute(
-    builder: (context, state, child) =>
-        MainScreen(location: state.uri.path, child: child),
-    routes: [
-      GoRoute(path: Routes.main, redirect: (_, _) => Routes.home),
-      GoRoute(path: Routes.library, redirect: (_, _) => Routes.vocabulary),
-      GoRoute(
-        path: Routes.vocabulary,
-        builder: (_, _) => const VocabularyPage(),
-        routes: [
-          GoRoute(
-            path: ':entryId',
-            redirect: (_, state) =>
-                const VocabularyRepository().byId(
-                      state.pathParameters['entryId']!,
-                    ) ==
-                    null
-                ? Routes.vocabulary
-                : null,
-            builder: (context, state) => VocabularyEntryPage(
-              entry: const VocabularyRepository().byId(
-                state.pathParameters['entryId']!,
-              )!,
-              onBack: () => context.pop(),
+List<RouteBase> _routes(Ref ref) {
+  final navigation = ShellNavigationObserver();
+  return [
+    GoRoute(
+      path: Routes.splash,
+      pageBuilder: (context, state) => state.slidePage(const SplashScreen()),
+    ),
+    GoRoute(
+      path: Routes.onboarding,
+      pageBuilder: (context, state) =>
+          state.slidePage(const OnboardingScreen()),
+    ),
+    ShellRoute(
+      observers: [navigation],
+      builder: (context, state, child) => MainScreen(
+        location: state.uri.path,
+        canChangeTab: () => navigation.canChangeTab,
+        child: child,
+      ),
+      routes: [
+        GoRoute(path: Routes.main, redirect: (_, _) => Routes.home),
+        GoRoute(path: Routes.library, redirect: (_, _) => Routes.vocabulary),
+        GoRoute(
+          path: Routes.vocabulary,
+          builder: (_, _) => const VocabularyPage(),
+          routes: [
+            GoRoute(
+              path: ':entryId',
+              redirect: (_, state) =>
+                  const VocabularyRepository().byId(
+                        state.pathParameters['entryId']!,
+                      ) ==
+                      null
+                  ? Routes.vocabulary
+                  : null,
+              builder: (context, state) => VocabularyEntryPage(
+                entry: const VocabularyRepository().byId(
+                  state.pathParameters['entryId']!,
+                )!,
+                onBack: () => context.pop(),
+              ),
             ),
-          ),
-        ],
-      ),
-      GoRoute(
-        path: Routes.explore,
-        builder: (_, _) => const ExplorePage(),
-        routes: [
-          GoRoute(
-            path: 'history',
-            builder: (context, _) =>
-                CollectionPage(onBack: () => context.pop()),
-          ),
-        ],
-      ),
-      GoRoute(path: Routes.home, builder: (_, _) => const HomePage()),
-      GoRoute(path: Routes.method, builder: (_, _) => const MethodPage()),
-      GoRoute(
-        path: Routes.practice,
-        builder: (_, _) => const PracticePage(),
-        routes: [
-          GoRoute(path: 'log', builder: (_, _) => const PracticeLogPage()),
-        ],
-      ),
-      GoRoute(
-        path: Routes.programmes,
-        builder: (_, _) => const ProgrammesPage(),
-      ),
-      GoRoute(
-        path: Routes.workout,
-        builder: (context, _) => TrainingSessionPage(
-          onClose: () => context.go(Routes.home),
-          onStart: () => context.push(Routes.workoutSession),
+          ],
         ),
-        routes: [
-          GoRoute(
-            path: 'session',
-            builder: (context, _) => TrainingSessionPage(
-              startImmediately: true,
-              onClose: () => context.pop(),
+        GoRoute(
+          path: Routes.explore,
+          builder: (_, _) => const ExplorePage(),
+          routes: [
+            GoRoute(
+              path: 'history',
+              builder: (context, _) =>
+                  CollectionPage(onBack: () => context.pop()),
             ),
+          ],
+        ),
+        GoRoute(path: Routes.home, builder: (_, _) => const HomePage()),
+        GoRoute(path: Routes.method, builder: (_, _) => const MethodPage()),
+        GoRoute(
+          path: Routes.practice,
+          builder: (_, _) => const PracticePage(),
+          routes: [
+            GoRoute(path: 'log', builder: (_, _) => const PracticeLogPage()),
+          ],
+        ),
+        GoRoute(
+          path: Routes.programmes,
+          builder: (_, _) => const ProgrammesPage(),
+        ),
+        GoRoute(
+          path: Routes.workout,
+          builder: (context, _) => TrainingSessionPage(
+            onClose: () => context.go(Routes.home),
+            onStart: () => context.push(Routes.workoutSession),
           ),
-        ],
-      ),
-      GoRoute(path: Routes.profile, builder: (_, _) => const ProfilePage()),
-      GoRoute(
-        path: '${Routes.main}/module/:moduleId',
-        builder: (context, state) {
-          final moduleId = state.pathParameters['moduleId']!;
-          ref.read(learnViewModelProvider.notifier).selectModule(moduleId);
-          return ModuleViewScreen(
-            moduleId: moduleId,
-            onBack: () => context.pop(),
-            onLessonNavigate: (lessonId) =>
-                LessonDestination(moduleId, lessonId).push<void>(context),
-          );
-        },
-        routes: [
-          GoRoute(
-            path: 'lesson/:lessonId',
-            builder: (context, state) {
-              final moduleId = state.pathParameters['moduleId']!;
-              final lessonId = state.pathParameters['lessonId']!;
-              ref.read(learnViewModelProvider.notifier).selectModule(moduleId);
-              final learn = ref.read(learnViewModelProvider).value;
-              if (learn == null || !learn.canOpenLesson(lessonId)) {
-                return ModuleViewScreen(
-                  moduleId: moduleId,
+          routes: [
+            GoRoute(
+              path: 'session',
+              builder: (context, _) => TrainingSessionPage(
+                startImmediately: true,
+                onClose: () => context.pop(),
+              ),
+            ),
+          ],
+        ),
+        GoRoute(path: Routes.profile, builder: (_, _) => const ProfilePage()),
+        GoRoute(
+          path: '${Routes.main}/module/:moduleId',
+          builder: (context, state) {
+            final moduleId = state.pathParameters['moduleId']!;
+            ref.read(learnViewModelProvider.notifier).selectModule(moduleId);
+            return ModuleViewScreen(
+              moduleId: moduleId,
+              onBack: () => context.pop(),
+              onLessonNavigate: (lessonId) =>
+                  LessonDestination(moduleId, lessonId).push<void>(context),
+            );
+          },
+          routes: [
+            GoRoute(
+              path: 'lesson/:lessonId',
+              builder: (context, state) {
+                final moduleId = state.pathParameters['moduleId']!;
+                final lessonId = state.pathParameters['lessonId']!;
+                ref
+                    .read(learnViewModelProvider.notifier)
+                    .selectModule(moduleId);
+                final learn = ref.read(learnViewModelProvider).value;
+                if (learn == null || !learn.canOpenLesson(lessonId)) {
+                  return ModuleViewScreen(
+                    moduleId: moduleId,
+                    onBack: () => context.pop(),
+                  );
+                }
+                return LessonPlayerScreen(
+                  lessonId: lessonId,
                   onBack: () => context.pop(),
                 );
-              }
-              return LessonPlayerScreen(
-                lessonId: lessonId,
-                onBack: () => context.pop(),
-              );
-            },
-          ),
-        ],
+              },
+            ),
+          ],
+        ),
+      ],
+    ),
+    GoRoute(
+      path: Routes.accountInformation,
+      pageBuilder: (context, state) {
+        final profile = state.extra;
+        if (profile is! Profile) return state.slidePage(const ProfilePage());
+        return state.slidePage(AccountInfoScreen(originalProfile: profile));
+      },
+    ),
+    GoRoute(
+      path: Routes.appearances,
+      pageBuilder: (context, state) =>
+          state.slidePage(const AppearancesScreen()),
+    ),
+    GoRoute(
+      path: Routes.settings,
+      pageBuilder: (context, state) => state.slidePage(
+        const SettingsPage(),
+        direction: SlideDirection.right,
       ),
-    ],
-  ),
-  GoRoute(
-    path: Routes.accountInformation,
-    pageBuilder: (context, state) {
-      final profile = state.extra;
-      if (profile is! Profile) return state.slidePage(const ProfilePage());
-      return state.slidePage(AccountInfoScreen(originalProfile: profile));
-    },
-  ),
-  GoRoute(
-    path: Routes.appearances,
-    pageBuilder: (context, state) => state.slidePage(const AppearancesScreen()),
-  ),
-  GoRoute(
-    path: Routes.settings,
-    pageBuilder: (context, state) =>
-        state.slidePage(const SettingsPage(), direction: SlideDirection.right),
-  ),
-  GoRoute(
-    path: Routes.stats,
-    pageBuilder: (context, state) => state.slidePage(const StatsPage()),
-  ),
-  GoRoute(
-    path: Routes.dataTransfer,
-    pageBuilder: (context, state) => state.slidePage(const DataTransferPage()),
-  ),
-];
+    ),
+    GoRoute(
+      path: Routes.stats,
+      pageBuilder: (context, state) => state.slidePage(const StatsPage()),
+    ),
+    GoRoute(
+      path: Routes.dataTransfer,
+      pageBuilder: (context, state) =>
+          state.slidePage(const DataTransferPage()),
+    ),
+  ];
+}

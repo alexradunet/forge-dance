@@ -12,8 +12,8 @@ import 'package:forge_dance/features/workout/ui/view_model/workout_view_model.da
 
 class FakeSessionRepository extends SessionRepository {
   FakeSessionRepository([List<WorkoutSession> seed = const []])
-      : store = {for (final s in seed) s.docKey: s},
-        super();
+    : store = {for (final s in seed) s.docKey: s},
+      super();
 
   final Map<String, WorkoutSession> store;
 
@@ -33,6 +33,24 @@ class FakeSessionRepository extends SessionRepository {
     if (existing != null) return (session: existing, created: false);
     store[completion.docKey] = completion;
     return (session: completion, created: true);
+  }
+}
+
+class MidnightRetryRepository extends FakeSessionRepository {
+  MidnightRetryRepository({required this.commitBeforeFailure});
+  final bool commitBeforeFailure;
+  final submissions = <WorkoutSession>[];
+  bool fail = true;
+  @override
+  Future<({WorkoutSession session, bool created})> completeOnce(
+    WorkoutSession completion,
+  ) async {
+    submissions.add(completion);
+    if (fail) {
+      if (commitBeforeFailure) await super.completeOnce(completion);
+      throw StateError('write failed');
+    }
+    return super.completeOnce(completion);
   }
 }
 
@@ -58,12 +76,11 @@ ProviderContainer containerWith(
   final container = ProviderContainer(
     overrides: [
       sessionRepositoryProvider.overrideWithValue(repository),
-      profileRepositoryProvider
-          .overrideWithValue(profileRepository ?? FakeProfileRepository()),
-      // The stats coordinator also reads lesson progress; use an empty local repository.
-      progressRepositoryProvider.overrideWithValue(
-        const ProgressRepository(),
+      profileRepositoryProvider.overrideWithValue(
+        profileRepository ?? FakeProfileRepository(),
       ),
+      // The stats coordinator also reads lesson progress; use an empty local repository.
+      progressRepositoryProvider.overrideWithValue(const ProgressRepository()),
     ],
   );
   addTearDown(container.dispose);
@@ -113,16 +130,18 @@ void main() {
   });
 
   group('WorkoutViewModel', () {
-    test('build exposes today\'s WOD and no completion for a fresh user',
-        () async {
-      final container = containerWith(FakeSessionRepository());
+    test(
+      'build exposes today\'s WOD and no completion for a fresh user',
+      () async {
+        final container = containerWith(FakeSessionRepository());
 
-      final state = await container.read(workoutViewModelProvider.future);
+        final state = await container.read(workoutViewModelProvider.future);
 
-      expect(state.wod, wodFor(DateTime.now()));
-      expect(state.todayKey, dateKey(DateTime.now()));
-      expect(state.wodCompletedToday, isFalse);
-    });
+        expect(state.wod, wodFor(DateTime.now()));
+        expect(state.todayKey, dateKey(DateTime.now()));
+        expect(state.wodCompletedToday, isFalse);
+      },
+    );
 
     test('completeWod persists once per day and reports the dedupe', () async {
       final repository = FakeSessionRepository();
@@ -136,16 +155,42 @@ void main() {
       final state = container.read(workoutViewModelProvider).value!;
       expect(state.wodCompletedToday, isTrue);
       expect(repository.store.length, 1);
-      expect(
-        repository.store.keys.single,
-        '${state.todayKey}_${state.wodId}',
-      );
+      expect(repository.store.keys.single, '${state.todayKey}_${state.wodId}');
 
       // Same day, same WOD: no second award, no duplicate session.
       final secondAward = await notifier.completeWod();
       expect(secondAward, isFalse);
       expect(repository.store.length, 1);
     });
+
+    for (final committed in [false, true]) {
+      test(
+        'midnight retry retains original key (partial commit: $committed)',
+        () async {
+          final repository = MidnightRetryRepository(
+            commitBeforeFailure: committed,
+          );
+          final container = containerWith(repository);
+          final initial = await container.read(workoutViewModelProvider.future);
+          final notifier = container.read(workoutViewModelProvider.notifier);
+          final beforeMidnight = DateTime(2026, 9, 7, 23, 59, 59);
+          final afterMidnight = DateTime(2026, 9, 8, 0, 0, 1);
+          await expectLater(
+            notifier.completeWod(now: beforeMidnight),
+            throwsStateError,
+          );
+          repository.fail = false;
+          final awarded = await notifier.completeWod(now: afterMidnight);
+          expect(awarded, !committed);
+          expect(repository.submissions.map((item) => item.docKey), [
+            '2026-09-07_${initial.wod.id}',
+            '2026-09-07_${initial.wod.id}',
+          ]);
+          expect(repository.store, hasLength(1));
+          expect(repository.store.values.single.date, '2026-09-07');
+        },
+      );
+    }
 
     test('completing the WOD records XP and streak on the profile', () async {
       final profileRepository = FakeProfileRepository();

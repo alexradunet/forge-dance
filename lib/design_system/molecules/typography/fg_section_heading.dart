@@ -30,6 +30,7 @@ class FgSectionHeading extends StatelessWidget {
         const SizedBox(height: AppSpacing.sm),
       ],
       Semantics(
+        container: true,
         header: true,
         child: Text(
           title,

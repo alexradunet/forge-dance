@@ -4,6 +4,7 @@ import '../../atoms/buttons/fg_button.dart';
 import '../../atoms/progress/fg_progress_bar.dart';
 import '../../atoms/surfaces/fg_card.dart';
 import '../../theme/forge_theme_extensions.dart';
+import '../../molecules/typography/fg_section_heading.dart';
 import '../../tokens/app_sizes.dart';
 import '../../tokens/app_spacing.dart';
 
@@ -20,10 +21,12 @@ class FgProgressSection extends StatelessWidget {
     this.levelProgress,
     this.onProgressTap,
     this.immersive = false,
+    this.editorial = false,
   });
 
   final String title;
   final bool immersive;
+  final bool editorial;
   final String? actionLabel;
   final VoidCallback? onAction;
   final List<FgStatData> stats;
@@ -40,12 +43,14 @@ class FgProgressSection extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: Text(
-                title,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  color: context.forgeForeground,
-                ),
-              ),
+              child: editorial
+                  ? FgSectionHeading(title: title)
+                  : Text(
+                      title,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: context.forgeForeground,
+                      ),
+                    ),
             ),
             if (actionLabel != null && onAction != null)
               FgButton(
@@ -80,6 +85,9 @@ class FgProgressSection extends StatelessWidget {
                               child: row + column < stats.length
                                   ? FgCard(
                                       immersive: immersive,
+                                      shape: editorial
+                                          ? FgCardShape.editorial
+                                          : FgCardShape.rounded,
                                       child: _StatContent(
                                         stat: stats[row + column],
                                       ),
@@ -101,6 +109,7 @@ class FgProgressSection extends StatelessWidget {
           FgCard(
             variant: immersive ? FgCardVariant.opaque : FgCardVariant.elevated,
             immersive: immersive,
+            shape: editorial ? FgCardShape.editorial : FgCardShape.rounded,
             onTap: onProgressTap,
             child: _ProgressContent(progress: levelProgress!),
           ),

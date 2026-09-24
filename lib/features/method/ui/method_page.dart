@@ -22,177 +22,145 @@ class MethodPage extends ConsumerWidget {
     final progress = ref.watch(methodViewModelProvider);
     return FgImmersiveScaffold(
       title: initialCategory?.label ?? LocaleKeys.methodTitle.tr(),
-      bodyBuilder: (context) => progress.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, _) => Center(
-          child: Padding(
-            padding: AppSpacing.allLG,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(LocaleKeys.methodLoadError.tr()),
-                const SizedBox(height: AppSpacing.lg),
-                FgButton(
-                  text: LocaleKeys.methodRetry.tr(),
-                  onPressed: () =>
-                      ref.read(methodViewModelProvider.notifier).reload(),
-                ),
-              ],
+      bodyBuilder: (context) => FgReadingBody(
+        child: progress.when(
+          loading: () => const Center(child: FgSpinner()),
+          error: (error, _) => Center(
+            child: Padding(
+              padding: AppSpacing.allLG,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(LocaleKeys.methodLoadError.tr()),
+                  const SizedBox(height: AppSpacing.lg),
+                  FgButton(
+                    text: LocaleKeys.methodRetry.tr(),
+                    onPressed: () =>
+                        ref.read(methodViewModelProvider.notifier).reload(),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        data: (value) => RefreshIndicator(
-          onRefresh: () => ref.read(methodViewModelProvider.notifier).reload(),
-          child: ListView(
-            padding: AppSpacing.allLG,
-            children: [
-              if (initialCategory == null) ...[
-                _Summary(progress: value),
-                const SizedBox(height: AppSpacing.xxl),
-                Text(
-                  LocaleKeys.methodCurrentProfile.tr(),
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                FgDetails(
-                  title: LocaleKeys.detailsAboutMethod.tr(),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(LocaleKeys.methodCurrentHelp.tr()),
-                      const SizedBox(height: AppSpacing.md),
-                      Text(LocaleKeys.methodCoreCategory.tr()),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(LocaleKeys.methodSupportCategory.tr()),
-                      const SizedBox(height: AppSpacing.md),
-                      Text(LocaleKeys.methodSupportHelp.tr()),
-                      const SizedBox(height: AppSpacing.md),
-                      Text(LocaleKeys.methodBeltsHelp.tr()),
-                      const SizedBox(height: AppSpacing.md),
-                      Text(LocaleKeys.forgeCriteriaProvisional.tr()),
-                    ],
-                  ),
-                ),
-                for (final category in ForgeCategory.values) ...[
-                  FgCard(
-                    immersive: true,
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) => MethodPage(initialCategory: category),
-                      ),
-                    ),
-                    child: Row(
+          data: (value) => RefreshIndicator(
+            onRefresh: () =>
+                ref.read(methodViewModelProvider.notifier).reload(),
+            child: ListView(
+              padding: AppSpacing.allLG,
+              children: [
+                if (initialCategory == null) ...[
+                  _Summary(progress: value),
+                  const SizedBox(height: AppSpacing.xxl),
+                  FgSectionHeading(title: LocaleKeys.methodCurrentProfile.tr()),
+                  const SizedBox(height: AppSpacing.sm),
+                  FgDetails(
+                    title: LocaleKeys.detailsAboutMethod.tr(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(
-                          category.isCore
-                              ? Icons.adjust
-                              : Icons.health_and_safety_outlined,
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                category.label,
-                                style: Theme.of(context).textTheme.titleMedium,
-                              ),
-                              Wrap(
-                                spacing: AppSpacing.sm,
-                                runSpacing: AppSpacing.xs,
-                                children: [
-                                  Text(_categoryLevel(value, category)),
-                                  Text(
-                                    category.isCore
-                                        ? LocaleKeys.compactCore.tr()
-                                        : LocaleKeys.compactSupport.tr(),
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.sm),
-                        const Icon(Icons.chevron_right),
+                        Text(LocaleKeys.methodCurrentHelp.tr()),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(LocaleKeys.methodCoreCategory.tr()),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(LocaleKeys.methodSupportCategory.tr()),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(LocaleKeys.methodSupportHelp.tr()),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(LocaleKeys.methodBeltsHelp.tr()),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(LocaleKeys.forgeCriteriaProvisional.tr()),
                       ],
                     ),
                   ),
+                  for (final category in ForgeCategory.values) ...[
+                    FgProgramCard(
+                      label: category.isCore
+                          ? LocaleKeys.compactCore.tr()
+                          : LocaleKeys.compactSupport.tr(),
+                      title: category.label,
+                      details: _categoryLevel(value, category),
+                      actionLabel: LocaleKeys.methodChooseAssessment.tr(),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (_) => MethodPage(initialCategory: category),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                  ],
+                  const SizedBox(height: AppSpacing.lg),
+                  FgSectionHeading(
+                    title: LocaleKeys.methodBeltsRequirements.tr(),
+                  ),
                   const SizedBox(height: AppSpacing.sm),
+                  for (final belt in forgeBelts)
+                    _BeltRequirements(belt: belt, progress: value),
+                ] else ...[
+                  FgCard(
+                    immersive: true,
+                    shape: FgCardShape.editorial,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FgSectionHeading(
+                          title: _categoryLevel(value, initialCategory!),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(LocaleKeys.compactSelfAssessed.tr()),
+                        FgDetails(
+                          title: LocaleKeys.detailsAboutMethod.tr(),
+                          child: Text(
+                            initialCategory!.isCore
+                                ? LocaleKeys.methodCurrentHelp.tr()
+                                : LocaleKeys.methodSupportHelp.tr(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.lg),
+                  FgSectionHeading(
+                    title: LocaleKeys.methodChooseAssessment.tr(),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  for (final assessment in forgeAssessments.where(
+                    (item) => item.category == initialCategory,
+                  )) ...[
+                    _AssessmentTile(assessment: assessment, progress: value),
+                    const SizedBox(height: AppSpacing.sm),
+                  ],
                 ],
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  LocaleKeys.methodBeltsRequirements.tr(),
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                for (final belt in forgeBelts)
-                  _BeltRequirements(belt: belt, progress: value),
-              ] else ...[
-                FgCard(
-                  immersive: true,
+                const SizedBox(height: AppSpacing.xxl),
+                FgDetails(
+                  title: LocaleKeys.methodDatedEvidence.tr(),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        _categoryLevel(value, initialCategory!),
-                        style: Theme.of(context).textTheme.headlineSmall,
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text(LocaleKeys.compactSelfAssessed.tr()),
-                      FgDetails(
-                        title: LocaleKeys.detailsAboutMethod.tr(),
-                        child: Text(
-                          initialCategory!.isCore
-                              ? LocaleKeys.methodCurrentHelp.tr()
-                              : LocaleKeys.methodSupportHelp.tr(),
+                      if (value.attempts
+                          .where(
+                            (attempt) =>
+                                initialCategory == null ||
+                                attempt.assessment.category == initialCategory,
+                          )
+                          .isEmpty)
+                        Text(LocaleKeys.methodNoAttempts.tr()),
+                      for (final attempt in value.attempts.reversed.where(
+                        (attempt) =>
+                            initialCategory == null ||
+                            attempt.assessment.category == initialCategory,
+                      )) ...[
+                        _AttemptTile(
+                          key: ValueKey(attempt.id),
+                          attempt: attempt,
                         ),
-                      ),
+                        const SizedBox(height: AppSpacing.sm),
+                      ],
                     ],
                   ),
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                Text(
-                  LocaleKeys.methodChooseAssessment.tr(),
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                for (final assessment in forgeAssessments.where(
-                  (item) => item.category == initialCategory,
-                )) ...[
-                  _AssessmentTile(assessment: assessment, progress: value),
-                  const SizedBox(height: AppSpacing.sm),
-                ],
+                const SizedBox(height: AppSpacing.xxl),
               ],
-              const SizedBox(height: AppSpacing.xxl),
-              FgDetails(
-                title: LocaleKeys.methodDatedEvidence.tr(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (value.attempts
-                        .where(
-                          (attempt) =>
-                              initialCategory == null ||
-                              attempt.assessment.category == initialCategory,
-                        )
-                        .isEmpty)
-                      Text(LocaleKeys.methodNoAttempts.tr()),
-                    for (final attempt in value.attempts.reversed.where(
-                      (attempt) =>
-                          initialCategory == null ||
-                          attempt.assessment.category == initialCategory,
-                    )) ...[
-                      _AttemptTile(key: ValueKey(attempt.id), attempt: attempt),
-                      const SizedBox(height: AppSpacing.sm),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(height: AppSpacing.xxl),
-            ],
+            ),
           ),
         ),
       ),
@@ -224,6 +192,7 @@ class _Summary extends StatelessWidget {
   @override
   Widget build(BuildContext context) => FgCard(
     immersive: true,
+    shape: FgCardShape.editorial,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -234,10 +203,7 @@ class _Summary extends StatelessWidget {
           style: Theme.of(context).textTheme.labelLarge,
         ),
         const SizedBox(height: AppSpacing.sm),
-        Text(
-          forgeBelts[progress.earnedBeltIndex].name,
-          style: Theme.of(context).textTheme.headlineLarge,
-        ),
+        FgSectionHeading(title: forgeBelts[progress.earnedBeltIndex].name),
         const SizedBox(height: AppSpacing.sm),
         Text(LocaleKeys.compactSelfAssessed.tr()),
         const SizedBox(height: AppSpacing.lg),
@@ -351,6 +317,7 @@ class _AssessmentTile extends StatelessWidget {
         .lastOrNull;
     return FgCard(
       immersive: true,
+      shape: FgCardShape.editorial,
       onTap: () => Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (_) => _AssessmentPage(assessment: assessment),
@@ -363,10 +330,7 @@ class _AssessmentTile extends StatelessWidget {
             _level(assessment.level),
             style: Theme.of(context).textTheme.labelLarge,
           ),
-          Text(
-            assessment.title,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          FgSectionHeading(title: assessment.title),
           if (previous != null) ...[
             const SizedBox(height: AppSpacing.sm),
             Text(
@@ -412,6 +376,7 @@ class _AssessmentPageState extends ConsumerState<_AssessmentPage> {
   }
 
   Future<void> _save() async {
+    if (_saving) return;
     setState(() {
       _saving = true;
       _error = null;
@@ -459,126 +424,135 @@ class _AssessmentPageState extends ConsumerState<_AssessmentPage> {
   Widget build(BuildContext context) {
     final assessment = widget.assessment;
     final missingNotes = assessment.requiresNotes && _notes.text.trim().isEmpty;
-    return FgImmersiveScaffold(
-      title: assessment.title,
-      bodyBuilder: (context) => ListView(
-        padding: AppSpacing.allLG,
-        children: [
-          FgCard(
-            immersive: true,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  LocaleKeys.methodRubricVersion.tr(
-                    args: [
-                      '${assessment.level}',
-                      '${assessment.rubricVersion}',
+    return PopScope(
+      canPop: !_saving,
+      child: FgImmersiveScaffold(
+        title: assessment.title,
+        onBack: () {
+          if (!_saving) Navigator.of(context).maybePop();
+        },
+        bodyBuilder: (context) => FgReadingBody(
+          child: ListView(
+            padding: AppSpacing.allLG,
+            children: [
+              FgCard(
+                immersive: true,
+                shape: FgCardShape.editorial,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      LocaleKeys.methodRubricVersion.tr(
+                        args: [
+                          '${assessment.level}',
+                          '${assessment.rubricVersion}',
+                        ],
+                      ),
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(
+                      assessment.instructions,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: AppSpacing.md),
+                    Text(LocaleKeys.compactMethodAssessmentSafety.tr()),
+                    FgDetails(
+                      title: LocaleKeys.detailsAdaptations.tr(),
+                      child: Text(assessment.adaptation),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xxl),
+              FgSectionHeading(title: LocaleKeys.methodMarkCriteria.tr()),
+              const SizedBox(height: AppSpacing.sm),
+              Text(LocaleKeys.methodMarkHelp.tr()),
+              const SizedBox(height: AppSpacing.lg),
+              for (final criterion in assessment.criteria) ...[
+                FgCard(
+                  immersive: true,
+                  shape: FgCardShape.editorial,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      FgCheckboxItem.simple(
+                        isChecked: _met.contains(criterion.id),
+                        semanticLabel: criterion.text,
+                        isEnabled: !_saving,
+                        onTap: () => _changed(() {
+                          if (!_met.add(criterion.id)) {
+                            _met.remove(criterion.id);
+                          }
+                        }),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(child: Text(criterion.text)),
                     ],
                   ),
-                  style: Theme.of(context).textTheme.labelLarge,
                 ),
-                const SizedBox(height: AppSpacing.md),
-                Text(
-                  assessment.instructions,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                const SizedBox(height: AppSpacing.md),
-                Text(LocaleKeys.compactMethodAssessmentSafety.tr()),
-                FgDetails(
-                  title: LocaleKeys.detailsAdaptations.tr(),
-                  child: Text(assessment.adaptation),
-                ),
+                const SizedBox(height: AppSpacing.sm),
               ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xxl),
-          Text(
-            LocaleKeys.methodMarkCriteria.tr(),
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(LocaleKeys.methodMarkHelp.tr()),
-          const SizedBox(height: AppSpacing.lg),
-          for (final criterion in assessment.criteria) ...[
-            FgCard(
-              immersive: true,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              const SizedBox(height: AppSpacing.lg),
+              FgInput(
+                label: LocaleKeys.methodNotes.tr(),
+                controller: _notes,
+                isEnabled: !_saving,
+                onChanged: (_) => _changed(() {}),
+              ),
+              if (assessment.requiresNotes)
+                Text(LocaleKeys.methodNotesRequired.tr()),
+              FgDetails(
+                title: LocaleKeys.compactMethodNotesGuide.tr(),
+                child: Text(LocaleKeys.methodNotesHelp.tr()),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              AbsorbPointer(
+                absorbing: _saving,
+                child: EvidencePicker(
+                  value: _evidenceId,
+                  onChanged: (value) => _changed(() => _evidenceId = value),
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
+              Row(
                 children: [
                   FgCheckboxItem.simple(
-                    isChecked: _met.contains(criterion.id),
-                    semanticLabel: criterion.text,
+                    isChecked: _confirmed,
+                    semanticLabel: LocaleKeys.methodConfirm.tr(),
                     isEnabled: !_saving,
-                    onTap: () => _changed(() {
-                      if (!_met.add(criterion.id)) _met.remove(criterion.id);
-                    }),
+                    onTap: () => setState(() => _confirmed = !_confirmed),
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  Expanded(child: Text(criterion.text)),
+                  Expanded(child: Text(LocaleKeys.methodConfirm.tr())),
                 ],
               ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-          ],
-          const SizedBox(height: AppSpacing.lg),
-          FgInput(
-            label: LocaleKeys.methodNotes.tr(),
-            controller: _notes,
-            isEnabled: !_saving,
-            onChanged: (_) => _changed(() {}),
-          ),
-          if (assessment.requiresNotes)
-            Text(LocaleKeys.methodNotesRequired.tr()),
-          FgDetails(
-            title: LocaleKeys.compactMethodNotesGuide.tr(),
-            child: Text(LocaleKeys.methodNotesHelp.tr()),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          AbsorbPointer(
-            absorbing: _saving,
-            child: EvidencePicker(
-              value: _evidenceId,
-              onChanged: (value) => _changed(() => _evidenceId = value),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          Row(
-            children: [
-              FgCheckboxItem.simple(
-                isChecked: _confirmed,
-                semanticLabel: LocaleKeys.methodConfirm.tr(),
-                isEnabled: !_saving,
-                onTap: () => setState(() => _confirmed = !_confirmed),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                _met.length == assessment.criteria.length && !missingNotes
+                    ? LocaleKeys.methodPassPreview.tr()
+                    : LocaleKeys.methodIncompletePreview.tr(),
               ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(child: Text(LocaleKeys.methodConfirm.tr())),
+              if (_error != null) ...[
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  _error!,
+                  style: Theme.of(context).textTheme.bodyMedium
+                      ?.copyWith(color: Theme.of(context).colorScheme.error),
+                ),
+              ],
+              const SizedBox(height: AppSpacing.lg),
+              FgButton(
+                text: LocaleKeys.methodSaveAssessment.tr(),
+                isLoading: _saving,
+                isEnabled: _confirmed,
+                expand: true,
+                onPressed: _save,
+              ),
+              const SizedBox(height: AppSpacing.xxl),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
-          Text(
-            _met.length == assessment.criteria.length && !missingNotes
-                ? LocaleKeys.methodPassPreview.tr()
-                : LocaleKeys.methodIncompletePreview.tr(),
-          ),
-          if (_error != null) ...[
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              _error!,
-              style: Theme.of(context).textTheme.bodyMedium
-                  ?.copyWith(color: Theme.of(context).colorScheme.error),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.lg),
-          FgButton(
-            text: LocaleKeys.methodSaveAssessment.tr(),
-            isLoading: _saving,
-            isEnabled: _confirmed,
-            expand: true,
-            onPressed: _save,
-          ),
-          const SizedBox(height: AppSpacing.xxl),
-        ],
+        ),
       ),
     );
   }
@@ -591,13 +565,11 @@ class _AttemptTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) => FgCard(
     immersive: true,
+    shape: FgCardShape.editorial,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          attempt.assessment.title,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        FgSectionHeading(title: attempt.assessment.title),
         const SizedBox(height: AppSpacing.sm),
         Text(
           LocaleKeys.methodAttemptSummary.tr(

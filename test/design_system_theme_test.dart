@@ -37,6 +37,8 @@ void main() {
             scheme.onTertiaryContainer,
           ),
           ('error', scheme.error, scheme.onError),
+          ('error text on surface', scheme.surface, scheme.error),
+          ('error text on card', scheme.surfaceContainerLow, scheme.error),
           ('errorContainer', scheme.errorContainer, scheme.onErrorContainer),
           ('surface', scheme.surface, scheme.onSurface),
           (
@@ -64,6 +66,51 @@ void main() {
           );
         }
       });
+
+      testWidgets(
+        '$name renders readable validation and destructive controls',
+        (tester) async {
+          await tester.pumpWidget(
+            MaterialApp(
+              theme: theme,
+              home: Scaffold(
+                body: Column(
+                  children: [
+                    const FgInput(
+                      label: 'Effort',
+                      errorText: 'Choose an effort from 1 to 10.',
+                    ),
+                    FgButton(
+                      text: 'Delete record',
+                      variant: FgButtonVariant.destructive,
+                      onPressed: () {},
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+          final error = tester.widget<RichText>(
+            find
+                .descendant(
+                  of: find.text('Choose an effort from 1 to 10.'),
+                  matching: find.byType(RichText),
+                )
+                .first,
+          );
+          expect(
+            _contrastRatio(error.text.style!.color!, theme.colorScheme.surface),
+            greaterThanOrEqualTo(4.5),
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          final foreground = button.style!.foregroundColor!.resolve({})!;
+          final background = button.style!.backgroundColor!.resolve({})!;
+          expect(
+            _contrastRatio(background, foreground),
+            greaterThanOrEqualTo(4.5),
+          );
+        },
+      );
 
       test('$name uses deterministic Forge typography', () {
         expect(theme.useMaterial3, isTrue);

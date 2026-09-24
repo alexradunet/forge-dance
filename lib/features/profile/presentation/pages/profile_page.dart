@@ -14,6 +14,7 @@ import '../../../stats/ui/view_model/user_stats_provider.dart';
 import '../../model/profile.dart';
 import '../../ui/view_model/profile_view_model.dart';
 import '../../ui/widgets/level_grid.dart';
+import '../../ui/widgets/profile_menu.dart';
 import '../../model/level_model.dart';
 import '../pages/level_progression_page.dart';
 
@@ -46,19 +47,44 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
-    final profile = ref.watch(
-      profileViewModelProvider.select((it) => it.value?.profile),
-    );
-    final stats = ref.watch(userStatsProvider).value ?? const UserStats();
+    final profile = ref.watch(profileViewModelProvider);
+    final stats = ref.watch(userStatsProvider);
+    final mastery = ref.watch(methodViewModelProvider);
 
-    return Scaffold(
-      body: FgBackground(child: _buildMainContent(profile, stats)),
+    return FgImmersiveScaffold(
+      bodyBuilder: (context) => FgReadingBody(
+        child: profile.hasError || stats.hasError || mastery.hasError
+            ? SingleChildScrollView(
+                child: FgEmpty(
+                  icon: Icons.error_outline,
+                  title: LocaleKeys.unexpectedErrorOccurred.tr(),
+                  tone: FgEmptyTone.error,
+                  actionLabel: LocaleKeys.practiceRetry.tr(),
+                  onAction: () {
+                    ref.invalidate(profileViewModelProvider);
+                    ref.invalidate(methodViewModelProvider);
+                    ref.invalidate(userStatsProvider);
+                  },
+                ),
+              )
+            : !profile.hasValue || !stats.hasValue || !mastery.hasValue
+            ? const Center(child: FgSpinner())
+            : _buildMainContent(
+                context,
+                profile.value!.profile,
+                stats.value!,
+                mastery.value!,
+              ),
+      ),
     );
   }
 
-  Widget _buildMainContent(Profile? profile, UserStats stats) {
-    final mastery =
-        ref.watch(methodViewModelProvider).value ?? MethodProgress();
+  Widget _buildMainContent(
+    BuildContext context,
+    Profile? profile,
+    UserStats stats,
+    MethodProgress mastery,
+  ) {
     final levels = DanceLevel.buildAll(progress: mastery);
     final levelSubtitle = LocaleKeys.levelBeltSubtitle.tr(
       args: ['${stats.level}', stats.beltName],
@@ -78,13 +104,14 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
           ),
         ),
         SliverToBoxAdapter(
-          child: _buildProfileInfo(profile, stats, levelSubtitle),
+          child: _buildProfileInfo(context, profile, stats, levelSubtitle),
         ),
         SliverToBoxAdapter(
           child: Padding(
             padding: AppSpacing.screen,
             child: FgProgressSection(
               immersive: true,
+              editorial: true,
               title: LocaleKeys.myProgress.tr().toUpperCase(),
               stats: [
                 FgStatData(
@@ -145,6 +172,29 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                 _openLevelProgression(context, levels, levelId: level.id),
           ),
         ),
+        SliverPadding(
+          padding: AppSpacing.allXXL,
+          sliver: SliverToBoxAdapter(
+            child: ProfileMenuSection(
+              title: LocaleKeys.general.tr(),
+              items: [
+                ProfileMenuItem(
+                  icon: Icons.person_outline,
+                  label: LocaleKeys.accountInformation.tr(),
+                  onTap: () => context.push(
+                    Routes.accountInformation,
+                    extra: profile ?? const Profile(),
+                  ),
+                ),
+                ProfileMenuItem(
+                  icon: Icons.settings_outlined,
+                  label: LocaleKeys.settings.tr(),
+                  onTap: () => context.push(Routes.settings),
+                ),
+              ],
+            ),
+          ),
+        ),
         const SliverToBoxAdapter(
           child: SizedBox(height: AppSizes.bottomNavHeight + AppSpacing.xxl),
         ),
@@ -153,46 +203,52 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   }
 
   Widget _buildProfileInfo(
+    BuildContext context,
     Profile? profile,
     UserStats stats,
     String levelSubtitle,
   ) {
-    final theme = Theme.of(context);
-
+    final avatar = FgAvatar.large(
+      imageUrl: profile?.avatar,
+      initials: profile?.name?.trim().isNotEmpty == true
+          ? profile!.name!.trim().characters.first
+          : null,
+      level: stats.level,
+      tone: FgAvatarTone.reward,
+      semanticLabel: profile?.name ?? Constants.defaultName,
+    );
+    final identity = FgSectionHeading(
+      eyebrow: LocaleKeys.personalLocalIdentity.tr(),
+      title: profile?.name ?? Constants.defaultName,
+      subtitle: levelSubtitle,
+    );
     return Padding(
       padding: AppSpacing.horizontalXXL,
-      child: Row(
-        children: [
-          FgAvatar.large(
-            imageUrl: profile?.avatar,
-            initials: profile?.name,
-            level: stats.level,
-            tone: FgAvatarTone.reward,
-            semanticLabel: profile?.name ?? Constants.defaultName,
-          ),
-          const SizedBox(width: AppSpacing.xl),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      child: FgCard(
+        immersive: true,
+        shape: FgCardShape.editorial,
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            if (constraints.maxWidth < AppSizes.cardStandardWidth ||
+                MediaQuery.textScalerOf(context).scale(1) > 1.5) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  avatar,
+                  const SizedBox(height: AppSpacing.lg),
+                  identity,
+                ],
+              );
+            }
+            return Row(
               children: [
-                Text(
-                  profile?.name ?? Constants.defaultName,
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: theme.forgeColors.onImmersive,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  levelSubtitle,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.forgeColors.onImmersiveMuted,
-                  ),
-                ),
+                avatar,
+                const SizedBox(width: AppSpacing.lg),
+                Expanded(child: identity),
               ],
-            ),
-          ),
-        ],
+            );
+          },
+        ),
       ),
     );
   }

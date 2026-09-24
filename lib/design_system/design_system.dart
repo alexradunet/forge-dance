@@ -131,3 +131,5 @@ export 'organisms/lessons/lesson_path_timeline.dart';
 
 export 'templates/swipeable_card_screen_template.dart';
 export 'templates/fg_immersive_scaffold.dart';
+
+export 'templates/fg_reading_body.dart';

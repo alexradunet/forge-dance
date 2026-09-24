@@ -77,7 +77,7 @@ void main() {
           ),
         ],
         child: MaterialApp(
-          theme: AppThemes.dark,
+          theme: AppThemes.light,
           builder: (context, child) => MediaQuery(
             data: MediaQuery.of(context)
                 .copyWith(textScaler: TextScaler.linear(textScale)),
@@ -127,38 +127,24 @@ void main() {
       find.byType(FgStepNavigation),
     );
     navigation.onPrevious!();
-    await tester.pump();
+    await tester.pumpAndSettle();
+    expect(closes, 0);
+    await tester.tap(find.widgetWithText(FgButton, 'practiceDiscard'));
+    await tester.pumpAndSettle();
     expect(closes, 1);
     expect(tester.takeException(), isNull);
   });
 
   testWidgets('small screen supports doubled player text', (tester) async {
-    await pumpTraining(tester, size: const Size(320, 640), textScale: 2);
-    await tester.tap(find.bySemanticsLabel('startWorkoutSemantic'));
-    await tester.pumpAndSettle();
+    await pumpTraining(
+      tester,
+      size: const Size(320, 640),
+      textScale: 2,
+      startImmediately: true,
+    );
     expect(tester.takeException(), isNull);
     expect(find.byType(FgStepNavigation), findsOneWidget);
   });
-
-  for (final size in [const Size(390, 760), const Size(1000, 600)]) {
-    testWidgets('media and coaching cards share a width at $size', (
-      tester,
-    ) async {
-      await pumpTraining(tester, size: size);
-      await tester.tap(find.bySemanticsLabel('startWorkoutSemantic'));
-      await tester.pumpAndSettle();
-      final mediaRect = tester.getRect(
-        find.byKey(const ValueKey('workout-media-shell')),
-      );
-      final textRect = tester.getRect(find.byType(FgInstructionCard));
-      expect(textRect.width, closeTo(mediaRect.width, 0.01));
-      if (size.width < 760) {
-        expect(textRect.left, closeTo(mediaRect.left, 0.01));
-        expect(textRect.right, closeTo(mediaRect.right, 0.01));
-      }
-      expect(tester.takeException(), isNull);
-    });
-  }
 
   group('adaptive workout training flow', () {
     testWidgets('overview presents workout purpose and starts training', (
@@ -253,44 +239,6 @@ void main() {
       expect(find.text(wod.exercises[1].name), findsWidgets);
     });
 
-    testWidgets(
-      'media swipe is gated forward but still supports backward navigation',
-      (tester) async {
-        await pumpTraining(tester, size: const Size(1000, 430));
-        final wod = wodFor(DateTime.now());
-        await tester.tap(find.bySemanticsLabel('startWorkoutSemantic'));
-        await tester.pumpAndSettle();
-
-        await tester.drag(
-          find.byKey(const ValueKey('workout-content-scroll')),
-          const Offset(-320, 0),
-        );
-        await tester.pumpAndSettle();
-        expect(find.text(wod.exercises.first.name), findsWidgets);
-
-        await tester.fling(
-          find.byKey(const ValueKey('workout-media-swipe-zone')),
-          const Offset(-320, 0),
-          1000,
-        );
-        await tester.pumpAndSettle();
-        expect(find.text('completeTimerToContinue'), findsOneWidget);
-        expect(find.text(wod.exercises.first.name), findsWidgets);
-
-        await tester.tap(find.text('SKIP'));
-        await tester.pumpAndSettle();
-        expect(find.text(wod.exercises[1].name), findsWidgets);
-
-        await tester.fling(
-          find.byKey(const ValueKey('workout-media-swipe-zone')),
-          const Offset(320, 0),
-          1000,
-        );
-        await tester.pumpAndSettle();
-        expect(find.text(wod.exercises.first.name), findsWidgets);
-      },
-    );
-
     testWidgets('timer completion enables progression', (tester) async {
       await pumpTraining(tester, size: const Size(390, 760));
       final wod = wodFor(DateTime.now());
@@ -308,37 +256,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text(wod.exercises[1].name), findsWidgets);
-    });
-
-    testWidgets('narrow scrolling docks media and expand brings it back', (
-      tester,
-    ) async {
-      await pumpTraining(tester, size: const Size(390, 560));
-      await tester.tap(find.bySemanticsLabel('startWorkoutSemantic'));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const ValueKey('workout-media-shell')), findsOneWidget);
-
-      await tester.drag(
-        find.byKey(const ValueKey('workout-content-scroll')),
-        const Offset(0, -220),
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const ValueKey('workout-media-shell')), findsNothing);
-      expect(find.byKey(const ValueKey('workout-media-dock')), findsOneWidget);
-      final timerSeconds = wodFor(DateTime.now()).exercises.first.seconds;
-      expect(find.text('${timerSeconds}s'), findsOneWidget);
-
-      await tester.tap(find.text('${timerSeconds}s'));
-      await tester.pump(const Duration(seconds: 1));
-      expect(find.text('${timerSeconds - 1}s'), findsOneWidget);
-
-      await tester.tap(find.byIcon(Icons.expand_less_rounded));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const ValueKey('workout-media-shell')), findsOneWidget);
-      expect(find.byKey(const ValueKey('workout-media-dock')), findsNothing);
     });
 
     testWidgets('completion records session reward and finish closes', (

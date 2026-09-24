@@ -17,55 +17,65 @@ class AppearancesScreen extends ConsumerWidget {
     final iconColor = Theme.of(context).colorScheme.onSurfaceVariant;
 
     return Scaffold(
-      body: FgBackground(
-        child: Column(
-          children: [
-            AppHeader(
-              title: LocaleKeys.appearances.tr(),
-              onBack: () => context.pop(),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: AppSpacing.allLG,
-                child: FgRadioGroup<ThemeMode>(
-                  semanticLabel: LocaleKeys.appearances.tr(),
-                  selectedValue: selectedMode,
-                  onChanged: (mode) => ref
-                      .read(appThemeModeProvider.notifier)
-                      .updateMode(mode),
-                  items: [
-                    FgRadioGroupItem(
-                      label: LocaleKeys.auto.tr(),
-                      value: ThemeMode.system,
-                      leading: FgIcon(
-                        icon: Icons.settings_suggest_rounded,
-                        color: iconColor,
-                        size: AppSizes.iconMd,
-                      ),
-                    ),
-                    FgRadioGroupItem(
-                      label: LocaleKeys.lightMode.tr(),
-                      value: ThemeMode.light,
-                      leading: FgIcon(
-                        icon: Icons.light_mode_rounded,
-                        color: iconColor,
-                        size: AppSizes.iconMd,
-                      ),
-                    ),
-                    FgRadioGroupItem(
-                      label: LocaleKeys.darkMode.tr(),
-                      value: ThemeMode.dark,
-                      leading: FgIcon(
-                        icon: Icons.dark_mode_rounded,
-                        color: iconColor,
-                        size: AppSizes.iconMd,
-                      ),
-                    ),
-                  ],
+      body: SafeArea(
+        child: FgReadingBody(
+          child: ListView(
+            padding: AppSpacing.allXXL,
+            children: [
+              Align(
+                alignment: AlignmentDirectional.centerStart,
+                child: FgIconButton(
+                  icon: Icons.arrow_back,
+                  semanticLabel: MaterialLocalizations.of(context)
+                      .backButtonTooltip,
+                  onPressed: () => context.pop(),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: AppSpacing.lg),
+              FgSectionHeading(
+                eyebrow: LocaleKeys.settings.tr(),
+                title: LocaleKeys.appearances.tr(),
+                subtitle: LocaleKeys.personalAppearanceIntro.tr(),
+              ),
+              const SizedBox(height: AppSpacing.xxxl),
+              FgRadioGroup<ThemeMode>(
+                editorial: true,
+                semanticLabel: LocaleKeys.appearances.tr(),
+                selectedValue: selectedMode,
+                onChanged: (mode) =>
+                    ref.read(appThemeModeProvider.notifier).updateMode(mode),
+                items: [
+                  FgRadioGroupItem(
+                    label: LocaleKeys.auto.tr(),
+                    value: ThemeMode.system,
+                    leading: FgIcon(
+                      icon: Icons.settings_suggest_rounded,
+                      color: iconColor,
+                      size: AppSizes.iconMd,
+                    ),
+                  ),
+                  FgRadioGroupItem(
+                    label: LocaleKeys.lightMode.tr(),
+                    value: ThemeMode.light,
+                    leading: FgIcon(
+                      icon: Icons.light_mode_rounded,
+                      color: iconColor,
+                      size: AppSizes.iconMd,
+                    ),
+                  ),
+                  FgRadioGroupItem(
+                    label: LocaleKeys.darkMode.tr(),
+                    value: ThemeMode.dark,
+                    leading: FgIcon(
+                      icon: Icons.dark_mode_rounded,
+                      color: iconColor,
+                      size: AppSizes.iconMd,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

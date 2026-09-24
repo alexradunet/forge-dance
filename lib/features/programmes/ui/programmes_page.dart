@@ -130,8 +130,11 @@ class _ProgrammePage extends ConsumerStatefulWidget {
 
 class _ProgrammePageState extends ConsumerState<_ProgrammePage> {
   bool _saving = false;
+  PracticeRecord? _pending;
+  bool _saveFailed = false;
 
   Future<void> _enrol(bool enrolled) async {
+    if (_saving || _pending != null) return;
     setState(() => _saving = true);
     try {
       final notifier = ref.read(programmesViewModelProvider.notifier);
@@ -152,42 +155,114 @@ class _ProgrammePageState extends ConsumerState<_ProgrammePage> {
   }
 
   Future<void> _practice(PracticeBlock block) async {
+    if (_saving || _pending != null) return;
     final learn = ref.read(learnViewModelProvider).value;
     if (!(learn?.canOpenLesson(block.lessonId) ?? false)) return;
+    setState(() => _saving = true);
     final record = await Navigator.of(context, rootNavigator: true)
         .push<PracticeRecord>(
           MaterialPageRoute(builder: (_) => PracticePlayerPage(block: block)),
         );
-    if (record == null || !mounted) return;
+    if (!mounted) return;
+    setState(() {
+      _saving = false;
+      _pending = record;
+    });
+    if (record == null) return;
     // Keep the returned record until persistence succeeds, so a disk failure is retryable.
     await _savePractice(record);
   }
 
   Future<void> _savePractice(PracticeRecord record) async {
+    if (_saving || !identical(record, _pending)) return;
+    setState(() {
+      _saving = true;
+      _saveFailed = false;
+    });
     try {
       if (ref.read(practiceViewModelProvider).isLoading) {
         await ref.read(practiceViewModelProvider.future);
       }
       await ref.read(practiceViewModelProvider.notifier).record(record);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(LocaleKeys.programmesPracticeSaved.tr())),
-        );
-      }
+      if (!mounted) return;
+      setState(() => _pending = null);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(LocaleKeys.programmesPracticeSaved.tr())),
+      );
     } catch (_) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(LocaleKeys.programmesSaveError.tr()),
-            action: SnackBarAction(
-              label: LocaleKeys.programmesRetry.tr(),
-              onPressed: () => _savePractice(record),
-            ),
-          ),
-        );
-      }
+      if (mounted) setState(() => _saveFailed = true);
+    } finally {
+      if (mounted) setState(() => _saving = false);
     }
   }
+
+  Future<void> _discardPending(BuildContext context) async {
+    if (_saving) return;
+    final discard = await FgImmersiveScaffold.showModal<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        scrollable: true,
+        title: Text(LocaleKeys.practiceDiscardTitle.tr()),
+        content: Text(LocaleKeys.practiceDiscardBody.tr()),
+        actions: [
+          FgButton(
+            text: LocaleKeys.practiceCancel.tr(),
+            variant: FgButtonVariant.ghost,
+            onPressed: () => Navigator.pop(context, false),
+          ),
+          FgButton(
+            text: LocaleKeys.practiceDiscard.tr(),
+            variant: FgButtonVariant.destructive,
+            onPressed: () => Navigator.pop(context, true),
+          ),
+        ],
+      ),
+    );
+    if (discard == true && mounted) {
+      setState(() {
+        _pending = null;
+        _saveFailed = false;
+      });
+    }
+  }
+
+  Widget _pendingResult(BuildContext context) => FgReadingBody(
+    child: ListView(
+      padding: AppSpacing.allLG,
+      children: [
+        FgRoundPanel(
+          label: LocaleKeys.practiceUnsaved.tr(),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                _pending!.title,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              if (_saveFailed)
+                Text(
+                  LocaleKeys.programmesSaveError.tr(),
+                  style: Theme.of(context).textTheme.bodyMedium
+                      ?.copyWith(color: Theme.of(context).colorScheme.error),
+                ),
+              const SizedBox(height: AppSpacing.lg),
+              FgButton(
+                text: LocaleKeys.practiceRetrySave.tr(),
+                isLoading: _saving,
+                onPressed: () => _savePractice(_pending!),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              FgButton(
+                text: LocaleKeys.practiceDiscard.tr(),
+                variant: FgButtonVariant.secondary,
+                onPressed: _saving ? null : () => _discardPending(context),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 
   void _openLesson(LearnState learn, String id) {
     final module = learn.modules.firstWhere(
@@ -213,143 +288,173 @@ class _ProgrammePageState extends ConsumerState<_ProgrammePage> {
     final assessment = forgeAssessments.firstWhere(
       (item) => item.id == programme.assessmentId,
     );
-    return FgImmersiveScaffold(
-      bodyBuilder: (context) {
-        final theme = Theme.of(context);
-        return ListView(
-          children: [
-            AppHeader(
-              title: programme.title,
-              onBack: () => Navigator.of(context).pop(),
-            ),
-            Padding(
-              padding: AppSpacing.screen,
-              child: DefaultTextStyle(
-                style: theme.textTheme.bodyMedium!.copyWith(
-                  color: theme.forgeColors.onImmersive,
+    return PopScope(
+      canPop: !_saving && _pending == null,
+      child: FgImmersiveScaffold(
+        bodyBuilder: (context) {
+          if (_pending != null) return _pendingResult(context);
+          if (_saving) return const Center(child: FgSpinner());
+          final theme = Theme.of(context);
+          return FgReadingBody(
+            child: ListView(
+              children: [
+                AppHeader(
+                  title: programme.title,
+                  onBack: () => Navigator.of(context).pop(),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    if (learning.isLoading || enrolments.isLoading)
-                      const Center(child: FgSpinner()),
-                    if (learning.hasError || enrolments.hasError)
-                      FgButton(
-                        text: LocaleKeys.programmesRetry.tr(),
-                        onPressed: () {
-                          ref.invalidate(learnViewModelProvider);
-                          ref.invalidate(programmesViewModelProvider);
-                        },
-                      ),
-                    FgButton(
-                      text: enrolled
-                          ? LocaleKeys.programmesLeave.tr()
-                          : LocaleKeys.programmesStart.tr(),
-                      variant: enrolled
-                          ? FgButtonVariant.secondary
-                          : FgButtonVariant.primary,
-                      isLoading: _saving,
-                      isEnabled:
-                          learn != null &&
-                          enrolments.hasValue &&
-                          (enrolled || !blocked),
-                      onPressed: () => _enrol(enrolled),
+                Padding(
+                  padding: AppSpacing.screen,
+                  child: DefaultTextStyle(
+                    style: theme.textTheme.bodyMedium!.copyWith(
+                      color: theme.forgeColors.onImmersive,
                     ),
-                    if (blocked) ...[
-                      Text(LocaleKeys.programmesPrerequisiteHint.tr()),
-                      _prerequisites(context, programme, learn),
-                    ],
-                    if (learn != null) ...[
-                      const SizedBox(height: AppSpacing.lg),
-                      Text(
-                        LocaleKeys.programmesProgress.tr(
-                          args: [
-                            '${programme.completedSessions(learn)}',
-                            '${programme.sessions.length}',
-                          ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        if (learning.isLoading || enrolments.isLoading)
+                          const Center(child: FgSpinner()),
+                        if (learning.hasError || enrolments.hasError)
+                          FgButton(
+                            text: LocaleKeys.programmesRetry.tr(),
+                            onPressed: () {
+                              ref.invalidate(learnViewModelProvider);
+                              ref.invalidate(programmesViewModelProvider);
+                            },
+                          ),
+                        FgSectionHeading(
+                          title: enrolled
+                              ? LocaleKeys.cypherProgrammeEnrolled.tr()
+                              : blocked
+                              ? LocaleKeys.lockedLabel.tr()
+                              : learn != null
+                              ? LocaleKeys.compactReady.tr()
+                              : LocaleKeys.programmesTitle.tr(),
+                          subtitle: programme.schedule,
                         ),
-                      ),
-                      FgProgressBar(
-                        value:
-                            programme.completedSessions(learn) /
-                            programme.sessions.length,
-                      ),
-                      if (nextSession != null) ...[
                         const SizedBox(height: AppSpacing.lg),
-                        Text(LocaleKeys.programmesNextSession.tr()),
-                        _sessionCard(context, nextSession, learn, enrolled),
-                      ],
-                    ],
-                    FgDetails(
-                      key: ValueKey('programme-about-${programme.id}'),
-                      title: LocaleKeys.detailsProgramme.tr(),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(programme.description),
-                          const SizedBox(height: AppSpacing.lg),
-                          Text(programme.schedule),
+                        if (!enrolled)
+                          _enrolAction(
+                            enrolled,
+                            learn != null && enrolments.hasValue && !blocked,
+                          ),
+                        if (blocked) ...[
+                          Text(LocaleKeys.programmesPrerequisiteHint.tr()),
+                          _prerequisites(context, programme, learn),
+                        ],
+                        if (learn != null) ...[
                           const SizedBox(height: AppSpacing.lg),
                           Text(
-                            LocaleKeys.programmesGains.tr(),
-                            style: theme.textTheme.titleMedium,
+                            LocaleKeys.programmesProgress.tr(
+                              args: [
+                                '${programme.completedSessions(learn)}',
+                                '${programme.sessions.length}',
+                              ],
+                            ),
                           ),
-                          for (final gain in programme.intendedGains.entries)
-                            Text('${gain.key.label}: ${gain.value}'),
-                          const SizedBox(height: AppSpacing.lg),
-                          Text(LocaleKeys.programmesCompletionNotMastery.tr()),
-                          const SizedBox(height: AppSpacing.lg),
-                          Text(LocaleKeys.programmesAssessmentHint.tr()),
-                          if (!blocked) ...[
+                          FgProgressBar(
+                            value:
+                                programme.completedSessions(learn) /
+                                programme.sessions.length,
+                          ),
+                          if (nextSession != null) ...[
                             const SizedBox(height: AppSpacing.lg),
-                            _prerequisites(context, programme, learn),
+                            FgSectionHeading(
+                              title: LocaleKeys.programmesNextSession.tr(),
+                            ),
+                            const SizedBox(height: AppSpacing.md),
+                            _sessionCard(context, nextSession, learn, enrolled),
                           ],
                         ],
-                      ),
-                    ),
-                    if (learn != null)
-                      for (final session in programme.sessions)
-                        if (session.lessonId != nextSession?.lessonId)
-                          _sessionCard(context, session, learn, enrolled),
-                    const SizedBox(height: AppSpacing.lg),
-                    Text(
-                      LocaleKeys.programmesFinalAssessment.tr(),
-                      style: theme.textTheme.titleMedium,
-                    ),
-                    Text(assessment.title),
-                    FgButton(
-                      text: LocaleKeys.programmesOpenAssessment.tr(),
-                      isEnabled:
-                          learn != null &&
-                          learn.canOpenLesson(assessment.linkedLessonId),
-                      onPressed: () => Navigator.of(context).push<void>(
-                        MaterialPageRoute(
-                          builder: (_) => MethodPage(
-                            initialCategory: assessment.category,
-                            initialAssessmentId: assessment.id,
+                        if (enrolled)
+                          _enrolAction(
+                            enrolled,
+                            learn != null && enrolments.hasValue,
+                          ),
+                        FgDetails(
+                          key: ValueKey('programme-about-${programme.id}'),
+                          title: LocaleKeys.detailsProgramme.tr(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(programme.description),
+                              const SizedBox(height: AppSpacing.lg),
+
+                              Text(
+                                LocaleKeys.programmesGains.tr(),
+                                style: theme.textTheme.titleMedium,
+                              ),
+                              for (final gain
+                                  in programme.intendedGains.entries)
+                                Text('${gain.key.label}: ${gain.value}'),
+                              const SizedBox(height: AppSpacing.lg),
+                              Text(
+                                LocaleKeys.programmesCompletionNotMastery.tr(),
+                              ),
+                              const SizedBox(height: AppSpacing.lg),
+                              Text(LocaleKeys.programmesAssessmentHint.tr()),
+                              if (!blocked) ...[
+                                const SizedBox(height: AppSpacing.lg),
+                                _prerequisites(context, programme, learn),
+                              ],
+                            ],
                           ),
                         ),
-                      ),
+                        if (learn != null)
+                          for (final session in programme.sessions)
+                            if (session.lessonId != nextSession?.lessonId)
+                              _sessionCard(context, session, learn, enrolled),
+                        const SizedBox(height: AppSpacing.lg),
+                        FgSectionHeading(
+                          title: LocaleKeys.programmesFinalAssessment.tr(),
+                        ),
+                        Text(assessment.title),
+                        FgButton(
+                          text: LocaleKeys.programmesOpenAssessment.tr(),
+                          isEnabled:
+                              learn != null &&
+                              learn.canOpenLesson(assessment.linkedLessonId),
+                          onPressed: () => Navigator.of(context).push<void>(
+                            MaterialPageRoute(
+                              builder: (_) => MethodPage(
+                                initialCategory: assessment.category,
+                                initialAssessmentId: assessment.id,
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (learn != null &&
+                            !learn.canOpenLesson(
+                              assessment.linkedLessonId,
+                            )) ...[
+                          Text(LocaleKeys.compactAssessmentLocked.tr()),
+                          FgButton(
+                            text: LocaleKeys.vocabularyViewPath.tr(),
+                            variant: FgButtonVariant.secondary,
+                            onPressed: () =>
+                                _openLesson(learn, assessment.linkedLessonId),
+                          ),
+                        ],
+                      ],
                     ),
-                    if (learn != null &&
-                        !learn.canOpenLesson(assessment.linkedLessonId)) ...[
-                      Text(LocaleKeys.compactAssessmentLocked.tr()),
-                      FgButton(
-                        text: LocaleKeys.vocabularyViewPath.tr(),
-                        variant: FgButtonVariant.secondary,
-                        onPressed: () =>
-                            _openLesson(learn, assessment.linkedLessonId),
-                      ),
-                    ],
-                  ],
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        );
-      },
+          );
+        },
+      ),
     );
   }
+
+  Widget _enrolAction(bool enrolled, bool enabled) => FgButton(
+    text: enrolled
+        ? LocaleKeys.programmesLeave.tr()
+        : LocaleKeys.programmesStart.tr(),
+    variant: enrolled ? FgButtonVariant.secondary : FgButtonVariant.primary,
+    isLoading: _saving,
+    isEnabled: enabled,
+    onPressed: () => _enrol(enrolled),
+  );
 
   Widget _prerequisites(
     BuildContext context,
@@ -382,16 +487,14 @@ class _ProgrammePageState extends ConsumerState<_ProgrammePage> {
   ) => Padding(
     key: ValueKey('programme-session-${session.lessonId}'),
     padding: const EdgeInsets.only(bottom: AppSpacing.md),
-    child: FgCard(
-      immersive: true,
+    child: FgRoundPanel(
+      label: session.schedule,
+      active: widget.programme.nextSession(learn)?.lessonId == session.lessonId,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(session.schedule),
-          Text(
-            learn.lessonById(session.lessonId)!.title,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          FgSectionHeading(title: learn.lessonById(session.lessonId)!.title),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             learn.progress[session.lessonId]?.status == LessonStatus.completed
                 ? LocaleKeys.programmesStudied.tr()

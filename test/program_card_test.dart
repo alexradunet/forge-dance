@@ -72,6 +72,47 @@ void main() {
     },
   );
 
+  for (final columns in [1, 2, 4]) {
+    testWidgets(
+      'requested column cap $columns preserves full card content and action',
+      (tester) async {
+        await tester.binding.setSurfaceSize(const Size(1280, 900));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        var opened = 0;
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppThemes.light,
+            home: FgImmersiveScaffold(
+              bodyBuilder: (context) => SingleChildScrollView(
+                child: FgProgramCardLayout(
+                  maxColumns: columns,
+                  children: [
+                    for (var index = 0; index < 4; index++)
+                      FgProgramCard(
+                        title: 'Lesson $index',
+                        label: 'Completed',
+                        summary: 'Complete reading content without a fixed-height grid.',
+                        onTap: () => opened++,
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+        final cards = find.byType(FgProgramCard);
+        expect(
+          tester.getSize(cards.first).width,
+          closeTo((1280 - AppSpacing.lg * (columns - 1)) / columns, .01),
+        );
+        await tester.ensureVisible(cards.last);
+        await tester.tap(cards.last);
+        expect(opened, 1);
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   for (final width in [320.0, 1024.0]) {
     testWidgets('program cards adapt at $width with large text', (
       tester,

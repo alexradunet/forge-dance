@@ -17,6 +17,7 @@ class _DataTransferPageState extends ConsumerState<DataTransferPage> {
   final _exportKey = GlobalKey();
 
   Future<void> _export() async {
+    setState(() => _message = null);
     try {
       final box = _exportKey.currentContext!.findRenderObject()! as RenderBox;
       await ref
@@ -31,6 +32,7 @@ class _DataTransferPageState extends ConsumerState<DataTransferPage> {
   }
 
   Future<void> _restore() async {
+    setState(() => _message = null);
     try {
       final backup = await ref
           .read(dataTransferViewModelProvider.notifier)
@@ -72,84 +74,97 @@ class _DataTransferPageState extends ConsumerState<DataTransferPage> {
     return PopScope(
       canPop: !busy,
       child: FgImmersiveScaffold(
-        bodyBuilder: (context) => CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: AppHeader(
-                title: LocaleKeys.forgeTransferTitle.tr(),
-                onBack: busy ? null : () => Navigator.of(context).pop(),
+        bodyBuilder: (context) => FgReadingBody(
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: AppHeader(
+                  title: LocaleKeys.forgeTransferTitle.tr(),
+                  onBack: busy ? null : () => Navigator.of(context).pop(),
+                ),
               ),
-            ),
-            SliverPadding(
-              padding: AppSpacing.allXXL,
-              sliver: SliverToBoxAdapter(
-                child: FgCard(
-                  immersive: true,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(LocaleKeys.compactBackupIntro.tr()),
-                      const SizedBox(height: AppSpacing.lg),
-                      FgButton(
-                        key: _exportKey,
-                        text: LocaleKeys.forgeExportData.tr(),
-                        expand: true,
-                        onPressed: busy ? null : _export,
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      FgButton(
-                        text: LocaleKeys.forgeImportData.tr(),
-                        variant: FgButtonVariant.secondary,
-                        expand: true,
-                        onPressed: busy ? null : _restore,
-                      ),
-                      const SizedBox(height: AppSpacing.lg),
-                      Text(LocaleKeys.compactRestoreWarning.tr()),
-                      FgDetails(
-                        key: const ValueKey('backup-included-details'),
-                        title: LocaleKeys.detailsBackup.tr(),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(LocaleKeys.forgeTransferDescription.tr()),
-                            const SizedBox(height: AppSpacing.sm),
-                            Text(LocaleKeys.forgeRestoreWarning.tr()),
-                          ],
+              SliverPadding(
+                padding: AppSpacing.allXXL,
+                sliver: SliverToBoxAdapter(
+                  child: FgCard(
+                    immersive: true,
+                    shape: FgCardShape.editorial,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FgSectionHeading(
+                          title: LocaleKeys.personalKeepYourProgress.tr(),
+                          subtitle: LocaleKeys.compactBackupIntro.tr(),
                         ),
-                      ),
-                      if (busy)
-                        const Padding(
-                          padding: AppSpacing.allLG,
-                          child: Center(child: FgSpinner()),
+                        const SizedBox(height: AppSpacing.lg),
+                        FgButton(
+                          key: _exportKey,
+                          text: LocaleKeys.forgeExportData.tr(),
+                          expand: true,
+                          onPressed: busy ? null : _export,
                         ),
-                      if (transfer.hasError)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: AppSpacing.lg,
+                        const SizedBox(height: AppSpacing.md),
+                        const FgDivider(),
+                        const SizedBox(height: AppSpacing.lg),
+                        FgSectionHeading(
+                          title: LocaleKeys.forgeRestoreAction.tr(),
+                        ),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(LocaleKeys.compactRestoreWarning.tr()),
+                        const SizedBox(height: AppSpacing.lg),
+                        FgButton(
+                          text: LocaleKeys.forgeImportData.tr(),
+                          variant: FgButtonVariant.secondary,
+                          expand: true,
+                          onPressed: busy ? null : _restore,
+                        ),
+                        const SizedBox(height: AppSpacing.lg),
+                        FgDetails(
+                          key: const ValueKey('backup-included-details'),
+                          title: LocaleKeys.detailsBackup.tr(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(LocaleKeys.forgeTransferDescription.tr()),
+                              const SizedBox(height: AppSpacing.sm),
+                              Text(LocaleKeys.forgeRestoreWarning.tr()),
+                            ],
                           ),
-                          child: Text(
-                            LocaleKeys.forgeTransferError.tr(
-                              args: ['${transfer.error}'],
+                        ),
+                        if (busy)
+                          const Padding(
+                            padding: AppSpacing.allLG,
+                            child: Center(child: FgSpinner()),
+                          ),
+                        if (transfer.hasError)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.lg,
                             ),
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: Theme.of(context).colorScheme.error,
-                                ),
+                            child: Text(
+                              LocaleKeys.forgeTransferError.tr(
+                                args: ['${transfer.error}'],
+                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: Theme.of(context).colorScheme.error,
+                                  ),
+                            ),
                           ),
-                        ),
-                      if (_message != null && !transfer.hasError)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: AppSpacing.lg,
+                        if (_message != null && !transfer.hasError)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              vertical: AppSpacing.lg,
+                            ),
+                            child: Text(_message!),
                           ),
-                          child: Text(_message!),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

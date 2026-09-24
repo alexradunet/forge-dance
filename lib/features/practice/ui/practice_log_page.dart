@@ -75,48 +75,52 @@ class _PracticeLogPageState extends ConsumerState<PracticeLogPage> {
     ]..sort((a, b) => b.performedAt.compareTo(a.performedAt));
     return FgImmersiveScaffold(
       title: LocaleKeys.practiceLogTitle.tr(),
-      bodyBuilder: (context) => ListView(
-        padding: AppSpacing.allLG,
-        children: [
-          FgDetails(
-            title: LocaleKeys.detailsProgress.tr(),
-            child: Text(LocaleKeys.practiceLogIntro.tr()),
-          ),
-          if (widget.lessonId != null || widget.vocabularyId != null)
-            Text(LocaleKeys.practiceFilteredHistory.tr()),
-          const SizedBox(height: AppSpacing.lg),
-          if (_error != null)
-            Text(
-              _error!,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+      bodyBuilder: (context) => FgReadingBody(
+        child: ListView(
+          padding: AppSpacing.allLG,
+          children: [
+            FgDetails(
+              title: LocaleKeys.detailsProgress.tr(),
+              child: Text(LocaleKeys.practiceLogIntro.tr()),
             ),
-          if (history.isLoading)
-            const Center(child: FgSpinner())
-          else if (history.hasError) ...[
-            Text(LocaleKeys.practiceLoadFailed.tr(args: ['${history.error}'])),
-            FgButton(
-              text: LocaleKeys.practiceRetry.tr(),
-              onPressed: () =>
-                  ref.read(practiceViewModelProvider.notifier).reload(),
-            ),
-          ] else if (records.isEmpty)
-            FgEmpty(
-              icon: Icons.history,
-              title: LocaleKeys.practiceLogEmpty.tr(),
-            )
-          else
-            for (var index = 0; index < records.length; index++) ...[
-              _recordCard(
-                context,
-                records[index],
-                records
-                    .skip(index + 1)
-                    .where(records[index].isComparableTo)
-                    .firstOrNull,
+            if (widget.lessonId != null || widget.vocabularyId != null)
+              Text(LocaleKeys.practiceFilteredHistory.tr()),
+            const SizedBox(height: AppSpacing.lg),
+            if (_error != null)
+              Text(
+                _error!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
               ),
-              const SizedBox(height: AppSpacing.lg),
-            ],
-        ],
+            if (history.isLoading)
+              const Center(child: FgSpinner())
+            else if (history.hasError) ...[
+              Text(
+                LocaleKeys.practiceLoadFailed.tr(args: ['${history.error}']),
+              ),
+              FgButton(
+                text: LocaleKeys.practiceRetry.tr(),
+                onPressed: () =>
+                    ref.read(practiceViewModelProvider.notifier).reload(),
+              ),
+            ] else if (records.isEmpty)
+              FgEmpty(
+                icon: Icons.history,
+                title: LocaleKeys.practiceLogEmpty.tr(),
+              )
+            else
+              for (var index = 0; index < records.length; index++) ...[
+                _recordCard(
+                  context,
+                  records[index],
+                  records
+                      .skip(index + 1)
+                      .where(records[index].isComparableTo)
+                      .firstOrNull,
+                ),
+                const SizedBox(height: AppSpacing.lg),
+              ],
+          ],
+        ),
       ),
     );
   }
@@ -125,18 +129,15 @@ class _PracticeLogPageState extends ConsumerState<PracticeLogPage> {
     BuildContext context,
     PracticeRecord record,
     PracticeRecord? previous,
-  ) => FgCard(
+  ) => FgRoundPanel(
     key: ValueKey(record.id),
-    immersive: true,
+    label: DateFormat.yMMMd(context.locale.toString())
+        .add_jm()
+        .format(record.performedAt.toLocal()),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(record.title, style: Theme.of(context).textTheme.titleMedium),
-        Text(
-          DateFormat.yMMMd(context.locale.toString())
-              .add_jm()
-              .format(record.performedAt.toLocal()),
-        ),
+        FgSectionHeading(title: record.title),
         if (record.workoutDate != null)
           Text(
             LocaleKeys.dailyPracticeWorkoutDate.tr(
@@ -327,48 +328,56 @@ class _PracticeReflectionPageState
     canPop: !_saving,
     child: FgImmersiveScaffold(
       title: LocaleKeys.practiceEditReflection.tr(),
-      bodyBuilder: (context) => ListView(
-        padding: AppSpacing.allLG,
-        children: [
-          Text(
-            widget.record.title,
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          FgInput.multiline(
-            label: LocaleKeys.practiceNotes.tr(),
-            controller: _notes,
-            helperText: LocaleKeys.practiceNotesHint.tr(),
-            isEnabled: !_saving,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          FgInput(
-            label: LocaleKeys.practiceRpe.tr(),
-            controller: _effort,
-            keyboardType: TextInputType.number,
-            isEnabled: !_saving,
-            helperText: LocaleKeys.practiceRpeHint.tr(),
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          IgnorePointer(
-            ignoring: _saving,
-            child: EvidencePicker(
-              value: _evidenceId,
-              onChanged: (value) => setState(() => _evidenceId = value),
+      bodyBuilder: (context) => FgReadingBody(
+        child: ListView(
+          padding: AppSpacing.allLG,
+          children: [
+            FgSectionHeading(
+              title: widget.record.title,
+              subtitle: LocaleKeys.compactRecord.tr(
+                args: [
+                  '${widget.record.durationSeconds}',
+                  '${widget.record.bpm}',
+                  '${widget.record.difficulty}',
+                ],
+              ),
             ),
-          ),
-          if (_error != null)
-            Text(
-              _error!,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            const SizedBox(height: AppSpacing.lg),
+            FgInput.multiline(
+              label: LocaleKeys.practiceNotes.tr(),
+              controller: _notes,
+              helperText: LocaleKeys.practiceNotesHint.tr(),
+              isEnabled: !_saving,
             ),
-          const SizedBox(height: AppSpacing.lg),
-          FgButton(
-            text: LocaleKeys.practiceSaveReflection.tr(),
-            isLoading: _saving,
-            onPressed: _save,
-          ),
-        ],
+            const SizedBox(height: AppSpacing.lg),
+            FgInput(
+              label: LocaleKeys.practiceRpe.tr(),
+              controller: _effort,
+              keyboardType: TextInputType.number,
+              isEnabled: !_saving,
+              helperText: LocaleKeys.practiceRpeHint.tr(),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            IgnorePointer(
+              ignoring: _saving,
+              child: EvidencePicker(
+                value: _evidenceId,
+                onChanged: (value) => setState(() => _evidenceId = value),
+              ),
+            ),
+            if (_error != null)
+              Text(
+                _error!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            const SizedBox(height: AppSpacing.lg),
+            FgButton(
+              text: LocaleKeys.practiceSaveReflection.tr(),
+              isLoading: _saving,
+              onPressed: _save,
+            ),
+          ],
+        ),
       ),
     ),
   );
