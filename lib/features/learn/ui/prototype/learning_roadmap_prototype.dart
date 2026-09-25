@@ -22,8 +22,13 @@ const _variantLabels = [
 ];
 
 class LearningRoadmapPrototype extends ConsumerStatefulWidget {
-  const LearningRoadmapPrototype({required this.variant, super.key});
+  const LearningRoadmapPrototype({
+    required this.variant,
+    this.initialSearch,
+    super.key,
+  });
   final String variant;
+  final String? initialSearch;
 
   @override
   ConsumerState<LearningRoadmapPrototype> createState() =>
@@ -37,6 +42,14 @@ class _LearningRoadmapPrototypeState
   String _query = '';
   bool _browse = false;
   final _search = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _query = widget.initialSearch ?? '';
+    _search.text = _query;
+    _browse = _query.isNotEmpty;
+  }
 
   @override
   void dispose() {

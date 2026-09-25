@@ -14,6 +14,7 @@ import '../features/vocabulary/ui/vocabulary_page.dart';
 import '../features/vocabulary/ui/vocabulary_entry_page.dart';
 import '../features/learn/ui/module_view_screen.dart';
 import '../features/learn/ui/prototype/learning_roadmap_prototype.dart';
+import '../features/skill_progression/prototype/ui/skill_progression_prototype.dart';
 import '../features/learn/ui/lesson_player_screen.dart';
 import '../features/learn/ui/view_model/learn_view_model.dart';
 import '../features/onboarding/ui/onboarding_screen.dart';
@@ -152,7 +153,10 @@ List<RouteBase> _routes(Ref ref) {
         builder: (_, state) {
           final variant = state.uri.queryParameters['variant'];
           if (kDebugMode && roadmapPrototypeVariants.contains(variant)) {
-            return LearningRoadmapPrototype(variant: variant!);
+            return LearningRoadmapPrototype(
+              variant: variant!,
+              initialSearch: state.uri.queryParameters['search'],
+            );
           }
           return const ExplorePage();
         },
@@ -190,7 +194,16 @@ List<RouteBase> _routes(Ref ref) {
           ),
         ],
       ),
-      GoRoute(path: Routes.profile, builder: (_, _) => const ProfilePage()),
+      GoRoute(
+        path: Routes.profile,
+        builder: (_, state) {
+          final variant = state.uri.queryParameters['variant'];
+          if (kDebugMode && skillPrototypeVariants.contains(variant)) {
+            return SkillProgressionPrototype(variant: variant!);
+          }
+          return const ProfilePage();
+        },
+      ),
       GoRoute(
         path: '${Routes.main}/module/:moduleId',
         builder: (context, state) {

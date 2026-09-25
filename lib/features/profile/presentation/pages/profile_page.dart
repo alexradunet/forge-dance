@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -103,6 +104,18 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
             ),
           ),
         ),
+        if (kDebugMode)
+          SliverPadding(
+            padding: AppSpacing.horizontalXXL,
+            sliver: SliverToBoxAdapter(
+              child: FgButton(
+                text: 'Preview skill progression',
+                icon: const Icon(Icons.auto_awesome),
+                variant: FgButtonVariant.secondary,
+                onPressed: () => context.go('${Routes.profile}?variant=skills'),
+              ),
+            ),
+          ),
         SliverToBoxAdapter(
           child: _buildProfileInfo(context, profile, stats, levelSubtitle),
         ),

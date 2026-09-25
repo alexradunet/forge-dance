@@ -58,6 +58,7 @@ import 'package:forge_dance/constants/constants.dart';
 
 import 'package:forge_dance/features/learn/ui/module_view_screen.dart';
 import 'package:forge_dance/features/learn/ui/prototype/learning_roadmap_prototype.dart';
+import 'package:forge_dance/features/skill_progression/prototype/ui/skill_progression_prototype.dart';
 import 'package:forge_dance/features/learn/ui/lesson_player_screen.dart';
 import 'package:forge_dance/features/learn/repository/lesson_catalog.dart';
 import 'package:forge_dance/features/learn/model/lesson_progress.dart';
@@ -96,6 +97,7 @@ part 'personal_surface_contracts.dart';
 part 'learning_surface_contracts.dart';
 part 'page_header_surface_contracts.dart';
 part 'roadmap_prototype_surface_contracts.dart';
+part 'skill_prototype_surface_contracts.dart';
 
 class _CatalogueLoader extends AssetLoader {
   _CatalogueLoader(this.catalogue);
@@ -447,6 +449,7 @@ void main() {
   _remainingSurfaceContracts();
   _reviewSurfaceContracts();
   _roadmapPrototypeSurfaceContracts();
+  _skillPrototypeSurfaceContracts();
 
   for (final entry in screens.entries) {
     testWidgets(
