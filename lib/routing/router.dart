@@ -208,7 +208,6 @@ List<RouteBase> _routes(Ref ref) {
         path: '${Routes.main}/module/:moduleId',
         builder: (context, state) {
           final moduleId = state.pathParameters['moduleId']!;
-          ref.read(learnViewModelProvider.notifier).selectModule(moduleId);
           return ModuleViewScreen(
             moduleId: moduleId,
             onBack: () => context.pop(),
@@ -222,7 +221,6 @@ List<RouteBase> _routes(Ref ref) {
             builder: (context, state) {
               final moduleId = state.pathParameters['moduleId']!;
               final lessonId = state.pathParameters['lessonId']!;
-              ref.read(learnViewModelProvider.notifier).selectModule(moduleId);
               final learn = ref.read(learnViewModelProvider).value;
               if (learn == null || !learn.canOpenLesson(lessonId)) {
                 return ModuleViewScreen(

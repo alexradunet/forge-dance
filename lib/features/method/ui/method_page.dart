@@ -89,12 +89,19 @@ class MethodPage extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.sm),
                   ],
                   const SizedBox(height: AppSpacing.lg),
-                  FgSectionHeading(
+                  FgDetails(
+                    key: const ValueKey('method-belt-requirements'),
                     title: LocaleKeys.methodBeltsRequirements.tr(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        for (final belt in forgeBelts) ...[
+                          _BeltRequirements(belt: belt, progress: value),
+                          const SizedBox(height: AppSpacing.md),
+                        ],
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: AppSpacing.sm),
-                  for (final belt in forgeBelts)
-                    _BeltRequirements(belt: belt, progress: value),
                 ] else ...[
                   FgCard(
                     immersive: true,
@@ -261,13 +268,19 @@ class _BeltRequirements extends StatelessWidget {
               '${requirements.length}',
             ],
           );
-    return FgDetails(
+    return FgCard(
+      immersive: true,
       key: ValueKey('belt-${belt.index}'),
-      title: '${belt.name} · $summary',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(belt.description),
+          Text(
+            '${belt.name} · $summary',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          if (!requirements.any((item) => item.description == belt.description))
+            Text(belt.description),
           const SizedBox(height: AppSpacing.md),
           for (final requirement in requirements)
             Padding(

@@ -200,6 +200,18 @@ class _LessonStepContent extends StatelessWidget {
                 : step.description,
           ),
 
+          if (step.focus.isNotEmpty)
+            FgCoachingCue(
+              icon: Icons.center_focus_strong_rounded,
+              label: LocaleKeys.focusLabel.tr(),
+              value: step.focus,
+            ),
+          if (step.breath.isNotEmpty)
+            FgCoachingCue(
+              icon: Icons.air_rounded,
+              label: LocaleKeys.breathLabel.tr(),
+              value: step.breath,
+            ),
           Semantics(
             expanded: techniqueExpanded,
             child: ExpansionTile(
@@ -223,18 +235,6 @@ class _LessonStepContent extends StatelessWidget {
                 style: TextStyle(color: context.forgeMutedForeground),
               ),
               children: [
-                if (step.focus.isNotEmpty)
-                  FgCoachingCue(
-                    icon: Icons.center_focus_strong_rounded,
-                    label: LocaleKeys.focusLabel.tr(),
-                    value: step.focus,
-                  ),
-                if (step.breath.isNotEmpty)
-                  FgCoachingCue(
-                    icon: Icons.air_rounded,
-                    label: LocaleKeys.breathLabel.tr(),
-                    value: step.breath,
-                  ),
                 if (step.energy.isNotEmpty)
                   FgCoachingCue(
                     icon: Icons.bolt_rounded,

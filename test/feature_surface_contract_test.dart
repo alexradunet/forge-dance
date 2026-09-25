@@ -41,6 +41,7 @@ import 'package:forge_dance/generated/locale_keys.g.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:go_router/go_router.dart';
 import 'package:forge_dance/routing/routes.dart';
+import 'package:forge_dance/routing/router.dart' as app_router;
 import 'package:forge_dance/routing/main_navigation.dart';
 
 import 'package:forge_dance/features/onboarding/ui/onboarding_screen.dart';
@@ -96,6 +97,7 @@ part 'review_surface_contracts.dart';
 part 'personal_surface_contracts.dart';
 part 'learning_surface_contracts.dart';
 part 'page_header_surface_contracts.dart';
+part 'focused_page_surface_contracts.dart';
 part 'roadmap_prototype_surface_contracts.dart';
 part 'skill_prototype_surface_contracts.dart';
 
@@ -112,6 +114,7 @@ Future<void> _pumpFeature(
   Widget page, {
   double textScale = 1,
   GoRouter? router,
+  bool useProductionRouter = false,
   List<PracticeRecord> records = const [],
   ProfileRepository? profileRepository,
   PortableBackupRepository? backupRepository,
@@ -227,14 +230,19 @@ Future<void> _pumpFeature(
                   .copyWith(textScaler: TextScaler.linear(textScale)),
               child: child!,
             );
-            if (router != null) {
+            final activeRouter =
+                router ??
+                (useProductionRouter
+                    ? container.read(app_router.routerProvider)
+                    : null);
+            if (activeRouter != null) {
               return MaterialApp.router(
                 theme: AppThemes.light,
                 locale: context.locale,
                 localizationsDelegates: context.localizationDelegates,
                 supportedLocales: context.supportedLocales,
                 builder: scale,
-                routerConfig: router,
+                routerConfig: activeRouter,
               );
             }
             return MaterialApp(
@@ -259,6 +267,17 @@ Future<void> _pumpFeature(
 }
 
 // Settle after scrolling: layout and lazy-sliver extents update on the next frame.
+Future<void> _openDetails(WidgetTester tester, Finder details) async {
+  await _show(tester, details);
+  final title = find.descendant(
+    of: details,
+    matching: find.text(tester.widget<FgDetails>(details).title),
+  );
+  await _show(tester, title);
+  await tester.tap(title);
+  await tester.pumpAndSettle();
+}
+
 Future<void> _show(
   WidgetTester tester,
   Finder target, {
@@ -443,6 +462,7 @@ void main() {
   });
 
   _pageHeaderSurfaceContracts();
+  _focusedPageSurfaceContracts();
   _workoutSessionSurfaceContracts();
   _personalSurfaceContracts();
   _learningSurfaceContracts();
@@ -664,12 +684,14 @@ void main() {
         await _pumpFeature(tester, page, textScale: 2);
         _expectDarkScreen(tester, page);
         expect(find.text(entry.definition), findsOneWidget);
-        final easier = find.widgetWithText(
-          FgButton,
-          LocaleKeys.vocabularyStartEasier.tr(),
-        );
-        await _show(tester, easier);
-        expect(tester.widget<FgButton>(easier).isEnabled, isFalse);
+        expect(find.text(entry.cue), findsOneWidget);
+        expect(find.text(LocaleKeys.vocabularyComfort.tr()), findsOneWidget);
+        expect(find.byType(FgButton), findsOneWidget);
+        expect(find.text(LocaleKeys.vocabularyViewPath.tr()), findsOneWidget);
+        expect(find.text(LocaleKeys.vocabularyStartEasier.tr()), findsNothing);
+        expect(find.text(LocaleKeys.vocabularyStartHarder.tr()), findsNothing);
+        expect(find.text(entry.context), findsNothing);
+        expect(find.text(LocaleKeys.vocabularyOpenHistory.tr()), findsNothing);
         final technique = find.text(LocaleKeys.detailsMovement.tr());
         await _show(tester, technique);
         await tester.tap(technique);
@@ -684,7 +706,26 @@ void main() {
           await _show(tester, find.text(text));
           expect(find.text(text), findsOneWidget);
         }
+        expect(find.text(LocaleKeys.vocabularyStartHarder.tr()), findsNothing);
         _expectDarkScreen(tester, page);
+        await _show(tester, technique);
+        await tester.tap(technique);
+        await tester.pumpAndSettle();
+        expect(find.text(entry.context), findsNothing);
+        final prerequisites = find.text(
+          LocaleKeys.programmesPrerequisites.tr(),
+        );
+        await _show(tester, prerequisites);
+        await tester.tap(prerequisites);
+        await tester.pumpAndSettle();
+        expect(find.text(LocaleKeys.vocabularyPathHint.tr()), findsOneWidget);
+        for (final lesson in const VocabularyRepository().prerequisitesFor(
+          entry,
+        )) {
+          expect(find.widgetWithText(FgButton, lesson.title), findsOneWidget);
+        }
+        await tester.tap(prerequisites);
+        await tester.pumpAndSettle();
         final progress = find.text(LocaleKeys.detailsProgress.tr());
         await _show(tester, progress);
         await tester.tap(progress);
@@ -694,10 +735,103 @@ void main() {
           findsOneWidget,
         );
         expect(find.text(LocaleKeys.vocabularyNoPractice.tr()), findsOneWidget);
+        expect(
+          find.text(LocaleKeys.compactAssessmentLocked.tr()),
+          findsOneWidget,
+        );
+        _expectDarkScreen(tester, page);
+        await _show(tester, progress);
+        await tester.tap(progress);
+        await tester.pumpAndSettle();
+        expect(find.text(LocaleKeys.vocabularyOpenHistory.tr()), findsNothing);
+        final related = find.text(LocaleKeys.vocabularyRelated.tr());
+        await _show(tester, related);
+        await tester.tap(related);
+        await tester.pumpAndSettle();
+        for (final id in entry.relatedIds) {
+          expect(
+            find.widgetWithText(
+              FgButton,
+              const VocabularyRepository().byId(id)!.name,
+            ),
+            findsOneWidget,
+          );
+        }
         expect(tester.takeException(), isNull);
       },
     );
   }
+
+  testWidgets('Movement reference keeps one action above the fold', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 780));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final page = VocabularyEntryPage(
+      entry: const VocabularyRepository().byId('bounce')!,
+      onBack: () {},
+    );
+    await _pumpFeature(tester, page);
+    final action = find.widgetWithText(
+      FgButton,
+      LocaleKeys.vocabularyViewPath.tr(),
+    );
+    expect(action.hitTestable(), findsOneWidget);
+    expect(find.byType(FgButton), findsOneWidget);
+    expect(tester.getBottomRight(action).dy, lessThan(700));
+    _expectDarkScreen(tester, page);
+  });
+
+  testWidgets('Movement reference reveals and launches the harder variation', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(320, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final entry = const VocabularyRepository().byId('breath')!;
+    final page = VocabularyEntryPage(entry: entry, onBack: () {});
+    await _pumpFeature(
+      tester,
+      page,
+      textScale: 2,
+      beforePump: (container) async {
+        final learning = container.read(learnViewModelProvider.notifier);
+        await learning.completeLesson('common-ready-body-space-signals');
+        await learning.completeLesson('common-ready-body-body-map');
+      },
+    );
+    expect(find.byType(FgButton), findsOneWidget);
+    expect(find.text(LocaleKeys.vocabularyStartEasier.tr()), findsOneWidget);
+    expect(find.text(LocaleKeys.vocabularyStartHarder.tr()), findsNothing);
+    final technique = find.text(LocaleKeys.detailsMovement.tr());
+    await _show(tester, technique);
+    await tester.tap(technique);
+    await tester.pumpAndSettle();
+    expect(find.text(LocaleKeys.vocabularyViewLesson.tr()), findsOneWidget);
+    expect(find.text(entry.harderPractice), findsOneWidget);
+    final variation = find.widgetWithText(
+      FgButton,
+      LocaleKeys.vocabularyStartHarder.tr(),
+    );
+    await _show(tester, variation);
+    await tester.tap(variation);
+    await tester.pumpAndSettle();
+    final player = tester.widget<PracticePlayerPage>(
+      find.byType(PracticePlayerPage),
+    );
+    final expected = const VocabularyRepository().practiceFor(
+      entry,
+      harder: true,
+    );
+    expect(player.block.vocabularyId, entry.id);
+    expect(player.block.id, expected.id);
+    expect(player.block.cues, expected.cues);
+    expect(player.block.bpm, expected.bpm);
+    expect(
+      find.widgetWithText(FgButton, LocaleKeys.playerStart.tr()),
+      findsOneWidget,
+    );
+    expect(tester.takeException(), isNull);
+  });
 
   testWidgets(
     'Vocabulary card opens its real reference and available practice starts paused',
@@ -879,6 +1013,11 @@ void main() {
         );
       });
       await tester.pumpAndSettle();
+      expect(find.text(LocaleKeys.programmesLeave.tr()), findsNothing);
+      await _openDetails(
+        tester,
+        find.byKey(const ValueKey('programme-about-find-the-beat')),
+      );
       expect(find.text(LocaleKeys.programmesLeave.tr()), findsOneWidget);
       await tester.scrollUntilVisible(find.byType(BackButton), -200);
       await tester.pumpAndSettle();
@@ -917,7 +1056,11 @@ void main() {
         FgButton,
         LocaleKeys.programmesStart.tr(),
       );
-      expect(tester.widget<FgButton>(start).isEnabled, isFalse);
+      expect(start, findsNothing);
+      expect(
+        find.widgetWithText(FgButton, LocaleKeys.vocabularyViewPath.tr()),
+        findsOneWidget,
+      );
       expect(
         find.text(LocaleKeys.programmesPrerequisiteHint.tr()),
         findsOneWidget,
@@ -1355,19 +1498,9 @@ void main() {
       gentle: false,
       includeConditioning: false,
     );
-    final guidance = find.byKey(
-      ValueKey('practice-adaptations-${plan.blocks.first.id}'),
-    );
-    final guidanceTitle = find.descendant(
-      of: guidance,
-      matching: find.text(LocaleKeys.detailsAdaptations.tr()),
-    );
-    await tester.scrollUntilVisible(guidanceTitle, 200);
-    await tester.pumpAndSettle();
-    await tester.ensureVisible(guidanceTitle);
-    await tester.pumpAndSettle();
-    await tester.tap(guidanceTitle);
-    await tester.pumpAndSettle();
+    expect(find.text(plan.blocks.first.adaptation), findsNothing);
+    final rounds = find.byKey(ValueKey('practice-rounds-${plan.dateKey}'));
+    await _openDetails(tester, rounds);
     expect(find.text(plan.blocks.first.adaptation), findsOneWidget);
     _expectDarkScreen(tester, page);
     final practice = find.byKey(const ValueKey('practice-hero-start'));
@@ -1423,9 +1556,17 @@ void main() {
         find.text(LocaleKeys.dailyPracticeVariation.tr(args: ['White'])),
         findsOneWidget,
       );
-      await tester.tap(
-        find.widgetWithText(FgButton, LocaleKeys.practiceDelete.tr()),
+      expect(find.text(LocaleKeys.practiceDelete.tr()), findsNothing);
+      await _openDetails(
+        tester,
+        find.byKey(const ValueKey('practice-record-daily-history')),
       );
+      final delete = find.widgetWithText(
+        FgButton,
+        LocaleKeys.practiceDelete.tr(),
+      );
+      await _show(tester, delete);
+      await tester.tap(delete);
       await tester.pumpAndSettle();
       final dialog = find.byType(AlertDialog);
       expect(dialog, findsOneWidget);

@@ -204,6 +204,11 @@ void _remainingSurfaceContracts() {
         ),
       ],
     );
+    expect(find.text(LocaleKeys.practiceViewEvidence.tr()), findsNothing);
+    await _openDetails(
+      tester,
+      find.byKey(const ValueKey('practice-record-latest')),
+    );
     final evidence = find.widgetWithText(
       FgButton,
       LocaleKeys.practiceViewEvidence.tr(),
@@ -912,7 +917,15 @@ void _pendingCallerContracts() {
               await learning.completeLesson('common-ready-body-body-map');
             },
           );
-          if (programme) await _openProgramme(tester);
+          if (programme) {
+            await _openProgramme(tester);
+            await _openDetails(
+              tester,
+              find.byKey(
+                ValueKey('programme-schedule-${forgeProgrammes.first.id}'),
+              ),
+            );
+          }
           final start = find
               .widgetWithText(
                 FgButton,
@@ -1001,6 +1014,14 @@ void _pendingCallerContracts() {
             await tester.pumpAndSettle();
             repo.fail = true;
             repo.hold = null;
+            if (programme) {
+              await _openDetails(
+                tester,
+                find.byKey(
+                  ValueKey('programme-schedule-${forgeProgrammes.first.id}'),
+                ),
+              );
+            }
             await _show(tester, start);
             await tester.tap(start);
             await tester.pumpAndSettle();

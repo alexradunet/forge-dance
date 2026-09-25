@@ -28,16 +28,18 @@ void _pageHeaderSurfaceContracts() {
           final header = find.byType(AppHeader);
           expect(header, findsOneWidget);
           final widget = tester.widget<AppHeader>(header);
-          expect(widget.compact, isFalse);
+          final compact = entry.value.page is VocabularyEntryPage;
+          expect(widget.compact, compact);
           final title = find.descendant(
             of: header,
             matching: find.text(widget.title.toUpperCase()),
           );
           final text = tester.widget<Text>(title);
-          expect(text.style!.fontFamily, AppTypography.h2.fontFamily);
-          expect(text.style!.fontSize, AppTypography.h2.fontSize);
-          expect(text.maxLines, isNull);
-          expect(text.overflow, isNull);
+          final typography = compact ? AppTypography.h4 : AppTypography.h2;
+          expect(text.style!.fontFamily, typography.fontFamily);
+          expect(text.style!.fontSize, typography.fontSize);
+          expect(text.maxLines, compact ? 2 : null);
+          expect(text.overflow, compact ? TextOverflow.ellipsis : null);
           expect(title.hitTestable(), findsOneWidget);
           expect(
             find.descendant(of: header, matching: find.byType(BackButton)),

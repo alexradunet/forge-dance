@@ -176,7 +176,9 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('nextStepSemantic'));
     await tester.pumpAndSettle();
-    expect(find.text(readyBody.lessons.first.steps[1].focus), findsNothing);
+    expect(find.text(readyBody.lessons.first.steps[1].focus), findsOneWidget);
+    expect(find.text(readyBody.lessons.first.steps[1].breath), findsOneWidget);
+    expect(find.text(readyBody.lessons.first.steps[1].energy), findsNothing);
     expect(find.text('lessonWrittenCues').hitTestable(), findsOneWidget);
   });
 

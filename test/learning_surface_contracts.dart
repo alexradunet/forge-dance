@@ -158,6 +158,13 @@ void _learningSurfaceContracts() {
         findsOneWidget,
       );
       _expectTopRouteDark(tester);
+      expect(find.text(LocaleKeys.programmesOpenAssessment.tr()), findsNothing);
+      await _openDetails(
+        tester,
+        find.byKey(
+          ValueKey('programme-assessment-${forgeProgrammes.first.id}'),
+        ),
+      );
       final assessment = find.widgetWithText(
         FgButton,
         LocaleKeys.programmesOpenAssessment.tr(),
@@ -560,6 +567,14 @@ void _learningSurfaceContracts() {
         for (final (index, step) in stepsFor(lesson).indexed) {
           await _show(tester, find.text(step.description));
           expect(find.text(step.description).hitTestable(), findsOneWidget);
+          // Focus/breath may contain stop signals: they are active guidance,
+          // not optional technique copy.
+          for (final cue in [
+            step.focus,
+            step.breath,
+          ].where((text) => text.isNotEmpty)) {
+            expect(find.text(cue), findsOneWidget);
+          }
           await _show(tester, find.text(LocaleKeys.techniqueDetails.tr()));
           await tester.tap(find.text(LocaleKeys.techniqueDetails.tr()));
           await tester.pumpAndSettle();
@@ -789,6 +804,11 @@ void _learningSurfaceContracts() {
       final page = ModuleViewScreen(onLessonNavigate: (_) {});
       await _pumpFeature(tester, page);
       expect(find.text(LocaleKeys.statusInProgress.tr()), findsNothing);
+      expect(find.text(LocaleKeys.vocabularyViewLesson.tr()), findsNothing);
+      await _openDetails(
+        tester,
+        find.byKey(ValueKey('module-lessons-${readyBody.id}')),
+      );
       await _show(tester, find.text(LocaleKeys.lessonAvailable.tr()));
       final container = ProviderScope.containerOf(
         tester.element(find.byWidget(page)),

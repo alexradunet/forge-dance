@@ -344,14 +344,21 @@ class _ProgrammePageState extends ConsumerState<_ProgrammePage> {
                           subtitle: programme.schedule,
                         ),
                         const SizedBox(height: AppSpacing.lg),
-                        if (!enrolled)
+                        if (!enrolled && !blocked)
                           _enrolAction(
                             enrolled,
                             learn != null && enrolments.hasValue && !blocked,
                           ),
                         if (blocked) ...[
                           Text(LocaleKeys.programmesPrerequisiteHint.tr()),
-                          _prerequisites(context, programme, learn),
+                          const SizedBox(height: AppSpacing.sm),
+                          FgButton(
+                            text: LocaleKeys.vocabularyViewPath.tr(),
+                            onPressed: () => _openLesson(
+                              learn,
+                              programme.unmetPrerequisites(learn).first,
+                            ),
+                          ),
                         ],
                         if (learn != null) ...[
                           const SizedBox(height: AppSpacing.lg),
@@ -368,20 +375,22 @@ class _ProgrammePageState extends ConsumerState<_ProgrammePage> {
                                 programme.completedSessions(learn) /
                                 programme.sessions.length,
                           ),
-                          if (nextSession != null) ...[
+                          if (nextSession != null && !blocked) ...[
                             const SizedBox(height: AppSpacing.lg),
-                            FgSectionHeading(
-                              title: LocaleKeys.programmesNextSession.tr(),
+                            Text(
+                              LocaleKeys.programmesNextSession.tr(),
+                              style: theme.textTheme.titleMedium,
                             ),
                             const SizedBox(height: AppSpacing.md),
-                            _sessionCard(context, nextSession, learn, enrolled),
+                            _sessionCard(
+                              context,
+                              nextSession,
+                              learn,
+                              enrolled,
+                              preview: true,
+                            ),
                           ],
                         ],
-                        if (enrolled)
-                          _enrolAction(
-                            enrolled,
-                            learn != null && enrolments.hasValue,
-                          ),
                         FgDetails(
                           key: ValueKey('programme-about-${programme.id}'),
                           title: LocaleKeys.detailsProgramme.tr(),
@@ -404,48 +413,77 @@ class _ProgrammePageState extends ConsumerState<_ProgrammePage> {
                               ),
                               const SizedBox(height: AppSpacing.lg),
                               Text(LocaleKeys.programmesAssessmentHint.tr()),
-                              if (!blocked) ...[
+                              const SizedBox(height: AppSpacing.lg),
+                              _prerequisites(context, programme, learn),
+                              if (enrolled) ...[
                                 const SizedBox(height: AppSpacing.lg),
-                                _prerequisites(context, programme, learn),
+                                _enrolAction(
+                                  enrolled,
+                                  learn != null && enrolments.hasValue,
+                                ),
                               ],
                             ],
                           ),
                         ),
                         if (learn != null)
-                          for (final session in programme.sessions)
-                            if (session.lessonId != nextSession?.lessonId)
-                              _sessionCard(context, session, learn, enrolled),
-                        const SizedBox(height: AppSpacing.lg),
-                        FgSectionHeading(
-                          title: LocaleKeys.programmesFinalAssessment.tr(),
-                        ),
-                        Text(assessment.title),
-                        FgButton(
-                          text: LocaleKeys.programmesOpenAssessment.tr(),
-                          isEnabled:
-                              learn != null &&
-                              learn.canOpenLesson(assessment.linkedLessonId),
-                          onPressed: () => Navigator.of(context).push<void>(
-                            MaterialPageRoute(
-                              builder: (_) => MethodPage(
-                                initialCategory: assessment.category,
-                                initialAssessmentId: assessment.id,
-                              ),
+                          FgDetails(
+                            key: ValueKey('programme-schedule-${programme.id}'),
+                            title: LocaleKeys.detailsProgrammeSchedule.tr(),
+                            child: Column(
+                              children: [
+                                for (final session in programme.sessions)
+                                  _sessionCard(
+                                    context,
+                                    session,
+                                    learn,
+                                    enrolled,
+                                  ),
+                              ],
                             ),
                           ),
-                        ),
-                        if (learn != null &&
-                            !learn.canOpenLesson(
-                              assessment.linkedLessonId,
-                            )) ...[
-                          Text(LocaleKeys.compactAssessmentLocked.tr()),
-                          FgButton(
-                            text: LocaleKeys.vocabularyViewPath.tr(),
-                            variant: FgButtonVariant.secondary,
-                            onPressed: () =>
-                                _openLesson(learn, assessment.linkedLessonId),
+                        FgDetails(
+                          key: ValueKey('programme-assessment-${programme.id}'),
+                          initiallyExpanded:
+                              learn != null && nextSession == null,
+                          title: LocaleKeys.programmesFinalAssessment.tr(),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Text(assessment.title),
+                              FgButton(
+                                text: LocaleKeys.programmesOpenAssessment.tr(),
+                                isEnabled:
+                                    learn != null &&
+                                    learn.canOpenLesson(
+                                      assessment.linkedLessonId,
+                                    ),
+                                onPressed: () =>
+                                    Navigator.of(context).push<void>(
+                                      MaterialPageRoute(
+                                        builder: (_) => MethodPage(
+                                          initialCategory: assessment.category,
+                                          initialAssessmentId: assessment.id,
+                                        ),
+                                      ),
+                                    ),
+                              ),
+                              if (learn != null &&
+                                  !learn.canOpenLesson(
+                                    assessment.linkedLessonId,
+                                  )) ...[
+                                Text(LocaleKeys.compactAssessmentLocked.tr()),
+                                FgButton(
+                                  text: LocaleKeys.vocabularyViewPath.tr(),
+                                  variant: FgButtonVariant.secondary,
+                                  onPressed: () => _openLesson(
+                                    learn,
+                                    assessment.linkedLessonId,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
-                        ],
+                        ),
                       ],
                     ),
                   ),
@@ -495,17 +533,27 @@ class _ProgrammePageState extends ConsumerState<_ProgrammePage> {
     BuildContext context,
     ProgrammeSession session,
     LearnState learn,
-    bool enrolled,
-  ) => Padding(
-    key: ValueKey('programme-session-${session.lessonId}'),
+    bool enrolled, {
+    bool preview = false,
+  }) => Padding(
+    key: ValueKey(
+      'programme-${preview ? 'next' : 'session'}-${session.lessonId}',
+    ),
     padding: const EdgeInsets.only(bottom: AppSpacing.md),
-    child: FgRoundPanel(
-      label: session.schedule,
-      active: widget.programme.nextSession(learn)?.lessonId == session.lessonId,
+    child: FgCard(
+      immersive: true,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          FgSectionHeading(title: learn.lessonById(session.lessonId)!.title),
+          Text(
+            session.schedule,
+            style: Theme.of(context).textTheme.labelMedium,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            learn.lessonById(session.lessonId)!.title,
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: AppSpacing.sm),
           Text(
             learn.progress[session.lessonId]?.status == LessonStatus.completed
@@ -516,14 +564,21 @@ class _ProgrammePageState extends ConsumerState<_ProgrammePage> {
             text: learn.canOpenLesson(session.lessonId)
                 ? LocaleKeys.vocabularyViewLesson.tr()
                 : LocaleKeys.vocabularyViewPath.tr(),
-            variant: FgButtonVariant.secondary,
+            variant: preview && enrolled
+                ? FgButtonVariant.primary
+                : FgButtonVariant.secondary,
             onPressed: () => _openLesson(learn, session.lessonId),
           ),
-          FgButton(
-            text: LocaleKeys.programmesPracticeSession.tr(),
-            isEnabled: enrolled && learn.canOpenLesson(session.lessonId),
-            onPressed: () => _practice(session.practice),
-          ),
+          if (!preview &&
+              enrolled &&
+              learn.canOpenLesson(session.lessonId)) ...[
+            const SizedBox(height: AppSpacing.sm),
+            FgButton(
+              text: LocaleKeys.programmesPracticeSession.tr(),
+              variant: FgButtonVariant.secondary,
+              onPressed: () => _practice(session.practice),
+            ),
+          ],
         ],
       ),
     ),

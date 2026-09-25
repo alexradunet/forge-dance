@@ -84,7 +84,12 @@ class ModuleViewScreen extends ConsumerWidget {
                 )
               else if (current == null)
                 Text(LocaleKeys.moduleComplete.tr())
-              else
+              else ...[
+                Text(
+                  current.title,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: AppSpacing.md),
                 FgButton(
                   text: state.hasStartedModule(state.activeModule)
                       ? LocaleKeys.continueText.tr()
@@ -99,53 +104,65 @@ class ModuleViewScreen extends ConsumerWidget {
                         }
                       : null,
                 ),
+              ],
             ],
           ),
         ),
-        const SizedBox(height: AppSpacing.xxl),
+        const SizedBox(height: AppSpacing.lg),
         if (state.isModuleUnlocked(state.activeModule))
-          for (final (index, lesson) in state.activeModule.lessons.indexed) ...[
-            FgRoundPanel(
-              label: LocaleKeys.lessonNumberType.tr(
-                args: ['${index + 1}', lesson.type.label],
-              ),
-              active: lesson.id == current?.id,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  FgSectionHeading(title: lesson.title),
-                  Text('${lesson.duration} · ${lesson.difficulty}'),
-                  const SizedBox(height: AppSpacing.sm),
-                  Text(
-                    state.statusOf(lesson) == LessonStatus.completed
-                        ? LocaleKeys.statusCompleted.tr()
-                        : state.canOpenLesson(lesson.id)
-                        ? state.statusOf(lesson) == LessonStatus.inProgress
-                              ? LocaleKeys.statusInProgress.tr()
-                              : LocaleKeys.lessonAvailable.tr()
-                        : LocaleKeys.lockedLabel.tr(),
+          FgDetails(
+            key: ValueKey('module-lessons-${state.activeModule.id}'),
+            title: LocaleKeys.detailsAllLessons.tr(),
+            initiallyExpanded: current == null,
+            child: Column(
+              children: [
+                for (final (index, lesson)
+                    in state.activeModule.lessons.indexed) ...[
+                  FgRoundPanel(
+                    label: LocaleKeys.lessonNumberType.tr(
+                      args: ['${index + 1}', lesson.type.label],
+                    ),
+                    active: lesson.id == current?.id,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        FgSectionHeading(title: lesson.title),
+                        Text('${lesson.duration} · ${lesson.difficulty}'),
+                        const SizedBox(height: AppSpacing.sm),
+                        Text(
+                          state.statusOf(lesson) == LessonStatus.completed
+                              ? LocaleKeys.statusCompleted.tr()
+                              : state.canOpenLesson(lesson.id)
+                              ? state.statusOf(lesson) ==
+                                        LessonStatus.inProgress
+                                    ? LocaleKeys.statusInProgress.tr()
+                                    : LocaleKeys.lessonAvailable.tr()
+                              : LocaleKeys.lockedLabel.tr(),
+                        ),
+                        const SizedBox(height: AppSpacing.md),
+                        FgButton(
+                          text: LocaleKeys.vocabularyViewLesson.tr(),
+                          variant: FgButtonVariant.secondary,
+                          onPressed:
+                              state.canOpenLesson(lesson.id) &&
+                                  onLessonNavigate != null
+                              ? () {
+                                  ref
+                                      .read(learnViewModelProvider.notifier)
+                                      .startLesson(lesson.id);
+                                  onLessonNavigate?.call(lesson.id);
+                                }
+                              : null,
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: AppSpacing.md),
-                  FgButton(
-                    text: LocaleKeys.vocabularyViewLesson.tr(),
-                    variant: FgButtonVariant.secondary,
-                    onPressed:
-                        state.canOpenLesson(lesson.id) &&
-                            onLessonNavigate != null
-                        ? () {
-                            ref
-                                .read(learnViewModelProvider.notifier)
-                                .startLesson(lesson.id);
-                            onLessonNavigate?.call(lesson.id);
-                          }
-                        : null,
-                  ),
+                  const SizedBox(height: AppSpacing.lg),
                 ],
-              ),
+              ],
             ),
-            const SizedBox(height: AppSpacing.lg),
-          ],
-        const SizedBox(height: AppSizes.bottomNavHeight),
+          ),
+        const SizedBox(height: AppSpacing.lg),
       ],
     );
   }

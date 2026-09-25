@@ -163,46 +163,49 @@ class _PracticeLogPageState extends ConsumerState<PracticeLogPage> {
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
-        Wrap(
-          spacing: AppSpacing.sm,
-          runSpacing: AppSpacing.sm,
-          children: [
-            FgButton(
-              text: LocaleKeys.practiceEditReflection.tr(),
-              variant: FgButtonVariant.secondary,
-              onPressed: _busy
-                  ? null
-                  : () => Navigator.of(context).push<void>(
-                      MaterialPageRoute(
-                        builder: (_) => _PracticeReflectionPage(record: record),
-                      ),
-                    ),
-            ),
-            if (record.evidenceId != null)
-              FgButton(
-                text: LocaleKeys.practiceViewEvidence.tr(),
-                variant: FgButtonVariant.secondary,
-                onPressed: () =>
-                    Navigator.of(context, rootNavigator: true).push<void>(
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            EvidenceViewer(evidenceId: record.evidenceId!),
-                      ),
-                    ),
-              ),
-            FgButton(
-              text: LocaleKeys.practiceDelete.tr(),
-              variant: FgButtonVariant.ghost,
-              onPressed: _busy ? null : () => _delete(record),
-            ),
-          ],
-        ),
         FgDetails(
           key: ValueKey('practice-record-${record.id}'),
-          title: LocaleKeys.detailsSession.tr(),
+          title: LocaleKeys.detailsSessionActions.tr(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Wrap(
+                spacing: AppSpacing.sm,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  FgButton(
+                    text: LocaleKeys.practiceEditReflection.tr(),
+                    variant: FgButtonVariant.secondary,
+                    onPressed: _busy
+                        ? null
+                        : () => Navigator.of(context).push<void>(
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  _PracticeReflectionPage(record: record),
+                            ),
+                          ),
+                  ),
+                  if (record.evidenceId != null)
+                    FgButton(
+                      text: LocaleKeys.practiceViewEvidence.tr(),
+                      variant: FgButtonVariant.secondary,
+                      onPressed: () =>
+                          Navigator.of(context, rootNavigator: true).push<void>(
+                            MaterialPageRoute(
+                              builder: (_) => EvidenceViewer(
+                                evidenceId: record.evidenceId!,
+                              ),
+                            ),
+                          ),
+                    ),
+                  FgButton(
+                    text: LocaleKeys.practiceDelete.tr(),
+                    variant: FgButtonVariant.ghost,
+                    onPressed: _busy ? null : () => _delete(record),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.md),
               Text(
                 LocaleKeys.practiceRecordedMetrics.tr(
                   args: [
