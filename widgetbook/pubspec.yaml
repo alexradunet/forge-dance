@@ -15,14 +15,14 @@ dependencies:
   forge_dance:
     path: ..
   go_router: ^16.2.4
-  shared_preferences: ^2.5.3
+  shared_preferences: ^2.5.6
   widgetbook: 4.0.0-beta.13
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  build_runner: ^2.16.0
+  build_runner: ^2.16.2
 
 flutter:
   uses-material-design: true
