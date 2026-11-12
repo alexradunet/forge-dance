@@ -1,6 +1,6 @@
 ---
 name: add-feature
-description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, or state class, and when productionizing a prototype screen (home, explore, collection, learn, workout, wod, stats) so it runs on real data instead of hardcoded mocks.
+description: Scaffold a new feature or screen in Forge Dance following the feature-first MVVM + Riverpod codegen architecture. Use when adding a feature, screen, view model, repository, state class, or catalog-backed lesson/workout content.
 ---
 
 # Adding a Feature
@@ -143,6 +143,23 @@ One command runs the whole pipeline (codegen → lints → analyze → test) —
 
 Add a view-model test with a fake repository (`.claude/skills/testing/SKILL.md`).
 
-## Productionizing a prototype screen
+## Existing wired screens
 
-Home, explore, collection, training, module view, lesson player, WOD, stats, and level progression currently render hardcoded mock data. To wire one up: extract the inline data classes into `model/` (freezed), create the repository + provider, add `state/` + `view_model/`, then swap the widget's local constants for the view model. Beware dead code: `home_screen.dart`, `home_screen_v2.dart`, `explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned — the live screens are in `presentation/pages/` and `learn/ui/`.
+The primary app surfaces are already wired to real state: auth/profile, learn module view + lesson player, home, explore, collection/library, workout/training, stats, level progression, and the belt grid. For new work, follow the same pattern instead of adding local mock lists: model → repository/provider → state/view model → screen renders `AsyncValue`.
+
+Beware dead code: `home_screen.dart`, `home_screen_v2.dart`, `explore_screen.dart` (in `ui/`), and `wod_session_screen.dart` are orphaned. The live screens are in `presentation/pages/` and `learn/ui/`.
+
+## Adding catalog content
+
+Lesson and workout content ships in code by design; Firestore stores only user state.
+
+- Lessons live in `lib/features/learn/repository/lesson_catalog.dart`.
+  - Keep lesson ids globally unique and stable. Existing `hip-hop-foundations` lesson ids predate the module-id prefix convention and must not change because user progress references them.
+  - Every module ends with a `LessonType.boss` lesson, and `subtitle` module numbering follows `allModules` display order.
+  - `LessonStep` content includes `title`, `description`, `focus`, `breath`, and `energy`; all five must be non-empty after `stepsFor(lesson)` resolves defaults.
+  - Modules 1 and 2 (`hipHopFoundations`, `bodyControl1`) are fully hand-authored. Tests fail if any lesson in those modules falls back to default steps.
+- Workouts live in `lib/features/workout/repository/workout_catalog.dart`.
+  - `wodFor(date)` rotates deterministically by day-of-year, with no backend.
+  - Workout `xp` feeds the stats system through completed sessions. Keep values modest relative to lesson XP so the belt ladder stays lesson-driven.
+
+When changing the lesson catalog, run the stats and learn tests: catalog XP controls belt thresholds, and `test/stats_test.dart` enforces that completing the catalog reaches Black Belt exactly.

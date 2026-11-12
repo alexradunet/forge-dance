@@ -34,9 +34,13 @@ Firebase is **null on Linux** (FlutterFire generated no Linux options; `main.dar
 Current schema — all owner-only, validated on write:
 
 ```
-users/{userId}:                      id, email, name, job, avatar, diamond, createdAt, updatedAt
-users/{userId}/progress/{lessonId}:  lessonId, status, progress, updatedAt
+users/{userId}:                            id, email, name, job, avatar, diamond, createdAt, updatedAt,
+                                           xp, streakCount, lastActivityDate
+users/{userId}/progress/{lessonId}:        lessonId, status, progress, updatedAt
+users/{userId}/sessions/{date}_{workoutId}: workoutId, date, completedAt
 ```
+
+The user document's `xp`, `streakCount`, and `lastActivityDate` fields are gamification mirrors written after training events. Total XP is still derived from lesson progress plus workout sessions (`StatsCoordinator` + `stats_rules.dart`); do not treat the denormalized `xp` field as the source of truth.
 
 **Typed references (`withConverter`) are mandatory for new Firestore access.** One converter per collection, defined inside the repository — never pass raw maps around:
 
@@ -56,7 +60,7 @@ CollectionReference<LessonProgress>? _progressRef() {
 }
 ```
 
-Conventions (reference implementations: `ProgressRepository`, `ProfileRepository`, `AuthenticationRepository`):
+Conventions (reference implementations: `ProgressRepository`, `SessionRepository`, `ProfileRepository`, `AuthenticationRepository`):
 
 - Writes use `SetOptions(merge: true)`; set `updatedAt: FieldValue.serverTimestamp()` inside the `toFirestore` payload, `createdAt` only on first create.
 - Reads normalize Firestore types before `fromJson`: `Timestamp` → **ISO-8601 string** (json_serializable parses strings for `DateTime` fields) — see `_normalizeFirestoreJson`.
@@ -71,9 +75,15 @@ Conventions (reference implementations: `ProgressRepository`, `ProfileRepository
 - Local file paths (e.g. picked avatar images, saved under app documents by `ProfileViewModel.saveImage`) are **never synced to Firestore** — only URLs are.
 - SharedPreferences keys live in `Constants` (`profileKey`, `isLoginKey`, `isExistAccountKey`, `themeModeKey`). Add new keys there, never inline.
 
+## Workout sessions and XP caps
+
+Completed workouts are stored at `users/{uid}/sessions/{date}_{workoutId}` through `SessionRepository`. `WorkoutSession.docKey` builds the deterministic document id, so repeating the same workout on the same local day overwrites the same document instead of awarding XP twice. Firestore rules enforce that `sessionId == date + '_' + workoutId`.
+
+Workout XP is priced by `workout_catalog.dart` and included by `workoutXpFrom(...)`; a session whose workout id no longer exists earns nothing.
+
 ## Security rules (`firestore.rules`)
 
-Rules are v2, owner-only, and **validate writes** — they don't just gate access. Current invariants: `users/{userId}.id` must equal the auth uid; `progress/{lessonId}.lessonId` must equal the doc id and `status` must be a whitelisted `LessonStatus` name (keep the whitelist in sync with the enum). When adding a collection:
+Rules are v2, owner-only, and **validate writes** — they don't just gate access. Current invariants: `users/{userId}.id` must equal the auth uid; optional stats fields must be sane (`xp`/`streakCount` non-negative ints, `lastActivityDate` string); `progress/{lessonId}.lessonId` must equal the doc id and `status` must be a whitelisted `LessonStatus` name (keep the whitelist in sync with the enum); `sessions/{sessionId}` must use the deterministic `{date}_{workoutId}` id. When adding a collection:
 
 1. Add an explicit `match` block (subcollections inherit NOTHING — everything unmatched is default-deny).
 2. Validate `request.resource.data` on create/update: ownership fields match `request.auth.uid`, ids mirror the doc path, enum fields whitelisted. Put validation on `create, update` only — `delete` has no `request.resource`.
